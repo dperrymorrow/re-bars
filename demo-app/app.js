@@ -1,6 +1,6 @@
-// import ReactiveHandlebars from "./lib/index.js";
+import Vbars from "../src/index.js";
 
-window.demoApp = Vbars.create({
+export default Vbars.create({
   template: /*html*/ `
     <!-- the reactive template we are demo-ing -->
       {{#watch 'header'}}

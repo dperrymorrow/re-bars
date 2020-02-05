@@ -7,8 +7,9 @@
     "start": "http-server . -c-1",
     "test": "echo \"Error: no test specified\" && exit 1",
     "rollup": "rollup src/index.js --file dist/index.min.js --format umd --name 'Vbars' ",
-    "compress": "minify dist/index.min.js -d dist",
-    "build": "npm run rollup && npm run compress"
+    "compress": "minify dist/index.min.js -d dist && minify dist/demo-app.min.js -d dist",
+    "buildDemoApp": "rollup demo-app/app.js --file dist/demo-app.min.js --format umd --name 'DemoApp' ",
+    "build": "npm run rollup && npm run buildDemoApp && npm run compress "
   },
   "author": "David Morrow",
   "license": "MIT",
