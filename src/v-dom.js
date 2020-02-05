@@ -6,6 +6,8 @@ const msg = Logger("V-DOM");
 
 export default function({ templateFn, proxyData, eventHandlers }) {
   const $el = document.createElement("div");
+
+  // should make event handlers a factory and then it wont have to pass $root around
   let $root;
 
   function render() {

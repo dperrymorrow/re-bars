@@ -1,3 +1,5 @@
+"use strict";
+
 const PATH_SEPARATOR = ".";
 const TARGET = Symbol("target");
 const UNSUBSCRIBE = Symbol("unsubscribe");

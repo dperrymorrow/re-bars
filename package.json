@@ -1,20 +1,27 @@
 {
   "name": "v-bars",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "VDom patching for handlebars templates",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "http-server docs -c-1",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "http-server . -c-1",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "rollup": "rollup src/index.js --file dist/index.min.js --format umd --name 'Vbars' ",
+    "compress": "minify dist/index.min.js -d dist",
+    "build": "npm run rollup && npm run compress"
   },
   "author": "David Morrow",
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
+    "@rollup/plugin-alias": "^3.0.1",
+    "babel-minify": "^0.5.1",
     "eslint": "^6.7.2",
     "eslint-config-prettier": "^6.7.0",
     "eslint-plugin-prettier": "^3.1.1",
     "http-server": "^0.12.0",
-    "prettier": "^1.19.1"
+    "on-change": "^1.6.2",
+    "prettier": "^1.19.1",
+    "rollup": "^1.31.0"
   }
 }
