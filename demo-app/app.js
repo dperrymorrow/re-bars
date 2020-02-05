@@ -27,12 +27,12 @@ export default Vbars.create({
       {{#watch 'todos'}}
         {{#each todos}}
         <!-- check if children have a data-key and if so patch that instead of replace -->
-          <li data-key="{{ name }}">
+          <li data-key="{{ id }}">
             {{#if done }}
               <input type="checkbox" checked data-handler="click:toggleDone"/>
               <s>{{ name }}</s>
             {{else}}
-              <input type="checkbox" data-handler="click:toggleDone"/>
+              <input type="checkbox" data-handler="click:toggleDone({{ id }})"/>
               <strong>{{ name }}</strong>
             {{/if}}
             <p>{{ description }}</p>
@@ -50,7 +50,7 @@ export default Vbars.create({
           <label>
             <input type="text" id="new-todo-label" placeholder="the new todo" />
             <button class="push" data-handler="click.prevent:addItem">Add todo</button>
-            <button class="cancel" data-handler="click.prevent:toggleCreate">Cancel</button>
+            <button class="cancel" onclick="alert('foobar')" >Cancel</button>
           </label>
         </div>
       {{else}}
@@ -72,19 +72,21 @@ export default Vbars.create({
         done: false,
         name: "Grocery Shopping",
         description: "get the milk, eggs and bread",
+        id: 22,
       },
       {
         done: true,
         name: "Paint the House",
         description: "buy the paint and then pain the house",
+        id: 44,
       },
     ],
   },
 
   eventHandlers: {
     deleteToDo({ event, data }) {
-      const name = event.target.parentNode.dataset.key;
-      const index = data.todos.findIndex(item => item.name === name);
+      const id = event.target.parentNode.dataset.key;
+      const index = data.todos.findIndex(item => item.id === id);
       data.todos.splice(index, 1);
     },
 
@@ -93,14 +95,16 @@ export default Vbars.create({
       data.todos.push({
         done: false,
         name: $input.value,
+        id: new Date().getTime(),
       });
       $input.value = "";
       $input.focus();
     },
 
     toggleDone({ event, data }) {
-      const name = event.target.parentNode.dataset.key;
-      const task = data.todos.find(item => item.name === name);
+      console.log("fired", data);
+      const id = event.target.parentNode.dataset.key;
+      const task = data.todos.find(item => item.id === id);
       task.done = !task.done;
     },
 

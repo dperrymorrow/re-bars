@@ -4,11 +4,9 @@ import Utils from "./utils.js";
 
 const msg = Logger("V-DOM");
 
-export default function({ templateFn, proxyData, eventHandlers }) {
+export default function({ $root, templateFn, proxyData, eventHandlers }) {
   const $el = document.createElement("div");
-
-  // should make event handlers a factory and then it wont have to pass $root around
-  let $root;
+  const Events = EventHandlers({ $root, eventHandlers, data: proxyData });
 
   function render() {
     $el.innerHTML = templateFn(proxyData);
@@ -20,7 +18,7 @@ export default function({ templateFn, proxyData, eventHandlers }) {
     $root = $target;
     render();
     $target.innerHTML = $el.innerHTML;
-    EventHandlers.add({ $root, $container: $target, eventHandlers, data: proxyData });
+    Events.add($target);
   }
 
   function _compareKeys($vNode, $realNode) {
@@ -31,12 +29,7 @@ export default function({ templateFn, proxyData, eventHandlers }) {
       else if (!$v.isEqualNode($e)) {
         // needs replaced, has changed
         const $updated = Utils.swapNodes($v, $e);
-        EventHandlers.add({
-          $root,
-          $container: $updated,
-          eventHandlers,
-          data: proxyData,
-        });
+        Events.add($updated);
       }
     });
     // this is items that were added via push
@@ -44,12 +37,7 @@ export default function({ templateFn, proxyData, eventHandlers }) {
       const $real = $realNode.querySelector(`[data-key="${$e.dataset.key}"]`);
       if (!$real) {
         const $newNode = Utils.addChild($realNode, $e);
-        EventHandlers.add({
-          $root,
-          $container: $newNode,
-          eventHandlers,
-          data: proxyData,
-        });
+        Events.add($newNode);
       }
     });
   }
@@ -67,7 +55,7 @@ export default function({ templateFn, proxyData, eventHandlers }) {
         } else {
           $real.innerHTML = $vNode.innerHTML;
           msg.log(`patching ${path}`, $vNode);
-          EventHandlers.add({ $root: $target, $container: $real, eventHandlers, data: proxyData });
+          Events.add($real);
         }
       });
   }
