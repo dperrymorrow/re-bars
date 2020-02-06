@@ -1,8 +1,5 @@
 import EventHandlers from "./event-handlers.js";
-import Logger from "./logger.js";
 import Utils from "./utils.js";
-
-const msg = Logger("V-DOM");
 
 export default function({ $root, templateFn, proxyData }) {
   const $el = document.createElement("div");
@@ -44,10 +41,10 @@ export default function({ $root, templateFn, proxyData }) {
       .forEach($vNode => {
         const $real = $target.querySelector(`[data-vbars-id="${$vNode.dataset.vbarsId}"]`);
         if (Utils.isKeyedNode($vNode)) {
-          msg.log(`comparing keyed arrays ${path}`, $vNode);
+          // console.log(`comparing keyed arrays ${path}`, $vNode);
           _compareKeys($vNode, $real);
         } else {
-          msg.log(`patching ${path}`, $vNode);
+          // console.log(`patching ${path}`, $vNode);
           Events.add(Utils.swapNodes($vNode, $real));
         }
       });

@@ -1,6 +1,4 @@
-import Logger from "./logger.js";
 import Utils from "./utils.js";
-const msg = Logger("Event Handlers");
 
 export default function({ $root, methods, proxyData }) {
   return {
@@ -10,10 +8,8 @@ export default function({ $root, methods, proxyData }) {
         const [eventType, methodName] = eventStr.split(":");
         let [listener, ...augs] = eventType.split(".");
 
-        if (!(methodName in methods)) {
-          msg.warn(`${methodName} not in event methods`, methods);
-          return;
-        }
+        if (!(methodName in methods))
+          throw new Error(`${methodName} not in event methods`, methods);
 
         // gonna have to store this to remove them when patching
         $el.addEventListener(listener, event => {

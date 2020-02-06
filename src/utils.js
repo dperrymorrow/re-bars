@@ -1,6 +1,3 @@
-import Logger from "./logger.js";
-const msg = Logger("utils");
-
 export default {
   isKeyedNode($node) {
     if ($node.children.length)
@@ -27,7 +24,7 @@ export default {
   setKey(obj, path, value) {
     const arr = path.split(".");
     arr.reduce((pointer, key, index) => {
-      if (!(key in pointer)) msg.warn(`${path} was not found in object`, obj);
+      if (!(key in pointer)) throw new Error(`${path} was not found in object`, obj);
       if (index + 1 === arr.length) pointer[key] = value;
       return pointer[key];
     }, obj);

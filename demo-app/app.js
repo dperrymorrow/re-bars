@@ -28,7 +28,7 @@ export default Vbars.create({
             <input type="checkbox" checked {{ handler "click:toggleDone" id }}/>
             <s>{{ name }}</s>
           {{else}}
-            <input type="checkbox" {{ handler "click:toggleDone" id }})"/>
+            <input type="checkbox" {{ handler "click:toggle---Done" id }})"/>
             <strong>{{ name }}</strong>
           {{/if}}
           <p>{{ description }}</p>

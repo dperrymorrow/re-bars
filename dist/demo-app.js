@@ -27,82 +27,7 @@
     });
   }
 
-  /* eslint-disable no-console */
-
-  const colors = {
-    orange: "#ffc934",
-    orangeDark: "#d38809",
-    grey: "#073042",
-    white: "#FFF",
-    red: "#e95233",
-    redDark: "#b74129",
-    green: "#02d479",
-    greenDark: "#0ea760",
-    black: "#000000",
-  };
-
-  const emoj = {
-    error: "💥",
-    warn: "⚠️",
-    log: "💬",
-  };
-
-  const styles = {
-    msg: `background: ${colors.black}; color: ${colors.white}; font-weight: bold;`,
-    warn: [
-      `background: ${colors.orangeDark}; color:${colors.black}; font-weight: bold;`,
-      `background: ${colors.orange}; color:${colors.black}; font-weight: bold;`,
-    ],
-    error: [
-      `background: ${colors.redDark}; color:${colors.black}; font-weight: bold;`,
-      `background: ${colors.red}; color:${colors.black}; font-weight: bold;`,
-    ],
-    log: [
-      `background: ${colors.greenDark}; color:${colors.black}; font-weight: bold;`,
-      `background: ${colors.green}; color:${colors.black}; font-weight: bold;`,
-    ],
-  };
-
-  function Logger(labels = "MSG") {
-    const prefix = Array.isArray(labels) ? labels : [labels];
-
-    const _render = (msg, msgType, data) => {
-      msg = `${emoj[msgType]} ${msg}`;
-
-      const message = prefix
-        .slice(0, 2)
-        .concat([msg])
-        .map(str => `%c ${str} `)
-        .join("");
-
-      const colors = [styles[msgType][0]];
-      if (prefix.length > 1) colors.push(styles[msgType][1]);
-      colors.push(styles.msg);
-
-      const args = [message].concat(colors);
-
-      const method = data === null ? console.log : console.groupCollapsed;
-      method(...args);
-      if (data) {
-        console.log(data);
-        console.groupEnd();
-      }
-    };
-
-    return {
-      warn: (msg, data = null) => _render(msg, "warn", data),
-      error: (msg, data = null) => _render(msg, "error", data),
-      log: (msg, data = null) => _render(msg, "log", data),
-    };
-  }
-
-  const msg = Logger("utils");
-
   var Utils = {
-    watchId(options) {
-      return `reactive-key-${options.loc.start.column}${options.loc.start.line}${options.loc.end.column}${options.loc.end.line}`;
-    },
-
     isKeyedNode($node) {
       if ($node.children.length)
         return Array.from($node.children).every($child => $child.dataset.key);
@@ -128,14 +53,12 @@
     setKey(obj, path, value) {
       const arr = path.split(".");
       arr.reduce((pointer, key, index) => {
-        if (!(key in pointer)) msg.warn(`${path} was not found in object`, obj);
+        if (!(key in pointer)) throw new Error(`${path} was not found in object`, obj);
         if (index + 1 === arr.length) pointer[key] = value;
         return pointer[key];
       }, obj);
     },
   };
-
-  const msg$1 = Logger("Event Handlers");
 
   function EventHandlers({ $root, methods, proxyData }) {
     return {
@@ -145,10 +68,8 @@
           const [eventType, methodName] = eventStr.split(":");
           let [listener, ...augs] = eventType.split(".");
 
-          if (!(methodName in methods)) {
-            msg$1.warn(`${methodName} not in event methods`, methods);
-            return;
-          }
+          if (!(methodName in methods))
+            throw new Error(`${methodName} not in event methods`, methods);
 
           // gonna have to store this to remove them when patching
           $el.addEventListener(listener, event => {
@@ -169,8 +90,6 @@
       },
     };
   }
-
-  const msg$2 = Logger("V-DOM");
 
   function VDom({ $root, templateFn, proxyData }) {
     const $el = document.createElement("div");
@@ -208,16 +127,15 @@
       render();
 
       Array.from($el.querySelectorAll("[data-vbars-watch]"))
-        .filter($node => path.startsWith($node.dataset.vbarsWatch))
+        .filter($e => path.startsWith($e.dataset.vbarsWatch))
         .forEach($vNode => {
-          const $real = $target.querySelector(`#${$vNode.getAttribute("id")}`);
+          const $real = $target.querySelector(`[data-vbars-id="${$vNode.dataset.vbarsId}"]`);
           if (Utils.isKeyedNode($vNode)) {
-            msg$2.log(`comparing keyed arrays ${path}`, $vNode);
+            // console.log(`comparing keyed arrays ${path}`, $vNode);
             _compareKeys($vNode, $real);
           } else {
-            $real.innerHTML = $vNode.innerHTML;
-            msg$2.log(`patching ${path}`, $vNode);
-            Events.add($real);
+            // console.log(`patching ${path}`, $vNode);
+            Events.add(Utils.swapNodes($vNode, $real));
           }
         });
     }
@@ -231,11 +149,10 @@
   }
 
   var Helpers = {
-    register(instance, proxyData) {
+    register(instance) {
       instance.registerHelper("watch", (path, options) => {
-        const id = Utils.watchId(options);
-        // wrapping in span can mess with layout, should probally have a attr helper instead of a block helper
-        return `<span id="${id}" data-vbars-watch="${path}">${options.fn(proxyData)}</span>`;
+        const identifier = `${options.loc.start.column}${options.loc.start.line}${options.loc.end.column}${options.loc.end.line}`;
+        return new instance.SafeString(`data-vbars-id="${identifier}" data-vbars-watch="${path}"`);
       });
 
       instance.registerHelper("handler", function() {
@@ -270,12 +187,10 @@
   var app = Vbars.create({
     template: /*html*/ `
     <!-- the reactive template we are demo-ing -->
-    {{#watch 'header'}}
-      <h1>
-        {{ header.title }}
-        <small>{{ header.description }}</small>
-      </h1>
-    {{/watch}}
+    <h1 {{ watch "header" }}>
+      {{ header.title }}
+      <small>{{ header.description }}</small>
+    </h1>
 
     <label>
       Edit Title:
@@ -289,28 +204,26 @@
 
     <hr />
 
-    <ul>
-      {{#watch 'todos'}}
-        {{#each todos}}
-        <!-- check if children have a data-key and if so patch that instead of replace -->
-          <li data-key="{{ id }}">
-            {{#if done }}
-              <input type="checkbox" checked {{ handler "click:toggleDone" id }}/>
-              <s>{{ name }}</s>
-            {{else}}
-              <input type="checkbox" {{ handler "click:toggleDone" id }})"/>
-              <strong>{{ name }}</strong>
-            {{/if}}
-            <p>{{ description }}</p>
-            <button {{ handler "click:deleteToDo" id }}>X</button>
-          </li>
-        {{/each}}
-      {{/watch}}
+    <ul {{ watch "todos" }}>
+      {{#each todos}}
+      <!-- check if children have a data-key and if so patch that instead of replace -->
+        <li data-key="{{ id }}">
+          {{#if done }}
+            <input type="checkbox" checked {{ handler "click:toggleDone" id }}/>
+            <s>{{ name }}</s>
+          {{else}}
+            <input type="checkbox" {{ handler "click:toggle---Done" id }})"/>
+            <strong>{{ name }}</strong>
+          {{/if}}
+          <p>{{ description }}</p>
+          <button {{ handler "click:deleteToDo" id }}>X</button>
+        </li>
+      {{/each}}
     </ul>
 
     <hr/>
 
-    {{#watch 'uiState'}}
+    <div {{ watch "uiState" }}>
       {{#if uiState.adding }}
         <div class="row">
           <label>
@@ -322,7 +235,7 @@
       {{else}}
         <button class="add" {{ handler "click:toggleCreate" }}>Add another</button>
       {{/if}}
-    {{/watch}}
+    </div>
   `,
 
     data: {
