@@ -3,17 +3,14 @@ import Utils from "./utils.js";
 export default function({ $root, methods, proxyData }) {
   return {
     add($container) {
+      console.groupCollapsed("adding event handlers");
+      console.log("container", $container);
+
       $container.querySelectorAll("[data-vbars-handler]").forEach($el => {
-        const [eventStr, ...rest] = JSON.parse($el.dataset.vbarsHandler);
-        const [eventType, methodName] = eventStr.split(":");
+        const { eventType, methodName, args } = JSON.parse($el.dataset.vbarsHandler);
         let [listener, ...augs] = eventType.split(".");
 
-        if (!(methodName in methods))
-          throw new Error(
-            `"${methodName}" not in Vbars component's methods. Availible methods: ${Object.keys(
-              methods
-            ).join(", ")}`
-          );
+        console.log({ listener, augs, methodName, $el });
 
         // gonna have to store this to remove them when patching
         $el.addEventListener(listener, event => {
@@ -21,7 +18,16 @@ export default function({ $root, methods, proxyData }) {
             event.stopPropagation();
             event.preventDefault();
           }
-          methods[methodName]({ event, data: proxyData, $root, $container }, ...rest);
+
+          const $refs = Array.from($root.querySelectorAll("[data-vbars-ref]")).reduce(
+            (obj, $el) => {
+              obj[$el.dataset.vbarsRef] = $el;
+              return obj;
+            },
+            {}
+          );
+
+          methods[methodName]({ event, data: proxyData, $root, $refs }, ...args);
         });
       });
 
@@ -30,6 +36,8 @@ export default function({ $root, methods, proxyData }) {
           Utils.setKey(proxyData, $el.dataset.vbarsBind, $event.currentTarget.value);
         });
       });
+
+      console.groupEnd();
     },
   };
 }

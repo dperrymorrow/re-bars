@@ -8,7 +8,7 @@ export default {
 
     const instance = window.Handlebars.create();
     const proxyData = Watcher(rawData, ({ path }) => vDom.patch($root, path));
-    Helpers.register(instance, proxyData);
+    Helpers.register({ instance, methods });
     const templateFn = instance.compile(template);
 
     return {

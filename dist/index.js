@@ -29,13 +29,13 @@
 
   var Utils = {
     isKeyedNode($node) {
-      if ($node.children.length)
-        return Array.from($node.children).every($child => $child.dataset.key);
-      return false;
+      return $node.children.length
+        ? Array.from($node.children).every($child => $child.dataset.vbarsKey)
+        : false;
     },
 
     keyedChildren($node) {
-      return Array.from($node.children).filter($e => $e.dataset.key);
+      return Array.from($node.children).filter($e => $e.dataset.vbarsKey);
     },
 
     swapNodes($source, $target) {
@@ -63,17 +63,10 @@
   function EventHandlers({ $root, methods, proxyData }) {
     return {
       add($container) {
-        $container.querySelectorAll("[data-vbars-handler]").forEach($el => {
-          const [eventStr, ...rest] = JSON.parse($el.dataset.vbarsHandler);
-          const [eventType, methodName] = eventStr.split(":");
-          let [listener, ...augs] = eventType.split(".");
 
-          if (!(methodName in methods))
-            throw new Error(
-              `"${methodName}" not in Vbars component's methods. Availible methods: ${Object.keys(
-              methods
-            ).join(", ")}`
-            );
+        $container.querySelectorAll("[data-vbars-handler]").forEach($el => {
+          const { eventType, methodName, args } = JSON.parse($el.dataset.vbarsHandler);
+          let [listener, ...augs] = eventType.split(".");
 
           // gonna have to store this to remove them when patching
           $el.addEventListener(listener, event => {
@@ -81,9 +74,17 @@
               event.stopPropagation();
               event.preventDefault();
             }
-            methods[methodName]({ event, data: proxyData, $root, $container }, ...rest);
+
+            const $refs = Array.from($root.querySelectorAll("[data-vbars-ref]")).reduce(
+              (obj, $el) => {
+                obj[$el.dataset.vbarsRef] = $el;
+                return obj;
+              },
+              {}
+            );
+
+            methods[methodName]({ event, data: proxyData, $root, $refs }, ...args);
           });
-          delete $el.dataset.vbarsHandler;
         });
 
         $container.querySelectorAll("[data-vbars-bind]").forEach($el => {
@@ -107,15 +108,21 @@
     }
 
     function _compareKeys($vNode, $realNode) {
+
       Utils.keyedChildren($realNode).forEach($e => {
-        const $v = $vNode.querySelector(`[data-key="${$e.dataset.key}"]`);
-        if (!$v) $e.remove();
-        else if (!$v.isEqualNode($e)) Events.add(Utils.swapNodes($v, $e));
+        const $v = $vNode.querySelector(`[data-vbars-key="${$e.dataset.vbarsKey}"]`);
+        if (!$v) {
+          $e.remove();
+        } else if (!$v.isEqualNode($e)) {
+          Events.add(Utils.swapNodes($v, $e));
+        }
       });
       // this is items that were added via push
-      Utils.keyedChildren($vNode).forEach($e => {
-        const $real = $realNode.querySelector(`[data-key="${$e.dataset.key}"]`);
-        if (!$real) Events.add(Utils.addChild($realNode, $e));
+      Utils.keyedChildren($vNode).forEach($v => {
+        const $e = $realNode.querySelector(`[data-vbars-key="${$v.dataset.vbarsKey}"]`);
+        if (!$e) {
+          Events.add(Utils.addChild($realNode, $v));
+        }
       });
     }
 
@@ -143,21 +150,39 @@
   }
 
   var Helpers = {
-    register(instance) {
+    register({ instance, methods }) {
+      function _handler() {
+        const [eventType, ...args] = arguments;
+        const opts = args.splice(-1, 1);
+
+        if (args.some(arg => arg !== null && typeof arg === "object"))
+          throw new Error(
+            `must only pass primitives as argument to a handler. ${JSON.stringify(args, null, 2)}`
+          );
+
+        const handler = JSON.stringify({ methodName: opts[0].name, eventType, args });
+        return _addData({ handler });
+      }
+
+      const _addData = pairs => {
+        return new instance.SafeString(
+          Object.keys(pairs)
+            .map(key => `data-vbars-${key}='${pairs[key]}'`)
+            .join(" ")
+        );
+      };
+
       instance.registerHelper("watch", (path, options) => {
-        const identifier = `${options.loc.start.column}${options.loc.start.line}${options.loc.end.column}${options.loc.end.line}`;
-        return new instance.SafeString(`data-vbars-id="${identifier}" data-vbars-watch="${path}"`);
+        const id = `${options.loc.start.column}${options.loc.start.line}${options.loc.end.column}${options.loc.end.line}`;
+        return _addData({ id, watch: path });
       });
 
-      instance.registerHelper("handler", function() {
-        const args = Array.from(arguments);
-        args.splice(-1, 1);
-        return new instance.SafeString(`data-vbars-handler='${JSON.stringify(args)}'`);
-      });
+      instance.registerHelper("keyed", val => _addData({ key: val }));
+      instance.registerHelper("isChecked", val => (val ? "checked" : ""));
+      instance.registerHelper("bind", path => _addData({ bind: path }));
+      instance.registerHelper("ref", key => _addData({ ref: key }));
 
-      instance.registerHelper("isChecked", function(val) {
-        return new instance.SafeString(val ? "checked" : "");
-      });
+      Object.keys(methods).forEach(key => instance.registerHelper(key, _handler));
     },
   };
 
@@ -167,7 +192,7 @@
 
       const instance = window.Handlebars.create();
       const proxyData = buildProxy(rawData, ({ path }) => vDom.patch($root, path));
-      Helpers.register(instance, proxyData);
+      Helpers.register({ instance, methods });
       const templateFn = instance.compile(template);
 
       return {

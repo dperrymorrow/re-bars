@@ -29,13 +29,13 @@
 
   var Utils = {
     isKeyedNode($node) {
-      if ($node.children.length)
-        return Array.from($node.children).every($child => $child.dataset.key);
-      return false;
+      return $node.children.length
+        ? Array.from($node.children).every($child => $child.dataset.vbarsKey)
+        : false;
     },
 
     keyedChildren($node) {
-      return Array.from($node.children).filter($e => $e.dataset.key);
+      return Array.from($node.children).filter($e => $e.dataset.vbarsKey);
     },
 
     swapNodes($source, $target) {
@@ -63,17 +63,14 @@
   function EventHandlers({ $root, methods, proxyData }) {
     return {
       add($container) {
+        console.groupCollapsed("adding event handlers");
+        console.log("container", $container);
+
         $container.querySelectorAll("[data-vbars-handler]").forEach($el => {
-          const [eventStr, ...rest] = JSON.parse($el.dataset.vbarsHandler);
-          const [eventType, methodName] = eventStr.split(":");
+          const { eventType, methodName, args } = JSON.parse($el.dataset.vbarsHandler);
           let [listener, ...augs] = eventType.split(".");
 
-          if (!(methodName in methods))
-            throw new Error(
-              `"${methodName}" not in Vbars component's methods. Availible methods: ${Object.keys(
-              methods
-            ).join(", ")}`
-            );
+          console.log({ listener, augs, methodName, $el });
 
           // gonna have to store this to remove them when patching
           $el.addEventListener(listener, event => {
@@ -81,9 +78,17 @@
               event.stopPropagation();
               event.preventDefault();
             }
-            methods[methodName]({ event, data: proxyData, $root, $container }, ...rest);
+
+            const $refs = Array.from($root.querySelectorAll("[data-vbars-ref]")).reduce(
+              (obj, $el) => {
+                obj[$el.dataset.vbarsRef] = $el;
+                return obj;
+              },
+              {}
+            );
+
+            methods[methodName]({ event, data: proxyData, $root, $refs }, ...args);
           });
-          delete $el.dataset.vbarsHandler;
         });
 
         $container.querySelectorAll("[data-vbars-bind]").forEach($el => {
@@ -91,6 +96,8 @@
             Utils.setKey(proxyData, $el.dataset.vbarsBind, $event.currentTarget.value);
           });
         });
+
+        console.groupEnd();
       },
     };
   }
@@ -107,19 +114,35 @@
     }
 
     function _compareKeys($vNode, $realNode) {
+      console.groupCollapsed("comparing keyed children");
+      console.log("real parent", $realNode);
+      console.log("virtual parent", $vNode);
+
       Utils.keyedChildren($realNode).forEach($e => {
-        const $v = $vNode.querySelector(`[data-key="${$e.dataset.key}"]`);
-        if (!$v) $e.remove();
-        else if (!$v.isEqualNode($e)) Events.add(Utils.swapNodes($v, $e));
+        const $v = $vNode.querySelector(`[data-vbars-key="${$e.dataset.vbarsKey}"]`);
+        if (!$v) {
+          console.log("removing keyed node", $e);
+          $e.remove();
+        } else if (!$v.isEqualNode($e)) {
+          console.log("swapping real", $e);
+          console.log("with virual", $v);
+          Events.add(Utils.swapNodes($v, $e));
+        }
       });
       // this is items that were added via push
-      Utils.keyedChildren($vNode).forEach($e => {
-        const $real = $realNode.querySelector(`[data-key="${$e.dataset.key}"]`);
-        if (!$real) Events.add(Utils.addChild($realNode, $e));
+      Utils.keyedChildren($vNode).forEach($v => {
+        const $e = $realNode.querySelector(`[data-vbars-key="${$v.dataset.vbarsKey}"]`);
+        if (!$e) {
+          console.log("could not find real node, adding", $v);
+          Events.add(Utils.addChild($realNode, $v));
+        }
       });
+
+      console.groupEnd();
     }
 
     function patch($target, path) {
+      console.groupCollapsed(`vDOM patching ${path}`);
       render();
 
       Array.from($el.querySelectorAll("[data-vbars-watch]"))
@@ -127,13 +150,15 @@
         .forEach($vNode => {
           const $real = $target.querySelector(`[data-vbars-id="${$vNode.dataset.vbarsId}"]`);
           if (Utils.isKeyedNode($vNode)) {
-            console.log(`comparing keyed arrays ${path}`, $vNode);
             _compareKeys($vNode, $real);
           } else {
-            console.log(`patching ${path}`, $vNode);
+            console.log("replacing", $real);
+            console.log("with", $vNode);
             Events.add(Utils.swapNodes($vNode, $real));
           }
         });
+
+      console.groupEnd();
     }
 
     return {
@@ -145,21 +170,39 @@
   }
 
   var Helpers = {
-    register(instance) {
+    register({ instance, methods }) {
+      function _handler() {
+        const [eventType, ...args] = arguments;
+        const opts = args.splice(-1, 1);
+
+        if (args.some(arg => arg !== null && typeof arg === "object"))
+          throw new Error(
+            `must only pass primitives as argument to a handler. ${JSON.stringify(args, null, 2)}`
+          );
+
+        const handler = JSON.stringify({ methodName: opts[0].name, eventType, args });
+        return _addData({ handler });
+      }
+
+      const _addData = pairs => {
+        return new instance.SafeString(
+          Object.keys(pairs)
+            .map(key => `data-vbars-${key}='${pairs[key]}'`)
+            .join(" ")
+        );
+      };
+
       instance.registerHelper("watch", (path, options) => {
-        const identifier = `${options.loc.start.column}${options.loc.start.line}${options.loc.end.column}${options.loc.end.line}`;
-        return new instance.SafeString(`data-vbars-id="${identifier}" data-vbars-watch="${path}"`);
+        const id = `${options.loc.start.column}${options.loc.start.line}${options.loc.end.column}${options.loc.end.line}`;
+        return _addData({ id, watch: path });
       });
 
-      instance.registerHelper("handler", function() {
-        const args = Array.from(arguments);
-        args.splice(-1, 1);
-        return new instance.SafeString(`data-vbars-handler='${JSON.stringify(args)}'`);
-      });
+      instance.registerHelper("keyed", val => _addData({ key: val }));
+      instance.registerHelper("isChecked", val => (val ? "checked" : ""));
+      instance.registerHelper("bind", path => _addData({ bind: path }));
+      instance.registerHelper("ref", key => _addData({ ref: key }));
 
-      instance.registerHelper("isChecked", function(val) {
-        return new instance.SafeString(val ? "checked" : "");
-      });
+      Object.keys(methods).forEach(key => instance.registerHelper(key, _handler));
     },
   };
 
@@ -169,7 +212,7 @@
 
       const instance = window.Handlebars.create();
       const proxyData = buildProxy(rawData, ({ path }) => vDom.patch($root, path));
-      Helpers.register(instance, proxyData);
+      Helpers.register({ instance, methods });
       const templateFn = instance.compile(template);
 
       return {
@@ -194,12 +237,12 @@
 
     <label>
       Edit Title:
-      <input value="{{ header.title }}" data-bind="header.title"/>
+      <input value="{{ header.title }}" {{ bind "header.title" }}/>
     </label>
 
     <label>
       Edit Description:
-      <input value="{{ header.description }}" data-bind="header.description"/>
+      <input value="{{ header.description }}" {{ bind "header.description" }}/>
     </label>
 
     <hr />
@@ -207,15 +250,17 @@
     <ul {{ watch "todos" }}>
       {{#each todos}}
       <!-- check if children have a data-key and if so patch that instead of replace -->
-        <li data-key="{{ id }}">
-          <input type="checkbox" {{ isChecked done }} {{ handler "click:toggleDone" id }}/>
-          {{#if done }}
-            <s>{{ name }}</s>
-          {{else}}
-            <strong>{{ name }}</strong>
-          {{/if}}
+        <li {{ keyed id }}>
+          <label for="{{ id }}">
+            <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ toggleDone "click" id }}/>
+            {{#if done }}
+              <s>{{ name }}</s>
+            {{else}}
+              <strong>{{ name }}</strong>
+            {{/if}}
+          </label>
           <p>{{ description }}</p>
-          <button {{ handler "click:deleteToDo" id }}>X</button>
+          <button {{ deleteToDo "click" @index }}>X</button>
         </li>
       {{/each}}
     </ul>
@@ -224,15 +269,14 @@
 
     <div {{ watch "uiState" }}>
       {{#if uiState.adding }}
-        <div class="row">
-          <label>
-            <input type="text" id="new-todo-label" placeholder="the new todo" />
-            <button class="push" {{ handler "click.prevent:addItem" }}>Add todo</button>
-            <button class="cancel" {{ handler "click:toggleCreate" }}>Cancel</button>
-          </label>
-        </div>
+        <form>
+          <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
+          <textarea name="description" {{ ref "newDescrip" }}></textarea>
+          <button class="push" {{ addItem "click.prevent" }}>Add todo</button>
+          <button class="cancel" {{ toggleCreate "click.prevent" uiState.adding }}>Cancel</button>
+        </form>
       {{else}}
-        <button class="add" {{ handler "click:toggleCreate" }}>Add another</button>
+        <button class="add" {{ toggleCreate "click" uiState.adding }}>Add another</button>
       {{/if}}
     </div>
   `,
@@ -262,20 +306,18 @@
     },
 
     methods: {
-      deleteToDo({ data }, id) {
-        const index = data.todos.findIndex(item => item.id === id);
+      deleteToDo({ data }, index) {
         data.todos.splice(index, 1);
       },
 
-      addItem({ data, $container }) {
-        const $input = $container.querySelector("#new-todo-label");
+      addItem({ $refs, data }) {
         data.todos.push({
-          done: false,
-          name: $input.value,
           id: new Date().getTime(),
+          name: $refs.newName.value,
+          description: $refs.newDescrip.value,
         });
-        $input.value = "";
-        $input.focus();
+
+        $refs.newName.value = $refs.newDescrip.value = "";
       },
 
       toggleDone({ data }, id) {
@@ -283,8 +325,8 @@
         task.done = !task.done;
       },
 
-      toggleCreate({ data }) {
-        data.uiState.adding = !data.uiState.adding;
+      toggleCreate({ data }, adding) {
+        data.uiState.adding = !adding;
       },
     },
   });

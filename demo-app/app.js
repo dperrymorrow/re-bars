@@ -10,12 +10,12 @@ export default Vbars.create({
 
     <label>
       Edit Title:
-      <input value="{{ header.title }}" data-bind="header.title"/>
+      <input value="{{ header.title }}" {{ bind "header.title" }}/>
     </label>
 
     <label>
       Edit Description:
-      <input value="{{ header.description }}" data-bind="header.description"/>
+      <input value="{{ header.description }}" {{ bind "header.description" }}/>
     </label>
 
     <hr />
@@ -24,14 +24,16 @@ export default Vbars.create({
       {{#each todos}}
       <!-- check if children have a data-key and if so patch that instead of replace -->
         <li {{ keyed id }}>
-          <input type="checkbox" {{ isChecked done }} {{ handler "click:toggleDone" id }}/>
-          {{#if done }}
-            <s>{{ name }}</s>
-          {{else}}
-            <strong>{{ name }}</strong>
-          {{/if}}
+          <label for="{{ id }}">
+            <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ toggleDone "click" id done }}/>
+            {{#if done }}
+              <s>{{ name }}</s>
+            {{else}}
+              <strong>{{ name }}</strong>
+            {{/if}}
+          </label>
           <p>{{ description }}</p>
-          <button {{ handler "click:deleteToDo" id }}>X</button>
+          <button {{ deleteToDo "click" @index }}>X</button>
         </li>
       {{/each}}
     </ul>
@@ -40,15 +42,14 @@ export default Vbars.create({
 
     <div {{ watch "uiState" }}>
       {{#if uiState.adding }}
-        <div class="row">
-          <label>
-            <input type="text" id="new-todo-label" placeholder="the new todo" />
-            <button class="push" {{ handler "click.prevent:addItem" }}>Add todo</button>
-            <button class="cancel" {{ handler "click:toggleCreate" }}>Cancel</button>
-          </label>
-        </div>
+        <form>
+          <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
+          <textarea name="description" {{ ref "newDescrip" }}></textarea>
+          <button class="push" {{ addItem "click.prevent" }}>Add todo</button>
+          <button class="cancel" {{ toggleCreate "click.prevent" uiState.adding }}>Cancel</button>
+        </form>
       {{else}}
-        <button class="add" {{ handler "click:toggleCreate" }}>Add another</button>
+        <button class="add" {{ toggleCreate "click" uiState.adding }}>Add another</button>
       {{/if}}
     </div>
   `,
@@ -78,29 +79,26 @@ export default Vbars.create({
   },
 
   methods: {
-    deleteToDo({ data }, id) {
-      const index = data.todos.findIndex(item => item.id === id);
+    deleteToDo({ data }, index) {
       data.todos.splice(index, 1);
     },
 
-    addItem({ data, $container }) {
-      const $input = $container.querySelector("#new-todo-label");
+    addItem({ $refs, data }) {
       data.todos.push({
-        done: false,
-        name: $input.value,
         id: new Date().getTime(),
+        name: $refs.newName.value,
+        description: $refs.newDescrip.value,
       });
-      $input.value = "";
-      $input.focus();
+
+      $refs.newName.value = $refs.newDescrip.value = "";
     },
 
-    toggleDone({ data }, id) {
-      const task = data.todos.find(item => item.id === id);
-      task.done = !task.done;
+    toggleDone({ data }, id, done) {
+      data.todos.find(item => item.id === id).done = !done;
     },
 
-    toggleCreate({ data }) {
-      data.uiState.adding = !data.uiState.adding;
+    toggleCreate({ data }, adding) {
+      data.uiState.adding = !adding;
     },
   },
 });
