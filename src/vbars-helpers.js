@@ -10,5 +10,13 @@ export default {
       args.splice(-1, 1);
       return new instance.SafeString(`data-vbars-handler='${JSON.stringify(args)}'`);
     });
+
+    instance.registerHelper("keyed", val => {
+      return new instance.SafeString(`data-vbars-key="${val}"`);
+    });
+
+    instance.registerHelper("isChecked", val => {
+      return new instance.SafeString(val ? "checked" : "");
+    });
   },
 };

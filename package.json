@@ -6,22 +6,20 @@
   "scripts": {
     "start": "http-server . -c-1",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "rollup": "rollup src/index.js --file dist/index.js --format umd --name 'Vbars' ",
-    "compress": "uglifyjs dist/index.js -o dist/index.min.js --compress --mangle",
-    "buildDemoApp": "rollup demo-app/app.js --file dist/demo-app.js --format umd --name 'DemoApp' ",
-    "build": "npm run rollup && npm run buildDemoApp && npm run compress "
+    "demoApp": "rollup demo-app/app.js --file dist/demo-app.js --format umd --name 'DemoApp' ",
+    "build": "rollup -c && npm run demoApp"
   },
   "author": "David Morrow",
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
-    "babel-minify": "^0.5.1",
     "eslint": "^6.7.2",
     "eslint-config-prettier": "^6.7.0",
     "eslint-plugin-prettier": "^3.1.1",
     "http-server": "^0.12.0",
     "prettier": "^1.19.1",
     "rollup": "^1.31.0",
-    "uglify-es": "^3.3.9"
+    "rollup-plugin-strip": "^1.2.2",
+    "rollup-plugin-terser": "^5.2.0"
   }
 }

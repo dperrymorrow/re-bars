@@ -69,7 +69,11 @@
           let [listener, ...augs] = eventType.split(".");
 
           if (!(methodName in methods))
-            throw new Error(`${methodName} not in event methods`, methods);
+            throw new Error(
+              `"${methodName}" not in Vbars component's methods. Availible methods: ${Object.keys(
+              methods
+            ).join(", ")}`
+            );
 
           // gonna have to store this to remove them when patching
           $el.addEventListener(listener, event => {
@@ -105,21 +109,13 @@
     function _compareKeys($vNode, $realNode) {
       Utils.keyedChildren($realNode).forEach($e => {
         const $v = $vNode.querySelector(`[data-key="${$e.dataset.key}"]`);
-        // has been deleted
         if (!$v) $e.remove();
-        else if (!$v.isEqualNode($e)) {
-          // needs replaced, has changed
-          const $updated = Utils.swapNodes($v, $e);
-          Events.add($updated);
-        }
+        else if (!$v.isEqualNode($e)) Events.add(Utils.swapNodes($v, $e));
       });
       // this is items that were added via push
       Utils.keyedChildren($vNode).forEach($e => {
         const $real = $realNode.querySelector(`[data-key="${$e.dataset.key}"]`);
-        if (!$real) {
-          const $newNode = Utils.addChild($realNode, $e);
-          Events.add($newNode);
-        }
+        if (!$real) Events.add(Utils.addChild($realNode, $e));
       });
     }
 
@@ -131,10 +127,10 @@
         .forEach($vNode => {
           const $real = $target.querySelector(`[data-vbars-id="${$vNode.dataset.vbarsId}"]`);
           if (Utils.isKeyedNode($vNode)) {
-            // console.log(`comparing keyed arrays ${path}`, $vNode);
+            console.log(`comparing keyed arrays ${path}`, $vNode);
             _compareKeys($vNode, $real);
           } else {
-            // console.log(`patching ${path}`, $vNode);
+            console.log(`patching ${path}`, $vNode);
             Events.add(Utils.swapNodes($vNode, $real));
           }
         });
@@ -159,6 +155,10 @@
         const args = Array.from(arguments);
         args.splice(-1, 1);
         return new instance.SafeString(`data-vbars-handler='${JSON.stringify(args)}'`);
+      });
+
+      instance.registerHelper("isChecked", function(val) {
+        return new instance.SafeString(val ? "checked" : "");
       });
     },
   };
@@ -208,11 +208,10 @@
       {{#each todos}}
       <!-- check if children have a data-key and if so patch that instead of replace -->
         <li data-key="{{ id }}">
+          <input type="checkbox" {{ isChecked done }} {{ handler "click:toggleDone" id }}/>
           {{#if done }}
-            <input type="checkbox" checked {{ handler "click:toggleDone" id }}/>
             <s>{{ name }}</s>
           {{else}}
-            <input type="checkbox" {{ handler "click:toggle---Done" id }})"/>
             <strong>{{ name }}</strong>
           {{/if}}
           <p>{{ description }}</p>

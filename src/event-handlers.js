@@ -9,7 +9,11 @@ export default function({ $root, methods, proxyData }) {
         let [listener, ...augs] = eventType.split(".");
 
         if (!(methodName in methods))
-          throw new Error(`${methodName} not in event methods`, methods);
+          throw new Error(
+            `"${methodName}" not in Vbars component's methods. Availible methods: ${Object.keys(
+              methods
+            ).join(", ")}`
+          );
 
         // gonna have to store this to remove them when patching
         $el.addEventListener(listener, event => {
@@ -19,7 +23,6 @@ export default function({ $root, methods, proxyData }) {
           }
           methods[methodName]({ event, data: proxyData, $root, $container }, ...rest);
         });
-        delete $el.dataset.vbarsHandler;
       });
 
       $container.querySelectorAll("[data-vbars-bind]").forEach($el => {

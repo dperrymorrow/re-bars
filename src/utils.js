@@ -1,12 +1,12 @@
 export default {
   isKeyedNode($node) {
-    if ($node.children.length)
-      return Array.from($node.children).every($child => $child.dataset.key);
-    return false;
+    return $node.children.length
+      ? Array.from($node.children).every($child => $child.dataset.vbarsKey)
+      : false;
   },
 
   keyedChildren($node) {
-    return Array.from($node.children).filter($e => $e.dataset.key);
+    return Array.from($node.children).filter($e => $e.dataset.vbarsKey);
   },
 
   swapNodes($source, $target) {
