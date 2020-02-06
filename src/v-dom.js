@@ -39,8 +39,8 @@ export default function({ $root, templateFn, proxyData }) {
   function patch($target, path) {
     render();
 
-    Array.from($el.querySelectorAll("[data-watch]"))
-      .filter($node => path.startsWith($node.dataset.watch))
+    Array.from($el.querySelectorAll("[data-vbars-watch]"))
+      .filter($node => path.startsWith($node.dataset.vbarsWatch))
       .forEach($vNode => {
         const $real = $target.querySelector(`#${$vNode.getAttribute("id")}`);
         if (Utils.isKeyedNode($vNode)) {

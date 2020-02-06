@@ -5,8 +5,8 @@ const msg = Logger("Event Handlers");
 export default function({ $root, methods, proxyData }) {
   return {
     add($container) {
-      $container.querySelectorAll("[data-vbar-handler]").forEach($el => {
-        const [eventStr, ...rest] = JSON.parse($el.dataset.vbarHandler);
+      $container.querySelectorAll("[data-vbars-handler]").forEach($el => {
+        const [eventStr, ...rest] = JSON.parse($el.dataset.vbarsHandler);
         const [eventType, methodName] = eventStr.split(":");
         let [listener, ...augs] = eventType.split(".");
 
@@ -23,12 +23,12 @@ export default function({ $root, methods, proxyData }) {
           }
           methods[methodName]({ event, data: proxyData, $root, $container }, ...rest);
         });
-        delete $el.dataset.vbarHandler;
+        delete $el.dataset.vbarsHandler;
       });
 
-      $container.querySelectorAll("[data-bind]").forEach($el => {
+      $container.querySelectorAll("[data-vbars-bind]").forEach($el => {
         $el.addEventListener("input", $event => {
-          Utils.setKey(proxyData, $el.dataset.bind, $event.currentTarget.value);
+          Utils.setKey(proxyData, $el.dataset.vbarsBind, $event.currentTarget.value);
         });
       });
     },
