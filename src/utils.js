@@ -2,10 +2,6 @@ import Logger from "./logger.js";
 const msg = Logger("utils");
 
 export default {
-  watchId(options) {
-    return `reactive-key-${options.loc.start.column}${options.loc.start.line}${options.loc.end.column}${options.loc.end.line}`;
-  },
-
   isKeyedNode($node) {
     if ($node.children.length)
       return Array.from($node.children).every($child => $child.dataset.key);

@@ -3,12 +3,10 @@ import Vbars from "../src/index.js";
 export default Vbars.create({
   template: /*html*/ `
     <!-- the reactive template we are demo-ing -->
-    {{#watch 'header'}}
-      <h1>
-        {{ header.title }}
-        <small>{{ header.description }}</small>
-      </h1>
-    {{/watch}}
+    <h1 {{ watch "header" }}>
+      {{ header.title }}
+      <small>{{ header.description }}</small>
+    </h1>
 
     <label>
       Edit Title:
@@ -22,28 +20,26 @@ export default Vbars.create({
 
     <hr />
 
-    <ul>
-      {{#watch 'todos'}}
-        {{#each todos}}
-        <!-- check if children have a data-key and if so patch that instead of replace -->
-          <li data-key="{{ id }}">
-            {{#if done }}
-              <input type="checkbox" checked {{ handler "click:toggleDone" id }}/>
-              <s>{{ name }}</s>
-            {{else}}
-              <input type="checkbox" {{ handler "click:toggleDone" id }})"/>
-              <strong>{{ name }}</strong>
-            {{/if}}
-            <p>{{ description }}</p>
-            <button {{ handler "click:deleteToDo" id }}>X</button>
-          </li>
-        {{/each}}
-      {{/watch}}
+    <ul {{ watch "todos" }}>
+      {{#each todos}}
+      <!-- check if children have a data-key and if so patch that instead of replace -->
+        <li data-key="{{ id }}">
+          {{#if done }}
+            <input type="checkbox" checked {{ handler "click:toggleDone" id }}/>
+            <s>{{ name }}</s>
+          {{else}}
+            <input type="checkbox" {{ handler "click:toggleDone" id }})"/>
+            <strong>{{ name }}</strong>
+          {{/if}}
+          <p>{{ description }}</p>
+          <button {{ handler "click:deleteToDo" id }}>X</button>
+        </li>
+      {{/each}}
     </ul>
 
     <hr/>
 
-    {{#watch 'uiState'}}
+    <div {{ watch "uiState" }}>
       {{#if uiState.adding }}
         <div class="row">
           <label>
@@ -55,7 +51,7 @@ export default Vbars.create({
       {{else}}
         <button class="add" {{ handler "click:toggleCreate" }}>Add another</button>
       {{/if}}
-    {{/watch}}
+    </div>
   `,
 
   data: {

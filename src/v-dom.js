@@ -40,16 +40,15 @@ export default function({ $root, templateFn, proxyData }) {
     render();
 
     Array.from($el.querySelectorAll("[data-vbars-watch]"))
-      .filter($node => path.startsWith($node.dataset.vbarsWatch))
+      .filter($e => path.startsWith($e.dataset.vbarsWatch))
       .forEach($vNode => {
-        const $real = $target.querySelector(`#${$vNode.getAttribute("id")}`);
+        const $real = $target.querySelector(`[data-vbars-id="${$vNode.dataset.vbarsId}"]`);
         if (Utils.isKeyedNode($vNode)) {
           msg.log(`comparing keyed arrays ${path}`, $vNode);
           _compareKeys($vNode, $real);
         } else {
-          $real.innerHTML = $vNode.innerHTML;
           msg.log(`patching ${path}`, $vNode);
-          Events.add($real);
+          Events.add(Utils.swapNodes($vNode, $real));
         }
       });
   }
