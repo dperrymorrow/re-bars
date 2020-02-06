@@ -14,6 +14,7 @@ export default function({ $root, methods, proxyData }) {
           msg.warn(`${methodName} not in event methods`, methods);
           return;
         }
+
         // gonna have to store this to remove them when patching
         $el.addEventListener(listener, event => {
           if (augs.includes("prevent")) {
@@ -22,6 +23,7 @@ export default function({ $root, methods, proxyData }) {
           }
           methods[methodName]({ event, data: proxyData, $root, $container }, ...rest);
         });
+        delete $el.dataset.vbarHandler;
       });
 
       $container.querySelectorAll("[data-bind]").forEach($el => {
