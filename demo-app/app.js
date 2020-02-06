@@ -3,23 +3,22 @@ import Vbars from "../src/index.js";
 export default Vbars.create({
   template: /*html*/ `
     <!-- the reactive template we are demo-ing -->
-      {{#watch 'header'}}
-        <h1>
-          {{ header.title }}
-          <small>{{ header.description }}</small>
-        </h1>
-      {{/watch}}
+    {{#watch 'header'}}
+      <h1>
+        {{ header.title }}
+        <small>{{ header.description }}</small>
+      </h1>
+    {{/watch}}
 
-      <label>
-        Edit Title:
-        <input value="{{ header.title }}" data-bind="header.title"/>
-      </label>
+    <label>
+      Edit Title:
+      <input value="{{ header.title }}" data-bind="header.title"/>
+    </label>
 
-      <label>
-        Edit Description:
-        <input value="{{ header.description }}" data-bind="header.description"/>
-      </label>
-
+    <label>
+      Edit Description:
+      <input value="{{ header.description }}" data-bind="header.description"/>
+    </label>
 
     <hr />
 
@@ -29,14 +28,14 @@ export default Vbars.create({
         <!-- check if children have a data-key and if so patch that instead of replace -->
           <li data-key="{{ id }}">
             {{#if done }}
-              <input type="checkbox" checked data-handler="click:toggleDone"/>
+              <input type="checkbox" checked {{ handler "click:toggleDone" id }}/>
               <s>{{ name }}</s>
             {{else}}
-              <input type="checkbox" data-handler="click:toggleDone({{ id }})"/>
+              <input type="checkbox" {{ handler "click:toggleDone" id }})"/>
               <strong>{{ name }}</strong>
             {{/if}}
             <p>{{ description }}</p>
-            <button data-handler="click:deleteToDo">X</button>
+            <button {{ handler "click:deleteToDo" id }}>X</button>
           </li>
         {{/each}}
       {{/watch}}
@@ -49,12 +48,12 @@ export default Vbars.create({
         <div class="row">
           <label>
             <input type="text" id="new-todo-label" placeholder="the new todo" />
-            <button class="push" data-handler="click.prevent:addItem">Add todo</button>
-            <button class="cancel" onclick="alert('foobar')" >Cancel</button>
+            <button class="push" {{ handler "click.prevent:addItem" }}>Add todo</button>
+            <button class="cancel" {{ handler "click:toggleCreate" }}>Cancel</button>
           </label>
         </div>
       {{else}}
-        <button class="add" data-handler="click:toggleCreate">Add another</button>
+        <button class="add" {{ handler "click:toggleCreate" }}>Add another</button>
       {{/if}}
     {{/watch}}
   `,
@@ -83,9 +82,8 @@ export default Vbars.create({
     ],
   },
 
-  eventHandlers: {
-    deleteToDo({ event, data }) {
-      const id = event.target.parentNode.dataset.key;
+  methods: {
+    deleteToDo({ data }, id) {
       const index = data.todos.findIndex(item => item.id === id);
       data.todos.splice(index, 1);
     },
@@ -101,9 +99,7 @@ export default Vbars.create({
       $input.focus();
     },
 
-    toggleDone({ event, data }) {
-      console.log("fired", data);
-      const id = event.target.parentNode.dataset.key;
+    toggleDone({ data }, id) {
       const task = data.todos.find(item => item.id === id);
       task.done = !task.done;
     },

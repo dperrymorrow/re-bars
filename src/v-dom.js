@@ -4,21 +4,15 @@ import Utils from "./utils.js";
 
 const msg = Logger("V-DOM");
 
-export default function({ $root, templateFn, proxyData, eventHandlers }) {
+export default function({ $root, templateFn, proxyData }) {
   const $el = document.createElement("div");
-  const Events = EventHandlers({ $root, eventHandlers, data: proxyData });
+  const Events = EventHandlers(...arguments);
+  const render = () => ($el.innerHTML = templateFn(proxyData));
 
-  function render() {
-    $el.innerHTML = templateFn(proxyData);
-    msg.log("vdom contents", $el);
-  }
-
-  function replace($target) {
-    // store the root the first time we render
-    $root = $target;
+  function replace() {
     render();
-    $target.innerHTML = $el.innerHTML;
-    Events.add($target);
+    $root.innerHTML = $el.innerHTML;
+    Events.add($root);
   }
 
   function _compareKeys($vNode, $realNode) {
