@@ -4,29 +4,6 @@
   (global = global || self, global.DemoApp = factory());
 }(this, (function () { 'use strict';
 
-  function buildProxy(raw, callback, tree = []) {
-    return new Proxy(raw, {
-      get: function(target, prop) {
-        const value = Reflect.get(...arguments);
-        if (value !== null && typeof value === "object" && prop !== "methods")
-          return buildProxy(value, callback, tree.concat(prop));
-        else return value;
-      },
-
-      set: function(target, prop) {
-        const ret = Reflect.set(...arguments);
-        callback({ path: tree.concat(prop).join(".") });
-        return ret;
-      },
-
-      deleteProperty: function(target, prop) {
-        const ret = Reflect.deleteProperty(...arguments);
-        callback({ path: tree.concat(prop).join(".") });
-        return ret;
-      },
-    });
-  }
-
   var Utils = {
     isKeyedNode($node) {
       return $node.children.length
@@ -55,10 +32,13 @@
   }
 
   function EventHandlers({ $root, methods, proxyData }) {
-    function _findHandlers($container) {
-      const $handlers = $container.querySelectorAll("[data-vbars-handler]");
-      return $container.dataset.vbarsHandler ? $handlers.concat($container) : $handlers;
+    function _findHandlers($container, type) {
+      const $handlers = $container.querySelectorAll(`[data-vbars-${type.toLowerCase()}]`);
+      return $container.dataset[type] ? $handlers.concat($container) : $handlers;
     }
+
+    const _bind = $event =>
+      Utils.setKey(proxyData, event.target.dataset.vbarsBind, $event.currentTarget.value);
 
     function _handler(event) {
       const $el = event.target;
@@ -80,10 +60,15 @@
         console.groupCollapsed("removing event handlers");
         console.log("container", $container);
 
-        _findHandlers($container).forEach($el => {
+        _findHandlers($container, "Handler").forEach($el => {
           const { listener, methodName } = _parseHandler($el);
           console.log({ listener, methodName, $el });
           $el.removeEventListener(listener, _handler);
+        });
+
+        _findHandlers($container, "Bind").forEach($el => {
+          console.log({ type: "input", $el });
+          $el.removeEventListener("input", _bind);
         });
         console.groupEnd();
       },
@@ -92,16 +77,15 @@
         console.groupCollapsed("adding event handlers");
         console.log("container", $container);
 
-        _findHandlers($container).forEach($el => {
+        _findHandlers($container, "Handler").forEach($el => {
           const { listener, augs, methodName, args } = _parseHandler($el);
           console.log({ listener, augs, methodName, args, $el });
           $el.addEventListener(listener, _handler);
         });
 
-        $container.querySelectorAll("[data-vbars-bind]").forEach($el => {
-          $el.addEventListener("input", $event => {
-            Utils.setKey(proxyData, $el.dataset.vbarsBind, $event.currentTarget.value);
-          });
+        _findHandlers($container, "Bind").forEach($el => {
+          $el.addEventListener("input", _bind);
+          console.log({ type: "input", $el });
         });
 
         console.groupEnd();
@@ -190,6 +174,29 @@
     };
   }
 
+  function buildProxy(raw, callback, tree = []) {
+    return new Proxy(raw, {
+      get: function(target, prop) {
+        const value = Reflect.get(...arguments);
+        if (value !== null && typeof value === "object" && prop !== "methods")
+          return buildProxy(value, callback, tree.concat(prop));
+        else return value;
+      },
+
+      set: function(target, prop) {
+        const ret = Reflect.set(...arguments);
+        callback({ path: tree.concat(prop).join(".") });
+        return ret;
+      },
+
+      deleteProperty: function(target, prop) {
+        const ret = Reflect.deleteProperty(...arguments);
+        callback({ path: tree.concat(prop).join(".") });
+        return ret;
+      },
+    });
+  }
+
   var Helpers = {
     register({ instance, methods }) {
       function _handler() {
@@ -228,15 +235,18 @@
   };
 
   var Vbars = {
-    create({ template, data: rawData, methods = {} }) {
+    create({ template, data: rawData, methods = {}, Handlebars = window.Handlebars }) {
       let $root, vDom;
 
-      const instance = window.Handlebars.create();
+      if (!Handlebars) throw new Error("Vbars need Handlebars in order to run!");
+
+      const instance = Handlebars.create();
       const proxyData = buildProxy(rawData, ({ path }) => vDom.patch($root, path));
       Helpers.register({ instance, methods });
       const templateFn = instance.compile(template);
 
       return {
+        VbarsComponent: true,
         instance,
         data: proxyData,
         render($target) {
@@ -270,7 +280,6 @@
 
     <ul {{ watch "todos" }}>
       {{#each todos}}
-      <!-- check if children have a data-key and if so patch that instead of replace -->
         <li {{ keyed id }}>
           <label for="{{ id }}">
             <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ toggleDone "click" id done }}/>
