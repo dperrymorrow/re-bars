@@ -7,10 +7,13 @@ function _parseHandler($el) {
 }
 
 export default function({ $root, methods, proxyData }) {
-  function _findHandlers($container) {
-    const $handlers = $container.querySelectorAll("[data-vbars-handler]");
-    return $container.dataset.vbarsHandler ? $handlers.concat($container) : $handlers;
+  function _findHandlers($container, type) {
+    const $handlers = $container.querySelectorAll(`[data-vbars-${type.toLowerCase()}]`);
+    return $container.dataset[type] ? $handlers.concat($container) : $handlers;
   }
+
+  const _bind = $event =>
+    Utils.setKey(proxyData, event.target.dataset.vbarsBind, $event.currentTarget.value);
 
   function _handler(event) {
     const $el = event.target;
@@ -32,10 +35,15 @@ export default function({ $root, methods, proxyData }) {
       console.groupCollapsed("removing event handlers");
       console.log("container", $container);
 
-      _findHandlers($container).forEach($el => {
+      _findHandlers($container, "Handler").forEach($el => {
         const { listener, methodName } = _parseHandler($el);
         console.log({ listener, methodName, $el });
         $el.removeEventListener(listener, _handler);
+      });
+
+      _findHandlers($container, "Bind").forEach($el => {
+        console.log({ type: "input", $el });
+        $el.removeEventListener("input", _bind);
       });
       console.groupEnd();
     },
@@ -44,16 +52,15 @@ export default function({ $root, methods, proxyData }) {
       console.groupCollapsed("adding event handlers");
       console.log("container", $container);
 
-      _findHandlers($container).forEach($el => {
+      _findHandlers($container, "Handler").forEach($el => {
         const { listener, augs, methodName, args } = _parseHandler($el);
         console.log({ listener, augs, methodName, args, $el });
         $el.addEventListener(listener, _handler);
       });
-      // this needs fixed
-      $container.querySelectorAll("[data-vbars-bind]").forEach($el => {
-        $el.addEventListener("input", $event => {
-          Utils.setKey(proxyData, $el.dataset.vbarsBind, $event.currentTarget.value);
-        });
+
+      _findHandlers($container, "Bind").forEach($el => {
+        $el.addEventListener("input", _bind);
+        console.log({ type: "input", $el });
       });
 
       console.groupEnd();

@@ -22,7 +22,6 @@ export default Vbars.create({
 
     <ul {{ watch "todos" }}>
       {{#each todos}}
-      <!-- check if children have a data-key and if so patch that instead of replace -->
         <li {{ keyed id }}>
           <label for="{{ id }}">
             <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ toggleDone "click" id done }}/>

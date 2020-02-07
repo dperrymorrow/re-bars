@@ -10,6 +10,7 @@
   "globals": {
     "Vbars": "readonly",
     "_": "readonly",
+    "Handlebars": "readonly",
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly"
   },
