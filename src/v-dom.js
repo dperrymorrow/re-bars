@@ -12,6 +12,19 @@ export default function({ $root, templateFn, proxyData }) {
     Events.add($root);
   }
 
+  function _swapNodes($source, $target) {
+    const $clone = $source.cloneNode(true);
+    Events.remove($target);
+    $target.parentNode.replaceChild($clone, $target);
+    Events.add($clone);
+  }
+
+  function _addChild($container, $child) {
+    const $clone = $child.cloneNode(true);
+    $container.appendChild($clone);
+    Events.add($clone);
+  }
+
   function _compareKeys($vNode, $realNode) {
     console.groupCollapsed("comparing keyed children");
     console.log("real parent", $realNode);
@@ -21,11 +34,12 @@ export default function({ $root, templateFn, proxyData }) {
       const $v = $vNode.querySelector(`[data-vbars-key="${$e.dataset.vbarsKey}"]`);
       if (!$v) {
         console.log("removing keyed node", $e);
+        Events.remove($e);
         $e.remove();
       } else if (!$v.isEqualNode($e)) {
         console.log("swapping real", $e);
         console.log("with virual", $v);
-        Events.add(Utils.swapNodes($v, $e));
+        _swapNodes($v, $e);
       }
     });
     // this is items that were added via push
@@ -33,7 +47,7 @@ export default function({ $root, templateFn, proxyData }) {
       const $e = $realNode.querySelector(`[data-vbars-key="${$v.dataset.vbarsKey}"]`);
       if (!$e) {
         console.log("could not find real node, adding", $v);
-        Events.add(Utils.addChild($realNode, $v));
+        _addChild($realNode, $v);
       }
     });
 
@@ -53,7 +67,7 @@ export default function({ $root, templateFn, proxyData }) {
         } else {
           console.log("replacing", $real);
           console.log("with", $vNode);
-          Events.add(Utils.swapNodes($vNode, $real));
+          _swapNodes($vNode, $real);
         }
       });
 

@@ -38,18 +38,6 @@
       return Array.from($node.children).filter($e => $e.dataset.vbarsKey);
     },
 
-    swapNodes($source, $target) {
-      const $clone = $source.cloneNode(true);
-      $target.parentNode.replaceChild($clone, $target);
-      return $clone;
-    },
-
-    addChild($container, $child) {
-      const $clone = $child.cloneNode(true);
-      $container.appendChild($clone);
-      return $clone;
-    },
-
     setKey(obj, path, value) {
       const arr = path.split(".");
       arr.reduce((pointer, key, index) => {
@@ -60,31 +48,47 @@
     },
   };
 
+  function _parseHandler($el) {
+    const { eventType, methodName, args } = JSON.parse($el.dataset.vbarsHandler);
+    let [listener, ...augs] = eventType.split(".");
+    return { listener, augs, methodName, args };
+  }
+
   function EventHandlers({ $root, methods, proxyData }) {
+    function _findHandlers($container) {
+      const $handlers = $container.querySelectorAll("[data-vbars-handler]");
+      return $container.dataset.vbarsHandler ? $handlers.concat($container) : $handlers;
+    }
+
+    function _handler(event) {
+      const $el = event.target;
+      const { augs, methodName, args } = _parseHandler($el);
+
+      if (augs.includes("prevent")) event.preventDefault();
+      if (augs.includes("stop")) event.stopPropagation();
+
+      const $refs = Array.from($root.querySelectorAll("[data-vbars-ref]")).reduce((obj, $el) => {
+        obj[$el.dataset.vbarsRef] = $el;
+        return obj;
+      }, {});
+
+      methods[methodName]({ event, data: proxyData, $root, $refs }, ...args);
+    }
+
     return {
+      remove($container) {
+
+        _findHandlers($container).forEach($el => {
+          const { listener, methodName } = _parseHandler($el);
+          $el.removeEventListener(listener, _handler);
+        });
+      },
+
       add($container) {
 
-        $container.querySelectorAll("[data-vbars-handler]").forEach($el => {
-          const { eventType, methodName, args } = JSON.parse($el.dataset.vbarsHandler);
-          let [listener, ...augs] = eventType.split(".");
-
-          // gonna have to store this to remove them when patching
-          $el.addEventListener(listener, event => {
-            if (augs.includes("prevent")) {
-              event.stopPropagation();
-              event.preventDefault();
-            }
-
-            const $refs = Array.from($root.querySelectorAll("[data-vbars-ref]")).reduce(
-              (obj, $el) => {
-                obj[$el.dataset.vbarsRef] = $el;
-                return obj;
-              },
-              {}
-            );
-
-            methods[methodName]({ event, data: proxyData, $root, $refs }, ...args);
-          });
+        _findHandlers($container).forEach($el => {
+          const { listener, augs, methodName, args } = _parseHandler($el);
+          $el.addEventListener(listener, _handler);
         });
 
         $container.querySelectorAll("[data-vbars-bind]").forEach($el => {
@@ -107,21 +111,35 @@
       Events.add($root);
     }
 
+    function _swapNodes($source, $target) {
+      const $clone = $source.cloneNode(true);
+      Events.remove($target);
+      $target.parentNode.replaceChild($clone, $target);
+      Events.add($clone);
+    }
+
+    function _addChild($container, $child) {
+      const $clone = $child.cloneNode(true);
+      $container.appendChild($clone);
+      Events.add($clone);
+    }
+
     function _compareKeys($vNode, $realNode) {
 
       Utils.keyedChildren($realNode).forEach($e => {
         const $v = $vNode.querySelector(`[data-vbars-key="${$e.dataset.vbarsKey}"]`);
         if (!$v) {
+          Events.remove($e);
           $e.remove();
         } else if (!$v.isEqualNode($e)) {
-          Events.add(Utils.swapNodes($v, $e));
+          _swapNodes($v, $e);
         }
       });
       // this is items that were added via push
       Utils.keyedChildren($vNode).forEach($v => {
         const $e = $realNode.querySelector(`[data-vbars-key="${$v.dataset.vbarsKey}"]`);
         if (!$e) {
-          Events.add(Utils.addChild($realNode, $v));
+          _addChild($realNode, $v);
         }
       });
     }
@@ -136,7 +154,7 @@
           if (Utils.isKeyedNode($vNode)) {
             _compareKeys($vNode, $real);
           } else {
-            Events.add(Utils.swapNodes($vNode, $real));
+            _swapNodes($vNode, $real);
           }
         });
     }
