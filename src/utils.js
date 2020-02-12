@@ -5,9 +5,8 @@ export default {
       : false;
   },
 
-  keyedChildren($node) {
-    return Array.from($node.children).filter($e => $e.dataset.vbarsKey);
-  },
+  keyedChildren: $node => Array.from($node.children).filter($e => $e.dataset.vbarsKey),
+  findComponent: id => document.querySelector(`[data-vbars-comp="${id}"]`),
 
   randomId: () =>
     "_" +

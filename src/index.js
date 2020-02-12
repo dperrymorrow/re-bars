@@ -19,7 +19,7 @@ export default {
 
     Helpers.register({ id, instance, methods, components, proxyData });
 
-    const templateFn = instance.compile(`<span id="${id}">${template}</span>`);
+    const templateFn = instance.compile(template);
     const vDom = VDom({ id, templateFn, proxyData, methods });
 
     return {
@@ -28,7 +28,8 @@ export default {
       id,
       data: proxyData,
       render() {
-        return templateFn(proxyData);
+        vDom.render();
+        return vDom.$el.innerHTML;
       },
     };
   },

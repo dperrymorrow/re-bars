@@ -2,8 +2,10 @@ import Vbars from "../src/index.js";
 
 export default Vbars.create({
   template: /*html*/ `
-  <textarea {{ bind "display" }}>{{ display }}</textarea>
-  <p {{ watch "display" }}>{{ display }}</p>
+  <div>
+    <textarea {{ bind "display" }}>{{ display }}</textarea>
+    <p {{ watch "display" }}>{{ display }}</p>
+  </div>
 `,
 
   data: {

@@ -3,56 +3,57 @@ import SubComponent from "./sub-component.js";
 
 export default Vbars.create({
   template: /*html*/ `
-    <!-- the reactive template we are demo-ing -->
-    <h1 {{ watch "header" }}>
-      {{ header.title }}
-      <small>{{ header.description }}</small>
-    </h1>
+    <div>
+      <h1 {{ watch "header" }}>
+        {{ header.title }}
+        <small>{{ header.description }}</small>
+      </h1>
 
-    <label>
-      Edit Title:
-      <input value="{{ header.title }}" {{ bind "header.title" }}/>
-    </label>
+      <label>
+        Edit Title:
+        <input value="{{ header.title }}" {{ bind "header.title" }}/>
+      </label>
 
-    <label>
-      Edit Description:
-      <input value="{{ header.description }}" {{ bind "header.description" }}/>
-    </label>
+      <label>
+        Edit Description:
+        <input value="{{ header.description }}" {{ bind "header.description" }}/>
+      </label>
 
-    <hr />
+      <hr />
 
-    <ul {{ watch "todos" }}>
-      {{#each todos}}
-        <li {{ keyed id }}>
-          <label for="{{ id }}">
-            <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ toggleDone "click" id done }}/>
-            {{#if done }}
-              <s>{{ name }}</s>
-            {{else}}
-              <strong>{{ name }}</strong>
-            {{/if}}
-          </label>
-          <p>{{ description }}</p>
-          <button {{ deleteToDo "click" @index }}>X</button>
-        </li>
-      {{/each}}
-    </ul>
+      <ul {{ watch "todos" }}>
+        {{#each todos}}
+          <li {{ keyed id }}>
+            <label for="{{ id }}">
+              <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ toggleDone "click" id done }}/>
+              {{#if done }}
+                <s>{{ name }}</s>
+              {{else}}
+                <strong>{{ name }}</strong>
+              {{/if}}
+            </label>
+            <p>{{ description }}</p>
+            <button {{ deleteToDo "click" @index }}>X</button>
+          </li>
+        {{/each}}
+      </ul>
 
-    <hr/>
+      <hr/>
 
-    <div {{ watch "uiState" }}>
-      {{#if uiState.adding }}
-        <form>
-          <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
-          <textarea name="description" {{ ref "newDescrip" }}></textarea>
-          <button class="push" {{ addItem "click" }}>Add todo</button>
-          <button class="cancel" {{ toggleCreate "click" uiState.adding }}>Cancel</button>
-        </form>
-      {{else}}
-        <button class="add" {{ toggleCreate "click" uiState.adding }}>Add another</button>
-      {{/if}}
+      <div {{ watch "uiState" }}>
+        {{#if uiState.adding }}
+          <form>
+            <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
+            <textarea name="description" {{ ref "newDescrip" }}></textarea>
+            <button class="push" {{ addItem "click" }}>Add todo</button>
+            <button class="cancel" {{ toggleCreate "click" uiState.adding }}>Cancel</button>
+          </form>
+        {{else}}
+          <button class="add" {{ toggleCreate "click" uiState.adding }}>Add another</button>
+        {{/if}}
 
-      {{ SubComponent }}
+        {{ SubComponent }}
+      </div>
     </div>
   `,
 
@@ -78,7 +79,7 @@ export default Vbars.create({
       {
         done: true,
         name: "Paint the House",
-        description: "buy the paint and then pain the house",
+        description: "buy the paint and then paint the house",
         id: 44,
       },
     ],
@@ -89,7 +90,9 @@ export default Vbars.create({
       data.todos.splice(index, 1);
     },
 
-    addItem({ $refs, data }) {
+    addItem({ $refs, data, event }) {
+      event.preventDefault();
+
       data.todos.push({
         id: new Date().getTime(),
         name: $refs.newName.value,

@@ -24,10 +24,13 @@ export default {
     }
 
     const _findRefs = () => {
-      return Array.from(document.getElementById(id)).reduce((obj, $el) => {
-        obj[$el.dataset.vbarsRef] = $el;
-        return obj;
-      }, {});
+      return Array.from(Utils.findComponent(id).querySelectorAll("[data-vbars-ref]")).reduce(
+        (obj, $el) => {
+          obj[$el.dataset.vbarsRef] = $el;
+          return obj;
+        },
+        {}
+      );
     };
 
     const _addData = pairs => {

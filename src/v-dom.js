@@ -2,7 +2,12 @@ import Utils from "./utils.js";
 
 export default function({ id, templateFn, proxyData }) {
   const $el = document.createElement("div");
-  const render = () => ($el.innerHTML = templateFn(proxyData));
+  function render() {
+    $el.innerHTML = templateFn(proxyData);
+    if ($el.children.length !== 1)
+      throw new Error(`template must have exactly one root node ${$el.innerHTML}`);
+    $el.children[0].dataset.vbarsComp = id;
+  }
 
   function _swapNodes($source, $target) {
     const $clone = $source.cloneNode(true);
@@ -43,7 +48,7 @@ export default function({ id, templateFn, proxyData }) {
   }
 
   function patch(path) {
-    const $target = document.getElementById(id);
+    const $target = Utils.findComponent(id);
     console.groupCollapsed(`vDOM patching ${path}`);
     render();
 
