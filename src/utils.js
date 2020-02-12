@@ -9,6 +9,12 @@ export default {
     return Array.from($node.children).filter($e => $e.dataset.vbarsKey);
   },
 
+  randomId: () =>
+    "_" +
+    Math.random()
+      .toString(36)
+      .substr(2, 9),
+
   setKey(obj, path, value) {
     const arr = path.split(".");
     arr.reduce((pointer, key, index) => {

@@ -15,6 +15,12 @@
       return Array.from($node.children).filter($e => $e.dataset.vbarsKey);
     },
 
+    randomId: () =>
+      "_" +
+      Math.random()
+        .toString(36)
+        .substr(2, 9),
+
     setKey(obj, path, value) {
       const arr = path.split(".");
       arr.reduce((pointer, key, index) => {
@@ -25,85 +31,18 @@
     },
   };
 
-  function _parseHandler($el) {
-    const { eventType, methodName, args } = JSON.parse($el.dataset.vbarsHandler);
-    let [listener, ...augs] = eventType.split(".");
-    return { listener, augs, methodName, args };
-  }
-
-  function EventHandlers({ $root, methods, proxyData }) {
-    function _findHandlers($container, type) {
-      const $handlers = $container.querySelectorAll(`[data-vbars-${type.toLowerCase()}]`);
-      return $container.dataset[type] ? $handlers.concat($container) : $handlers;
-    }
-
-    const _bind = $event =>
-      Utils.setKey(proxyData, event.target.dataset.vbarsBind, $event.currentTarget.value);
-
-    function _handler(event) {
-      const $el = event.target;
-      const { augs, methodName, args } = _parseHandler($el);
-
-      if (augs.includes("prevent")) event.preventDefault();
-      if (augs.includes("stop")) event.stopPropagation();
-
-      const $refs = Array.from($root.querySelectorAll("[data-vbars-ref]")).reduce((obj, $el) => {
-        obj[$el.dataset.vbarsRef] = $el;
-        return obj;
-      }, {});
-
-      methods[methodName]({ event, data: proxyData, $root, $refs }, ...args);
-    }
-
-    return {
-      remove($container) {
-
-        _findHandlers($container, "Handler").forEach($el => {
-          const { listener, methodName } = _parseHandler($el);
-          $el.removeEventListener(listener, _handler);
-        });
-
-        _findHandlers($container, "Bind").forEach($el => {
-          $el.removeEventListener("input", _bind);
-        });
-      },
-
-      add($container) {
-
-        _findHandlers($container, "Handler").forEach($el => {
-          const { listener, augs, methodName, args } = _parseHandler($el);
-          $el.addEventListener(listener, _handler);
-        });
-
-        _findHandlers($container, "Bind").forEach($el => {
-          $el.addEventListener("input", _bind);
-        });
-      },
-    };
-  }
-
-  function VDom({ $root, templateFn, proxyData }) {
+  function VDom({ id, templateFn, proxyData }) {
     const $el = document.createElement("div");
-    const Events = EventHandlers(...arguments);
     const render = () => ($el.innerHTML = templateFn(proxyData));
-
-    function replace() {
-      render();
-      $root.innerHTML = $el.innerHTML;
-      Events.add($root);
-    }
 
     function _swapNodes($source, $target) {
       const $clone = $source.cloneNode(true);
-      Events.remove($target);
       $target.parentNode.replaceChild($clone, $target);
-      Events.add($clone);
     }
 
     function _addChild($container, $child) {
       const $clone = $child.cloneNode(true);
       $container.appendChild($clone);
-      Events.add($clone);
     }
 
     function _compareKeys($vNode, $realNode) {
@@ -111,7 +50,6 @@
       Utils.keyedChildren($realNode).forEach($e => {
         const $v = $vNode.querySelector(`[data-vbars-key="${$e.dataset.vbarsKey}"]`);
         if (!$v) {
-          Events.remove($e);
           $e.remove();
         } else if (!$v.isEqualNode($e)) {
           _swapNodes($v, $e);
@@ -126,7 +64,8 @@
       });
     }
 
-    function patch($target, path) {
+    function patch(path) {
+      const $target = document.getElementById(id);
       render();
 
       Array.from($el.querySelectorAll("[data-vbars-watch]"))
@@ -144,7 +83,6 @@
     return {
       $el,
       render,
-      replace,
       patch,
     };
   }
@@ -173,7 +111,13 @@
   }
 
   var Helpers = {
-    register({ instance, methods }) {
+    register({ id, instance, methods, components, proxyData }) {
+      window.vbars = window.vbars || { handlers: {} };
+      window.vbars.handlers[id] = {
+        bind: (event, path) => Utils.setKey(proxyData, path, event.currentTarget.value),
+      };
+      // we can garbage collect here...
+
       function _handler() {
         const [eventType, ...args] = arguments;
         const opts = args.splice(-1, 1);
@@ -183,9 +127,18 @@
             `must only pass primitives as argument to a handler. ${JSON.stringify(args, null, 2)}`
           );
 
-        const handler = JSON.stringify({ methodName: opts[0].name, eventType, args });
-        return _addData({ handler });
+        const handler = { methodName: opts[0].name, eventType, args };
+        return new instance.SafeString(
+          `on${eventType}="vbars.handlers.${id}.${handler.methodName}(${args.join(",")})"`
+        );
       }
+
+      const _findRefs = () => {
+        return Array.from(document.getElementById(id)).reduce((obj, $el) => {
+          obj[$el.dataset.vbarsRef] = $el;
+          return obj;
+        }, {});
+      };
 
       const _addData = pairs => {
         return new instance.SafeString(
@@ -200,34 +153,60 @@
         return _addData({ id, watch: path });
       });
 
+      Object.keys(components).forEach(name => {
+        instance.registerHelper(name, function() {
+          return new instance.SafeString(components[name].render());
+        });
+      });
+
       instance.registerHelper("keyed", val => _addData({ key: val }));
       instance.registerHelper("isChecked", val => (val ? "checked" : ""));
-      instance.registerHelper("bind", path => _addData({ bind: path }));
       instance.registerHelper("ref", key => _addData({ ref: key }));
+      instance.registerHelper(
+        "bind",
+        path => new instance.SafeString(`oninput="vbars.handlers.${id}.bind(event, '${path}')"`)
+      );
 
-      Object.keys(methods).forEach(key => instance.registerHelper(key, _handler));
+      // should throw an error if there is collision of method and comoponent name
+      Object.keys(methods).forEach(key => {
+        window.vbars.handlers[id][key] = function() {
+          return methods[key].call(
+            methods,
+            { data: proxyData, $refs: _findRefs(), event },
+            ...arguments
+          );
+        };
+        instance.registerHelper(key, _handler);
+      });
     },
   };
 
   var index = {
-    create({ template, data: rawData, methods = {}, Handlebars = window.Handlebars }) {
-      let $root, vDom;
-
+    create({
+      template,
+      data: rawData,
+      components = {},
+      methods = {},
+      Handlebars = window.Handlebars,
+    }) {
       if (!Handlebars) throw new Error("Vbars need Handlebars in order to run!");
 
+      const id = Utils.randomId();
       const instance = Handlebars.create();
-      const proxyData = buildProxy(rawData, ({ path }) => vDom.patch($root, path));
-      Helpers.register({ instance, methods });
-      const templateFn = instance.compile(template);
+      const proxyData = buildProxy(rawData, ({ path }) => vDom.patch(path));
+
+      Helpers.register({ id, instance, methods, components, proxyData });
+
+      const templateFn = instance.compile(`<span id="${id}">${template}</span>`);
+      const vDom = VDom({ id, templateFn, proxyData, methods });
 
       return {
         VbarsComponent: true,
         instance,
+        id,
         data: proxyData,
-        render($target) {
-          $root = $target;
-          vDom = VDom({ $root, templateFn, proxyData, methods });
-          vDom.replace();
+        render() {
+          return templateFn(proxyData);
         },
       };
     },

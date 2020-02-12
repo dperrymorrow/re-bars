@@ -1,4 +1,5 @@
 import Vbars from "../src/index.js";
+import SubComponent from "./sub-component.js";
 
 export default Vbars.create({
   template: /*html*/ `
@@ -44,14 +45,20 @@ export default Vbars.create({
         <form>
           <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
           <textarea name="description" {{ ref "newDescrip" }}></textarea>
-          <button class="push" {{ addItem "click.prevent" }}>Add todo</button>
-          <button class="cancel" {{ toggleCreate "click.prevent" uiState.adding }}>Cancel</button>
+          <button class="push" {{ addItem "click" }}>Add todo</button>
+          <button class="cancel" {{ toggleCreate "click" uiState.adding }}>Cancel</button>
         </form>
       {{else}}
         <button class="add" {{ toggleCreate "click" uiState.adding }}>Add another</button>
       {{/if}}
+
+      {{ SubComponent }}
     </div>
   `,
+
+  components: {
+    SubComponent,
+  },
 
   data: {
     uiState: {
@@ -96,7 +103,8 @@ export default Vbars.create({
       data.todos.find(item => item.id === id).done = !done;
     },
 
-    toggleCreate({ data }, adding) {
+    toggleCreate({ event, data }, adding) {
+      event.preventDefault();
       data.uiState.adding = !adding;
     },
   },

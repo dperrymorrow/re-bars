@@ -1,28 +1,17 @@
-import EventHandlers from "./event-handlers.js";
 import Utils from "./utils.js";
 
-export default function({ $root, templateFn, proxyData }) {
+export default function({ id, templateFn, proxyData }) {
   const $el = document.createElement("div");
-  const Events = EventHandlers(...arguments);
   const render = () => ($el.innerHTML = templateFn(proxyData));
-
-  function replace() {
-    render();
-    $root.innerHTML = $el.innerHTML;
-    Events.add($root);
-  }
 
   function _swapNodes($source, $target) {
     const $clone = $source.cloneNode(true);
-    Events.remove($target);
     $target.parentNode.replaceChild($clone, $target);
-    Events.add($clone);
   }
 
   function _addChild($container, $child) {
     const $clone = $child.cloneNode(true);
     $container.appendChild($clone);
-    Events.add($clone);
   }
 
   function _compareKeys($vNode, $realNode) {
@@ -34,7 +23,6 @@ export default function({ $root, templateFn, proxyData }) {
       const $v = $vNode.querySelector(`[data-vbars-key="${$e.dataset.vbarsKey}"]`);
       if (!$v) {
         console.log("removing keyed node", $e);
-        Events.remove($e);
         $e.remove();
       } else if (!$v.isEqualNode($e)) {
         console.log("swapping real", $e);
@@ -54,7 +42,8 @@ export default function({ $root, templateFn, proxyData }) {
     console.groupEnd();
   }
 
-  function patch($target, path) {
+  function patch(path) {
+    const $target = document.getElementById(id);
     console.groupCollapsed(`vDOM patching ${path}`);
     render();
 
@@ -77,7 +66,6 @@ export default function({ $root, templateFn, proxyData }) {
   return {
     $el,
     render,
-    replace,
     patch,
   };
 }

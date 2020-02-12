@@ -1,5 +1,6 @@
 import { terser } from "rollup-plugin-terser";
 import strip from "rollup-plugin-strip";
+import filesize from "rollup-plugin-filesize";
 
 export default {
   input: "src/index.js",
@@ -10,7 +11,7 @@ export default {
       format: "umd",
       name: "Vbars",
       sourcemap: true,
-      plugins: [terser()],
+      plugins: [terser(), filesize()],
     },
   ],
 
