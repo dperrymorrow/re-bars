@@ -1,7 +1,8 @@
 import Utils from "./utils.js";
 
 export default {
-  register({ id, instance, methods, components, proxyData }) {
+  register({ id, instance, methods, components, proxyData, parentData }) {
+    console.log(parentData);
     window.vbars = window.vbars || { handlers: {} };
     window.vbars.handlers[id] = {
       bind: (event, path) => Utils.setKey(proxyData, path, event.currentTarget.value),
@@ -48,7 +49,7 @@ export default {
 
     Object.keys(components).forEach(name => {
       instance.registerHelper(name, function() {
-        return new instance.SafeString(components[name].render());
+        return new instance.SafeString(components[name].render(proxyData));
       });
     });
 
@@ -63,9 +64,10 @@ export default {
     // should throw an error if there is collision of method and comoponent name
     Object.keys(methods).forEach(key => {
       window.vbars.handlers[id][key] = function() {
+        const props = Utils.findComponent(id).dataset;
         return methods[key].call(
           methods,
-          { data: proxyData, $refs: _findRefs(), event },
+          { data: proxyData, parent: parentData, props, $refs: _findRefs(), event },
           ...arguments
         );
       };

@@ -4,32 +4,34 @@ import Helpers from "./helpers.js";
 import Utils from "./utils.js";
 
 export default {
-  create({
+  component({
     template,
-    data: rawData,
+    data: rawData = {},
     components = {},
     methods = {},
     Handlebars = window.Handlebars,
   }) {
+    let init = false;
+    let vDom;
+
     if (!Handlebars) throw new Error("Vbars need Handlebars in order to run!");
 
     const id = Utils.randomId();
     const instance = Handlebars.create();
     const proxyData = Watcher(rawData, ({ path }) => vDom.patch(path));
-
-    Helpers.register({ id, instance, methods, components, proxyData });
-
     const templateFn = instance.compile(template);
-    const vDom = VDom({ id, templateFn, proxyData, methods });
 
     return {
-      VbarsComponent: true,
-      instance,
       id,
+      instance,
       data: proxyData,
-      render() {
-        vDom.render();
-        return vDom.$el.innerHTML;
+      render(parentData = {}) {
+        if (!init) {
+          vDom = VDom({ id, templateFn, proxyData, parentData });
+          Helpers.register({ id, instance, methods, components, proxyData, parentData });
+          init = true;
+        }
+        return vDom.render();
       },
     };
   },

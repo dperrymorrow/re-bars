@@ -1,4 +1,5 @@
-import Vbars from "../src/index.js";
+import Vbars from "../../src/index.js";
+import AddComponent from "./add-component.js";
 
 export default Vbars.component({
   template: /*html*/ `
@@ -41,14 +42,9 @@ export default Vbars.component({
 
       <div {{ watch "uiState" }}>
         {{#if uiState.adding }}
-          <form>
-            <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
-            <textarea name="description" {{ ref "newDescrip" }}></textarea>
-            <button class="push" {{ addItem "click" }}>Add todo</button>
-            <button class="cancel" {{ toggleCreate "click" uiState.adding }}>Cancel</button>
-          </form>
+          {{ AddComponent }}
         {{else}}
-          <button class="add" {{ toggleCreate "click" uiState.adding }}>Add another</button>
+          <button class="add" {{ showAdd "click" }}>Add another</button>
         {{/if}}
       </div>
     </div>
@@ -78,30 +74,22 @@ export default Vbars.component({
     ],
   },
 
+  components: {
+    AddComponent,
+  },
+
   methods: {
     deleteToDo({ data }, index) {
       data.todos.splice(index, 1);
-    },
-
-    addItem({ $refs, data, event }) {
-      event.preventDefault();
-
-      data.todos.push({
-        id: new Date().getTime(),
-        name: $refs.newName.value,
-        description: $refs.newDescrip.value,
-      });
-
-      $refs.newName.value = $refs.newDescrip.value = "";
     },
 
     toggleDone({ data }, id, done) {
       data.todos.find(item => item.id === id).done = !done;
     },
 
-    toggleCreate({ event, data }, adding) {
+    showAdd({ event, data }) {
       event.preventDefault();
-      data.uiState.adding = !adding;
+      data.uiState.adding = true;
     },
   },
 });

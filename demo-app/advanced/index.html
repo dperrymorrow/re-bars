@@ -1,0 +1,18 @@
+
+<html>
+
+<head>
+  <link rel="stylesheet" href="../index.css">
+</head>
+
+<body>
+  <div id="demo-app"></div>
+  <!-- include Handlebars Templating engine -->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+
+  <script type="module">
+    import DemoApp from "./app.js"
+    document.getElementById("demo-app").innerHTML = DemoApp.render();
+  </script>
+</body>
+</html>

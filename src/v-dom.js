@@ -1,12 +1,14 @@
 import Utils from "./utils.js";
 
-export default function({ id, templateFn, proxyData }) {
+export default function({ id, templateFn, proxyData, parentData }) {
   const $el = document.createElement("div");
+
   function render() {
-    $el.innerHTML = templateFn(proxyData);
+    $el.innerHTML = templateFn({ ...proxyData, ...{ parent: parentData } });
     if ($el.children.length !== 1)
       throw new Error(`template must have exactly one root node ${$el.innerHTML}`);
     $el.children[0].dataset.vbarsComp = id;
+    return $el.innerHTML;
   }
 
   function _swapNodes($source, $target) {
