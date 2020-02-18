@@ -1,52 +1,46 @@
-import Vbars from "../../src/index.js";
-import AddComponent from "./add-component.js";
+import AddComponent from "./add.js";
+import TodoComponent from "./todo.js";
 
-export default Vbars.component({
+export default {
   template: /*html*/ `
     <div>
-      <h1 {{ watch "header" }}>
-        {{ header.title }}
-        <small>{{ header.description }}</small>
-      </h1>
+      {{#watch "header.*" }}
+        <h1>
+          {{ header.title }}
+          <small>{{ header.description }}</small>
+        </h1>
+      {{/watch}}
 
-      <label>
-        Edit Title:
-        <input value="{{ header.title }}" {{ bind "header.title" }}/>
-      </label>
+       <label>
+         Edit Title:
+         <input value="{{ header.title }}" {{ bind "header.title" }}/>
+       </label>
 
-      <label>
-        Edit Description:
-        <input value="{{ header.description }}" {{ bind "header.description" }}/>
-      </label>
+       <label>
+         Edit Description:
+         <input value="{{ header.description }}" {{ bind "header.description" }}/>
+       </label>
 
-      <hr />
+       <hr />
 
-      <ul {{ watch "todos" }}>
-        {{#each todos}}
-          <li {{ keyed id }}>
-            <label for="{{ id }}">
-              <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ toggleDone "click" id done }}/>
-              {{#if done }}
-                <s>{{ name }}</s>
-              {{else}}
-                <strong>{{ name }}</strong>
-              {{/if}}
-            </label>
-            <p>{{ description }}</p>
-            <button {{ deleteToDo "click" @index }}>X</button>
-          </li>
-        {{/each}}
-      </ul>
+       {{#watch "todos.length" }}
+         <ul>
+           {{#each todos}}
+             {{ TodoComponent index=@index id=id }}
+           {{/each}}
+         </ul>
+       {{/watch}}
 
-      <hr/>
 
-      <div {{ watch "uiState" }}>
-        {{#if uiState.adding }}
-          {{ AddComponent }}
-        {{else}}
-          <button class="add" {{ showAdd "click" }}>Add another</button>
-        {{/if}}
-      </div>
+       {{#watch "uiState.adding" }}
+         <div>
+           {{#if uiState.adding }}
+             {{ AddComponent }}
+           {{else}}
+             <button class="add" {{ showAdd "click" }}>Add another</button>
+           {{/if}}
+         </div>
+       {{/watch}}
     </div>
   `,
 
@@ -76,20 +70,13 @@ export default Vbars.component({
 
   components: {
     AddComponent,
+    TodoComponent,
   },
 
   methods: {
-    deleteToDo({ data }, index) {
-      data.todos.splice(index, 1);
-    },
-
-    toggleDone({ data }, id, done) {
-      data.todos.find(item => item.id === id).done = !done;
-    },
-
     showAdd({ event, data }) {
       event.preventDefault();
       data.uiState.adding = true;
     },
   },
-});
+};

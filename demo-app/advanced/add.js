@@ -1,25 +1,23 @@
-import Vbars from "../../src/index.js";
-
-export default Vbars.component({
+export default {
   template: /*html*/ `
   <form>
+    <h1>{{ props.title }}</h1>
     <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
     <textarea name="description" {{ ref "newDescrip" }}></textarea>
     <button class="push" {{ addItem "click" }}>Add todo</button>
     <button class="cancel" {{ cancel "click" }}>Cancel</button>
   </form>
 `,
-
   methods: {
-    cancel({ event, parent }) {
+    cancel({ event, parentData }) {
       event.preventDefault();
-      parent.uiState.adding = false;
+      parentData.uiState.adding = false;
     },
 
-    addItem({ $refs, event, parent }) {
+    addItem({ $refs, event, parentData }) {
       event.preventDefault();
 
-      parent.todos.push({
+      parentData.todos.push({
         id: new Date().getTime(),
         name: $refs.newName.value,
         description: $refs.newDescrip.value,
@@ -28,4 +26,4 @@ export default Vbars.component({
       $refs.newName.value = $refs.newDescrip.value = "";
     },
   },
-});
+};

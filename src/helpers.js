@@ -1,8 +1,8 @@
 import Utils from "./utils.js";
+import Vbars from "./index.js";
 
 export default {
-  register({ id, instance, methods, components, proxyData, parentData }) {
-    console.log(parentData);
+  register({ id, instance, methods, components, proxyData, parentData, props }) {
     window.vbars = window.vbars || { handlers: {} };
     window.vbars.handlers[id] = {
       bind: (event, path) => Utils.setKey(proxyData, path, event.currentTarget.value),
@@ -24,16 +24,6 @@ export default {
       );
     }
 
-    const _findRefs = () => {
-      return Array.from(Utils.findComponent(id).querySelectorAll("[data-vbars-ref]")).reduce(
-        (obj, $el) => {
-          obj[$el.dataset.vbarsRef] = $el;
-          return obj;
-        },
-        {}
-      );
-    };
-
     const _addData = pairs => {
       return new instance.SafeString(
         Object.keys(pairs)
@@ -42,18 +32,29 @@ export default {
       );
     };
 
-    instance.registerHelper("watch", (path, options) => {
-      const id = `${options.loc.start.column}${options.loc.start.line}${options.loc.end.column}${options.loc.end.line}`;
-      return _addData({ id, watch: path });
+    instance.registerHelper("debug", obj => {
+      return new instance.SafeString(`<pre class="debug">${JSON.stringify(obj, null, 2)}</pre>`);
+    });
+
+    instance.registerHelper("watch", function(path, { fn }) {
+      const id = Utils.randomId();
+      setTimeout(() => {
+        document.getElementById(id).vBarsRender = fn;
+      }, 0);
+      return `<span id="${id}" ${_addData({ watch: path })}>${fn(proxyData)}</span>`;
     });
 
     Object.keys(components).forEach(name => {
-      instance.registerHelper(name, function() {
-        return new instance.SafeString(components[name].render(proxyData));
+      instance.registerHelper(name, function(options) {
+        return new instance.SafeString(
+          Vbars.component({
+            ...components[name],
+            ...{ parentData: proxyData, props: options.hash },
+          })
+        );
       });
     });
 
-    instance.registerHelper("keyed", val => _addData({ key: val }));
     instance.registerHelper("isChecked", val => (val ? "checked" : ""));
     instance.registerHelper("ref", key => _addData({ ref: key }));
     instance.registerHelper(
@@ -64,10 +65,9 @@ export default {
     // should throw an error if there is collision of method and comoponent name
     Object.keys(methods).forEach(key => {
       window.vbars.handlers[id][key] = function() {
-        const props = Utils.findComponent(id).dataset;
         return methods[key].call(
           methods,
-          { data: proxyData, parent: parentData, props, $refs: _findRefs(), event },
+          { data: proxyData, parentData, props, $refs: Utils.findRefs(id), event },
           ...arguments
         );
       };

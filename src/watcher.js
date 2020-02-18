@@ -1,9 +1,9 @@
-function buildProxy(raw, callback, tree = []) {
+function buildProxy(id, raw, callback, tree = []) {
   return new Proxy(raw, {
     get: function(target, prop) {
       const value = Reflect.get(...arguments);
       if (value !== null && typeof value === "object" && prop !== "methods")
-        return buildProxy(value, callback, tree.concat(prop));
+        return buildProxy(id, value, callback, tree.concat(prop));
       else return value;
     },
 

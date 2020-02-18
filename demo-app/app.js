@@ -1,13 +1,12 @@
-import Vbars from "../src/index.js";
-
-export default Vbars.component({
+export default {
   template: /*html*/ `
     <div>
-      <h1 {{ watch "header" }}>
-        {{ header.title }}
-        <small>{{ header.description }}</small>
-      </h1>
-
+      {{#watch "header.*" }}
+        <h1 >
+          {{ header.title }}
+          <small>{{ header.description }}</small>
+        </h1>
+      {{/watch}}
       <label>
         Edit Title:
         <input value="{{ header.title }}" {{ bind "header.title" }}/>
@@ -20,26 +19,28 @@ export default Vbars.component({
 
       <hr />
 
-      <ul {{ watch "todos" }}>
-        {{#each todos}}
-          <li {{ keyed id }}>
-            <label for="{{ id }}">
-              <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ toggleDone "click" id done }}/>
-              {{#if done }}
-                <s>{{ name }}</s>
-              {{else}}
-                <strong>{{ name }}</strong>
-              {{/if}}
-            </label>
-            <p>{{ description }}</p>
-            <button {{ deleteToDo "click" @index }}>X</button>
-          </li>
-        {{/each}}
-      </ul>
+      {{#watch "todos.length" }}
+        <ul>
+          {{#each todos}}
+            <li>
+              <label for="{{ id }}">
+                <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ toggleDone "click" id done }}/>
+                {{#if done }}
+                  <s>{{ name }}</s>
+                {{else}}
+                  <strong>{{ name }}</strong>
+                {{/if}}
+              </label>
+              <p>{{ description }}</p>
+              <button {{ deleteToDo "click" @index }}>X</button>
+            </li>
+          {{/each}}
+        </ul>
+      {{/watch}}
 
       <hr/>
 
-      <div {{ watch "uiState" }}>
+      {{#watch "uiState.adding" }}
         {{#if uiState.adding }}
           <form>
             <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
@@ -50,7 +51,7 @@ export default Vbars.component({
         {{else}}
           <button class="add" {{ toggleCreate "click" uiState.adding }}>Add another</button>
         {{/if}}
-      </div>
+      {{/watch}}
     </div>
   `,
 
@@ -104,4 +105,4 @@ export default Vbars.component({
       data.uiState.adding = !adding;
     },
   },
-});
+};

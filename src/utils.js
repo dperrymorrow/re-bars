@@ -1,12 +1,21 @@
 export default {
-  isKeyedNode($node) {
-    return $node.children.length
-      ? Array.from($node.children).every($child => $child.dataset.vbarsKey)
-      : false;
+  findComponent: id => document.getElementById(id),
+
+  findRefs(id) {
+    return Array.from(this.findComponent(id).querySelectorAll("[data-vbars-ref]")).reduce(
+      (obj, $el) => {
+        obj[$el.dataset.vbarsRef] = $el;
+        return obj;
+      },
+      {}
+    );
   },
 
-  keyedChildren: $node => Array.from($node.children).filter($e => $e.dataset.vbarsKey),
-  findComponent: id => document.querySelector(`[data-vbars-comp="${id}"]`),
+  getWildCard(path) {
+    const segs = path.split(".").slice(0, -1);
+    segs.push("*");
+    return segs.join(".");
+  },
 
   randomId: () =>
     "_" +
