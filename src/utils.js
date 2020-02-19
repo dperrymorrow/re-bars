@@ -12,8 +12,6 @@ export default {
     );
   },
 
-  name: "ReBars",
-
   shouldRender(path, watchPath) {
     if (path === watchPath) return true;
     return this.getWildCard(path) === watchPath;
