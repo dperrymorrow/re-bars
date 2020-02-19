@@ -21,7 +21,7 @@ export default {
 
       {{#watch "todos.length" }}
         <ul>
-          {{#each todos}}
+          {{#watchEach todos "todos" }}
             <li>
               <label for="{{ id }}">
                 <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ toggleDone "click" id done }}/>
@@ -34,7 +34,7 @@ export default {
               <p>{{ description }}</p>
               <button {{ deleteToDo "click" @index }}>X</button>
             </li>
-          {{/each}}
+          {{/watchEach}}
         </ul>
       {{/watch}}
 

@@ -1,5 +1,6 @@
 export default {
   findComponent: id => document.getElementById(id),
+  wrapTemplate: (id, html) => `<span id="${id}">${html}</span>`,
 
   findRefs(id) {
     return Array.from(this.findComponent(id).querySelectorAll("[data-vbars-ref]")).reduce(
@@ -9,6 +10,13 @@ export default {
       },
       {}
     );
+  },
+
+  name: "Vbars",
+
+  shouldRender(path, watchPath) {
+    if (path === watchPath) return true;
+    return this.getWildCard(path) === watchPath;
   },
 
   getWildCard(path) {

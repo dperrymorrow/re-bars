@@ -23,13 +23,13 @@ export default {
 
        <hr />
 
-       {{#watch "todos.length" }}
-         <ul>
-           {{#each todos}}
-             {{ TodoComponent index=@index id=id }}
-           {{/each}}
-         </ul>
-       {{/watch}}
+      {{#watch "todos.length" }}
+        <ul>
+          {{#each todos}}
+            {{ TodoComponent index=@index id=id }}
+          {{/each}}
+        </ul>
+      {{/watch}}
 
 
        {{#watch "uiState.adding" }}

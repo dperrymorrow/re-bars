@@ -4,12 +4,12 @@
   (global = global || self, global.Vbars = factory());
 }(this, (function () { 'use strict';
 
-  function buildProxy(id, raw, callback, tree = []) {
+  function buildProxy(raw, callback, tree = []) {
     return new Proxy(raw, {
       get: function(target, prop) {
         const value = Reflect.get(...arguments);
         if (value !== null && typeof value === "object" && prop !== "methods")
-          return buildProxy(id, value, callback, tree.concat(prop));
+          return buildProxy(value, callback, tree.concat(prop));
         else return value;
       },
 
@@ -29,6 +29,7 @@
 
   var Utils = {
     findComponent: id => document.getElementById(id),
+    wrapTemplate: (id, html) => `<span id="${id}">${html}</span>`,
 
     findRefs(id) {
       return Array.from(this.findComponent(id).querySelectorAll("[data-vbars-ref]")).reduce(
@@ -38,6 +39,13 @@
         },
         {}
       );
+    },
+
+    name: "Vbars",
+
+    shouldRender(path, watchPath) {
+      if (path === watchPath) return true;
+      return this.getWildCard(path) === watchPath;
     },
 
     getWildCard(path) {
@@ -64,11 +72,15 @@
 
   var Helpers = {
     register({ id, instance, methods, components, proxyData, parentData, props }) {
-      window.vbars = window.vbars || { handlers: {} };
-      window.vbars.handlers[id] = {
-        bind: (event, path) => Utils.setKey(proxyData, path, event.currentTarget.value),
+      const globalRef = {
+        handlers: {
+          bind: (event, path) => Utils.setKey(proxyData, path, event.currentTarget.value),
+        },
+        renders: {},
       };
-      // we can garbage collect here...
+
+      window[Utils.name] = window[Utils.name] || { components: {} };
+      window[Utils.name].components[id] = globalRef;
 
       function _handler() {
         const [eventType, ...args] = arguments;
@@ -80,29 +92,33 @@
           );
 
         const handler = { methodName: opts[0].name, eventType, args };
+
         return new instance.SafeString(
-          `on${eventType}="vbars.handlers.${id}.${handler.methodName}(${args.join(",")})"`
+          `on${eventType}="${Utils.name}.components.${id}.handlers.${handler.methodName}(${args.join(
+          ","
+        )})"`
         );
       }
-
-      const _addData = pairs => {
-        return new instance.SafeString(
-          Object.keys(pairs)
-            .map(key => `data-vbars-${key}='${pairs[key]}'`)
-            .join(" ")
-        );
-      };
 
       instance.registerHelper("debug", obj => {
         return new instance.SafeString(`<pre class="debug">${JSON.stringify(obj, null, 2)}</pre>`);
       });
 
       instance.registerHelper("watch", function(path, { fn }) {
-        const id = Utils.randomId();
-        setTimeout(() => {
-          document.getElementById(id).vBarsRender = fn;
-        }, 0);
-        return `<span id="${id}" ${_addData({ watch: path })}>${fn(proxyData)}</span>`;
+        const eId = Utils.randomId();
+        globalRef.renders[eId] = { render: fn.bind(null, proxyData), path };
+        return Utils.wrapTemplate(eId, fn(proxyData));
+      });
+
+      instance.registerHelper("watchEach", function(arr, arrName, { fn }) {
+        return arr.map((item, index) => {
+          const eId = Utils.randomId();
+          globalRef.renders[eId] = {
+            render: fn.bind(null, item),
+            path: `${arrName}.${index}.*`,
+          };
+          return Utils.wrapTemplate(eId, fn(item));
+        });
       });
 
       Object.keys(components).forEach(name => {
@@ -117,15 +133,18 @@
       });
 
       instance.registerHelper("isChecked", val => (val ? "checked" : ""));
-      instance.registerHelper("ref", key => _addData({ ref: key }));
+      instance.registerHelper("ref", key => new instance.SafeString(`data-vbars-ref="${key}"`));
       instance.registerHelper(
         "bind",
-        path => new instance.SafeString(`oninput="vbars.handlers.${id}.bind(event, '${path}')"`)
+        path =>
+          new instance.SafeString(
+            `oninput="${Utils.name}.components.${id}.handlers.bind(event, '${path}')"`
+          )
       );
 
       // should throw an error if there is collision of method and comoponent name
       Object.keys(methods).forEach(key => {
-        window.vbars.handlers[id][key] = function() {
+        globalRef.handlers[key] = function() {
           return methods[key].call(
             methods,
             { data: proxyData, parentData, props, $refs: Utils.findRefs(id), event },
@@ -156,16 +175,29 @@
       // need to call created before building the proxy
       if (hooks.created) hooks.created(...arguments);
 
-      const proxyData = buildProxy(id, data, ({ path }) => {
-        Array.from(Utils.findComponent(id).querySelectorAll("[data-vbars-watch]"))
-          .filter($el => {
-            const key = $el.dataset.vbarsWatch;
-            if (path === key) return true;
-            return Utils.getWildCard(path) === key;
-          })
-          .forEach($el => {
-            $el.innerHTML = $el.vBarsRender(proxyData);
+      const proxyData = buildProxy(data, ({ path }) => {
+        const globalRef = window[Utils.name].components[id];
+
+        Object.keys(globalRef.renders).forEach(eId => {
+          const handler = globalRef.renders[eId];
+
+          if (Utils.shouldRender(path, handler.path)) {
+            const $target = Utils.findComponent(eId);
+            if ($target) {
+              $target.innerHTML = handler.render();
+            } else {
+              delete globalRef[eId];
+            }
+          }
+        });
+
+        setTimeout(() => {
+          Object.keys(window[Utils.name].components).forEach(cId => {
+            if (!Utils.findComponent(cId)) {
+              delete window[Utils.name].components[cId];
+            }
           });
+        }, 100);
       });
 
       const templateFn = instance.compile(template);
@@ -184,7 +216,7 @@
         }, 100);
       }
 
-      return `<span id="${id}">${templateFn(data)}</span>`;
+      return Utils.wrapTemplate(id, templateFn(data));
     },
   };
 

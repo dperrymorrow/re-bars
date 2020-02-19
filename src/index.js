@@ -21,16 +21,33 @@ export default {
     // need to call created before building the proxy
     if (hooks.created) hooks.created(...arguments);
 
-    const proxyData = Watcher(id, data, ({ path }) => {
-      Array.from(Utils.findComponent(id).querySelectorAll("[data-vbars-watch]"))
-        .filter($el => {
-          const key = $el.dataset.vbarsWatch;
-          if (path === key) return true;
-          return Utils.getWildCard(path) === key;
-        })
-        .forEach($el => {
-          $el.innerHTML = $el.vBarsRender(proxyData);
+    const proxyData = Watcher(data, ({ path }) => {
+      const globalRef = window[Utils.name].components[id];
+
+      console.log("Vbars update:", path);
+
+      Object.keys(globalRef.renders).forEach(eId => {
+        const handler = globalRef.renders[eId];
+
+        if (Utils.shouldRender(path, handler.path)) {
+          const $target = Utils.findComponent(eId);
+          if ($target) {
+            $target.innerHTML = handler.render();
+            console.log($target);
+          } else {
+            delete globalRef[eId];
+          }
+        }
+      });
+
+      setTimeout(() => {
+        Object.keys(window[Utils.name].components).forEach(cId => {
+          if (!Utils.findComponent(cId)) {
+            console.log("Vbars", `removing handlers, and renders for ${cId}`);
+            delete window[Utils.name].components[cId];
+          }
         });
+      }, 100);
     });
 
     const templateFn = instance.compile(template);
@@ -49,6 +66,6 @@ export default {
       }, 100);
     }
 
-    return `<span id="${id}">${templateFn(data)}</span>`;
+    return Utils.wrapTemplate(id, templateFn(data));
   },
 };
