@@ -1,31 +1,8 @@
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
-  (global = global || self, global.Vbars = factory());
+  (global = global || self, global.ReBars = factory());
 }(this, (function () { 'use strict';
-
-  function buildProxy(raw, callback, tree = []) {
-    return new Proxy(raw, {
-      get: function(target, prop) {
-        const value = Reflect.get(...arguments);
-        if (value !== null && typeof value === "object" && prop !== "methods")
-          return buildProxy(value, callback, tree.concat(prop));
-        else return value;
-      },
-
-      set: function(target, prop) {
-        const ret = Reflect.set(...arguments);
-        callback({ path: tree.concat(prop).join(".") });
-        return ret;
-      },
-
-      deleteProperty: function(target, prop) {
-        const ret = Reflect.deleteProperty(...arguments);
-        callback({ path: tree.concat(prop).join(".") });
-        return ret;
-      },
-    });
-  }
 
   var Utils = {
     findComponent: id => document.getElementById(id),
@@ -41,7 +18,7 @@
       );
     },
 
-    name: "Vbars",
+    name: "ReBars",
 
     shouldRender(path, watchPath) {
       if (path === watchPath) return true;
@@ -70,17 +47,64 @@
     },
   };
 
-  var Helpers = {
-    register({ id, instance, methods, components, proxyData, parentData, props }) {
-      const globalRef = {
-        handlers: {
-          bind: (event, path) => Utils.setKey(proxyData, path, event.currentTarget.value),
-        },
-        renders: {},
-      };
+  function Watcher({ id, storage, rawData }) {
+    function _handler(path) {
+      const cRef = storage.components[id];
 
-      window[Utils.name] = window[Utils.name] || { components: {} };
-      window[Utils.name].components[id] = globalRef;
+      Object.keys(cRef.renders).forEach(eId => {
+        const handler = cRef.renders[eId];
+
+        if (Utils.shouldRender(path, handler.path)) {
+          const $target = Utils.findComponent(eId);
+          if ($target) {
+            $target.innerHTML = handler.render();
+          } else {
+            delete storage.components[eId];
+          }
+        }
+      });
+
+      Object.keys(storage.components).forEach(cId => {
+        if (!Utils.findComponent(cId)) {
+          delete storage.components[cId];
+        }
+      });
+    }
+
+    function _buildProxy(raw, tree = []) {
+      return new Proxy(raw, {
+        get: function(target, prop) {
+          const value = Reflect.get(...arguments);
+          if (value !== null && typeof value === "object" && prop !== "methods")
+            return _buildProxy(value, tree.concat(prop));
+          else return value;
+        },
+
+        set: function(target, prop) {
+          const ret = Reflect.set(...arguments);
+          _handler(tree.concat(prop).join("."));
+          return ret;
+        },
+
+        deleteProperty: function(target, prop) {
+          const ret = Reflect.deleteProperty(...arguments);
+          _handler(tree.concat(prop).join("."));
+          return ret;
+        },
+      });
+    }
+
+    return _buildProxy(rawData);
+  }
+
+  var Helpers = {
+    register({ id, instance, app, methods, components, proxyData, parentData, props }) {
+      const storage = app.storage.components[id];
+
+      storage.handlers.bind = (event, path) =>
+        Utils.setKey(proxyData, path, event.currentTarget.value);
+
+      const handlerPath = `${app.name}.storage.components.${id}.handlers`;
 
       function _handler() {
         const [eventType, ...args] = arguments;
@@ -94,9 +118,7 @@
         const handler = { methodName: opts[0].name, eventType, args };
 
         return new instance.SafeString(
-          `on${eventType}="${Utils.name}.components.${id}.handlers.${handler.methodName}(${args.join(
-          ","
-        )})"`
+          `on${eventType}="${handlerPath}.${handler.methodName}(${args.join(",")})"`
         );
       }
 
@@ -106,14 +128,14 @@
 
       instance.registerHelper("watch", function(path, { fn }) {
         const eId = Utils.randomId();
-        globalRef.renders[eId] = { render: fn.bind(null, proxyData), path };
+        storage.renders[eId] = { render: fn.bind(null, proxyData), path };
         return Utils.wrapTemplate(eId, fn(proxyData));
       });
 
       instance.registerHelper("watchEach", function(arr, arrName, { fn }) {
         return arr.map((item, index) => {
           const eId = Utils.randomId();
-          globalRef.renders[eId] = {
+          storage.renders[eId] = {
             render: fn.bind(null, item),
             path: `${arrName}.${index}.*`,
           };
@@ -124,7 +146,7 @@
       Object.keys(components).forEach(name => {
         instance.registerHelper(name, function(options) {
           return new instance.SafeString(
-            Vbars.component({
+            app.component({
               ...components[name],
               ...{ parentData: proxyData, props: options.hash },
             })
@@ -136,15 +158,12 @@
       instance.registerHelper("ref", key => new instance.SafeString(`data-vbars-ref="${key}"`));
       instance.registerHelper(
         "bind",
-        path =>
-          new instance.SafeString(
-            `oninput="${Utils.name}.components.${id}.handlers.bind(event, '${path}')"`
-          )
+        path => new instance.SafeString(`oninput="${handlerPath}.bind(event, '${path}')"`)
       );
 
       // should throw an error if there is collision of method and comoponent name
       Object.keys(methods).forEach(key => {
-        globalRef.handlers[key] = function() {
+        storage.handlers[key] = function() {
           return methods[key].call(
             methods,
             { data: proxyData, parentData, props, $refs: Utils.findRefs(id), event },
@@ -156,8 +175,13 @@
     },
   };
 
-  var Vbars = {
-    component({
+  function index({ $el, name, root, Handlebars = window.Handlebars }) {
+    if (!Handlebars) throw new Error("ReBars need Handlebars in order to run!");
+
+    const storage = { components: {} };
+    $el.innerHTML = component(root);
+
+    function component({
       template,
       data = {},
       components = {},
@@ -165,44 +189,31 @@
       parentData = {},
       props = {},
       hooks = {},
-      Handlebars = window.Handlebars,
     }) {
-      if (!Handlebars) throw new Error("Vbars need Handlebars in order to run!");
-
       const id = Utils.randomId();
       const instance = Handlebars.create();
 
       // need to call created before building the proxy
       if (hooks.created) hooks.created(...arguments);
 
-      const proxyData = buildProxy(data, ({ path }) => {
-        const globalRef = window[Utils.name].components[id];
+      storage.components[id] = {
+        handlers: {},
+        renders: {},
+      };
 
-        Object.keys(globalRef.renders).forEach(eId => {
-          const handler = globalRef.renders[eId];
-
-          if (Utils.shouldRender(path, handler.path)) {
-            const $target = Utils.findComponent(eId);
-            if ($target) {
-              $target.innerHTML = handler.render();
-            } else {
-              delete globalRef[eId];
-            }
-          }
-        });
-
-        setTimeout(() => {
-          Object.keys(window[Utils.name].components).forEach(cId => {
-            if (!Utils.findComponent(cId)) {
-              delete window[Utils.name].components[cId];
-            }
-          });
-        }, 100);
-      });
-
+      const proxyData = Watcher({ rawData: data, storage, id });
       const templateFn = instance.compile(template);
 
-      Helpers.register({ id, instance, methods, components, proxyData, parentData, props });
+      Helpers.register({
+        id,
+        app: { storage, component, name },
+        instance,
+        methods,
+        components,
+        proxyData,
+        parentData,
+        props,
+      });
 
       if ("attached" in hooks) {
         const int = setInterval(() => {
@@ -213,13 +224,18 @@
               ...{ $refs: Utils.findRefs(id) },
             });
           }
-        }, 100);
+        }, 10);
       }
 
       return Utils.wrapTemplate(id, templateFn(data));
-    },
-  };
+    }
 
-  return Vbars;
+    return {
+      component,
+      storage,
+    };
+  }
+
+  return index;
 
 })));

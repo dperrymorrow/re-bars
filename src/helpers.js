@@ -1,17 +1,13 @@
 import Utils from "./utils.js";
-import Vbars from "./index.js";
 
 export default {
-  register({ id, instance, methods, components, proxyData, parentData, props }) {
-    const globalRef = {
-      handlers: {
-        bind: (event, path) => Utils.setKey(proxyData, path, event.currentTarget.value),
-      },
-      renders: {},
-    };
+  register({ id, instance, app, methods, components, proxyData, parentData, props }) {
+    const storage = app.storage.components[id];
 
-    window[Utils.name] = window[Utils.name] || { components: {} };
-    window[Utils.name].components[id] = globalRef;
+    storage.handlers.bind = (event, path) =>
+      Utils.setKey(proxyData, path, event.currentTarget.value);
+
+    const handlerPath = `${app.name}.storage.components.${id}.handlers`;
 
     function _handler() {
       const [eventType, ...args] = arguments;
@@ -25,9 +21,7 @@ export default {
       const handler = { methodName: opts[0].name, eventType, args };
 
       return new instance.SafeString(
-        `on${eventType}="${Utils.name}.components.${id}.handlers.${handler.methodName}(${args.join(
-          ","
-        )})"`
+        `on${eventType}="${handlerPath}.${handler.methodName}(${args.join(",")})"`
       );
     }
 
@@ -37,14 +31,14 @@ export default {
 
     instance.registerHelper("watch", function(path, { fn }) {
       const eId = Utils.randomId();
-      globalRef.renders[eId] = { render: fn.bind(null, proxyData), path };
+      storage.renders[eId] = { render: fn.bind(null, proxyData), path };
       return Utils.wrapTemplate(eId, fn(proxyData));
     });
 
     instance.registerHelper("watchEach", function(arr, arrName, { fn }) {
       return arr.map((item, index) => {
         const eId = Utils.randomId();
-        globalRef.renders[eId] = {
+        storage.renders[eId] = {
           render: fn.bind(null, item),
           path: `${arrName}.${index}.*`,
         };
@@ -55,7 +49,7 @@ export default {
     Object.keys(components).forEach(name => {
       instance.registerHelper(name, function(options) {
         return new instance.SafeString(
-          Vbars.component({
+          app.component({
             ...components[name],
             ...{ parentData: proxyData, props: options.hash },
           })
@@ -67,15 +61,12 @@ export default {
     instance.registerHelper("ref", key => new instance.SafeString(`data-vbars-ref="${key}"`));
     instance.registerHelper(
       "bind",
-      path =>
-        new instance.SafeString(
-          `oninput="${Utils.name}.components.${id}.handlers.bind(event, '${path}')"`
-        )
+      path => new instance.SafeString(`oninput="${handlerPath}.bind(event, '${path}')"`)
     );
 
     // should throw an error if there is collision of method and comoponent name
     Object.keys(methods).forEach(key => {
-      globalRef.handlers[key] = function() {
+      storage.handlers[key] = function() {
         return methods[key].call(
           methods,
           { data: proxyData, parentData, props, $refs: Utils.findRefs(id), event },

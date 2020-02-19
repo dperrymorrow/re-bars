@@ -12,7 +12,7 @@ export default {
     );
   },
 
-  name: "Vbars",
+  name: "ReBars",
 
   shouldRender(path, watchPath) {
     if (path === watchPath) return true;

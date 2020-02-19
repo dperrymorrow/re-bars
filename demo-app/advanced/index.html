@@ -11,9 +11,15 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
 
   <script type="module">
-    import Vbars from "../../src/index.js"
-    import DemoApp from "./app.js"
-    document.getElementById("demo-app").innerHTML = Vbars.component(DemoApp);
+  import ReBars from "../../src/index.js";
+  import DemoApp from "./app.js";
+
+  window.ReBarsApp = ReBars({
+    Handlebars: window.Handlebars,
+    $el: document.getElementById("demo-app"),
+    root: DemoApp,
+    name: "ReBarsApp"
+  });
   </script>
 </body>
 </html>

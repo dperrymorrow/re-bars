@@ -10,10 +10,16 @@
   <div id="demo-app"></div>
   <!-- include Handlebars Templating engine -->
   <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+  <script src="/dist/index.js"></script>
   <script src="/dist/demo-app.js"></script>
 
   <script>
-    document.getElementById("demo-app").innerHTML = Vbars.component(DemoApp);
+    window.ReBarsApp = ReBars({
+      Handlebars: window.Handlebars,
+      $el: document.getElementById("demo-app"),
+      root: DemoApp,
+      name: "ReBarsApp"
+    });
   </script>
 </body>
 </html>

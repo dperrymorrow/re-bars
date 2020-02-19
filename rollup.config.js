@@ -6,11 +6,11 @@ import gzipPlugin from "rollup-plugin-gzip";
 export default {
   input: "src/index.js",
   output: [
-    { file: "dist/index.js", format: "umd", name: "Vbars" },
+    { file: "dist/index.js", format: "umd", name: "ReBars" },
     {
       file: "dist/index.min.js",
       format: "umd",
-      name: "Vbars",
+      name: "ReBars",
       sourcemap: true,
       plugins: [terser(), gzipPlugin(), filesize()],
     },
