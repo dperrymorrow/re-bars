@@ -24,8 +24,8 @@ export default {
   },
 
   hooks: {
-    created({ props, data, parentData }) {
-      data.todo = parentData.todos.find(item => item.id === props.id);
+    created({ props, data }) {
+      data.todo = props.todo;
     },
   },
 

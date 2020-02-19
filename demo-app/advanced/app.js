@@ -3,45 +3,42 @@ import TodoComponent from "./todo.js";
 
 export default {
   template: /*html*/ `
-    <div>
-      {{#watch "header.*" }}
-        <h1>
-          {{ header.title }}
-          <small>{{ header.description }}</small>
-        </h1>
-      {{/watch}}
+    {{#watch "header.*" }}
+      <h1>
+        {{ header.title }}
+        <small>{{ header.description }}</small>
+      </h1>
+    {{/watch}}
 
-       <label>
-         Edit Title:
-         <input value="{{ header.title }}" {{ bind "header.title" }}/>
-       </label>
+    <label>
+      Edit Title:
+      <input value="{{ header.title }}" {{ bind "header.title" }}/>
+    </label>
 
-       <label>
-         Edit Description:
-         <input value="{{ header.description }}" {{ bind "header.description" }}/>
-       </label>
+    <label>
+      Edit Description:
+      <input value="{{ header.description }}" {{ bind "header.description" }}/>
+    </label>
 
-       <hr />
+    <hr />
 
-      {{#watch "todos.length" }}
-        <ul>
-          {{#each todos}}
-            {{ TodoComponent index=@index id=id }}
-          {{/each}}
-        </ul>
-      {{/watch}}
+    {{#watch "todos.length" }}
+      <ul>
+        {{#each todos}}
+          {{ TodoComponent index=@index todo=. }}
+        {{/each}}
+      </ul>
+    {{/watch}}
 
-
-       {{#watch "uiState.adding" }}
-         <div>
-           {{#if uiState.adding }}
-             {{ AddComponent }}
-           {{else}}
-             <button class="add" {{ showAdd "click" }}>Add another</button>
-           {{/if}}
-         </div>
-       {{/watch}}
-    </div>
+    {{#watch "uiState.adding" }}
+     <div>
+       {{#if uiState.adding }}
+         {{ AddComponent }}
+       {{else}}
+         <button class="add" {{ showAdd "click" }}>Add another</button>
+       {{/if}}
+     </div>
+    {{/watch}}
   `,
 
   data: {

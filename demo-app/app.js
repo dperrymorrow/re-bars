@@ -1,58 +1,56 @@
 export default {
   template: /*html*/ `
-    <div>
-      {{#watch "header.*" }}
-        <h1 >
-          {{ header.title }}
-          <small>{{ header.description }}</small>
-        </h1>
-      {{/watch}}
-      <label>
-        Edit Title:
-        <input value="{{ header.title }}" {{ bind "header.title" }}/>
-      </label>
+    {{#watch "header.*" }}
+      <h1 >
+        {{ header.title }}
+        <small>{{ header.description }}</small>
+      </h1>
+    {{/watch}}
+    <label>
+      Edit Title:
+      <input value="{{ header.title }}" {{ bind "header.title" }}/>
+    </label>
 
-      <label>
-        Edit Description:
-        <input value="{{ header.description }}" {{ bind "header.description" }}/>
-      </label>
+    <label>
+      Edit Description:
+      <input value="{{ header.description }}" {{ bind "header.description" }}/>
+    </label>
 
-      <hr />
+    <hr />
 
-      {{#watch "todos.length" }}
-        <ul>
-          {{#watchEach todos "todos" }}
-            <li>
-              <label for="{{ id }}">
-                <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ toggleDone "click" id done }}/>
-                {{#if done }}
-                  <s>{{ name }}</s>
-                {{else}}
-                  <strong>{{ name }}</strong>
-                {{/if}}
-              </label>
-              <p>{{ description }}</p>
-              <button {{ deleteToDo "click" @index }}>X</button>
-            </li>
-          {{/watchEach}}
-        </ul>
-      {{/watch}}
+    {{#watch "todos.length" }}
+      <ul>
+        {{#watchEach todos }}
+          <li>
+            <label for="{{ id }}">
+              <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ toggleDone "click" id done }}/>
+              {{#if done }}
+                <s>{{ name }}</s>
+              {{else}}
+                <strong>{{ name }}</strong>
+              {{/if}}
+            </label>
+            <p>{{ description }}</p>
+            <button {{ deleteToDo "click" @index }}>X</button>
+          </li>
+        {{/watchEach}}
+      </ul>
+    {{/watch}}
 
-      <hr/>
+    <hr/>
 
-      {{#watch "uiState.adding" }}
-        {{#if uiState.adding }}
-          <form>
-            <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
-            <textarea name="description" {{ ref "newDescrip" }}></textarea>
-            <button class="push" {{ addItem "click" }}>Add todo</button>
-            <button class="cancel" {{ toggleCreate "click" uiState.adding }}>Cancel</button>
-          </form>
-        {{else}}
-          <button class="add" {{ toggleCreate "click" uiState.adding }}>Add another</button>
-        {{/if}}
-      {{/watch}}
-    </div>
+    {{#watch "uiState.adding" }}
+      {{#if uiState.adding }}
+        <form>
+          <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
+          <textarea name="description" {{ ref "newDescrip" }}></textarea>
+          <button class="push" {{ addItem "click" }}>Add todo</button>
+          <button class="cancel" {{ toggleCreate "click" uiState.adding }}>Cancel</button>
+        </form>
+      {{else}}
+        <button class="add" {{ toggleCreate "click" uiState.adding }}>Add another</button>
+      {{/if}}
+    {{/watch}}
   `,
 
   data: {
