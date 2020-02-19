@@ -29,15 +29,18 @@ export default {
         {{/each}}
       </ul>
     {{/watch}}
+    {{#watch "todos.*" }}
+    {{ debug . }}
+    {{/watch}}
 
     {{#watch "uiState.adding" }}
-     <div>
-       {{#if uiState.adding }}
-         {{ AddComponent }}
-       {{else}}
-         <button class="add" {{ showAdd "click" }}>Add another</button>
-       {{/if}}
-     </div>
+       <div>
+         {{#if uiState.adding }}
+           {{ AddComponent }}
+         {{else}}
+           <button class="add" {{ showAdd "click" }}>Add another</button>
+         {{/if}}
+       </div>
     {{/watch}}
   `,
 
@@ -49,6 +52,8 @@ export default {
       title: "This is my list of things to do",
       description: "just general items that need done around the house",
     },
+    completed: [],
+    active: [],
     todos: [
       {
         done: false,
@@ -68,6 +73,13 @@ export default {
   components: {
     AddComponent,
     TodoComponent,
+  },
+
+  watchers: {
+    "todos.*"({ data }) {
+      data.completed = data.todos.filter(item => item.done);
+      data.active = data.todos.filter(item => !item.done);
+    },
   },
 
   methods: {

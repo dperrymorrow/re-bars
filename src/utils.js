@@ -14,13 +14,14 @@ export default {
 
   shouldRender(path, watchPath) {
     if (path === watchPath) return true;
-    return this.getWildCard(path) === watchPath;
-  },
 
-  getWildCard(path) {
-    const segs = path.split(".").slice(0, -1);
-    segs.push("*");
-    return segs.join(".");
+    const pathSegs = path.split(".");
+    const watchSegs = watchPath.split(".");
+
+    return watchSegs.every((seg, index) => {
+      if (seg === pathSegs[index] || seg === "*") return true;
+      return false;
+    });
   },
 
   randomId: () =>

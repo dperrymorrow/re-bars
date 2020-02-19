@@ -1,7 +1,7 @@
 import Utils from "./utils.js";
 
 export default {
-  register({ id, instance, app, methods, components, proxyData, parentData, props }) {
+  register({ id, instance, app, methods, components, proxyData, parentData, props, watchers }) {
     const storage = app.storage.components[id];
 
     storage.handlers.bind = (event, path) =>
@@ -67,12 +67,19 @@ export default {
       path => new instance.SafeString(`oninput="${handlerPath}.bind(event, '${path}')"`)
     );
 
-    // should throw an error if there is collision of method and comoponent name
     Object.keys(methods).forEach(key => {
       storage.handlers[key] = function() {
         return methods[key].call(
-          methods,
-          { data: proxyData, parentData, props, $refs: Utils.findRefs(id), event },
+          null,
+          {
+            methods,
+            watchers,
+            data: proxyData,
+            parentData,
+            props,
+            $refs: Utils.findRefs(id),
+            event,
+          },
           ...arguments
         );
       };

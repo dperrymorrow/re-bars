@@ -1,10 +1,18 @@
 import Utils from "./utils.js";
 
-export default function({ id, storage, rawData }) {
+export default function({ id, app, parentData, props, data, watchers }) {
+  console.log(arguments);
   function _handler(path) {
-    const cRef = storage.components[id];
+    const cRef = app.storage.components[id];
 
     console.log("Rebars update:", path);
+
+    Object.keys(watchers).forEach(watchPath => {
+      if (Utils.shouldRender(path, watchPath)) {
+        console.log(watchPath);
+        watchers[watchPath].call(null, { data: proxyData, parentData, props });
+      }
+    });
 
     Object.keys(cRef.renders).forEach(eId => {
       const handler = cRef.renders[eId];
@@ -15,15 +23,15 @@ export default function({ id, storage, rawData }) {
           $target.innerHTML = handler.render();
           console.log($target);
         } else {
-          delete storage.components[eId];
+          delete app.storage.components[eId];
         }
       }
     });
 
-    Object.keys(storage.components).forEach(cId => {
+    Object.keys(app.storage.components).forEach(cId => {
       if (!Utils.findComponent(cId)) {
         console.log("ReBars:", `removing handlers, and renders for ${cId}`);
-        delete storage.components[cId];
+        delete app.storage.components[cId];
       }
     });
   }
@@ -52,5 +60,6 @@ export default function({ id, storage, rawData }) {
     });
   }
 
-  return _buildProxy(rawData);
+  const proxyData = _buildProxy(data);
+  return proxyData;
 }
