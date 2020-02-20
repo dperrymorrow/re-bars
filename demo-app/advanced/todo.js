@@ -13,7 +13,8 @@ export default {
       </label>
       <p>{{ todo.description }}</p>
       <button {{ deleteToDo "click" }}>X</button>
-      <!-- {{debug . }} -->
+
+      {{{ deleteToDo "click" 45 false "man o man" }}}
       </div>
     </li>
   {{/watch}}

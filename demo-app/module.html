@@ -14,11 +14,9 @@
     import ReBars from "../src/index.js";
     import DemoApp from "./app.js";
 
-    window.ReBarsApp = ReBars({
-      Handlebars: window.Handlebars,
+    ReBars({
       $el: document.getElementById("demo-app"),
       root: DemoApp,
-      name: "ReBarsApp"
     });
   </script>
 </body>

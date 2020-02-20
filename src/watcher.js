@@ -1,7 +1,6 @@
 import Utils from "./utils.js";
 
 export default function({ id, app, parentData, props, data, watchers }) {
-  console.log(arguments);
   function _handler(path) {
     const cRef = app.storage.components[id];
 

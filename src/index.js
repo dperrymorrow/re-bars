@@ -1,11 +1,17 @@
 import Watcher from "./watcher.js";
-import Helpers from "./helpers.js";
+import Helpers from "./helpers/index.js";
 import Utils from "./utils.js";
 
-export default function({ $el, name, root, Handlebars = window.Handlebars }) {
+window.ReBars = window.ReBars || {};
+window.ReBars.apps = window.ReBars.apps || {};
+
+export default function({ $el, root, Handlebars = window.Handlebars }) {
   if (!Handlebars) throw new Error("ReBars need Handlebars in order to run!");
 
-  const storage = { components: {} };
+  const appId = Utils.randomId();
+  const storage = (window.ReBars.apps[appId] = { components: {} });
+  const app = { storage, component, id: appId };
+
   $el.innerHTML = component(root);
 
   function component({
@@ -20,7 +26,6 @@ export default function({ $el, name, root, Handlebars = window.Handlebars }) {
   }) {
     const id = Utils.randomId();
     const instance = Handlebars.create();
-    const app = { storage, component, name };
 
     storage.components[id] = {
       handlers: {},
@@ -33,7 +38,7 @@ export default function({ $el, name, root, Handlebars = window.Handlebars }) {
     const proxyData = Watcher({ id, app, parentData, props, data, watchers });
     const templateFn = instance.compile(template);
 
-    Helpers.register({
+    Helpers({
       id,
       instance,
       app,
@@ -57,7 +62,7 @@ export default function({ $el, name, root, Handlebars = window.Handlebars }) {
       }, 10);
     }
 
-    return Utils.wrapTemplate(id, templateFn(data));
+    return Utils.wrapTemplate(id, templateFn(proxyData));
   }
 
   return {

@@ -3,9 +3,9 @@ export default {
   wrapTemplate: (id, html) => `<span id="${id}">${html}</span>`,
 
   findRefs(id) {
-    return Array.from(this.findComponent(id).querySelectorAll("[data-vbars-ref]")).reduce(
+    return Array.from(this.findComponent(id).querySelectorAll("[data-rbs-ref]")).reduce(
       (obj, $el) => {
-        obj[$el.dataset.vbarsRef] = $el;
+        obj[$el.dataset.rbsRef] = $el;
         return obj;
       },
       {}
@@ -25,7 +25,7 @@ export default {
   },
 
   randomId: () =>
-    "_" +
+    "_rbs_" +
     Math.random()
       .toString(36)
       .substr(2, 9),
