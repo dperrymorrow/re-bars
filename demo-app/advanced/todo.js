@@ -3,8 +3,8 @@ export default {
   {{# watch "todo.*" }}
     <li>
      <div >
-      <label for="{{ todo.id }}">
-        <input id="{{ todo.id }}" type="checkbox" {{ isChecked todo.done }} {{ method "click" "toggleDone" }}/>
+      <label>
+        <input type="checkbox" {{ isChecked todo.done }} {{ method "click" "toggleDone" }}/>
         {{#if todo.done }}
           <s>{{ todo.name }}</s>
         {{else}}
