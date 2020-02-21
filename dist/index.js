@@ -9,30 +9,29 @@
     wrapTemplate: (id, html) => `<span id="${id}">${html}</span>`,
 
     findRefs(id) {
-      return Array.from(this.findComponent(id).querySelectorAll("[data-vbars-ref]")).reduce(
+      return Array.from(this.findComponent(id).querySelectorAll("[data-rbs-ref]")).reduce(
         (obj, $el) => {
-          obj[$el.dataset.vbarsRef] = $el;
+          obj[$el.dataset.rbsRef] = $el;
           return obj;
         },
         {}
       );
     },
 
-    name: "ReBars",
-
     shouldRender(path, watchPath) {
       if (path === watchPath) return true;
-      return this.getWildCard(path) === watchPath;
-    },
 
-    getWildCard(path) {
-      const segs = path.split(".").slice(0, -1);
-      segs.push("*");
-      return segs.join(".");
+      const pathSegs = path.split(".");
+      const watchSegs = watchPath.split(".");
+
+      return watchSegs.every((seg, index) => {
+        if (seg === pathSegs[index] || seg === "*") return true;
+        return false;
+      });
     },
 
     randomId: () =>
-      "_" +
+      "_rbs_" +
       Math.random()
         .toString(36)
         .substr(2, 9),
@@ -47,9 +46,15 @@
     },
   };
 
-  function Watcher({ id, storage, rawData }) {
+  function Watcher({ id, app, parentData, props, data, watchers, name }) {
     function _handler(path) {
-      const cRef = storage.components[id];
+      const cRef = app.storage.components[id];
+
+      Object.keys(watchers).forEach(watchPath => {
+        if (Utils.shouldRender(path, watchPath)) {
+          watchers[watchPath].call(null, { data: proxyData, parentData, props });
+        }
+      });
 
       Object.keys(cRef.renders).forEach(eId => {
         const handler = cRef.renders[eId];
@@ -59,14 +64,14 @@
           if ($target) {
             $target.innerHTML = handler.render();
           } else {
-            delete storage.components[eId];
+            delete app.storage.components[eId];
           }
         }
       });
 
-      Object.keys(storage.components).forEach(cId => {
+      Object.keys(app.storage.components).forEach(cId => {
         if (!Utils.findComponent(cId)) {
-          delete storage.components[cId];
+          delete app.storage.components[cId];
         }
       });
     }
@@ -74,6 +79,7 @@
     function _buildProxy(raw, tree = []) {
       return new Proxy(raw, {
         get: function(target, prop) {
+          if (prop === "ReBarsPath") return tree.join(".");
           const value = Reflect.get(...arguments);
           if (value !== null && typeof value === "object" && prop !== "methods")
             return _buildProxy(value, tree.concat(prop));
@@ -94,125 +100,152 @@
       });
     }
 
-    return _buildProxy(rawData);
+    const proxyData = _buildProxy(data);
+    return proxyData;
   }
 
-  var Helpers = {
-    register({ id, instance, app, methods, components, proxyData, parentData, props }) {
-      const storage = app.storage.components[id];
+  function EventHandlers(
+    storage,
+    { proxyData, instance, methods, id, watchers, parentData, props, app }
+  ) {
+    const handlerPath = `ReBars.apps.${app.id}.components.${id}.handlers`;
 
-      storage.handlers.bind = (event, path) =>
-        Utils.setKey(proxyData, path, event.currentTarget.value);
+    function _handler() {
+      const [eventType, methodName, ...args] = arguments;
+      args.splice(-1, 1);
 
-      const handlerPath = `${app.name}.storage.components.${id}.handlers`;
-
-      function _handler() {
-        const [eventType, ...args] = arguments;
-        const opts = args.splice(-1, 1);
-
-        if (args.some(arg => arg !== null && typeof arg === "object"))
+      const params = [methodName].concat(args).map(param => {
+        if (param !== null && typeof parm === "object")
           throw new Error(
             `must only pass primitives as argument to a handler. ${JSON.stringify(args, null, 2)}`
           );
-
-        const handler = { methodName: opts[0].name, eventType, args };
-
-        return new instance.SafeString(
-          `on${eventType}="${handlerPath}.${handler.methodName}(${args.join(",")})"`
-        );
-      }
-
-      instance.registerHelper("debug", obj => {
-        return new instance.SafeString(`<pre class="debug">${JSON.stringify(obj, null, 2)}</pre>`);
+        if (typeof param === "string") return `'${param}'`;
+        return param;
       });
 
-      instance.registerHelper("watch", function(path, { fn }) {
-        const eId = Utils.randomId();
-        storage.renders[eId] = { render: fn.bind(null, proxyData), path };
-        return Utils.wrapTemplate(eId, fn(proxyData));
-      });
+      return new instance.SafeString(`on${eventType}="${handlerPath}.action(${params.join(",")})"`);
+    }
 
-      instance.registerHelper("watchEach", function(arr, arrName, { fn }) {
-        return arr.map((item, index) => {
-          const eId = Utils.randomId();
-          storage.renders[eId] = {
-            render: fn.bind(null, item),
-            path: `${arrName}.${index}.*`,
-          };
-          return Utils.wrapTemplate(eId, fn(item));
-        });
-      });
+    storage.handlers.bind = (event, path) => Utils.setKey(proxyData, path, event.currentTarget.value);
 
-      Object.keys(components).forEach(name => {
-        instance.registerHelper(name, function(options) {
-          return new instance.SafeString(
-            app.component({
-              ...components[name],
-              ...{ parentData: proxyData, props: options.hash },
-            })
-          );
-        });
-      });
+    storage.handlers.action = function() {
+      const [key, ...args] = arguments;
 
-      instance.registerHelper("isChecked", val => (val ? "checked" : ""));
-      instance.registerHelper("ref", key => new instance.SafeString(`data-vbars-ref="${key}"`));
-      instance.registerHelper(
-        "bind",
-        path => new instance.SafeString(`oninput="${handlerPath}.bind(event, '${path}')"`)
+      return methods[key].call(
+        null,
+        {
+          methods,
+          watchers,
+          data: proxyData,
+          parentData,
+          props,
+          $refs: Utils.findRefs(id),
+          event,
+        },
+        ...args
       );
+    };
 
-      // should throw an error if there is collision of method and comoponent name
-      Object.keys(methods).forEach(key => {
-        storage.handlers[key] = function() {
-          return methods[key].call(
-            methods,
-            { data: proxyData, parentData, props, $refs: Utils.findRefs(id), event },
-            ...arguments
-          );
+    instance.registerHelper("method", _handler);
+    instance.registerHelper(
+      "bind",
+      path => new instance.SafeString(`oninput="${handlerPath}.bind(event, '${path}')"`)
+    );
+  }
+
+  function ReRenders(storage, { instance, proxyData }) {
+    instance.registerHelper("watch", function(path, { fn }) {
+      const eId = Utils.randomId();
+      storage.renders[eId] = { render: fn.bind(null, proxyData), path };
+      return Utils.wrapTemplate(eId, fn(proxyData));
+    });
+
+    instance.registerHelper("watchEach", function(arr, { fn }) {
+      if (!Array.isArray(arr)) throw new Error("watchEach must be passed an Array");
+      const path = arr.ReBarsPath;
+
+      return arr.map((item, index) => {
+        const eId = Utils.randomId();
+        storage.renders[eId] = {
+          render: fn.bind(null, item),
+          path: `${path}.${index}.*`,
         };
-        instance.registerHelper(key, _handler);
+        return Utils.wrapTemplate(eId, fn(item));
       });
-    },
-  };
+    });
+  }
 
-  function index({ $el, name, root, Handlebars = window.Handlebars }) {
+  function Helpers({ instance, app, id, proxyData, components }) {
+    const storage = app.storage.components[id];
+
+    ReRenders(storage, ...arguments);
+    EventHandlers(storage, ...arguments);
+
+    instance.registerHelper("component", function(name, { hash: props }) {
+      return new instance.SafeString(
+        app.component({
+          ...components[name],
+          ...{ parentData: proxyData, props },
+        })
+      );
+    });
+
+    instance.registerHelper("isChecked", val => (val ? "checked" : ""));
+    instance.registerHelper("ref", key => new instance.SafeString(`data-rbs-ref="${key}"`));
+    instance.registerHelper(
+      "debug",
+      obj => new instance.SafeString(`<pre class="debug">${JSON.stringify(obj, null, 2)}</pre>`)
+    );
+  }
+
+  function index({ $el, root, Handlebars = window.Handlebars }) {
     if (!Handlebars) throw new Error("ReBars need Handlebars in order to run!");
 
-    const storage = { components: {} };
+    window.ReBars = window.ReBars || {};
+    window.ReBars.apps = window.ReBars.apps || {};
+    const appId = Utils.randomId();
+    const storage = (window.ReBars.apps[appId] = { components: {} });
+    const app = { storage, component, id: appId };
+
     $el.innerHTML = component(root);
 
     function component({
       template,
-      data = {},
       components = {},
       methods = {},
       parentData = {},
       props = {},
       hooks = {},
+      watchers = {},
+      data = {},
+      name,
     }) {
       const id = Utils.randomId();
       const instance = Handlebars.create();
 
-      // need to call created before building the proxy
-      if (hooks.created) hooks.created(...arguments);
+      if (!name) throw new Error("Each ReBars component should have a name");
 
       storage.components[id] = {
         handlers: {},
         renders: {},
+        hooks,
       };
 
-      const proxyData = Watcher({ rawData: data, storage, id });
+      // need to call created before building the proxy
+      if (hooks.created) hooks.created(...arguments);
+      const proxyData = Watcher({ id, app, parentData, props, data, watchers, name });
       const templateFn = instance.compile(template);
 
-      Helpers.register({
+      Helpers({
         id,
-        app: { storage, component, name },
         instance,
+        app,
         methods,
         components,
         proxyData,
         parentData,
         props,
+        watchers,
       });
 
       if ("attached" in hooks) {
@@ -220,14 +253,14 @@
           if (Utils.findComponent(id)) {
             clearInterval(int);
             hooks.attached({
-              ...{ methods, data: proxyData, parentData, props },
+              ...{ watchers, methods, data: proxyData, parentData, props },
               ...{ $refs: Utils.findRefs(id) },
             });
           }
         }, 10);
       }
 
-      return Utils.wrapTemplate(id, templateFn(data));
+      return Utils.wrapTemplate(id, templateFn(proxyData));
     }
 
     return {

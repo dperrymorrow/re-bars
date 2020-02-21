@@ -6,8 +6,7 @@ export default function({ id, app, parentData, props, data, watchers, name }) {
 
     Object.keys(watchers).forEach(watchPath => {
       if (Utils.shouldRender(path, watchPath)) {
-        console.log(`ReBars: watcher "${name}"`, path);
-        console.log(watchPath);
+        console.log(`ReBars: watcher "${name}.${path}"`);
         watchers[watchPath].call(null, { data: proxyData, parentData, props });
       }
     });
@@ -19,7 +18,7 @@ export default function({ id, app, parentData, props, data, watchers, name }) {
         const $target = Utils.findComponent(eId);
         if ($target) {
           $target.innerHTML = handler.render();
-          console.log($target);
+          console.log("ReBars: re-render", $target, `component: ${name}`, `path: ${path}`);
         } else {
           delete app.storage.components[eId];
         }
@@ -27,13 +26,8 @@ export default function({ id, app, parentData, props, data, watchers, name }) {
     });
 
     Object.keys(app.storage.components).forEach(cId => {
-      if (!Utils.findComponent(cId)) {
-        console.log("ReBars:", `removing handlers, and renders for ${cId}`);
-        delete app.storage.components[cId];
-      }
+      if (!Utils.findComponent(cId)) delete app.storage.components[cId];
     });
-
-    console.log(performance.memory.usedJSHeapSize.toLocaleString());
   }
 
   function _buildProxy(raw, tree = []) {

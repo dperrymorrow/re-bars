@@ -2,12 +2,11 @@ import Watcher from "./watcher.js";
 import Helpers from "./helpers/index.js";
 import Utils from "./utils.js";
 
-window.ReBars = window.ReBars || {};
-window.ReBars.apps = window.ReBars.apps || {};
-
 export default function({ $el, root, Handlebars = window.Handlebars }) {
   if (!Handlebars) throw new Error("ReBars need Handlebars in order to run!");
 
+  window.ReBars = window.ReBars || {};
+  window.ReBars.apps = window.ReBars.apps || {};
   const appId = Utils.randomId();
   const storage = (window.ReBars.apps[appId] = { components: {} });
   const app = { storage, component, id: appId };

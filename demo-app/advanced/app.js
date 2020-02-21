@@ -29,9 +29,7 @@ export default {
         {{/each}}
       </ul>
     {{/watch}}
-    {{#watch "todos.*" }}
-      {{ debug . }}
-    {{/watch}}
+
 
     {{#watch "uiState.adding" }}
        <div>
