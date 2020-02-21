@@ -2,6 +2,13 @@ import Utils from "../utils.js";
 
 export default function(storage, { instance, proxyData }) {
   instance.registerHelper("watch", function(path, { fn }) {
+    if (path === null)
+      throw new Error("Rebars: cannot pass null to watch helper, pass a string or Object");
+
+    if (typeof path === "object") {
+      path = `${path.ReBarsPath}.*`;
+      console.log(path);
+    }
     const eId = Utils.randomId();
     storage.renders[eId] = { render: fn.bind(null, proxyData), path };
     return Utils.wrapTemplate(eId, fn(proxyData));

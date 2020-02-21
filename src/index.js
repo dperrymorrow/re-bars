@@ -7,6 +7,7 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
 
   window.ReBars = window.ReBars || {};
   window.ReBars.apps = window.ReBars.apps || {};
+
   const appId = Utils.randomId();
   const storage = (window.ReBars.apps[appId] = { components: {} });
   const app = { storage, component, id: appId };
@@ -17,7 +18,6 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
     template,
     components = {},
     methods = {},
-    parentData = {},
     props = {},
     hooks = {},
     watchers = {},
@@ -35,9 +35,9 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
       hooks,
     };
 
-    // need to call created before building the proxy
     if (hooks.created) hooks.created(...arguments);
-    const proxyData = Watcher({ id, app, parentData, props, data, watchers, name });
+    // need to call created before building the proxy
+    const proxyData = Watcher({ id, app, props, data, watchers, name });
     const templateFn = instance.compile(template);
 
     Helpers({
@@ -47,7 +47,6 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
       methods,
       components,
       proxyData,
-      parentData,
       props,
       watchers,
     });
@@ -57,7 +56,7 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
         if (Utils.findComponent(id)) {
           clearInterval(int);
           hooks.attached({
-            ...{ watchers, methods, data: proxyData, parentData, props },
+            ...{ watchers, methods, data: proxyData, props },
             ...{ $refs: Utils.findRefs(id) },
           });
         }

@@ -1,9 +1,6 @@
 import Utils from "../utils.js";
 
-export default function(
-  storage,
-  { proxyData, instance, methods, id, watchers, parentData, props, app }
-) {
+export default function(storage, { proxyData, instance, methods, id, watchers, props, app }) {
   const handlerPath = `ReBars.apps.${app.id}.components.${id}.handlers`;
 
   function _handler() {
@@ -33,7 +30,6 @@ export default function(
         methods,
         watchers,
         data: proxyData,
-        parentData,
         props,
         $refs: Utils.findRefs(id),
         event,

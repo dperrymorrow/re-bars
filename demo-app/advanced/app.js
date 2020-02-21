@@ -1,5 +1,6 @@
-import AddComponent from "./add.js";
-import TodoComponent from "./todo.js";
+import Add from "./add.js";
+import Todo from "./todo.js";
+import Memory from "./memory.js";
 
 export default {
   template: /*html*/ `
@@ -25,7 +26,7 @@ export default {
     {{#watch "todos.length" }}
       <ul>
         {{#each todos}}
-          {{ component "TodoComponent" index=@index todo=. }}
+          {{ component "Todo" index=@index todo=. todos=@root.todos }}
         {{/each}}
       </ul>
     {{/watch}}
@@ -34,12 +35,14 @@ export default {
     {{#watch "uiState.adding" }}
        <div>
          {{#if uiState.adding }}
-           {{ component "AddComponent" }}
+           {{ component "Add" todos=todos }}
          {{else}}
            <button class="add" {{ method "click" "showAdd" }}>Add another</button>
          {{/if}}
        </div>
     {{/watch}}
+
+    {{ component "Memory" }}
   `,
 
   name: "DemoApp",
@@ -59,20 +62,19 @@ export default {
         done: false,
         name: "Grocery Shopping",
         description: "get the milk, eggs and bread",
-        id: 22,
       },
       {
         done: true,
         name: "Paint the House",
         description: "buy the paint and then paint the house",
-        id: 44,
       },
     ],
   },
 
   components: {
-    AddComponent,
-    TodoComponent,
+    Add,
+    Todo,
+    Memory,
   },
 
   watchers: {

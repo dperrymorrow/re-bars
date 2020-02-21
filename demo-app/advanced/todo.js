@@ -31,8 +31,8 @@ export default {
   },
 
   methods: {
-    deleteToDo({ props, parentData }) {
-      parentData.todos.splice(props.index, 1);
+    deleteToDo({ props }) {
+      props.todos.splice(props.index, 1);
     },
 
     toggleDone({ data }) {

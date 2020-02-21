@@ -12,16 +12,15 @@ export default {
   name: "AddComponent",
 
   methods: {
-    cancel({ event, parentData }) {
+    cancel({ event, props }) {
       event.preventDefault();
-      parentData.uiState.adding = false;
+      props.uiState.adding = false;
     },
 
-    addItem({ $refs, event, parentData }) {
+    addItem({ $refs, event, props }) {
       event.preventDefault();
 
-      parentData.todos.push({
-        id: new Date().getTime(),
+      props.todos.push({
         name: $refs.newName.value,
         description: $refs.newDescrip.value,
       });
