@@ -25,24 +25,26 @@ export default {
     {{#watch "todos.length" }}
       <ul>
         {{#each todos}}
-          {{ TodoComponent index=@index todo=. }}
+          {{ component "TodoComponent" index=@index todo=. }}
         {{/each}}
       </ul>
     {{/watch}}
     {{#watch "todos.*" }}
-    {{ debug . }}
+      {{ debug . }}
     {{/watch}}
 
     {{#watch "uiState.adding" }}
        <div>
          {{#if uiState.adding }}
-           {{ AddComponent }}
+           {{ component "AddComponent" }}
          {{else}}
-           <button class="add" {{ showAdd "click" }}>Add another</button>
+           <button class="add" {{ method "click" "showAdd" }}>Add another</button>
          {{/if}}
        </div>
     {{/watch}}
   `,
+
+  name: "DemoApp",
 
   data: {
     uiState: {

@@ -3,8 +3,8 @@ export default {
   {{# watch "todo.*" }}
     <li>
      <div >
-      <label for="{{ props.id }}">
-        <input id="{{ props.id }}" type="checkbox" {{ isChecked todo.done }} {{ toggleDone "click" }}/>
+      <label for="{{ todo.id }}">
+        <input id="{{ todo.id }}" type="checkbox" {{ isChecked todo.done }} {{ method "click" "toggleDone" }}/>
         {{#if todo.done }}
           <s>{{ todo.name }}</s>
         {{else}}
@@ -12,13 +12,13 @@ export default {
         {{/if}}
       </label>
       <p>{{ todo.description }}</p>
-      <button {{ deleteToDo "click" }}>X</button>
-
-      {{{ deleteToDo "click" 45 false "man o man" }}}
+      <button {{ method "click" "deleteToDo" }}>X</button>
       </div>
     </li>
   {{/watch}}
   `,
+
+  name: "Todo",
 
   data: {
     todo: null,

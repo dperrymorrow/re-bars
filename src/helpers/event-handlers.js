@@ -7,9 +7,8 @@ export default function(
   const handlerPath = `ReBars.apps.${app.id}.components.${id}.handlers`;
 
   function _handler() {
-    const [eventType, ...args] = arguments;
-    const opts = args.splice(-1, 1);
-    const methodName = opts[0].name;
+    const [eventType, methodName, ...args] = arguments;
+    args.splice(-1, 1);
 
     const params = [methodName].concat(args).map(param => {
       if (param !== null && typeof parm === "object")
@@ -43,7 +42,7 @@ export default function(
     );
   };
 
-  Object.keys(methods).forEach(key => instance.registerHelper(key, _handler));
+  instance.registerHelper("method", _handler);
   instance.registerHelper(
     "bind",
     path => new instance.SafeString(`oninput="${handlerPath}.bind(event, '${path}')"`)

@@ -1,13 +1,12 @@
 import Utils from "./utils.js";
 
-export default function({ id, app, parentData, props, data, watchers }) {
+export default function({ id, app, parentData, props, data, watchers, name }) {
   function _handler(path) {
     const cRef = app.storage.components[id];
 
-    console.log("Rebars update:", path);
-
     Object.keys(watchers).forEach(watchPath => {
       if (Utils.shouldRender(path, watchPath)) {
+        console.log(`ReBars: watcher "${name}"`, path);
         console.log(watchPath);
         watchers[watchPath].call(null, { data: proxyData, parentData, props });
       }
@@ -33,6 +32,8 @@ export default function({ id, app, parentData, props, data, watchers }) {
         delete app.storage.components[cId];
       }
     });
+
+    console.log(performance.memory.usedJSHeapSize.toLocaleString());
   }
 
   function _buildProxy(raw, tree = []) {

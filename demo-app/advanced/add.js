@@ -4,10 +4,13 @@ export default {
     <h1>{{ props.title }}</h1>
     <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
     <textarea name="description" {{ ref "newDescrip" }}></textarea>
-    <button class="push" {{ addItem "click" }}>Add todo</button>
-    <button class="cancel" {{ cancel "click" }}>Cancel</button>
+    <button class="push" {{ method "click" "addItem" }}>Add todo</button>
+    <button class="cancel" {{ method "click" "cancel" }}>Cancel</button>
   </form>
 `,
+
+  name: "AddComponent",
+
   methods: {
     cancel({ event, parentData }) {
       event.preventDefault();

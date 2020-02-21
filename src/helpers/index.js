@@ -7,15 +7,13 @@ export default function({ instance, app, id, proxyData, components }) {
   ReRenders(storage, ...arguments);
   EventHandlers(storage, ...arguments);
 
-  Object.keys(components).forEach(name => {
-    instance.registerHelper(name, function(options) {
-      return new instance.SafeString(
-        app.component({
-          ...components[name],
-          ...{ parentData: proxyData, props: options.hash },
-        })
-      );
-    });
+  instance.registerHelper("component", function(name, { hash: props }) {
+    return new instance.SafeString(
+      app.component({
+        ...components[name],
+        ...{ parentData: proxyData, props },
+      })
+    );
   });
 
   instance.registerHelper("isChecked", val => (val ? "checked" : ""));

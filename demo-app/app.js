@@ -23,7 +23,7 @@ export default {
         {{#watchEach todos }}
           <li>
             <label for="{{ id }}">
-              <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ toggleDone "click" id done }}/>
+              <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ method "click" "toggleDone" id done }}/>
               {{#if done }}
                 <s>{{ name }}</s>
               {{else}}
@@ -31,7 +31,7 @@ export default {
               {{/if}}
             </label>
             <p>{{ description }}</p>
-            <button {{ deleteToDo "click" @index }}>X</button>
+            <button {{ method "click" "deleteToDo" @index }}>X</button>
           </li>
         {{/watchEach}}
       </ul>
@@ -44,11 +44,11 @@ export default {
         <form>
           <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
           <textarea name="description" {{ ref "newDescrip" }}></textarea>
-          <button class="push" {{ addItem "click" }}>Add todo</button>
-          <button class="cancel" {{ toggleCreate "click" uiState.adding }}>Cancel</button>
+          <button class="push" {{ method "click" "addItem" }}>Add todo</button>
+          <button class="cancel" {{ method "click" "toggleCreate" uiState.adding }}>Cancel</button>
         </form>
       {{else}}
-        <button class="add" {{ toggleCreate "click" uiState.adding }}>Add another</button>
+        <button class="add" {{ method "click" "toggleCreate" uiState.adding }}>Add another</button>
       {{/if}}
     {{/watch}}
   `,
@@ -76,6 +76,8 @@ export default {
       },
     ],
   },
+
+  name: "DemoApp",
 
   methods: {
     deleteToDo({ data }, index) {

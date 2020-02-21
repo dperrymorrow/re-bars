@@ -23,9 +23,12 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
     hooks = {},
     watchers = {},
     data = {},
+    name,
   }) {
     const id = Utils.randomId();
     const instance = Handlebars.create();
+
+    if (!name) throw new Error("Each ReBars component should have a name");
 
     storage.components[id] = {
       handlers: {},
@@ -35,7 +38,7 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
 
     // need to call created before building the proxy
     if (hooks.created) hooks.created(...arguments);
-    const proxyData = Watcher({ id, app, parentData, props, data, watchers });
+    const proxyData = Watcher({ id, app, parentData, props, data, watchers, name });
     const templateFn = instance.compile(template);
 
     Helpers({
