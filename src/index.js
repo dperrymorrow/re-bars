@@ -33,6 +33,7 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
       handlers: {},
       renders: {},
       hooks,
+      name,
     };
 
     if (hooks.created) hooks.created(...arguments);

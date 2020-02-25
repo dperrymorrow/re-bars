@@ -5,6 +5,7 @@ export default {
     {{#watch usage }}
       {{ usage.used }}
     {{/watch}}
+    <button {{ method "click" "updateStorage" }} >update</button>
   </div>
   `,
 
@@ -23,9 +24,6 @@ export default {
   hooks: {
     attached({ methods }) {
       methods.updateStorage(...arguments);
-      setInterval(() => {
-        methods.updateStorage(...arguments);
-      }, 5000);
     },
   },
 };
