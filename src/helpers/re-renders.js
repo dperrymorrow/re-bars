@@ -10,7 +10,10 @@ export default function(storage, { instance, proxyData }) {
       console.log(path);
     }
     const eId = Utils.randomId();
-    storage.renders[eId] = { render: fn.bind(null, proxyData), path };
+    storage.renders[eId] = {
+      render: () => fn(proxyData),
+      path,
+    };
     return Utils.wrapTemplate(eId, fn(proxyData));
   });
 
@@ -21,7 +24,7 @@ export default function(storage, { instance, proxyData }) {
     return arr.map((item, index) => {
       const eId = Utils.randomId();
       storage.renders[eId] = {
-        render: fn.bind(null, item),
+        render: () => fn(item),
         path: `${path}.${index}.*`,
       };
       return Utils.wrapTemplate(eId, fn(item));
