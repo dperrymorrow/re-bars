@@ -44,7 +44,7 @@
     },
   };
 
-  function Watcher({ id, app, props, data, watchers, name }) {
+  function Watcher({ id, app, props = {}, data = {}, watchers = {}, name }) {
     const cRef = app.storage.comp[id];
 
     function _handler(path) {
@@ -174,7 +174,7 @@
     });
   }
 
-  function Helpers({ instance, app, id, proxyData, components }) {
+  function Helpers({ instance, app, id, components = {} }) {
     const storage = app.storage.comp[id];
 
     ReRenders(storage, ...arguments);
@@ -184,7 +184,7 @@
       return new instance.SafeString(
         app.component({
           ...components[name],
-          ...{ parentData: proxyData, props },
+          ...{ props },
         })
       );
     });
@@ -210,16 +210,7 @@
 
     $el.innerHTML = component(root);
 
-    function component({
-      template,
-      components = {},
-      methods = {},
-      props = {},
-      hooks = {},
-      watchers = {},
-      data = {},
-      name,
-    }) {
+    function component({ template, methods = {}, props = {}, hooks = {}, name }) {
       const id = Utils.randomId();
       const instance = Handlebars.create();
 
@@ -234,18 +225,12 @@
 
       if (hooks.created) hooks.created(...arguments);
       // need to call created before building the proxy
-      const proxyData = Watcher({ id, app, props, data, watchers, name });
+      const proxyData = Watcher({ ...arguments[0], ...{ id, app } });
       const templateFn = instance.compile(template);
 
       Helpers({
-        id,
-        instance,
-        app,
-        methods,
-        components,
-        proxyData,
-        props,
-        watchers,
+        ...arguments[0],
+        ...{ id, instance, proxyData, app },
       });
 
       if ("attached" in hooks) {
@@ -253,7 +238,7 @@
           if (Utils.findComponent(id)) {
             clearInterval(int);
             hooks.attached({
-              ...{ watchers, methods, data: proxyData, props },
+              ...{ methods, data: proxyData, props },
               ...{ $refs: Utils.findRefs(id) },
             });
           }

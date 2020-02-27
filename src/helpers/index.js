@@ -1,7 +1,7 @@
 import EventHandlers from "./event-handlers.js";
 import ReRenders from "./re-renders.js";
 
-export default function({ instance, app, id, proxyData, components }) {
+export default function({ instance, app, id, components = {} }) {
   const storage = app.storage.comp[id];
 
   ReRenders(storage, ...arguments);
@@ -11,7 +11,7 @@ export default function({ instance, app, id, proxyData, components }) {
     return new instance.SafeString(
       app.component({
         ...components[name],
-        ...{ parentData: proxyData, props },
+        ...{ props },
       })
     );
   });
