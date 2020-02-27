@@ -26,7 +26,7 @@ export default {
     });
   },
 
-  randomId: () => "rbs_" + counter++,
+  randomId: () => `rbs${counter++}`,
 
   setKey(obj, path, value) {
     const arr = path.split(".");

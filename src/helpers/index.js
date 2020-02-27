@@ -2,7 +2,7 @@ import EventHandlers from "./event-handlers.js";
 import ReRenders from "./re-renders.js";
 
 export default function({ instance, app, id, proxyData, components }) {
-  const storage = app.storage.components[id];
+  const storage = app.storage.comp[id];
 
   ReRenders(storage, ...arguments);
   EventHandlers(storage, ...arguments);

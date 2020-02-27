@@ -7,9 +7,10 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
 
   window.ReBars = window.ReBars || {};
   window.ReBars.apps = window.ReBars.apps || {};
+  window.rbs = window.ReBars;
 
   const appId = Utils.randomId();
-  const storage = (window.ReBars.apps[appId] = { components: {} });
+  const storage = (window.ReBars.apps[appId] = { comp: {} });
   const app = { storage, component, id: appId };
 
   $el.innerHTML = component(root);
@@ -29,9 +30,9 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
 
     if (!name) throw new Error("Each ReBars component should have a name");
 
-    storage.components[id] = {
-      handlers: {},
+    storage.comp[id] = {
       renders: {},
+      ev: {},
       hooks,
       name,
     };

@@ -2,7 +2,7 @@ import Utils from "./utils.js";
 
 export default function({ id, app, parentData, props, data, watchers, name }) {
   function _handler(path) {
-    const cRef = app.storage.components[id];
+    const cRef = app.storage.comp[id];
 
     Object.keys(watchers).forEach(watchPath => {
       if (Utils.shouldRender(path, watchPath)) {
@@ -20,13 +20,13 @@ export default function({ id, app, parentData, props, data, watchers, name }) {
           $target.innerHTML = handler.render();
           console.log("ReBars: re-render", $target, `component: ${name}`, `path: ${path}`);
         } else {
-          delete app.storage.components[eId];
+          delete app.storage.comp[eId];
         }
       }
     });
 
-    Object.keys(app.storage.components).forEach(cId => {
-      if (!Utils.findComponent(cId)) delete app.storage.components[cId];
+    Object.keys(app.storage.comp).forEach(cId => {
+      if (!Utils.findComponent(cId)) delete app.storage.comp[cId];
     });
   }
 
