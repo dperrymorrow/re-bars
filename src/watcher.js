@@ -26,7 +26,10 @@ export default function({ id, app, parentData, props, data, watchers, name }) {
     });
 
     Object.keys(app.storage.comp).forEach(cId => {
-      if (!Utils.findComponent(cId)) delete app.storage.comp[cId];
+      if (!Utils.findComponent(cId)) {
+        // will fire destory hook here...
+        delete app.storage.comp[cId];
+      }
     });
   }
 
@@ -54,6 +57,6 @@ export default function({ id, app, parentData, props, data, watchers, name }) {
     });
   }
 
-  const proxyData = _buildProxy(data);
+  const proxyData = _buildProxy({ ...data, ...props });
   return proxyData;
 }

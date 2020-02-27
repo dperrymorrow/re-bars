@@ -12,12 +12,12 @@ export default {
   name: "AddComponent",
 
   methods: {
-    cancel({ event, props }) {
+    cancel({ data }, event) {
       event.preventDefault();
-      props.uiState.adding = false;
+      data.uiState.adding = false;
     },
 
-    addItem({ $refs, event, props }) {
+    addItem({ $refs, props }, event) {
       event.preventDefault();
 
       props.todos.push({

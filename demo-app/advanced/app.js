@@ -85,7 +85,7 @@ export default {
   },
 
   methods: {
-    showAdd({ event, data }) {
+    showAdd({ data }, event) {
       event.preventDefault();
       data.uiState.adding = true;
     },

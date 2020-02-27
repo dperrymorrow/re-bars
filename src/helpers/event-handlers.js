@@ -1,6 +1,6 @@
 import Utils from "../utils.js";
 
-export default function(storage, { proxyData, instance, methods, id, watchers, props, app }) {
+export default function(storage, { proxyData, instance, methods, id, props, app }) {
   const handlerPath = `ReBars.apps.${app.id}.comp.${id}.ev`;
 
   function _handler() {
@@ -16,23 +16,19 @@ export default function(storage, { proxyData, instance, methods, id, watchers, p
       return param;
     });
 
-    return new instance.SafeString(`on${eventType}="${handlerPath}.method(${params.join(",")})"`);
+    return new instance.SafeString(
+      `on${eventType}="${handlerPath}.method(event, ${params.join(",")})"`
+    );
   }
 
   storage.ev.bind = (event, path) => Utils.setKey(proxyData, path, event.currentTarget.value);
   storage.ev.method = function() {
-    const [key, ...args] = arguments;
+    const [event, key, ...args] = arguments;
 
     return methods[key].call(
-      null,
-      {
-        methods,
-        watchers,
-        data: proxyData,
-        props,
-        $refs: Utils.findRefs(id),
-        event,
-      },
+      methods,
+      { data: proxyData, props, methods, $refs: Utils.findRefs(id) },
+      event,
       ...args
     );
   };
