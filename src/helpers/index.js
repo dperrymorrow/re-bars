@@ -4,8 +4,6 @@ import ReRenders from "./re-renders.js";
 export default function({ instance, app, id, proxyData, components }) {
   const storage = app.storage.components[id];
 
-  console.log("storage", storage);
-
   ReRenders(storage, ...arguments);
   EventHandlers(storage, ...arguments);
 

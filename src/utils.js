@@ -1,3 +1,5 @@
+let counter = 1;
+
 export default {
   findComponent: id => document.getElementById(id),
   wrapTemplate: (id, html) => `<span id="${id}">${html}</span>`,
@@ -24,11 +26,7 @@ export default {
     });
   },
 
-  randomId: () =>
-    "_rbs_" +
-    Math.random()
-      .toString(36)
-      .substr(2, 9),
+  randomId: () => "rbs_" + counter++,
 
   setKey(obj, path, value) {
     const arr = path.split(".");
