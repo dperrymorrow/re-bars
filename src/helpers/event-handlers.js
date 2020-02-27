@@ -1,7 +1,7 @@
 import Utils from "../utils.js";
 
 export default function(storage, { proxyData, instance, methods, id, props, app }) {
-  const handlerPath = `ReBars.apps.${app.id}.comp.${id}.ev`;
+  const handlerPath = `rbs.apps.${app.id}.comp.${id}.ev`;
 
   function _handler() {
     const [eventType, methodName, ...args] = arguments;

@@ -11,7 +11,7 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
 
   const appId = Utils.randomId();
   const storage = (window.ReBars.apps[appId] = { comp: {} });
-  const app = { storage, component, id: appId };
+  const app = { component, id: appId, storage };
 
   $el.innerHTML = component(root);
 

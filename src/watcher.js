@@ -1,13 +1,13 @@
 import Utils from "./utils.js";
 
-export default function({ id, app, parentData, props, data, watchers, name }) {
-  function _handler(path) {
-    const cRef = app.storage.comp[id];
+export default function({ id, app, props, data, watchers, name }) {
+  const cRef = app.storage.comp[id];
 
+  function _handler(path) {
     Object.keys(watchers).forEach(watchPath => {
       if (Utils.shouldRender(path, watchPath)) {
         console.log(`ReBars: watcher "${name}.${path}"`);
-        watchers[watchPath].call(null, { data: proxyData, parentData, props });
+        watchers[watchPath].call(null, { data: proxyData, props });
       }
     });
 
@@ -20,7 +20,7 @@ export default function({ id, app, parentData, props, data, watchers, name }) {
           $target.innerHTML = handler.render();
           console.log("ReBars: re-render", $target, `component: ${name}`, `path: ${path}`);
         } else {
-          delete app.storage.comp[eId];
+          delete cRef.renders[eId];
         }
       }
     });

@@ -86,11 +86,11 @@
     name: "DemoApp",
 
     methods: {
-      deleteToDo({ data }, index) {
+      deleteToDo({ data }, event, index) {
         data.todos.splice(index, 1);
       },
 
-      addItem({ $refs, data, event }) {
+      addItem({ $refs, data }, event) {
         event.preventDefault();
 
         data.todos.push({
@@ -102,11 +102,11 @@
         $refs.newName.value = $refs.newDescrip.value = "";
       },
 
-      toggleDone({ data }, id, done) {
+      toggleDone({ data }, event, id, done) {
         data.todos.find(item => item.id === id).done = !done;
       },
 
-      toggleCreate({ event, data }, adding) {
+      toggleCreate({ data }, event, adding) {
         event.preventDefault();
         data.uiState.adding = !adding;
       },
