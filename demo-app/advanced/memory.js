@@ -1,9 +1,9 @@
 export default {
-  /*html*/
-  template: `
+  template: /*html*/ `
   <div id="memory">
     {{#watch usage }}
-      {{ usage.used }}
+      <div>Used: {{ usage.used }}</div>
+      <div>Max: {{ usage.max }}</div>
     {{/watch}}
     <button {{ method "click" "updateStorage" }} >update</button>
   </div>
@@ -12,12 +12,13 @@ export default {
   name: "memory",
 
   data: {
-    usage: { used: 0 },
+    usage: { used: 0, max: 0 },
   },
 
   methods: {
     updateStorage({ data }) {
       data.usage.used = performance.memory.usedJSHeapSize.toLocaleString();
+      data.usage.max = performance.memory.jsHeapSizeLimit.toLocaleString();
     },
   },
 

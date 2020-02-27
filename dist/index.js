@@ -4,6 +4,8 @@
   (global = global || self, global.ReBars = factory());
 }(this, (function () { 'use strict';
 
+  let counter = 1;
+
   var Utils = {
     findComponent: id => document.getElementById(id),
     wrapTemplate: (id, html) => `<span id="${id}">${html}</span>`,
@@ -30,11 +32,7 @@
       });
     },
 
-    randomId: () =>
-      "_rbs_" +
-      Math.random()
-        .toString(36)
-        .substr(2, 9),
+    randomId: () => `rbs${counter++}`,
 
     setKey(obj, path, value) {
       const arr = path.split(".");
@@ -48,7 +46,7 @@
 
   function Watcher({ id, app, parentData, props, data, watchers, name }) {
     function _handler(path) {
-      const cRef = app.storage.components[id];
+      const cRef = app.storage.comp[id];
 
       Object.keys(watchers).forEach(watchPath => {
         if (Utils.shouldRender(path, watchPath)) {
@@ -64,15 +62,13 @@
           if ($target) {
             $target.innerHTML = handler.render();
           } else {
-            delete app.storage.components[eId];
+            delete app.storage.comp[eId];
           }
         }
       });
 
-      Object.keys(app.storage.components).forEach(cId => {
-        if (!Utils.findComponent(cId)) {
-          delete app.storage.components[cId];
-        }
+      Object.keys(app.storage.comp).forEach(cId => {
+        if (!Utils.findComponent(cId)) delete app.storage.comp[cId];
       });
     }
 
@@ -104,11 +100,8 @@
     return proxyData;
   }
 
-  function EventHandlers(
-    storage,
-    { proxyData, instance, methods, id, watchers, parentData, props, app }
-  ) {
-    const handlerPath = `ReBars.apps.${app.id}.components.${id}.handlers`;
+  function EventHandlers(storage, { proxyData, instance, methods, id, watchers, props, app }) {
+    const handlerPath = `ReBars.apps.${app.id}.comp.${id}.ev`;
 
     function _handler() {
       const [eventType, methodName, ...args] = arguments;
@@ -123,12 +116,11 @@
         return param;
       });
 
-      return new instance.SafeString(`on${eventType}="${handlerPath}.action(${params.join(",")})"`);
+      return new instance.SafeString(`on${eventType}="${handlerPath}.method(${params.join(",")})"`);
     }
 
-    storage.handlers.bind = (event, path) => Utils.setKey(proxyData, path, event.currentTarget.value);
-
-    storage.handlers.action = function() {
+    storage.ev.bind = (event, path) => Utils.setKey(proxyData, path, event.currentTarget.value);
+    storage.ev.method = function() {
       const [key, ...args] = arguments;
 
       return methods[key].call(
@@ -137,7 +129,6 @@
           methods,
           watchers,
           data: proxyData,
-          parentData,
           props,
           $refs: Utils.findRefs(id),
           event,
@@ -155,8 +146,16 @@
 
   function ReRenders(storage, { instance, proxyData }) {
     instance.registerHelper("watch", function(path, { fn }) {
+      if (path === null)
+        throw new Error("Rebars: cannot pass null to watch helper, pass a string or Object");
+
+      if (typeof path === "object") path = `${path.ReBarsPath}.*`;
+
       const eId = Utils.randomId();
-      storage.renders[eId] = { render: fn.bind(null, proxyData), path };
+      storage.renders[eId] = {
+        render: () => fn(proxyData),
+        path,
+      };
       return Utils.wrapTemplate(eId, fn(proxyData));
     });
 
@@ -167,7 +166,7 @@
       return arr.map((item, index) => {
         const eId = Utils.randomId();
         storage.renders[eId] = {
-          render: fn.bind(null, item),
+          render: () => fn(item),
           path: `${path}.${index}.*`,
         };
         return Utils.wrapTemplate(eId, fn(item));
@@ -176,7 +175,7 @@
   }
 
   function Helpers({ instance, app, id, proxyData, components }) {
-    const storage = app.storage.components[id];
+    const storage = app.storage.comp[id];
 
     ReRenders(storage, ...arguments);
     EventHandlers(storage, ...arguments);
@@ -203,8 +202,10 @@
 
     window.ReBars = window.ReBars || {};
     window.ReBars.apps = window.ReBars.apps || {};
+    window.rbs = window.ReBars;
+
     const appId = Utils.randomId();
-    const storage = (window.ReBars.apps[appId] = { components: {} });
+    const storage = (window.ReBars.apps[appId] = { comp: {} });
     const app = { storage, component, id: appId };
 
     $el.innerHTML = component(root);
@@ -213,7 +214,6 @@
       template,
       components = {},
       methods = {},
-      parentData = {},
       props = {},
       hooks = {},
       watchers = {},
@@ -225,15 +225,16 @@
 
       if (!name) throw new Error("Each ReBars component should have a name");
 
-      storage.components[id] = {
-        handlers: {},
+      storage.comp[id] = {
         renders: {},
+        ev: {},
         hooks,
+        name,
       };
 
-      // need to call created before building the proxy
       if (hooks.created) hooks.created(...arguments);
-      const proxyData = Watcher({ id, app, parentData, props, data, watchers, name });
+      // need to call created before building the proxy
+      const proxyData = Watcher({ id, app, props, data, watchers, name });
       const templateFn = instance.compile(template);
 
       Helpers({
@@ -243,7 +244,6 @@
         methods,
         components,
         proxyData,
-        parentData,
         props,
         watchers,
       });
@@ -253,7 +253,7 @@
           if (Utils.findComponent(id)) {
             clearInterval(int);
             hooks.attached({
-              ...{ watchers, methods, data: proxyData, parentData, props },
+              ...{ watchers, methods, data: proxyData, props },
               ...{ $refs: Utils.findRefs(id) },
             });
           }
