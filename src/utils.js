@@ -14,15 +14,18 @@ export default {
     );
   },
 
-  shouldRender(path, watchPath) {
-    if (path === watchPath || watchPath === ".*") return true;
+  shouldRender(path, watch) {
+    const watchPaths = Array.isArray(watch) ? watch : [watch];
+    return watchPaths.some(watchPath => {
+      if (path === watchPath || watchPath === ".*") return true;
 
-    const pathSegs = path.split(".");
-    const watchSegs = watchPath.split(".");
+      const pathSegs = path.split(".");
+      const watchSegs = watchPath.split(".");
 
-    return watchSegs.every((seg, index) => {
-      if (seg === pathSegs[index] || seg === "*") return true;
-      return false;
+      return watchSegs.every((seg, index) => {
+        if (seg === pathSegs[index] || seg === "*") return true;
+        return false;
+      });
     });
   },
 

@@ -1,6 +1,6 @@
 export default {
   template: /*html*/ `
-  {{# watch "todo.*" }}
+  {{#watch todo }}
     <li>
       <label>
         <input type="checkbox" {{ isChecked todo.done }} {{ method "toggleDone" }} />

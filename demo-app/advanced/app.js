@@ -26,8 +26,9 @@ export default {
     <button {{ method "filter" "completed" }}>Show Completed</button>
     <button {{ method "filter" "incomplete" }}>Show Incompleted</button>
     <button {{ method "clearFilter" }}>Show All</button>
+
     <ul>
-      {{#watch "filter" }}
+      {{#watch "filter,todos.length" }}
         {{#each todos}}
           {{ component "Todo" index=@index todo=. todos=@root.todos  }}
         {{/each}}
@@ -45,7 +46,7 @@ export default {
     {{/watch}}
 
     {{ component "Memory" }}
-    {{ debug . }}
+    <!-- {{ debug . }} -->
   `,
 
   name: "DemoApp",
