@@ -5,10 +5,7 @@ export default function({ id, app, props = {}, data = {}, watchers = {}, name })
 
   function _handler(path) {
     Object.keys(watchers).forEach(watchPath => {
-      if (Utils.shouldRender(path, watchPath)) {
-        console.log(`ReBars: watcher "${name}.${path}"`);
-        watchers[watchPath].call(null, { data: proxyData, props });
-      }
+      if (Utils.shouldRender(path, watchPath)) watchers[watchPath]({ data: proxyData, props });
     });
 
     Object.keys(cRef.renders).forEach(eId => {
@@ -18,7 +15,7 @@ export default function({ id, app, props = {}, data = {}, watchers = {}, name })
         const $target = Utils.findComponent(eId);
         if ($target) {
           $target.innerHTML = handler.render();
-          console.log("ReBars: re-render", $target, `component: ${name}`, `path: ${path}`);
+          console.log("ReBars: re-render", $target, `${name}: ${path}`);
         } else {
           delete cRef.renders[eId];
         }
