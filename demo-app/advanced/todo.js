@@ -25,9 +25,7 @@ export default {
   },
 
   methods: {
-    deleteToDo({ data }) {
-      data.todos.splice(data.index, 1);
-    },
+    deleteToDo({ data, props }) {},
 
     toggleDone({ data }) {
       data.todo.done = !data.todo.done;

@@ -30,7 +30,7 @@ export default {
     <ul>
       {{#watch "filter,todos.length" }}
         {{#each filtered }}
-          {{ component "Todo" index=@index todo=. todos=@root.filtered  }}
+          {{ component "Todo" todo=. }}
         {{/each}}
       {{/watch}}
     </ul>

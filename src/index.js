@@ -47,11 +47,11 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
       props,
       methods,
       id,
-      name,
       components,
       instance,
       helpers,
       data: proxyData,
+      name,
       app,
     });
 
