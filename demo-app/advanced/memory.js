@@ -5,7 +5,7 @@ export default {
       <div>Used: {{ usage.used }}</div>
       <div>Max: {{ usage.max }}</div>
     {{/watch}}
-    <button {{ method "click" "updateStorage" }} >update</button>
+    <button {{ method "updateStorage" }} >update</button>
   </div>
   `,
 

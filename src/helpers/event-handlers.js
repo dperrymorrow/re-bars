@@ -4,7 +4,8 @@ export default function(storage, { proxyData, instance, methods, id, props, app 
   const handlerPath = `rbs.apps.${app.id}.comp.${id}.ev`;
 
   function _handler() {
-    const [eventType, methodName, ...args] = arguments;
+    const [str, ...args] = arguments;
+    const [methodName, eventType = "click"] = str.split(":");
     args.splice(-1, 1);
 
     const params = [methodName].concat(args).map(param => {

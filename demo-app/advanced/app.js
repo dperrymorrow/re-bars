@@ -39,7 +39,7 @@ export default {
        {{#if uiState.adding }}
          {{ component "Add" todos=todos uiState=uiState }}
        {{else}}
-         <button class="add" {{ method "showAdd:click" }}>Add another</button>
+         <button class="add" {{ method "showAdd" }}>Add another</button>
        {{/if}}
       </div>
     {{/watch}}

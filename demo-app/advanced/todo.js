@@ -3,7 +3,7 @@ export default {
   {{# watch "todo.*" }}
     <li>
       <label>
-        <input type="checkbox" {{ isChecked todo.done }} {{ method "click" "toggleDone" }} />
+        <input type="checkbox" {{ isChecked todo.done }} {{ method "toggleDone" }} />
         {{#if todo.done }}
           <s>{{ todo.name }}</s>
         {{else}}
@@ -11,7 +11,7 @@ export default {
         {{/if}}
       </label>
       <p>{{ todo.description }}</p>
-      <button {{ method "click" "deleteToDo" }}>X</button>
+      <button {{ method "deleteToDo" }}>X</button>
     </li>
   {{/watch}}
   `,
