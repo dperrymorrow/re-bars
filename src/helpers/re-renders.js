@@ -6,7 +6,7 @@ const _getPath = target => {
   return typeof target === "object" ? `${target.ReBarsPath}.*` : target.split(",");
 };
 
-export default function(storage, { instance, proxyData }) {
+export default function(storage, { instance, data }) {
   instance.registerHelper("debug", function(obj) {
     const render = () => `<pre class="debug">${JSON.stringify(obj, null, 2)}</pre>`;
     const eId = Utils.randomId();
@@ -20,10 +20,10 @@ export default function(storage, { instance, proxyData }) {
   instance.registerHelper("watch", function(target, { fn }) {
     const eId = Utils.randomId();
     storage.renders[eId] = {
-      render: fn.bind(null, proxyData),
+      render: fn.bind(null, data),
       path: _getPath(target),
     };
-    return Utils.wrapTemplate(eId, fn(proxyData));
+    return Utils.wrapTemplate(eId, fn(data));
   });
 
   instance.registerHelper("watchEach", function(arr, { fn }) {

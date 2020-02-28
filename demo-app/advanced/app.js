@@ -29,8 +29,8 @@ export default {
 
     <ul>
       {{#watch "filter,todos.length" }}
-        {{#each todos}}
-          {{ component "Todo" index=@index todo=. todos=@root.todos  }}
+        {{#each filtered }}
+          {{ component "Todo" index=@index todo=. todos=@root.filtered  }}
         {{/each}}
       {{/watch}}
     </ul>
@@ -46,14 +46,20 @@ export default {
     {{/watch}}
 
     {{ component "Memory" }}
-    <!-- {{ debug . }} -->
+    {{ debug . }}
   `,
 
   name: "DemoApp",
 
   data: {
     filter: null,
-    // filterSet: null,
+
+    filtered() {
+      if (this.filter === "completed") return this.todos.filter(item => item.done);
+      if (this.filter === "incomplete") return this.todos.filter(item => !item.done);
+      return this.todos;
+    },
+
     uiState: {
       adding: false,
     },
@@ -61,8 +67,6 @@ export default {
       title: "This is my list of things to do",
       description: "just general items that need done around the house",
     },
-    completed: [],
-    incomplete: [],
     todos: [
       {
         done: false,
@@ -76,35 +80,16 @@ export default {
       },
     ],
   },
+  helpers: {
+    // disableActive({instance, data}, filter){
+    //
+    // }
+  },
 
   components: { Add, Todo, Memory },
 
-  watchers: {
-    "todos.*"({ data }) {
-      data.completed = data.todos.filter(item => item.done);
-      data.incomplete = data.todos.filter(item => !item.done);
-    },
-  },
-  // need to pass in methods here to make easier to work with
-  hooks: {
-    created({ data }) {
-      data.completed = data.todos.filter(item => item.done);
-      data.incomplete = data.todos.filter(item => !item.done);
-      data.filterSet = data.todos;
-    },
-  },
-
   methods: {
-    filter({ data }, event, filter) {
-      event.stopPropagation();
-
-      data.filter = filter;
-      // data.filterSet = data.todos;
-      //
-      // if (filter === "completed") data.filterSet = data.completed;
-      // if (filter === "incomplete") data.filterSet = data.incomplete;
-    },
-
+    filter: ({ data }, event, filter) => (data.filter = filter),
     clearFilter: ({ data }) => (data.filter = null),
 
     showAdd({ data }, event) {

@@ -1,11 +1,11 @@
 import Utils from "./utils.js";
 
-export default function({ id, app, props = {}, data = {}, watchers = {}, name }) {
+export default function({ id, app, props = {}, methods, rawData = {}, watchers = {}, name }) {
   const cRef = app.storage.comp[id];
 
   function _handler(path) {
     Object.entries(watchers).forEach(([watch, fn]) => {
-      if (Utils.shouldRender(path, watch)) fn({ data: proxyData, props });
+      if (Utils.shouldRender(path, watch)) fn({ data: proxyData, props, methods });
     });
 
     Object.entries(cRef.renders).forEach(([eId, handler]) => {
@@ -52,6 +52,6 @@ export default function({ id, app, props = {}, data = {}, watchers = {}, name })
     });
   }
 
-  const proxyData = _buildProxy({ ...data, ...props });
+  const proxyData = _buildProxy({ ...rawData, ...props });
   return proxyData;
 }

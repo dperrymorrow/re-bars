@@ -18,6 +18,12 @@ export default {
 
   name: "Todo",
 
+  helpers: {
+    isChecked(context, val) {
+      return val ? "checked" : "";
+    },
+  },
+
   methods: {
     deleteToDo({ data }) {
       data.todos.splice(data.index, 1);

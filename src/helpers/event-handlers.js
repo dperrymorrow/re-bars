@@ -1,6 +1,6 @@
 import Utils from "../utils.js";
 
-export default function(storage, { proxyData, instance, methods, id, props, app }) {
+export default function(storage, { data, instance, methods, id, props, app }) {
   const handlerPath = `rbs.apps.${app.id}.comp.${id}.ev`;
 
   function _handler() {
@@ -22,13 +22,13 @@ export default function(storage, { proxyData, instance, methods, id, props, app 
     );
   }
 
-  storage.ev.bind = (event, path) => Utils.setKey(proxyData, path, event.currentTarget.value);
+  storage.ev.bind = (event, path) => Utils.setKey(data, path, event.currentTarget.value);
   storage.ev.method = function() {
     const [event, key, ...args] = arguments;
 
     return methods[key].call(
       methods,
-      { data: proxyData, props, methods, $refs: Utils.findRefs(id) },
+      { data, props, methods, $refs: Utils.findRefs(id) },
       event,
       ...args
     );

@@ -15,7 +15,17 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
 
   $el.innerHTML = component(root);
 
-  function component({ template, methods = {}, props = {}, hooks = {}, name }) {
+  function component({
+    template,
+    methods = {},
+    props = {},
+    hooks = {},
+    name,
+    components = {},
+    data: rawData,
+    watchers = {},
+    helpers = {},
+  }) {
     const id = Utils.randomId();
     const instance = Handlebars.create();
 
@@ -28,24 +38,28 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
       name,
     };
 
-    if (hooks.created) hooks.created(...arguments);
+    if (hooks.created) hooks.created({ data: rawData, methods });
     // need to call created before building the proxy
-    const proxyData = Watcher({ ...arguments[0], ...{ id, app } });
+    const proxyData = Watcher({ id, app, props, methods, rawData, watchers, name });
     const templateFn = instance.compile(template);
 
     Helpers({
-      ...arguments[0],
-      ...{ id, instance, proxyData, app },
+      props,
+      methods,
+      id,
+      name,
+      components,
+      instance,
+      helpers,
+      data: proxyData,
+      app,
     });
 
     if ("attached" in hooks) {
       const int = setInterval(() => {
         if (Utils.findComponent(id)) {
           clearInterval(int);
-          hooks.attached({
-            ...{ methods, data: proxyData, props },
-            ...{ $refs: Utils.findRefs(id) },
-          });
+          hooks.attached({ methods, data: proxyData, props, $refs: Utils.findRefs(id) });
         }
       }, 10);
     }
