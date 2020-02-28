@@ -4,13 +4,11 @@ export default function({ id, app, props = {}, data = {}, watchers = {}, name })
   const cRef = app.storage.comp[id];
 
   function _handler(path) {
-    Object.keys(watchers).forEach(watchPath => {
-      if (Utils.shouldRender(path, watchPath)) watchers[watchPath]({ data: proxyData, props });
+    Object.entries(watchers).forEach(([watch, fn]) => {
+      if (Utils.shouldRender(path, watch)) fn({ data: proxyData, props });
     });
 
-    Object.keys(cRef.renders).forEach(eId => {
-      const handler = cRef.renders[eId];
-
+    Object.entries(cRef.renders).forEach(([eId, handler]) => {
       if (Utils.shouldRender(path, handler.path)) {
         const $target = Utils.findComponent(eId);
         if ($target) {
