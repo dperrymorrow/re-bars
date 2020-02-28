@@ -23,31 +23,36 @@ export default {
 
     <hr />
 
-    {{#watch "todos.length" }}
-      <ul>
+    <button {{ method "filter" "completed" }}>Show Completed</button>
+    <button {{ method "filter" "incomplete" }}>Show Incompleted</button>
+    <button {{ method "clearFilter" }}>Show All</button>
+    <ul>
+      {{#watch "filter" }}
         {{#each todos}}
-          {{ component "Todo" index=@index todo=. todos=@root.todos }}
+          {{ component "Todo" index=@index todo=. todos=@root.todos  }}
         {{/each}}
-      </ul>
-    {{/watch}}
-
+      {{/watch}}
+    </ul>
 
     {{#watch "uiState.adding" }}
-       <div>
-         {{#if uiState.adding }}
-           {{ component "Add" todos=todos uiState=uiState }}
-         {{else}}
-           <button class="add" {{ method "click" "showAdd" }}>Add another</button>
-         {{/if}}
-       </div>
+      <div>
+       {{#if uiState.adding }}
+         {{ component "Add" todos=todos uiState=uiState }}
+       {{else}}
+         <button class="add" {{ method "showAdd:click" }}>Add another</button>
+       {{/if}}
+      </div>
     {{/watch}}
 
     {{ component "Memory" }}
+    {{ debug . }}
   `,
 
   name: "DemoApp",
 
   data: {
+    filter: null,
+    // filterSet: null,
     uiState: {
       adding: false,
     },
@@ -56,7 +61,7 @@ export default {
       description: "just general items that need done around the house",
     },
     completed: [],
-    active: [],
+    incomplete: [],
     todos: [
       {
         done: false,
@@ -71,21 +76,38 @@ export default {
     ],
   },
 
-  components: {
-    Add,
-    Todo,
-    Memory,
-  },
+  components: { Add, Todo, Memory },
 
   watchers: {
     "todos.*"({ data }) {
       data.completed = data.todos.filter(item => item.done);
-      data.active = data.todos.filter(item => !item.done);
+      data.incomplete = data.todos.filter(item => !item.done);
+    },
+  },
+  // need to pass in methods here to make easier to work with
+  hooks: {
+    created({ data }) {
+      data.completed = data.todos.filter(item => item.done);
+      data.incomplete = data.todos.filter(item => !item.done);
+      data.filterSet = data.todos;
     },
   },
 
   methods: {
+    filter({ data }, event, filter) {
+      event.stopPropagation();
+
+      data.filter = filter;
+      // data.filterSet = data.todos;
+      //
+      // if (filter === "completed") data.filterSet = data.completed;
+      // if (filter === "incomplete") data.filterSet = data.incomplete;
+    },
+
+    clearFilter: ({ data }) => (data.filter = null),
+
     showAdd({ data }, event) {
+      console.log(arguments);
       event.preventDefault();
       data.uiState.adding = true;
     },

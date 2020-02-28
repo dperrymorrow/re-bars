@@ -18,8 +18,4 @@ export default function({ instance, app, id, components = {} }) {
 
   instance.registerHelper("isChecked", val => (val ? "checked" : ""));
   instance.registerHelper("ref", key => new instance.SafeString(`data-rbs-ref="${key}"`));
-  instance.registerHelper(
-    "debug",
-    obj => new instance.SafeString(`<pre class="debug">${JSON.stringify(obj, null, 2)}</pre>`)
-  );
 }

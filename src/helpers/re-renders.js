@@ -1,14 +1,25 @@
 import Utils from "../utils.js";
 
-export default function(storage, { instance, proxyData }) {
-  instance.registerHelper("watch", function(path, { fn }) {
-    if (path === null)
-      throw new Error("Rebars: cannot pass null to watch helper, pass a string or Object");
+const _getPath = target => {
+  if (target === null)
+    throw new Error("Rebars: cannot pass null to watch helper, pass a string or Object");
+  return typeof target === "object" ? `${target.ReBarsPath}.*` : target;
+};
 
-    if (typeof path === "object") {
-      path = `${path.ReBarsPath}.*`;
-      console.log(path);
-    }
+export default function(storage, { instance, proxyData }) {
+  instance.registerHelper("debug", function(obj) {
+    const path = _getPath(obj);
+    const render = () => `<pre class="debug">${JSON.stringify(obj, null, 2)}</pre>`;
+    const eId = Utils.randomId();
+    storage.renders[eId] = {
+      render,
+      path,
+    };
+    return new instance.SafeString(Utils.wrapTemplate(eId, render()));
+  });
+
+  instance.registerHelper("watch", function(target, { fn }) {
+    const path = _getPath(target);
     const eId = Utils.randomId();
     storage.renders[eId] = {
       render: () => fn(proxyData),
