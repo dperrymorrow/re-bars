@@ -15,7 +15,7 @@ export default {
   },
 
   shouldRender(path, watchPath) {
-    if (path === watchPath) return true;
+    if (path === watchPath || watchPath === ".*") return true;
 
     const pathSegs = path.split(".");
     const watchSegs = watchPath.split(".");
