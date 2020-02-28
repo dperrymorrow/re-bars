@@ -23,6 +23,7 @@ export default {
       props.todos.push({
         name: $refs.newName.value,
         description: $refs.newDescrip.value,
+        id: new Date().getTime(),
       });
 
       $refs.newName.value = $refs.newDescrip.value = "";

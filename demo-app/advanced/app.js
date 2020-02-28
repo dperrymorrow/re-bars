@@ -1,6 +1,5 @@
 import Add from "./add.js";
 import Todo from "./todo.js";
-import Memory from "./memory.js";
 
 export default {
   template: /*html*/ `
@@ -23,15 +22,19 @@ export default {
 
     <hr />
 
-    <button {{ method "filter" "completed" }}>Show Completed</button>
-    <button {{ method "filter" "incomplete" }}>Show Incompleted</button>
-    <button {{ method "clearFilter" }}>Show All</button>
+    {{#watch "filter" }}
+      <button {{ disabledIf "completed" }} {{ method "filter" "completed" }}>Show Completed</button>
+      <button {{ disabledIf "incomplete" }} {{ method "filter" "incomplete" }}>Show Incompleted</button>
+      <button {{ disabledIf null }} {{ method "clearFilter" }}>Show All</button>
+    {{/watch}}
 
     <ul>
       {{#watch "filter,todos.length" }}
-        {{#each filtered }}
-          {{ component "Todo" todo=. }}
-        {{/each}}
+        {{#watchEach todos }}
+          {{#ifShowTodo . }}
+            {{ component "Todo" todo=. todos=@root.todos }}
+          {{/ifShowTodo}}
+        {{/watchEach}}
       {{/watch}}
     </ul>
 
@@ -44,22 +47,12 @@ export default {
        {{/if}}
       </div>
     {{/watch}}
-
-    {{ component "Memory" }}
-    {{ debug . }}
   `,
 
   name: "DemoApp",
 
   data: {
     filter: null,
-
-    filtered() {
-      if (this.filter === "completed") return this.todos.filter(item => item.done);
-      if (this.filter === "incomplete") return this.todos.filter(item => !item.done);
-      return this.todos;
-    },
-
     uiState: {
       adding: false,
     },
@@ -72,21 +65,29 @@ export default {
         done: false,
         name: "Grocery Shopping",
         description: "get the milk, eggs and bread",
+        id: 33,
       },
       {
         done: true,
         name: "Paint the House",
         description: "buy the paint and then paint the house",
+        id: 22,
       },
     ],
   },
   helpers: {
-    // disableActive({instance, data}, filter){
-    //
-    // }
+    disabledIf({ data }, filter) {
+      return data.filter === filter ? "disabled" : "";
+    },
+
+    ifShowTodo({ data }, todo, options) {
+      let shouldRender = true;
+      if (data.filter) shouldRender = data.filter === "completed" ? todo.done : !todo.done;
+      return shouldRender ? options.fn(todo) : options.inverse(todo);
+    },
   },
 
-  components: { Add, Todo, Memory },
+  components: { Add, Todo },
 
   methods: {
     filter: ({ data }, event, filter) => (data.filter = filter),

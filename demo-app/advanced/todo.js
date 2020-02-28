@@ -1,6 +1,5 @@
 export default {
   template: /*html*/ `
-  {{#watch todo }}
     <li>
       <label>
         <input type="checkbox" {{ isChecked todo.done }} {{ method "toggleDone" }} />
@@ -13,7 +12,6 @@ export default {
       <p>{{ todo.description }}</p>
       <button {{ method "deleteToDo" }}>X</button>
     </li>
-  {{/watch}}
   `,
 
   name: "Todo",
@@ -25,7 +23,10 @@ export default {
   },
 
   methods: {
-    deleteToDo({ data, props }) {},
+    deleteToDo({ data }) {
+      const index = data.todos.findIndex(item => item.id === data.todo.id);
+      data.todos.splice(index, 1);
+    },
 
     toggleDone({ data }) {
       data.todo.done = !data.todo.done;

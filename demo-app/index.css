@@ -10,15 +10,6 @@ body {
   animation: pulse 1s ease-out;
 }
 
-#memory {
-  position: fixed;
-  top: 0;
-  right: 0;
-  background-color: #444;
-  padding: 10px;
-  text-align: right;
-}
-
 pre.debug {
   background-color: #444;
   color: #999;
