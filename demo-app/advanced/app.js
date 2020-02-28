@@ -25,16 +25,18 @@ export default {
     {{#watch "filter" }}
       <button {{ disabledIf "completed" }} {{ method "filter" "completed" }}>Show Completed</button>
       <button {{ disabledIf "incomplete" }} {{ method "filter" "incomplete" }}>Show Incompleted</button>
-      <button {{ disabledIf null }} {{ method "clearFilter" }}>Show All</button>
+      <button {{ disabledIf null }} {{ method "filter" null }}>Show All</button>
     {{/watch}}
 
     <ul>
       {{#watch "filter,todos.length" }}
-        {{#watchEach todos }}
-          {{#ifShowTodo . }}
-            {{ component "Todo" todo=. todos=@root.todos }}
-          {{/ifShowTodo}}
-        {{/watchEach}}
+        {{#each todos as |todo| }}
+          {{#watch todo }}
+            {{#ifShowTodo todo }}
+              {{ component "Todo" todo=todo todos=@root.todos }}
+            {{/ifShowTodo}}
+          {{/watch}}
+        {{/each}}
       {{/watch}}
     </ul>
 
@@ -76,9 +78,7 @@ export default {
     ],
   },
   helpers: {
-    disabledIf({ data }, filter) {
-      return data.filter === filter ? "disabled" : "";
-    },
+    disabledIf: ({ data }, filter) => (data.filter === filter ? "disabled" : ""),
 
     ifShowTodo({ data }, todo, options) {
       let shouldRender = true;
@@ -91,7 +91,6 @@ export default {
 
   methods: {
     filter: ({ data }, event, filter) => (data.filter = filter),
-    clearFilter: ({ data }) => (data.filter = null),
 
     showAdd({ data }, event) {
       console.log(arguments);

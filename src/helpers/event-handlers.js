@@ -1,7 +1,9 @@
 import Utils from "../utils.js";
 
-export default function(storage, { data, instance, methods, id, props, app }) {
+export default function(storage, { data, instance, methods, id, props, app, name }) {
   const handlerPath = `rbs.apps.${app.id}.comp.${id}.ev`;
+
+  console.log(name);
 
   function _handler() {
     const [str, ...args] = arguments;
@@ -25,6 +27,9 @@ export default function(storage, { data, instance, methods, id, props, app }) {
   storage.ev.bind = (event, path) => Utils.setKey(data, path, event.currentTarget.value);
   storage.ev.method = function() {
     const [event, key, ...args] = arguments;
+
+    if (!(key in methods))
+      throw new Error(`${key} was not found in methods for component '${name}'`);
 
     return methods[key].call(
       methods,
