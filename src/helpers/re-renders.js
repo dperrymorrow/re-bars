@@ -1,15 +1,15 @@
 import Utils from "../utils.js";
 
-export default function(storage, { instance, data }) {
+export default function(storage, { instance, name }) {
   const _getPath = (target, wildcard = true) => {
-    return typeof target === "object"
-      ? `${target.ReBarsPath}${wildcard ? ".*" : ""}`
-      : target.split(",");
+    if (target === undefined)
+      throw new Error(`have passed undefined to watch helper in component '${name}'`);
+    return typeof target === "object" ? `${target.ReBarsPath}${wildcard ? ".*" : ""}` : target;
   };
 
   const _watch = (path, render) => {
     const eId = Utils.randomId();
-    storage.renders[eId] = { render, path };
+    storage.renders[eId] = { path, render };
     return eId;
   };
 
@@ -21,8 +21,12 @@ export default function(storage, { instance, data }) {
 
   instance.registerHelper("watch", function(...args) {
     const { fn } = args.pop();
-    const path = args.map(arg => _getPath(arg, false)).join(".");
-    const eId = _watch(path, () => fn(this, data));
+    const path = args
+      .map(arg => _getPath(arg, false))
+      .join(".")
+      .split(",");
+
+    const eId = _watch(path, () => fn(this));
     return Utils.wrapTemplate(eId, fn(this));
   });
 
