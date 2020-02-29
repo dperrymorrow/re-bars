@@ -3,8 +3,6 @@ import Utils from "../utils.js";
 export default function(storage, { data, instance, methods, id, props, app, name }) {
   const handlerPath = `rbs.apps.${app.id}.comp.${id}.ev`;
 
-  console.log(name);
-
   function _handler() {
     const [str, ...args] = arguments;
     const [methodName, eventType = "click"] = str.split(":");
