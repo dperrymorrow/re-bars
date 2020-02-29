@@ -40,24 +40,13 @@ export default {
       {{/watch}}
     </ul>
 
-    {{#watch "uiState.adding" }}
-      <div>
-       {{#if uiState.adding }}
-         {{ component "Add" todos=todos uiState=uiState }}
-       {{else}}
-         <button class="add" {{ method "showAdd" }}>Add another</button>
-       {{/if}}
-      </div>
-    {{/watch}}
+    {{ component "Add" todos=todos uiState=uiState }}
   `,
 
   name: "DemoApp",
 
   data: {
     filter: null,
-    uiState: {
-      adding: false,
-    },
     header: {
       title: "This is my list of things to do",
       description: "just general items that need done around the house",
