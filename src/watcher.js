@@ -12,11 +12,10 @@ export default function({ id, app, props = {}, methods, rawData = {}, watchers =
       if (Utils.shouldRender(path, handler.path)) {
         const $target = Utils.findComponent(eId);
         if ($target) {
-          const $temp = document.createElement("div");
-          $temp.innerHTML = handler.render();
+          const html = handler.render();
 
-          if ($target.innerHTML !== $temp.innerHTML) {
-            $target.innerHTML = $temp.innerHTML;
+          if ($target.innerHTML !== html) {
+            $target.innerHTML = html;
             console.log("ReBars: re-render", $target, `${name}: ${path}`);
           }
         } else {
