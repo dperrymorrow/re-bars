@@ -29,14 +29,4 @@ export default function(storage, { instance, name }) {
     const eId = _watch(path, () => fn(this));
     return Utils.wrapTemplate(eId, fn(this));
   });
-
-  // instance.registerHelper("watchEach", function(arr, { fn }) {
-  //   if (!Array.isArray(arr)) throw new Error("watchEach must be passed an Array");
-  //   const path = arr.ReBarsPath;
-  //
-  //   return arr.map(function(item, index) {
-  //     const eId = _watch(`${path}.${index}.*`, fn.bind(this));
-  //     return Utils.wrapTemplate(eId, fn(this));
-  //   });
-  // });
 }

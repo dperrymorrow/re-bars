@@ -12,8 +12,13 @@ export default function({ id, app, props = {}, methods, rawData = {}, watchers =
       if (Utils.shouldRender(path, handler.path)) {
         const $target = Utils.findComponent(eId);
         if ($target) {
-          $target.innerHTML = handler.render();
-          console.log("ReBars: re-render", $target, `${name}: ${path}`);
+          const $temp = document.createElement("div");
+          $temp.innerHTML = handler.render();
+
+          if ($target.innerHTML !== $temp.innerHTML) {
+            $target.innerHTML = $temp.innerHTML;
+            console.log("ReBars: re-render", $target, `${name}: ${path}`);
+          }
         } else {
           delete cRef.renders[eId];
         }

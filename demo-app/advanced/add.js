@@ -1,9 +1,15 @@
 export default {
   template: /*html*/ `
   <form>
-    <h1>{{ props.title }}</h1>
-    <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
-    <textarea name="description" {{ ref "newDescrip" }}></textarea>
+    {{#watch "newTodo.name" }}
+      <h1>{{ newTodo.name }}</h1>
+    {{/watch}}
+
+    {{#watch "newTodo.id" }}
+      <input type="text" name="name" value="{{ newTodo.name }}" {{ bind "newTodo.name" }} placeholder="the new todo" />
+      <textarea name="description" value="{{ newTodo.description }}" {{ bind "newTodo.description" }}></textarea>
+    {{/watch}}
+    
     <button class="push" {{ method "addItem" }}>Add todo</button>
     <button class="cancel" {{ method "cancel" }}>Cancel</button>
   </form>
@@ -11,22 +17,28 @@ export default {
 
   name: "AddComponent",
 
+  data: {
+    newTodo: {
+      name: "",
+      description: "",
+      id: null,
+    },
+  },
+
   methods: {
     cancel({ data }, event) {
       event.preventDefault();
       data.uiState.adding = false;
     },
 
-    addItem({ $refs, props }, event) {
+    addItem({ data }, event) {
       event.preventDefault();
+      data.newTodo.id = new Date().getTime();
+      data.todos.push({ ...data.newTodo });
 
-      props.todos.push({
-        name: $refs.newName.value,
-        description: $refs.newDescrip.value,
-        id: new Date().getTime(),
-      });
-
-      $refs.newName.value = $refs.newDescrip.value = "";
+      data.newTodo.name = "";
+      data.newTodo.description = "";
+      data.newTodo.id = null;
     },
   },
 };

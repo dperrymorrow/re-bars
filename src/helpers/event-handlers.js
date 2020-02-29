@@ -18,7 +18,7 @@ export default function(storage, { data, instance, methods, id, props, app, name
     });
 
     return new instance.SafeString(
-      `on${eventType}="${handlerPath}.method(event, ${params.join(",")})"`
+      `on${eventType}="${handlerPath}.method(event,${params.join(",")})"`
     );
   }
 
