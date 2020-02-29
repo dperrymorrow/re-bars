@@ -1,7 +1,7 @@
 import EventHandlers from "./event-handlers.js";
 import ReRenders from "./re-renders.js";
 
-export default function({ instance, app, id, components, data, helpers, name }) {
+export default function({ instance, app, id, components, helpers, name }) {
   const storage = app.storage.comp[id];
 
   ReRenders(storage, ...arguments);
@@ -23,9 +23,6 @@ export default function({ instance, app, id, components, data, helpers, name }) 
     );
   });
 
-  Object.entries(helpers).forEach(([name, fn]) =>
-    instance.registerHelper(name, fn.bind(null, { instance, data }))
-  );
-
+  Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
   instance.registerHelper("ref", key => new instance.SafeString(`data-rbs-ref="${key}"`));
 }
