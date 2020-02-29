@@ -29,7 +29,7 @@ export default {
   },
 
   helpers: {
-    isChecked: (context, val) => (val ? "checked" : ""),
+    isChecked: val => (val ? "checked" : ""),
   },
 
   methods: {

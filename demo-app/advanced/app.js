@@ -30,8 +30,8 @@ export default {
 
     <ul>
       {{#watch "filter,todos.length" }}
-        {{#each todos as |todo| }}
-          {{#watch todo }}
+        {{#each todos as | todo | }}
+          {{#watch todo "done" }}
             {{#ifShowTodo todo }}
               {{ component "Todo" todo=todo todos=@root.todos }}
             {{/ifShowTodo}}
@@ -78,12 +78,13 @@ export default {
     ],
   },
   helpers: {
-    disabledIf: ({ data }, filter) => (data.filter === filter ? "disabled" : ""),
+    disabledIf: (filter, { data }) => (data.root.filter === filter ? "disabled" : ""),
 
-    ifShowTodo({ data }, todo, options) {
+    ifShowTodo(todo, { fn, inverse, data }) {
       let shouldRender = true;
-      if (data.filter) shouldRender = data.filter === "completed" ? todo.done : !todo.done;
-      return shouldRender ? options.fn(todo) : options.inverse(todo);
+      if (data.root.filter)
+        shouldRender = data.root.filter === "completed" ? todo.done : !todo.done;
+      return shouldRender ? fn(todo) : inverse(todo);
     },
   },
 

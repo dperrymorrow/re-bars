@@ -18,24 +18,26 @@ export default {
 
     <hr />
 
-    {{#watch "todos.length" }}
       <ul>
-        {{#watchEach todos }}
-          <li>
-            <label for="{{ id }}">
-              <input id="{{ id }}" type="checkbox" {{ isChecked done }} {{ method "toggleDone" id done }}/>
-              {{#if done }}
-                <s>{{ name }}</s>
-              {{else}}
-                <strong>{{ name }}</strong>
-              {{/if}}
-            </label>
-            <p>{{ description }}</p>
-            <button {{ method "deleteToDo" @index }}>X</button>
-          </li>
-        {{/watchEach}}
+        {{#watch "todos.length" }}
+          {{#each todos }}
+            <li>
+              {{#watch . }}
+                <label>
+                  <input type="checkbox" {{ isChecked done }} {{ method "toggleDone" id done }}/>
+                  {{#if done }}
+                    <s>{{ name }}</s>
+                  {{else}}
+                    <strong>{{ name }}</strong>
+                  {{/if}}
+                </label>
+                <p>{{ description }}</p>
+                <button {{ method "deleteToDo" @index }}>X</button>
+              {{/watch}}
+            </li>
+          {{/each}}
+        {{/watch}}
       </ul>
-    {{/watch}}
 
     <hr/>
 
@@ -78,6 +80,10 @@ export default {
   },
 
   name: "DemoApp",
+
+  helpers: {
+    isChecked: val => (val ? "checked" : ""),
+  },
 
   methods: {
     deleteToDo({ data }, event, index) {
