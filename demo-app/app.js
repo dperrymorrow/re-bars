@@ -7,6 +7,7 @@ export default {
         <small>{{ header.description }}</small>
       </h1>
     {{/watch}}
+
     <label>
       Edit Title:
       <input value="{{ header.title }}" {{ bind "header.title" }}/>
@@ -17,29 +18,21 @@ export default {
       <input value="{{ header.description }}" {{ bind "header.description" }}/>
     </label>
 
-    <hr />
-
-      <ul>
-        {{#watch "todos.length" }}
-          {{#each todos }}
-            <li>
-              {{#watch . }}
-                <label>
-                  <input type="checkbox" {{ isChecked done }} {{ method "toggleDone" id done }}/>
-                  {{#if done }}
-                    <s>{{ name }}</s>
-                  {{else}}
-                    <strong>{{ name }}</strong>
-                  {{/if}}
-                </label>
-                <button {{ method "deleteToDo" @index }}>X</button>
-              {{/watch}}
-            </li>
-          {{/each}}
+    {{#watch "todos.length" tag="ul" }}
+      {{#each todos }}
+        {{#watch . tag="li" }}
+          <label>
+            <input type="checkbox" {{ isChecked done }} {{ method "toggleDone" id done }}/>
+            {{#if done }}
+              <s>{{ name }}</s>
+            {{else}}
+              <strong>{{ name }}</strong>
+            {{/if}}
+          </label>
+          <button {{ method "deleteToDo" @index }}>X</button>
         {{/watch}}
-      </ul>
-
-    <hr/>
+      {{/each}}
+    {{/watch}}
 
     {{#watch "uiState.adding" }}
       {{#if uiState.adding }}
