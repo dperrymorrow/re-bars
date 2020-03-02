@@ -64,7 +64,7 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
       }, 10);
     }
 
-    return Utils.wrapTemplate(id, templateFn(proxyData));
+    return Utils.tagComponent(id, templateFn(proxyData), name);
   }
 
   return {

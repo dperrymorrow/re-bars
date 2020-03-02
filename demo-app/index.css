@@ -1,13 +1,78 @@
 
+$root: {
+  --padding-large: 50px;
+}
 
 body {
-  background-color: #333;
-  font-family: Monaco, monospace;
-  color: #666
+  background: rgb(224,224,224);
+  background: linear-gradient(57deg, rgba(224,224,224,1) 0%, rgba(255,255,255,1) 100%);
+  font-family: Helvetica, sans-serif;
+}
+
+#demo-app {
+  color: #333;
+  padding: 50px;
 }
 
 #demo-app * {
   animation: pulse 1s ease-out;
+}
+
+#demo-app button {
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  /* border: 1px solid #999; */
+  color: #666;
+  text-transform: uppercase;
+  background-color: #efefef;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+#demo-app ul {
+  padding: 0;
+  margin: 20px 0;
+  list-style: none;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #999;
+  box-shadow: 2px 2px 2px 0px #999;
+}
+
+#demo-app ul li {
+  border-bottom: 1px solid #999;
+  background-color: white;
+  padding: 12px 15px;
+}
+
+#demo-app ul li:last-child {
+  border: none;
+}
+
+#demo-app ul li .todo {
+  align-items: center;
+  justify-content: space-between;
+  display: flex;
+}
+
+#demo-app h1 {
+  font-weight: 300;
+  letter-spacing: -.02em;
+  color: #444;
+  margin-bottom: 30px;
+}
+
+#demo-app input[type="text"], #demo-app button {
+  height: 50p;
+}
+
+#demo-app h1 small {
+  font-weight: 100;
+  display: block;
+  color: #999;
+  letter-spacing: -.02em;
+  font-style: italic;
 }
 
 pre.debug {

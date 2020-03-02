@@ -3,11 +3,10 @@ import Todo from "./todo.js";
 
 export default {
   template: /*html*/ `
-    {{#watch "header.*" }}
-      <h1>
-        {{ header.title }}
-        <small>{{ header.description }}</small>
-      </h1>
+  <div>
+    {{#watch "header.*" tag="h1" }}
+      {{ header.title }}
+      <small>{{ header.description }}</small>
     {{/watch}}
 
     <label>
@@ -20,27 +19,24 @@ export default {
       <input value="{{ header.description }}" {{ bind "header.description" }}/>
     </label>
 
-    <hr />
-
-    {{#watch "filter" }}
+    {{#watch "filter" tag="div" classes="filters" }}
       <button {{ disabledIf "completed" }} {{ method "filter" "completed" }}>Show Completed</button>
       <button {{ disabledIf "incomplete" }} {{ method "filter" "incomplete" }}>Show Incompleted</button>
       <button {{ disabledIf null }} {{ method "filter" null }}>Show All</button>
     {{/watch}}
 
-    <ul>
-      {{#watch "filter,todos.length" }}
-        {{#each todos as | todo | }}
-          {{#watch todo "done" }}
-            {{#ifShowTodo todo }}
-              {{ component "Todo" todo=todo todos=@root.todos }}
-            {{/ifShowTodo}}
-          {{/watch}}
-        {{/each}}
-      {{/watch}}
-    </ul>
+    {{#watch "filter,todos.length" tag="ul"}}
+      {{#each todos as | todo | }}
+        {{#watch todo "done" tag="li" }}
+          {{#ifShowTodo todo }}
+            {{ component "Todo" todo=todo todos=@root.todos }}
+          {{/ifShowTodo}}
+        {{/watch}}
+      {{/each}}
+    {{/watch}}
 
     {{ component "Add" todos=todos uiState=uiState }}
+  <div>
   `,
 
   name: "DemoApp",
@@ -55,13 +51,11 @@ export default {
       {
         done: false,
         name: "Grocery Shopping",
-        description: "get the milk, eggs and bread",
         id: 33,
       },
       {
         done: true,
         name: "Paint the House",
-        description: "buy the paint and then paint the house",
         id: 22,
       },
     ],

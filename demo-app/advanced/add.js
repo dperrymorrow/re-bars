@@ -1,25 +1,26 @@
 export default {
   template: /*html*/ `
-  {{#watch "isAdding" }}
-    {{#if isAdding }}
-      <form>
-        {{#watch "newTodo.name" }}
-          <h1>{{ newTodo.name }}</h1>
-        {{/watch}}
+  <div>
+    {{#watch "isAdding" }}
+      {{#if isAdding }}
+        <form>
+          {{#watch "newTodo.name" }}
+            <h1>{{ newTodo.name }}</h1>
+          {{/watch}}
 
-        {{#watch "newTodo.id" }}
-          <input type="text" name="name" value="{{ newTodo.name }}" {{ bind "newTodo.name" }} placeholder="the new todo" />
-          <textarea name="description" value="{{ newTodo.description }}" {{ bind "newTodo.description" }}></textarea>
-        {{/watch}}
+          {{#watch "newTodo.id" }}
+            <input type="text" name="name" value="{{ newTodo.name }}" {{ bind "newTodo.name" }} placeholder="the new todo" />
+          {{/watch}}
 
-        <button class="push" {{ method "addItem" }}>Add todo</button>
-        <button class="cancel" {{ method "toggleAdd" }}>Cancel</button>
-      </form>
-    {{ else }}
-      <button class="add" {{ method "toggleAdd" }}>Add another</button>
-    {{/if}}
-  {{/watch}}
-`,
+          <button class="push" {{ method "addItem" }}>Add todo</button>
+          <button class="cancel" {{ method "toggleAdd" }}>Cancel</button>
+        </form>
+      {{ else }}
+        <button class="add" {{ method "toggleAdd" }}>Add another</button>
+      {{/if}}
+    {{/watch}}
+  </div>
+  `,
 
   name: "AddComponent",
 
@@ -27,7 +28,6 @@ export default {
     isAdding: false,
     newTodo: {
       name: "",
-      description: "",
       id: null,
     },
   },
@@ -43,7 +43,7 @@ export default {
       data.newTodo.id = new Date().getTime();
       data.todos.push({ ...data.newTodo });
 
-      data.newTodo.name = data.newTodo.description = "";
+      data.newTodo.name = "";
       data.newTodo.id = null;
     },
   },

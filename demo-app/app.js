@@ -1,6 +1,7 @@
 export default {
   template: /*html*/ `
-    {{#watch "header.*" }}
+  <div>
+    {{#watch "header.*" tag="h1" }}
       <h1 >
         {{ header.title }}
         <small>{{ header.description }}</small>
@@ -31,7 +32,6 @@ export default {
                     <strong>{{ name }}</strong>
                   {{/if}}
                 </label>
-                <p>{{ description }}</p>
                 <button {{ method "deleteToDo" @index }}>X</button>
               {{/watch}}
             </li>
@@ -53,6 +53,7 @@ export default {
         <button class="add" {{ method "toggleCreate" uiState.adding }}>Add another</button>
       {{/if}}
     {{/watch}}
+  </div>
   `,
 
   data: {
@@ -67,13 +68,11 @@ export default {
       {
         done: false,
         name: "Grocery Shopping",
-        description: "get the milk, eggs and bread",
         id: 22,
       },
       {
         done: true,
         name: "Paint the House",
-        description: "buy the paint and then paint the house",
         id: 44,
       },
     ],

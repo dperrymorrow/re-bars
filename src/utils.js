@@ -1,8 +1,22 @@
 let counter = 1;
 
 export default {
-  findComponent: id => document.getElementById(id),
-  wrapTemplate: (id, html) => `<span id="${id}">${html}</span>`,
+  findWatcher: id => document.querySelector(`[data-rbs-watch="${id}"]`),
+  wrapWatcher: (id, html, { tag = "span", classes = "rbs-watch" }) =>
+    `<${tag} class="${classes}" data-rbs-watch="${id}">${html}</${tag}>`,
+
+  tagComponent(id, html, name) {
+    const $tmp = document.createElement("div");
+    $tmp.innerHTML = html;
+    const $root = $tmp.firstElementChild;
+    if ($tmp.children.length > 1 || $root.dataset.rbsWatch)
+      throw new Error(`component:'${name}' must have one root node, and cannot be a {{#watch}}`);
+
+    $root.dataset.rbsComp = id;
+    return $tmp.innerHTML;
+  },
+
+  findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
 
   findRefs(id) {
     return Array.from(this.findComponent(id).querySelectorAll("[data-rbs-ref]")).reduce(

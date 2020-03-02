@@ -10,7 +10,7 @@ export default function({ id, app, props = {}, methods, rawData = {}, watchers =
 
     Object.entries(cRef.renders).forEach(([eId, handler]) => {
       if (Utils.shouldRender(path, handler.path)) {
-        const $target = Utils.findComponent(eId);
+        const $target = Utils.findWatcher(eId);
         if ($target) {
           const html = handler.render();
 

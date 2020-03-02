@@ -16,17 +16,18 @@ export default function(storage, { instance, name }) {
   instance.registerHelper("debug", function(obj) {
     const render = () => `<pre class="debug">${JSON.stringify(obj, null, 2)}</pre>`;
     const eId = _watch(_getPath(obj), render);
-    return new instance.SafeString(Utils.wrapTemplate(eId, render()));
+    return new instance.SafeString(Utils.wrapWatch(eId, render()));
   });
 
   instance.registerHelper("watch", function(...args) {
-    const { fn } = args.pop();
+    const { fn, hash } = args.pop();
+
     const path = args
       .map(arg => _getPath(arg, false))
       .join(".")
       .split(",");
 
     const eId = _watch(path, () => fn(this));
-    return Utils.wrapTemplate(eId, fn(this));
+    return Utils.wrapWatcher(eId, fn(this), hash);
   });
 }
