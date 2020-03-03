@@ -33,7 +33,6 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
     storage.comp[id] = {
       renders: {},
       ev: {},
-      focus: null,
       name,
     };
 

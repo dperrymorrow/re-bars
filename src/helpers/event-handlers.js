@@ -39,10 +39,11 @@ export default function(storage, { data, instance, methods, id, props, app, name
   };
 
   instance.registerHelper("method", _handler);
-  instance.registerHelper("bind", function(path, { ref }) {
+  instance.registerHelper("bind", (path, { hash = {} }) => {
     const val = Utils.findByPath(data, path);
+    const ref = hash.ref || path;
     return new instance.SafeString(
-      `value="${val}" data-rbs-ref="${ref || path}" oninput="${handlerPath}.bind(event, '${path}')"`
+      `value="${val}" data-rbs-ref="${ref}" oninput="${handlerPath}.bind(event, '${path}')"`
     );
   });
 }

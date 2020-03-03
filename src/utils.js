@@ -26,8 +26,11 @@ export default {
 
   findRefs(parent) {
     const $el = typeof parent === "object" ? parent : this.findComponent(parent);
+
     return Array.from($el.querySelectorAll("[data-rbs-ref]")).reduce((obj, $el) => {
-      obj[$el.dataset.rbsRef] = $el;
+      const key = $el.dataset.rbsRef;
+      const target = obj[$el.dataset.rbsRef];
+      obj[key] = target ? [target].concat($el) : $el;
       return obj;
     }, {});
   },

@@ -28,8 +28,14 @@ export default function({ id, app, props = {}, methods, rawData = {}, watchers =
             const $input = Utils.findRefs($target)[activeRef.ref];
 
             if ($input) {
-              $input.focus();
-              if (activeRef.pos) $input.setSelectionRange(activeRef.pos + 1, activeRef.pos + 1);
+              if (Array.isArray($input)) {
+                console.warn(
+                  `component:${name} ref ${activeRef.ref} is used more than once. The focus cannot be restored. If using bind, add a ref="uniqeName" to each`
+                );
+              } else {
+                $input.focus();
+                if (activeRef.pos) $input.setSelectionRange(activeRef.pos + 1, activeRef.pos + 1);
+              }
             }
           }
         } else {

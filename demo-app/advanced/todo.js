@@ -3,7 +3,7 @@ export default {
     <div>
       {{#watch "editing" tag="div" class="todo" }}
         {{#if editing}}
-          <input type="text" value="{{ todo.name }}" {{ bind "todo.name" }}/>
+          <input type="text" {{ bind "todo.name" }}/>
           <button {{ method "toggleEditing" }}>save</button>
         {{ else }}
           <label>

@@ -12,12 +12,12 @@ export default {
 
       <label>
         Title:
-        <input type="text" {{ bind "header.title" "title" }}/>
+        <input type="text" {{ bind "header.title" }}/>
       </label>
 
       <label>
         Description:
-        <input type="text" {{ bind "header.description" "descrip" }}/>
+        <input type="text" {{ bind "header.description" }}/>
       </label>
     </div>
 
