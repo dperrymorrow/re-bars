@@ -22,9 +22,9 @@ export default function({ id, app, props = {}, methods, rawData = {}, watchers =
           };
 
           if ($target.innerHTML !== html) {
+            $target.removeAttribute("style");
             $target.innerHTML = html;
             console.log("ReBars: re-render", $target, `${name}: ${path}`);
-
             const $input = Utils.findRefs($target)[activeRef.ref];
 
             if ($input) {

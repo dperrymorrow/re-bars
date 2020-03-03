@@ -8,7 +8,9 @@ export default {
       .map(([key, val]) => `${key}="${val}"`)
       .join(" ");
 
-    return `<${tag} ${propStr} data-rbs-watch="${id}">${html}</${tag}>`;
+    const style = !html.length ? "style='display:none;'" : "";
+
+    return `<${tag} ${propStr} ${style} data-rbs-watch="${id}">${html}</${tag}>`;
   },
 
   tagComponent(appId, id, html, name) {
