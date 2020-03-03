@@ -2,8 +2,14 @@ let counter = 1;
 
 export default {
   findWatcher: id => document.querySelector(`[data-rbs-watch="${id}"]`),
-  wrapWatcher: (id, html, { tag = "span", classes = "rbs-watch" }) =>
-    `<${tag} class="${classes}" data-rbs-watch="${id}">${html}</${tag}>`,
+  wrapWatcher: (id, html, hash) => {
+    const { tag, ...props } = { ...{ tag: "span", class: "rbs-watch" }, ...hash };
+    const propStr = Object.entries(props)
+      .map(([key, val]) => `${key}="${val}"`)
+      .join(" ");
+
+    return `<${tag} ${propStr} data-rbs-watch="${id}">${html}</${tag}>`;
+  },
 
   tagComponent(id, html, name) {
     const $tmp = document.createElement("div");

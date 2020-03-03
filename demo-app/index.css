@@ -5,7 +5,7 @@ $root: {
 
 body {
   background: rgb(224,224,224);
-  background: linear-gradient(57deg, rgba(224,224,224,1) 0%, rgba(255,255,255,1) 100%);
+  background: linear-gradient(0deg, rgba(224,224,224,1) 0%, rgba(255,255,255,1) 100%);
   font-family: Helvetica, sans-serif;
 }
 
@@ -18,32 +18,88 @@ body {
   animation: pulse 1s ease-out;
 }
 
-#demo-app button {
-  -moz-appearance: none;
-  -webkit-appearance: none;
-  /* border: 1px solid #999; */
-  color: #666;
+#demo-app .header-container {
+  margin-bottom: 40px;
+}
+
+#demo-app .header-container label {
   text-transform: uppercase;
-  background-color: #efefef;
   font-weight: bold;
+  font-size: 11px;
+  margin-right: 6px;
+}
+
+#demo-app h1 {
+  font-weight: 300;
+  letter-spacing: -.02em;
+  color: #444;
+  margin: 0 0 10px 0;
+}
+
+#demo-app h1 small {
+  font-weight: 100;
+  color: #999;
+  letter-spacing: -.02em;
+}
+
+#demo-app .filters {
+  background-color: white;
+  border: 1px solid #ccc;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  padding: 10px 15px;
+  border-bottom: none;
+}
+
+
+#demo-app input[type="text"], #demo-app button {
+  background-color: #efefef;
   padding: 5px 10px;
+  box-sizing: border-box;
   border-radius: 5px;
+  height: 30px;
+  border: 1px solid #ccc;
+  font-size: 12px;
+}
+
+#demo-app input[type="text"] {
+  min-width: 200px;
+  background-color: white;
+}
+
+#demo-app button {
+  color: #555;
+  text-transform: uppercase;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#demo-app button:disabled {
+  cursor: not-allowed;
+  color: #999;
+  border-color: #ccc;
+  background-color: #efefef;
+  opacity: .6;
 }
 
 #demo-app ul {
   padding: 0;
-  margin: 20px 0;
+  margin: 0 0 20px 0;
   list-style: none;
-  border-radius: 10px;
   overflow: hidden;
-  border: 1px solid #999;
-  box-shadow: 2px 2px 2px 0px #999;
+  border: 1px solid #ccc;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
 #demo-app ul li {
-  border-bottom: 1px solid #999;
+  border-bottom: 1px solid #ccc;
   background-color: white;
   padding: 12px 15px;
+}
+
+#demo-app ul li:nth-child(odd) {
+  background-color: #efefef;
 }
 
 #demo-app ul li:last-child {
@@ -54,25 +110,6 @@ body {
   align-items: center;
   justify-content: space-between;
   display: flex;
-}
-
-#demo-app h1 {
-  font-weight: 300;
-  letter-spacing: -.02em;
-  color: #444;
-  margin-bottom: 30px;
-}
-
-#demo-app input[type="text"], #demo-app button {
-  height: 50p;
-}
-
-#demo-app h1 small {
-  font-weight: 100;
-  display: block;
-  color: #999;
-  letter-spacing: -.02em;
-  font-style: italic;
 }
 
 pre.debug {

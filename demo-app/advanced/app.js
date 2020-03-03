@@ -4,22 +4,24 @@ import Todo from "./todo.js";
 export default {
   template: /*html*/ `
   <div>
-    {{#watch "header.*" tag="h1" }}
-      {{ header.title }}
-      <small>{{ header.description }}</small>
-    {{/watch}}
+    <div class="header-container">
+      {{#watch "header.*" tag="h1" }}
+        {{ header.title }}
+        <small>{{ header.description }}</small>
+      {{/watch}}
 
-    <label>
-      Edit Title:
-      <input value="{{ header.title }}" {{ bind "header.title" }}/>
-    </label>
+      <label>
+        Title:
+        <input type="text" value="{{ header.title }}" {{ bind "header.title" }}/>
+      </label>
 
-    <label>
-      Edit Description:
-      <input value="{{ header.description }}" {{ bind "header.description" }}/>
-    </label>
+      <label>
+        Description:
+        <input type="text" value="{{ header.description }}" {{ bind "header.description" }}/>
+      </label>
+    </div>
 
-    {{#watch "filter" tag="div" classes="filters" }}
+    {{#watch "filter" tag="div" class="filters" }}
       <button {{ disabledIf "completed" }} {{ method "filter" "completed" }}>Show Completed</button>
       <button {{ disabledIf "incomplete" }} {{ method "filter" "incomplete" }}>Show Incompleted</button>
       <button {{ disabledIf null }} {{ method "filter" null }}>Show All</button>
@@ -44,8 +46,8 @@ export default {
   data: {
     filter: null,
     header: {
-      title: "This is my list of things to do",
-      description: "just general items that need done around the house",
+      title: "Todos",
+      description: "Some things that need done",
     },
     todos: [
       {

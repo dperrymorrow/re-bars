@@ -1,7 +1,7 @@
 export default {
   template: /*html*/ `
     <div>
-      {{#watch "editing" tag="div" classes="todo" }}
+      {{#watch "editing" tag="div" class="todo" }}
         {{#if editing}}
           <input type="text" value="{{ todo.name }}" {{ bind "todo.name" }}/>
           <button {{ method "toggleEditing" }}>save</button>

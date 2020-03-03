@@ -9,12 +9,12 @@ export default {
     {{/watch}}
 
     <label>
-      Edit Title:
+      Title:
       <input value="{{ header.title }}" {{ bind "header.title" }}/>
     </label>
 
     <label>
-      Edit Description:
+      Description:
       <input value="{{ header.description }}" {{ bind "header.description" }}/>
     </label>
 
@@ -38,7 +38,6 @@ export default {
       {{#if uiState.adding }}
         <form>
           <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
-          <textarea name="description" {{ ref "newDescrip" }}></textarea>
           <button class="push" {{ method "addItem" }}>Add todo</button>
           <button class="cancel" {{ method "toggleCreate" uiState.adding }}>Cancel</button>
         </form>
@@ -54,8 +53,8 @@ export default {
       adding: false,
     },
     header: {
-      title: "This is my list of things to do",
-      description: "just general items that need done around the house",
+      title: "Todos",
+      description: "some things that need done",
     },
     todos: [
       {
@@ -88,10 +87,9 @@ export default {
       data.todos.push({
         id: new Date().getTime(),
         name: $refs.newName.value,
-        description: $refs.newDescrip.value,
       });
 
-      $refs.newName.value = $refs.newDescrip.value = "";
+      $refs.newName.value = "";
     },
 
     toggleDone({ data }, event, id, done) {

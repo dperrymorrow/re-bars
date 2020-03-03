@@ -9,7 +9,10 @@ export default function(storage, { instance, name }) {
 
   const _watch = (path, render) => {
     const eId = Utils.randomId();
-    storage.renders[eId] = { path, render };
+    storage.renders[eId] = {
+      path,
+      render,
+    };
     return eId;
   };
 
