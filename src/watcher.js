@@ -15,21 +15,21 @@ export default function({ id, app, props = {}, methods, rawData = {}, watchers =
         const $target = Utils.findWatcher(eId);
         if ($target) {
           const html = handler.render();
+          const $active = document.activeElement;
+          const activeRef = {
+            ref: $active.dataset.rbsRef,
+            pos: $active.selectionStart,
+          };
 
           if ($target.innerHTML !== html) {
             $target.innerHTML = html;
             console.log("ReBars: re-render", $target, `${name}: ${path}`);
-          }
 
-          if (cRef.focus) {
-            const $target = Utils.findRefs(id)[cRef.focus.ref];
-            if ($target) {
-              $target.focus();
-              $target.setSelectionRange(cRef.focus.pos + 1, cRef.focus.pos + 1);
-              cRef.focus = {
-                ref: $target.dataset.rbsRef,
-                pos: $target.selectionStart,
-              };
+            const $input = Utils.findRefs($target)[activeRef.ref];
+
+            if ($input) {
+              $input.focus();
+              if (activeRef.pos) $input.setSelectionRange(activeRef.pos + 1, activeRef.pos + 1);
             }
           }
         } else {

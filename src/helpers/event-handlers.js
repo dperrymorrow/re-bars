@@ -22,22 +22,8 @@ export default function(storage, { data, instance, methods, id, props, app, name
     );
   }
 
-  // should scope this to a watcher, and get the refs in the watcher
-  storage.ev.input = (event, cId) => {
-    const $el = event.target;
-    if (cId === id) {
-      if ($el.dataset.rbsRef) {
-        storage.focus = {
-          ref: $el.dataset.rbsRef,
-          pos: $el.selectionStart,
-        };
-      } else {
-        storage.focus = null;
-      }
-    }
-  };
+  storage.ev.bind = (event, path) => Utils.setKey(data, path, event.target.value);
 
-  storage.ev.bind = (event, path) => Utils.setKey(data, path, event.currentTarget.value);
   storage.ev.method = function() {
     const [event, key, ...args] = arguments;
 
@@ -53,8 +39,10 @@ export default function(storage, { data, instance, methods, id, props, app, name
   };
 
   instance.registerHelper("method", _handler);
-  instance.registerHelper(
-    "bind",
-    path => new instance.SafeString(`oninput="${handlerPath}.bind(event, '${path}')"`)
-  );
+  instance.registerHelper("bind", function(path, { ref }) {
+    const val = Utils.findByPath(data, path);
+    return new instance.SafeString(
+      `value="${val}" data-rbs-ref="${ref || path}" oninput="${handlerPath}.bind(event, '${path}')"`
+    );
+  });
 }

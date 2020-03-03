@@ -3,13 +3,14 @@ export default {
   <div>
     {{#watch "isAdding" }}
       {{#if isAdding }}
-        <form onload="alert('fooo')">
+        <form>
           {{#watch "newTodo.name" }}
             <h1>{{ newTodo.name }}</h1>
           {{/watch}}
 
           {{#watch newTodo }}
-            <input type="text" {{ ref "name" }} name="name" value="{{ newTodo.name }}" {{ bind "newTodo.name" }} placeholder="the new todo" />
+            <input type="text" {{ bind "newTodo.name" }} placeholder="the new todo" />
+              <input type="text" {{ bind "newTodo.name" }} placeholder="the new todo" />
           {{/watch}}
 
           <button class="push" {{ method "addItem" }}>Add todo</button>

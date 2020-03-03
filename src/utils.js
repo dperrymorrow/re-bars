@@ -18,23 +18,21 @@ export default {
     if ($tmp.children.length > 1 || $root.dataset.rbsWatch)
       throw new Error(`component:'${name}' must have one root node, and cannot be a {{#watch}}`);
 
-    $root.setAttribute("onkeydown", `${this.getPath(appId, id)}.ev.input(event, '${id}')`);
     $root.dataset.rbsComp = id;
     return $tmp.innerHTML;
   },
 
   findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
 
-  findRefs(id) {
-    return Array.from(this.findComponent(id).querySelectorAll("[data-rbs-ref]")).reduce(
-      (obj, $el) => {
-        obj[$el.dataset.rbsRef] = $el;
-        return obj;
-      },
-      {}
-    );
+  findRefs(parent) {
+    const $el = typeof parent === "object" ? parent : this.findComponent(parent);
+    return Array.from($el.querySelectorAll("[data-rbs-ref]")).reduce((obj, $el) => {
+      obj[$el.dataset.rbsRef] = $el;
+      return obj;
+    }, {});
   },
 
+  findByPath: (data, path) => path.split(".").reduce((pointer, seg) => pointer[seg], data),
   getPath: (appId, compId) => `rbs.apps.${appId}.comp.${compId}`,
 
   shouldRender(path, watch) {
