@@ -11,13 +11,14 @@ export default {
     return `<${tag} ${propStr} data-rbs-watch="${id}">${html}</${tag}>`;
   },
 
-  tagComponent(id, html, name) {
+  tagComponent(appId, id, html, name) {
     const $tmp = document.createElement("div");
     $tmp.innerHTML = html;
     const $root = $tmp.firstElementChild;
     if ($tmp.children.length > 1 || $root.dataset.rbsWatch)
       throw new Error(`component:'${name}' must have one root node, and cannot be a {{#watch}}`);
 
+    $root.setAttribute("onkeydown", `${this.getPath(appId, id)}.ev.input(event, '${id}')`);
     $root.dataset.rbsComp = id;
     return $tmp.innerHTML;
   },
@@ -33,6 +34,8 @@ export default {
       {}
     );
   },
+
+  getPath: (appId, compId) => `rbs.apps.${appId}.comp.${compId}`,
 
   shouldRender(path, watch) {
     const watchPaths = Array.isArray(watch) ? watch : [watch];

@@ -3,6 +3,8 @@ import Utils from "./utils.js";
 export default function({ id, app, props = {}, methods, rawData = {}, watchers = {}, name }) {
   const cRef = app.storage.comp[id];
 
+  // the handling of change
+
   function _handler(path) {
     Object.entries(watchers).forEach(([watch, fn]) => {
       if (Utils.shouldRender(path, watch)) fn({ data: proxyData, props, methods });
@@ -18,6 +20,18 @@ export default function({ id, app, props = {}, methods, rawData = {}, watchers =
             $target.innerHTML = html;
             console.log("ReBars: re-render", $target, `${name}: ${path}`);
           }
+
+          if (cRef.focus) {
+            const $target = Utils.findRefs(id)[cRef.focus.ref];
+            if ($target) {
+              $target.focus();
+              $target.setSelectionRange(cRef.focus.pos + 1, cRef.focus.pos + 1);
+              cRef.focus = {
+                ref: $target.dataset.rbsRef,
+                pos: $target.selectionStart,
+              };
+            }
+          }
         } else {
           delete cRef.renders[eId];
         }
@@ -31,6 +45,8 @@ export default function({ id, app, props = {}, methods, rawData = {}, watchers =
       }
     });
   }
+
+  // the proxy building
 
   function _buildProxy(raw, tree = []) {
     return new Proxy(raw, {

@@ -1,7 +1,7 @@
 import Utils from "../utils.js";
 
 export default function(storage, { data, instance, methods, id, props, app, name }) {
-  const handlerPath = `rbs.apps.${app.id}.comp.${id}.ev`;
+  const handlerPath = `${Utils.getPath(app.id, id)}.ev`;
 
   function _handler() {
     const [str, ...args] = arguments;
@@ -21,6 +21,21 @@ export default function(storage, { data, instance, methods, id, props, app, name
       `on${eventType}="${handlerPath}.method(event,${params.join(",")})"`
     );
   }
+
+  // should scope this to a watcher, and get the refs in the watcher
+  storage.ev.input = (event, cId) => {
+    const $el = event.target;
+    if (cId === id) {
+      if ($el.dataset.rbsRef) {
+        storage.focus = {
+          ref: $el.dataset.rbsRef,
+          pos: $el.selectionStart,
+        };
+      } else {
+        storage.focus = null;
+      }
+    }
+  };
 
   storage.ev.bind = (event, path) => Utils.setKey(data, path, event.currentTarget.value);
   storage.ev.method = function() {
