@@ -13,7 +13,7 @@ export default {
     return `<${tag} ${propStr} ${style} data-rbs-watch="${id}">${html}</${tag}>`;
   },
 
-  tagComponent(appId, id, html, name) {
+  tagComponent(id, html, name) {
     const $tmp = document.createElement("div");
     $tmp.innerHTML = html;
     const $root = $tmp.firstElementChild;
