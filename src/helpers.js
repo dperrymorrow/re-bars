@@ -34,11 +34,6 @@ export default {
     instance.registerHelper("component", function(cName, { hash: props }) {
       const cDefs = Utils.getStorage(appId).cDefs;
 
-      Object.entries(props).forEach(([key, val]) => {
-        if (typeof val === "function")
-          throw new Error(`cannot pass a function as a prop. in '${name}' child '${cName}' prop '${key}'`);
-      });
-
       if (!cDefs[cName]) throw new Error(`component:${name} child component ${cName} is not registered`);
 
       return new instance.SafeString(cDefs[cName].render(props));
@@ -52,7 +47,7 @@ export default {
     instance.registerHelper("debug", function(obj, { data }) {
       const render = () => `<pre class="debug">${JSON.stringify(obj, null, 2)}</pre>`;
       const eId = _watch(_getPath(obj), render, data);
-      return new instance.SafeString(Utils.wrapWatch(eId, render()));
+      return new instance.SafeString(Utils.wrapWatcher(eId, render()));
     });
 
     instance.registerHelper("watch", function(...args) {
