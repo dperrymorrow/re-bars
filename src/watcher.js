@@ -79,7 +79,7 @@ export default {
       });
     }
 
-    const proxyData = _buildProxy({ ...data(), $_componentId: id, $_appId: appId, ...props });
-    return proxyData;
+    const proxyData = _buildProxy({ ...data(), ...props });
+    return { ...proxyData, $_componentId: id, $_appId: appId };
   },
 };
