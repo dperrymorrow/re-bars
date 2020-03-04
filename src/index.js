@@ -13,6 +13,8 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
   const storage = (window.ReBars.apps[appId] = { comp: {} });
   const app = { component, id: appId, storage };
 
+  if (!document.body.contains($el)) throw new Error("$el must be present in the document");
+
   $el.innerHTML = component(root);
 
   function component({
@@ -55,6 +57,7 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
   }
 
   return {
+    id: appId,
     component,
     storage,
   };

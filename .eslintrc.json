@@ -8,7 +8,7 @@
     "plugin:prettier/recommended"
   ],
   "globals": {
-    "Vbars": "readonly",
+    "ReBars": "readonly",
     "_": "readonly",
     "Handlebars": "readonly",
     "Atomics": "readonly",

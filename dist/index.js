@@ -7,18 +7,44 @@
   let counter = 1;
 
   var Utils = {
-    findComponent: id => document.getElementById(id),
-    wrapTemplate: (id, html) => `<span id="${id}">${html}</span>`,
+    findWatcher: id => document.querySelector(`[data-rbs-watch="${id}"]`),
+    wrapWatcher: (id, html, hash) => {
+      const { tag, ...props } = { ...{ tag: "span", class: "rbs-watch" }, ...hash };
+      const propStr = Object.entries(props)
+        .map(([key, val]) => `${key}="${val}"`)
+        .join(" ");
 
-    findRefs(id) {
-      return Array.from(this.findComponent(id).querySelectorAll("[data-rbs-ref]")).reduce(
-        (obj, $el) => {
-          obj[$el.dataset.rbsRef] = $el;
-          return obj;
-        },
-        {}
-      );
+      const style = !html.length ? "style='display:none;'" : "";
+
+      return `<${tag} ${propStr} ${style} data-rbs-watch="${id}">${html}</${tag}>`;
     },
+
+    tagComponent(appId, id, html, name) {
+      const $tmp = document.createElement("div");
+      $tmp.innerHTML = html;
+      const $root = $tmp.firstElementChild;
+      if ($tmp.children.length > 1 || $root.dataset.rbsWatch)
+        throw new Error(`component:'${name}' must have one root node, and cannot be a {{#watch}}`);
+
+      $root.dataset.rbsComp = id;
+      return $tmp.innerHTML;
+    },
+
+    findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
+
+    findRefs(parent) {
+      const $el = typeof parent === "object" ? parent : this.findComponent(parent);
+
+      return Array.from($el.querySelectorAll("[data-rbs-ref]")).reduce((obj, $el) => {
+        const key = $el.dataset.rbsRef;
+        const target = obj[$el.dataset.rbsRef];
+        obj[key] = target ? [target].concat($el) : $el;
+        return obj;
+      }, {});
+    },
+
+    findByPath: (data, path) => path.split(".").reduce((pointer, seg) => pointer[seg], data),
+    getPath: (appId, compId) => `rbs.apps.${appId}.comp.${compId}`,
 
     shouldRender(path, watch) {
       const watchPaths = Array.isArray(watch) ? watch : [watch];
@@ -50,6 +76,8 @@
   function Watcher({ id, app, props = {}, methods, rawData = {}, watchers = {}, name }) {
     const cRef = app.storage.comp[id];
 
+    // the handling of change
+
     function _handler(path) {
       Object.entries(watchers).forEach(([watch, fn]) => {
         if (Utils.shouldRender(path, watch)) fn({ data: proxyData, props, methods });
@@ -57,13 +85,26 @@
 
       Object.entries(cRef.renders).forEach(([eId, handler]) => {
         if (Utils.shouldRender(path, handler.path)) {
-          const $target = Utils.findComponent(eId);
+          const $target = Utils.findWatcher(eId);
           if ($target) {
-            const $temp = document.createElement("div");
-            $temp.innerHTML = handler.render();
+            const html = handler.render();
+            const $active = document.activeElement;
+            const activeRef = {
+              ref: $active.dataset.rbsRef,
+              pos: $active.selectionStart,
+            };
 
-            if ($target.innerHTML !== $temp.innerHTML) {
-              $target.innerHTML = $temp.innerHTML;
+            if ($target.innerHTML !== html) {
+              $target.removeAttribute("style");
+              $target.innerHTML = html;
+              const $input = Utils.findRefs($target)[activeRef.ref];
+
+              if ($input) {
+                if (Array.isArray($input)) ; else {
+                  $input.focus();
+                  if (activeRef.pos) $input.setSelectionRange(activeRef.pos + 1, activeRef.pos + 1);
+                }
+              }
             }
           } else {
             delete cRef.renders[eId];
@@ -78,6 +119,8 @@
         }
       });
     }
+
+    // the proxy building
 
     function _buildProxy(raw, tree = []) {
       return new Proxy(raw, {
@@ -108,7 +151,7 @@
   }
 
   function EventHandlers(storage, { data, instance, methods, id, props, app, name }) {
-    const handlerPath = `rbs.apps.${app.id}.comp.${id}.ev`;
+    const handlerPath = `${Utils.getPath(app.id, id)}.ev`;
 
     function _handler() {
       const [str, ...args] = arguments;
@@ -129,7 +172,8 @@
       );
     }
 
-    storage.ev.bind = (event, path) => Utils.setKey(data, path, event.currentTarget.value);
+    storage.ev.bind = (event, path) => Utils.setKey(data, path, event.target.value);
+
     storage.ev.method = function() {
       const [event, key, ...args] = arguments;
 
@@ -145,10 +189,13 @@
     };
 
     instance.registerHelper("method", _handler);
-    instance.registerHelper(
-      "bind",
-      path => new instance.SafeString(`oninput="${handlerPath}.bind(event, '${path}')"`)
-    );
+    instance.registerHelper("bind", (path, { hash = {} }) => {
+      const val = Utils.findByPath(data, path);
+      const ref = hash.ref || path;
+      return new instance.SafeString(
+        `value="${val}" data-rbs-ref="${ref}" oninput="${handlerPath}.bind(event, '${path}')"`
+      );
+    });
   }
 
   function ReRenders(storage, { instance, name }) {
@@ -160,25 +207,29 @@
 
     const _watch = (path, render) => {
       const eId = Utils.randomId();
-      storage.renders[eId] = { path, render };
+      storage.renders[eId] = {
+        path,
+        render,
+      };
       return eId;
     };
 
     instance.registerHelper("debug", function(obj) {
       const render = () => `<pre class="debug">${JSON.stringify(obj, null, 2)}</pre>`;
       const eId = _watch(_getPath(obj), render);
-      return new instance.SafeString(Utils.wrapTemplate(eId, render()));
+      return new instance.SafeString(Utils.wrapWatch(eId, render()));
     });
 
     instance.registerHelper("watch", function(...args) {
-      const { fn } = args.pop();
+      const { fn, hash } = args.pop();
+
       const path = args
         .map(arg => _getPath(arg, false))
         .join(".")
         .split(",");
 
       const eId = _watch(path, () => fn(this));
-      return Utils.wrapTemplate(eId, fn(this));
+      return Utils.wrapWatcher(eId, fn(this), hash);
     });
   }
 
@@ -219,13 +270,14 @@
     const storage = (window.ReBars.apps[appId] = { comp: {} });
     const app = { component, id: appId, storage };
 
+    if (!document.body.contains($el)) throw new Error("$el must be present in the document");
+
     $el.innerHTML = component(root);
 
     function component({
       template,
       methods = {},
       props = {},
-      hooks = {},
       name,
       components = {},
       data: rawData,
@@ -240,12 +292,9 @@
       storage.comp[id] = {
         renders: {},
         ev: {},
-        hooks,
         name,
       };
 
-      if (hooks.created) hooks.created({ data: rawData, methods });
-      // need to call created before building the proxy
       const proxyData = Watcher({ id, app, props, methods, rawData, watchers, name });
       const templateFn = instance.compile(template);
 
@@ -261,19 +310,11 @@
         app,
       });
 
-      if ("attached" in hooks) {
-        const int = setInterval(() => {
-          if (Utils.findComponent(id)) {
-            clearInterval(int);
-            hooks.attached({ methods, data: proxyData, props, $refs: Utils.findRefs(id) });
-          }
-        }, 10);
-      }
-
-      return Utils.wrapTemplate(id, templateFn(proxyData));
+      return Utils.tagComponent(app.id, id, templateFn(proxyData), name);
     }
 
     return {
+      id: appId,
       component,
       storage,
     };

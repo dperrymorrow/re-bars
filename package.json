@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "http-server . -c-1",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "npm run build && ava",
     "demoApp": "rollup demo-app/app.js --file dist/demo-app.js --format umd --name 'DemoApp' ",
     "build": "rollup -c && npm run demoApp"
   },
@@ -13,15 +13,30 @@
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
+    "ava": "^3.5.0",
+    "browser-env": "^3.3.0",
     "eslint": "^6.7.2",
     "eslint-config-prettier": "^6.7.0",
     "eslint-plugin-prettier": "^3.1.1",
+    "handlebars": "^4.7.3",
     "http-server": "^0.12.0",
     "prettier": "^1.19.1",
     "rollup": "^1.31.0",
     "rollup-plugin-filesize": "^6.2.1",
     "rollup-plugin-gzip": "^2.3.0",
     "rollup-plugin-strip": "^1.2.2",
-    "rollup-plugin-terser": "^5.2.0"
+    "rollup-plugin-terser": "^5.2.0",
+    "sinon": "^9.0.0"
+  },
+  "ava": {
+    "require": [
+      "./test/setup.js"
+    ],
+    "files": [
+      "./test/**/*.spec.js"
+    ],
+    "concurrency": 20,
+    "failFast": true,
+    "verbose": true
   }
 }
