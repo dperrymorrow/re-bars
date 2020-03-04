@@ -1,64 +1,24 @@
-import Watcher from "./watcher.js";
-import Helpers from "./helpers/index.js";
 import Utils from "./utils.js";
+import Handlers from "./handlers.js";
+import Component from "./component.js";
 
 export default function({ $el, root, Handlebars = window.Handlebars }) {
   if (!Handlebars) throw new Error("ReBars need Handlebars in order to run!");
 
   window.ReBars = window.ReBars || {};
   window.ReBars.apps = window.ReBars.apps || {};
+  window.ReBars.handlers = window.ReBars.handlers || Handlers;
   window.rbs = window.ReBars;
 
-  const appId = Utils.randomId();
-  const storage = (window.ReBars.apps[appId] = { comp: {} });
-  const app = { component, id: appId, storage };
+  const id = Utils.randomId();
+  const storage = (window.ReBars.apps[id] = { cDefs: {}, inst: {} });
 
   if (!document.body.contains($el)) throw new Error("$el must be present in the document");
 
-  $el.innerHTML = component(root);
-
-  function component({
-    template,
-    methods = {},
-    props = {},
-    name,
-    components = {},
-    data: rawData,
-    watchers = {},
-    helpers = {},
-  }) {
-    const id = Utils.randomId();
-    const instance = Handlebars.create();
-
-    if (!name) throw new Error("Each ReBars component should have a name");
-
-    storage.comp[id] = {
-      renders: {},
-      ev: {},
-      name,
-    };
-
-    const proxyData = Watcher({ id, app, props, methods, rawData, watchers, name });
-    const templateFn = instance.compile(template);
-
-    Helpers({
-      props,
-      methods,
-      id,
-      components,
-      instance,
-      helpers,
-      data: proxyData,
-      name,
-      app,
-    });
-
-    return Utils.tagComponent(id, templateFn(proxyData), name);
-  }
+  $el.innerHTML = Component.create(id, root).render();
 
   return {
-    id: appId,
-    component,
+    id,
     storage,
   };
 }

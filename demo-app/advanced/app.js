@@ -6,18 +6,18 @@ export default {
   <div>
     <div class="header-container">
       {{#watch "header.*" tag="h1" }}
-        {{ header.title }}
+        <span>{{ header.title }}</span>
         <small>{{ header.description }}</small>
       {{/watch}}
 
       <label>
         Title:
-        <input type="text" {{ bind "header.title" }}/>
+        <input type="text" {{ bound "header.title" }}/>
       </label>
 
       <label>
         Description:
-        <input type="text" {{ bind "header.description" }}/>
+        <input type="text" {{ bound "header.description" }}/>
       </label>
     </div>
 
@@ -37,51 +37,54 @@ export default {
       {{/each}}
     {{/watch}}
 
-    {{ component "Add" todos=todos uiState=uiState }}
+    {{ component "AddTodo" todos=todos }}
   <div>
   `,
 
   name: "DemoApp",
 
-  data: {
-    filter: null,
-    header: {
-      title: "Todos",
-      description: "Some things that need done",
-    },
-    todos: [
-      {
-        done: false,
-        name: "Grocery Shopping",
-        id: 33,
+  data() {
+    return {
+      filter: null,
+      header: {
+        title: "Todos",
+        description: "Some things that need done",
       },
-      {
-        done: true,
-        name: "Paint the House",
-        id: 22,
-      },
-    ],
+      todos: [
+        {
+          done: false,
+          name: "Grocery Shopping",
+          id: 33,
+        },
+        {
+          done: true,
+          name: "Paint the House",
+          id: 22,
+        },
+      ],
+    };
   },
+
   helpers: {
     disabledIf: (filter, { data }) => (data.root.filter === filter ? "disabled" : ""),
 
     ifShowTodo(todo, { fn, inverse, data }) {
       let shouldRender = true;
-      if (data.root.filter)
-        shouldRender = data.root.filter === "completed" ? todo.done : !todo.done;
+      if (data.root.filter) shouldRender = data.root.filter === "completed" ? todo.done : !todo.done;
       return shouldRender ? fn(todo) : inverse(todo);
     },
   },
 
-  components: { Add, Todo },
+  components: [Add, Todo],
 
   methods: {
-    filter: ({ data }, event, filter) => (data.filter = filter),
+    filter(event, filter) {
+      this.data.filter = filter;
+    },
 
-    showAdd({ data }, event) {
-      console.log(arguments);
+    showAdd(event) {
       event.preventDefault();
-      data.uiState.adding = true;
+      this.data.uiState.adding = true;
     },
   },
 };

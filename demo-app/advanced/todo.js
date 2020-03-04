@@ -3,7 +3,7 @@ export default {
     <div>
       {{#watch "editing" tag="div" class="todo" }}
         {{#if editing}}
-          <input type="text" {{ bind "todo.name" }}/>
+          <input type="text" {{ bound "todo.name" }}/>
           <button {{ method "toggleEditing" }}>save</button>
         {{ else }}
           <label>
@@ -26,8 +26,8 @@ export default {
 
   name: "Todo",
 
-  data: {
-    editing: false,
+  data() {
+    return { editing: false };
   },
 
   helpers: {
@@ -35,17 +35,17 @@ export default {
   },
 
   methods: {
-    deleteToDo({ data }) {
-      const index = data.todos.findIndex(item => item.id === data.todo.id);
-      data.todos.splice(index, 1);
+    deleteToDo() {
+      const index = this.data.todos.findIndex(item => item.id === this.data.todo.id);
+      this.data.todos.splice(index, 1);
     },
 
-    toggleEditing({ data }) {
-      data.editing = !data.editing;
+    toggleEditing() {
+      this.data.editing = !this.data.editing;
     },
 
-    toggleDone({ data }) {
-      data.todo.done = !data.todo.done;
+    toggleDone() {
+      this.data.todo.done = !this.data.todo.done;
     },
   },
 };

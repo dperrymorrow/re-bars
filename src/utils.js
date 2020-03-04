@@ -24,6 +24,12 @@ export default {
     return $tmp.innerHTML;
   },
 
+  getStorage(appId, cId) {
+    return cId
+      ? this.findByPath(window.ReBars, `apps.${appId}.inst.${cId}`)
+      : this.findByPath(window.ReBars, `apps.${appId}`);
+  },
+
   findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
 
   findRefs(parent) {
@@ -38,7 +44,7 @@ export default {
   },
 
   findByPath: (data, path) => path.split(".").reduce((pointer, seg) => pointer[seg], data),
-  getPath: (appId, compId) => `rbs.apps.${appId}.comp.${compId}`,
+  getPath: (appId, compId) => `rbs.apps.${appId}.inst.${compId}`,
 
   shouldRender(path, watch) {
     const watchPaths = Array.isArray(watch) ? watch : [watch];
@@ -57,11 +63,11 @@ export default {
 
   randomId: () => `rbs${counter++}`,
 
-  setKey(obj, path, value) {
+  setKey(obj, path, val) {
     const arr = path.split(".");
     arr.reduce((pointer, key, index) => {
       if (!(key in pointer)) throw new Error(`${path} was not found in object`, obj);
-      if (index + 1 === arr.length) pointer[key] = value;
+      if (index + 1 === arr.length) pointer[key] = val;
       return pointer[key];
     }, obj);
   },

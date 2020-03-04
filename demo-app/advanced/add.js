@@ -9,7 +9,7 @@ export default {
           {{/watch}}
 
           {{#watch newTodo }}
-            <input type="text" {{ bind "newTodo.name" }} placeholder="the new todo" />
+            <input type="text" {{ bound "newTodo.name" }} placeholder="the new todo" />
           {{/watch}}
 
           <button class="push" {{ method "addItem" }}>Add todo</button>
@@ -22,30 +22,31 @@ export default {
   </div>
   `,
 
-  name: "AddComponent",
+  name: "AddTodo",
 
-  data: {
-    isAdding: false,
-    hasError: false,
-    newTodo: {
-      name: "",
-      id: null,
-    },
+  data() {
+    return {
+      isAdding: false,
+      hasError: false,
+      newTodo: {
+        name: "",
+        id: null,
+      },
+    };
   },
 
   methods: {
-    toggleAdd({ data }, event) {
+    toggleAdd(event) {
       event.preventDefault();
-      data.isAdding = !data.isAdding;
+      this.data.isAdding = !this.data.isAdding;
     },
 
-    addItem({ data }, event) {
+    addItem(event) {
       event.preventDefault();
-      data.newTodo.id = new Date().getTime();
-      data.todos.push({ ...data.newTodo });
-
-      data.newTodo.name = "";
-      data.newTodo.id = null;
+      this.data.newTodo.id = new Date().getTime();
+      this.data.todos.push({ ...this.data.newTodo });
+      this.data.newTodo.name = "";
+      this.data.newTodo.id = null;
     },
   },
 };
