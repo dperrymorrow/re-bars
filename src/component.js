@@ -1,8 +1,6 @@
 import Utils from "./utils.js";
 import Watcher from "./watcher.js";
-import Watch from "./helpers/watch.js";
-import Core from "./helpers/core.js";
-import Events from "./helpers/events.js";
+import Helpers from "./helpers.js";
 
 function create(appId, { name, template, data, helpers = {}, methods = {}, watchers = {}, components = [] }) {
   const appStore = Utils.getStorage(appId);
@@ -15,14 +13,17 @@ function create(appId, { name, template, data, helpers = {}, methods = {}, watch
 
   if (!name) throw new Error("Each ReBars component should have a name");
   if (typeof data !== "function") throw new Error(`component:${name} data must be a function`);
-  if (typeof template !== "string") throw new Error("component:${name} needs a template string");
+  if (typeof template !== "string") throw new Error(`component:${name} needs a template string`);
 
   const instance = Handlebars.create();
   const templateFn = instance.compile(template);
 
-  Core.register(appId, { instance, helpers, name, components });
-  Watch.register(appId, { instance, name });
-  Events.register(appId, { instance, name });
+  components.forEach(def => {
+    if (!def.name) throw new Error("component needs a name", def);
+    if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = create(appId, def);
+  });
+
+  Helpers.register(appId, { instance, helpers, name, components });
 
   return {
     render(props = {}) {

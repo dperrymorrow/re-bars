@@ -10,7 +10,6 @@ export default {
   },
 
   bound(appId, cId, event, path) {
-    console.log(arguments);
     const scope = Utils.getStorage(appId, cId).scope;
     Utils.setKey(scope.data, path, event.target.value);
   },
