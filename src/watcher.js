@@ -1,13 +1,13 @@
 import Utils from "./utils.js";
 
 export default {
-  create(appId, { id, props, methods, data, watchers, name }) {
+  create(appId, { id, props, data, watchers, name }) {
     const cStore = Utils.getStorage(appId, id);
     const appStore = Utils.getStorage(appId);
 
     function _handler(path) {
       Object.entries(watchers).forEach(([watch, fn]) => {
-        if (Utils.shouldRender(path, watch)) fn({ data: proxyData, methods });
+        if (Utils.shouldRender(path, watch)) fn();
       });
 
       Object.entries(cStore.renders).forEach(([eId, handler]) => {
@@ -79,7 +79,7 @@ export default {
       });
     }
 
-    const proxyData = _buildProxy({ ...data(), ...props });
-    return { ...proxyData, $_componentId: id, $_appId: appId };
+    const proxyData = _buildProxy({ ...data(), $_componentId: id, $_appId: appId, ...props });
+    return proxyData;
   },
 };

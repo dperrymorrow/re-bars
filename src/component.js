@@ -28,9 +28,14 @@ function create(appId, { name, template, data, helpers = {}, methods = {}, watch
   return {
     render(props = {}) {
       const id = Utils.randomId();
-      const scope = { props, methods, name };
+      const scope = { props, methods, name, watchers };
 
       scope.methods = Object.entries(methods).reduce((bound, [name, method]) => {
+        bound[name] = method.bind(scope);
+        return bound;
+      }, {});
+
+      scope.watchers = Object.entries(watchers).reduce((bound, [name, method]) => {
         bound[name] = method.bind(scope);
         return bound;
       }, {});
@@ -40,7 +45,7 @@ function create(appId, { name, template, data, helpers = {}, methods = {}, watch
         renders: {},
       };
 
-      const proxyData = Watcher.create(appId, { methods, data, watchers, name, ...{ id, props } });
+      const proxyData = Watcher.create(appId, { methods, data, watchers: scope.watchers, name, ...{ id, props } });
       scope.data = proxyData;
       return Utils.tagComponent(id, templateFn(proxyData), name);
     },

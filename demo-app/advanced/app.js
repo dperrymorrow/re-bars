@@ -43,6 +43,12 @@ export default {
 
   name: "DemoApp",
 
+  watchers: {
+    "todos.length"() {
+      this.data.filter = null;
+    },
+  },
+
   data() {
     return {
       filter: null,
