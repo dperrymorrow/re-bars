@@ -38,8 +38,6 @@ export default {
     {{/watch}}
 
     {{ component "AddTodo" addTodo=methods.addTodo }}
-
-    {{ debug . }}
   <div>
   `,
 

@@ -15,7 +15,7 @@ body {
 }
 
 #demo-app * {
-  animation: pulse 1s ease-out;
+  animation: highlight .2s linear;
 }
 
 #demo-app .header-container {
@@ -119,17 +119,12 @@ pre.debug {
   padding: 1rem;
 }
 
-@keyframes pulse {
+@keyframes highlight {
   0% {
-    background-color: inherit;
+    outline: 1px solid orange;
   }
-  20% {
-    background-color: #c6fffa;
-  }
-  90% {
-    background-color: #c6fffa;
-  }
+
   100% {
-    background-color: inherit;
+    outline: none;
   }
 }
