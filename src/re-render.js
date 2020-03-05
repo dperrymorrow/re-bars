@@ -37,6 +37,7 @@ export default {
 
     return {
       patch(path) {
+        _deleteOrphans();
         _checkWatchers(path);
 
         Object.entries(cStore.renders).forEach(([renderId, handler]) => {
@@ -59,8 +60,6 @@ export default {
           _restoreCursor($target, activeRef);
           console.log(`component:${name} ${path}`, $target);
         });
-
-        _deleteOrphans();
       },
     };
   },
