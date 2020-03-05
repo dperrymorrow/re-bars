@@ -2,7 +2,10 @@ import Utils from "./utils.js";
 import Watcher from "./watcher.js";
 import Helpers from "./helpers.js";
 
-function create(appId, { name, template, data, helpers = {}, methods = {}, watchers = {}, components = [] }) {
+function create(
+  appId,
+  { name, template, data, helpers = {}, hooks = {}, methods = {}, watchers = {}, components = [] }
+) {
   const appStore = Utils.getStorage(appId);
 
   data =
@@ -23,12 +26,16 @@ function create(appId, { name, template, data, helpers = {}, methods = {}, watch
     if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = create(appId, def);
   });
 
-  Helpers.register(appId, { instance, helpers, name, components });
+  Helpers.register(appId, { instance, methods, helpers, name, components });
 
   return {
     render(props = {}) {
-      const id = Utils.randomId();
-      const scope = { props, methods, name, watchers };
+      const compId = Utils.randomId();
+      const scope = { props, methods, name, watchers, data };
+
+      Object.entries(props).forEach(([key, value]) => {
+        if (value === undefined) console.warn(`component:${name} was passed undefined for prop '${key}'`);
+      });
 
       scope.methods = Object.entries(methods).reduce((bound, [name, method]) => {
         bound[name] = method.bind(scope);
@@ -40,14 +47,14 @@ function create(appId, { name, template, data, helpers = {}, methods = {}, watch
         return bound;
       }, {});
 
-      appStore.inst[id] = {
+      appStore.inst[compId] = {
         scope,
         renders: {},
       };
 
-      const proxyData = Watcher.create(appId, { methods, data, watchers: scope.watchers, name, ...{ id, props } });
-      scope.data = proxyData;
-      return Utils.tagComponent(id, templateFn(proxyData), name);
+      scope.data = Watcher.create({ ...scope, ...{ appId, compId, props } });
+      if (hooks.created) hooks.created.call(scope);
+      return Utils.tagComponent(compId, templateFn(scope.data), name);
     },
   };
 }

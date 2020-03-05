@@ -16,7 +16,7 @@ export default {
           </label>
 
           <div class="actions">
-            <button {{ method "deleteToDo" }}>delete</button>
+            <button {{ method "remove" }}>delete</button>
             <button {{ method "toggleEditing" }}>edit</button>
           </div>
         {{/if}}
@@ -35,9 +35,8 @@ export default {
   },
 
   methods: {
-    deleteToDo() {
-      const index = this.data.todos.findIndex(item => item.id === this.data.todo.id);
-      this.data.todos.splice(index, 1);
+    remove() {
+      this.data.deleteTodo(this.data.index);
     },
 
     toggleEditing() {

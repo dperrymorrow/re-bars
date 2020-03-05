@@ -41,12 +41,15 @@ export default {
       this.data.isAdding = !this.data.isAdding;
     },
 
+    reset() {
+      this.data.newTodo.name = "";
+      this.data.newTodo.id = null;
+    },
+
     addItem(event) {
       event.preventDefault();
       this.data.newTodo.id = new Date().getTime();
-      this.data.todos.push({ ...this.data.newTodo });
-      this.data.newTodo.name = "";
-      this.data.newTodo.id = null;
+      this.data.addTodo({ ...this.data.newTodo });
     },
   },
 };

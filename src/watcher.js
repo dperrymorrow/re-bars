@@ -1,8 +1,8 @@
 import Utils from "./utils.js";
 
 export default {
-  create(appId, { id, props, data, watchers, name }) {
-    const cStore = Utils.getStorage(appId, id);
+  create({ appId, compId, props, data, watchers, name }) {
+    const cStore = Utils.getStorage(appId, compId);
     const appStore = Utils.getStorage(appId);
 
     function _handler(path) {
@@ -25,7 +25,7 @@ export default {
               $target.style.display = html === "" ? "none" : "";
 
               $target.innerHTML = html;
-              console.log("ReBars: re-render", $target, `${name}: ${path}`);
+              console.log(`component:${name} ${path}`, $target);
               const $input = Utils.findRefs($target)[activeRef.ref];
 
               if ($input) {
@@ -60,6 +60,8 @@ export default {
         get: function(target, prop) {
           if (prop === "ReBarsPath") return tree.join(".");
           const value = Reflect.get(...arguments);
+          // this lets us pass functions around...
+          if (typeof value === "function" && target.hasOwnProperty(prop)) return value.bind(proxyData);
           if (value !== null && typeof value === "object" && prop !== "methods")
             return _buildProxy(value, tree.concat(prop));
           else return value;
@@ -79,7 +81,7 @@ export default {
       });
     }
 
-    const proxyData = _buildProxy({ ...data(), $_componentId: id, $_appId: appId, ...props });
+    const proxyData = _buildProxy({ ...props, ...data(), $_componentId: compId, $_appId: appId });
     return proxyData;
   },
 };

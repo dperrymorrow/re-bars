@@ -45,7 +45,12 @@ export default {
     instance.registerHelper("ref", key => new instance.SafeString(`data-rbs-ref="${key}"`));
     // watch helpers and debug
     instance.registerHelper("debug", function(obj, { data }) {
-      const render = () => `<pre class="debug">${JSON.stringify(obj, null, 2)}</pre>`;
+      const render = () =>
+        `<pre class="debug">${JSON.stringify(
+          obj,
+          (key, val) => (typeof val === "function" ? val + "" : val),
+          2
+        )}</pre>`;
       const eId = _watch(_getPath(obj), render, data);
       return new instance.SafeString(Utils.wrapWatcher(eId, render()));
     });

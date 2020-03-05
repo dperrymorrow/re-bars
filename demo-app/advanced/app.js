@@ -31,26 +31,31 @@ export default {
       {{#each todos as | todo | }}
         {{#watch todo "done" tag="li" }}
           {{#ifShowTodo todo }}
-            {{ component "Todo" todo=todo todos=@root.todos }}
+            {{ component "Todo" todo=todo index=@index deleteTodo=@root.deleteTodo }}
           {{/ifShowTodo}}
         {{/watch}}
       {{/each}}
     {{/watch}}
 
-    {{ component "AddTodo" todos=todos }}
+    {{ debug . }}
+
+    {{ component "AddTodo" addTodo=addTodo }}
   <div>
   `,
 
   name: "DemoApp",
 
-  watchers: {
-    "todos.length"() {
-      this.data.filter = null;
-    },
-  },
-
   data() {
     return {
+      addTodo(todo) {
+        this.todos.push(todo);
+        this.filter = null;
+      },
+
+      deleteTodo(index) {
+        this.todos.splice(index, 1);
+      },
+
       filter: null,
       header: {
         title: "Todos",
