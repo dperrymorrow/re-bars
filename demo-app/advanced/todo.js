@@ -16,7 +16,7 @@ export default {
           </label>
 
           <div class="actions">
-            <button {{ method "remove" }}>delete</button>
+            <button {{ method "deleteTodo" index }}>delete</button>
             <button {{ method "toggleEditing" }}>edit</button>
           </div>
         {{/if}}

@@ -33,9 +33,7 @@ export default {
     // component
     instance.registerHelper("component", function(cName, { hash: props }) {
       const cDefs = Utils.getStorage(appId).cDefs;
-
       if (!cDefs[cName]) throw new Error(`component:${name} child component ${cName} is not registered`);
-
       return new instance.SafeString(cDefs[cName].render(props));
     });
 

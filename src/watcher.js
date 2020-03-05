@@ -1,7 +1,7 @@
 import Utils from "./utils.js";
 
 export default {
-  create({ appId, compId, props, data, watchers, name }) {
+  create({ appId, compId, props, data, methods, watchers, name }) {
     const cStore = Utils.getStorage(appId, compId);
     const appStore = Utils.getStorage(appId);
 
@@ -81,7 +81,7 @@ export default {
       });
     }
 
-    const proxyData = _buildProxy({ ...props, ...data(), $_componentId: compId, $_appId: appId });
+    const proxyData = _buildProxy({ ...props, ...data(), ...{ methods }, $_componentId: compId, $_appId: appId });
     return proxyData;
   },
 };

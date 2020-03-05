@@ -33,14 +33,18 @@ function create(
       const compId = Utils.randomId();
       const scope = { props, methods, name, watchers, data };
 
-      Object.entries(props).forEach(([key, value]) => {
-        if (value === undefined) console.warn(`component:${name} was passed undefined for prop '${key}'`);
-      });
-
       scope.methods = Object.entries(methods).reduce((bound, [name, method]) => {
         bound[name] = method.bind(scope);
         return bound;
       }, {});
+
+      Object.entries(props).forEach(([key, value]) => {
+        if (value === undefined) console.warn(`component:${name} was passed undefined for prop '${key}'`);
+        if (typeof value === "function" && !(key in scope.methods)) {
+          scope.methods[key] = value;
+          delete props[key];
+        }
+      });
 
       scope.watchers = Object.entries(watchers).reduce((bound, [name, method]) => {
         bound[name] = method.bind(scope);

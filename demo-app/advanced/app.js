@@ -31,15 +31,15 @@ export default {
       {{#each todos as | todo | }}
         {{#watch todo "done" tag="li" }}
           {{#ifShowTodo todo }}
-            {{ component "Todo" todo=todo index=@index deleteTodo=@root.deleteTodo }}
+            {{ component "Todo" todo=todo index=@index deleteTodo=@root.methods.deleteTodo }}
           {{/ifShowTodo}}
         {{/watch}}
       {{/each}}
     {{/watch}}
 
-    {{ debug . }}
+    {{ component "AddTodo" addTodo=methods.addTodo }}
 
-    {{ component "AddTodo" addTodo=addTodo }}
+    {{ debug . }}
   <div>
   `,
 
@@ -47,15 +47,6 @@ export default {
 
   data() {
     return {
-      addTodo(todo) {
-        this.todos.push(todo);
-        this.filter = null;
-      },
-
-      deleteTodo(index) {
-        this.todos.splice(index, 1);
-      },
-
       filter: null,
       header: {
         title: "Todos",
@@ -91,6 +82,15 @@ export default {
   methods: {
     filter(event, filter) {
       this.data.filter = filter;
+    },
+
+    addTodo(todo) {
+      this.data.todos.push({ ...todo });
+      this.data.filter = null;
+    },
+
+    deleteTodo(index) {
+      this.data.todos.splice(index, 1);
     },
 
     showAdd(event) {
