@@ -36,14 +36,16 @@ export default {
               todo=todo
               index=@index
               deleteTodo=@root.methods.deleteTodo
-              updateTodo=@root.methods.updateTodo
             }}
           </li>
         {{/ifShowTodo}}
       {{/each}}
     {{/watch}}
 
-    {{ component "AddTodo" addTodo=methods.addTodo }}
+    {{
+      component "AddTodo"
+      addTodo=methods.addTodo
+    }}
 
   <div>
   `,
@@ -104,11 +106,6 @@ export default {
     addTodo(todo) {
       this.data.todos.push({ ...todo });
       this.data.filter = null;
-    },
-
-    updateTodo(todo) {
-      const index = this.methods.findIndex(todo);
-      this.data.todos[index] = todo;
     },
 
     findIndex(todo) {

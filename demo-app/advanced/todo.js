@@ -34,7 +34,7 @@ export default {
 
   hooks: {
     created() {
-      this.data.todo = { ...this.$props.todo };
+      this.data.todo = this.$props.todo;
     },
   },
 
@@ -48,7 +48,7 @@ export default {
     },
 
     save() {
-      this.$props.updateTodo(this.data.todo);
+      this.data.editing = false;
     },
 
     toggleEditing() {

@@ -35,7 +35,8 @@ export default {
       });
     }
 
-    function _patchArr($target, html) {
+    function _patchArr($target, html, path) {
+      const fullPatch = !path.endsWith(".length");
       const $shadow = Utils.getShadow(html);
       const $vChilds = Array.from($shadow.children);
       const $rChilds = Array.from($target.children);
@@ -44,6 +45,7 @@ export default {
       $rChilds.forEach($r => {
         const $v = Utils.findRef($shadow, $r.dataset.rbsRef);
         if (!$v) $r.remove();
+        else if (fullPatch && !Utils.isEqHtml($v, $r)) $r.replaceWith($v.cloneNode(true));
       });
 
       // additions
@@ -73,7 +75,7 @@ export default {
           const html = handler.render();
 
           if (Utils.isKeyedNode($target)) {
-            _patchArr($target, html);
+            _patchArr($target, html, path);
             return;
           }
 

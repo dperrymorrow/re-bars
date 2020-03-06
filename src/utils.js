@@ -14,16 +14,14 @@ export default {
   },
 
   isKeyedNode: $target => Array.from($target.children).every($el => $el.dataset.rbsRef),
+  normalizeHtml: html => html.replace(new RegExp(/="rbs(.*?)"/g), ""),
 
-  normalizeHtml(html) {
-    return html.replace(/\s/g, "").replace(new RegExp(/="rbs(.*?)"/g), "");
-  },
-
-  isEqHtml(html1, html2) {
-    console.log(this.normalizeHtml(html1));
-    console.log(this.normalizeHtml(html2));
-
-    return this.normalizeHtml(html1) === this.normalizeHtml(html2);
+  isEqHtml(item1, item2) {
+    const $n1 = typeof item1 === "string" ? this.getShadow(item1) : this.getShadow(item1.innerHTML);
+    const $n2 = typeof item2 === "string" ? this.getShadow(item2) : this.getShadow(item2.innerHTML);
+    $n1.innerHTML = this.normalizeHtml($n1.innerHTML);
+    $n2.innerHTML = this.normalizeHtml($n2.innerHTML);
+    return $n1.isEqualNode($n2);
   },
 
   getShadow(html) {
