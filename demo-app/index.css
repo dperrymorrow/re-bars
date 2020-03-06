@@ -132,10 +132,10 @@ pre.debug {
 
 @keyframes highlight {
   0% {
-    outline: 3px solid orange;
+    box-shadow: rgba(0,0,0,0.5) 0px 0px 14px;
   }
 
   100% {
-    outline: none;
+    box-shadow: inherit;
   }
 }

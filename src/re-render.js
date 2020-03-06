@@ -46,16 +46,14 @@ export default {
         else if (!Utils.isEqHtml($v, $r)) $r.replaceWith($v.cloneNode(true));
       });
       // additions;
-      let $lastMatch;
-      $vChilds.forEach($v => {
+
+      $vChilds.forEach(($v, index) => {
         const $r = Utils.findRef($target, $v.dataset.rbsRef);
         if (!$r) {
-          if ($lastMatch && $lastMatch.nextElementSibling) {
-            $target.insertBefore($v.cloneNode(true), $lastMatch.nextElementSibling);
-          } else {
-            $target.append($v.cloneNode(true));
-          }
-        } else $lastMatch = $r;
+          const $prev = $target.children[index];
+          if ($prev) $target.insertBefore($v.cloneNode(true), $prev);
+          else $target.prepend($v.cloneNode(true));
+        }
       });
       // sorting
       $vChilds
