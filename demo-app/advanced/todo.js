@@ -3,7 +3,7 @@ export default {
     <div>
       {{#watch "editing" tag="div" class="todo" }}
         {{#if editing}}
-          <input type="text" {{ bound "todo.name" }}/>
+          <input type="text" value="{{ todo.name }}" {{ ref "nameInput" }}/>
           <button {{ method "save" }}>save</button>
         {{ else }}
           <label>
@@ -18,7 +18,7 @@ export default {
           </label>
 
           <div class="actions">
-            <button {{ method "remove" }}>delete</button>
+            <button {{ method "deleteTodo" index }}>delete</button>
             <button {{ method "toggleEditing" }}>edit</button>
           </div>
         {{/if}}
@@ -32,22 +32,13 @@ export default {
     return { editing: false };
   },
 
-  hooks: {
-    created() {
-      this.data.todo = this.$props.todo;
-    },
-  },
-
   helpers: {
     isChecked: val => (val ? "checked" : ""),
   },
 
   methods: {
-    remove() {
-      this.$props.deleteTodo(this.data.todo);
-    },
-
     save() {
+      this.data.todo.name = this.$refs().nameInput.value;
       this.data.editing = false;
     },
 
