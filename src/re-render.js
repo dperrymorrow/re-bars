@@ -2,7 +2,7 @@ import Utils from "./utils.js";
 
 function _restoreCursor($target, activeRef) {
   // this fetches all the refs, is this performant?
-  const $input = Utils.findRefs($target)[activeRef.ref];
+  const $input = Utils.findRef($target, activeRef.ref);
 
   if (!$input) return;
   if (Array.isArray($input)) {
