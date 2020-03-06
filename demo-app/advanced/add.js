@@ -44,7 +44,7 @@ export default {
     addItem(event) {
       event.preventDefault();
       this.data.newTodo.id = new Date().getTime();
-      this.methods.addTodo(this.data.newTodo);
+      this.$props.addTodo(this.data.newTodo);
 
       this.data.newTodo.name = "";
       this.data.newTodo.id = null;

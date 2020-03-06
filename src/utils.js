@@ -13,15 +13,36 @@ export default {
     return `<${tag} ${propStr} ${style} data-rbs-watch="${id}">${html}</${tag}>`;
   },
 
-  tagComponent(id, html, name) {
+  isKeyedNode: $target => Array.from($target.children).every($el => $el.dataset.rbsRef),
+
+  normalizeHtml(html) {
+    return html.replace(/\s/g, "").replace(new RegExp(/="rbs(.*?)"/g), "");
+  },
+
+  isEqHtml(html1, html2) {
+    console.log(this.normalizeHtml(html1));
+    console.log(this.normalizeHtml(html2));
+
+    return this.normalizeHtml(html1) === this.normalizeHtml(html2);
+  },
+
+  getShadow(html) {
     const $tmp = document.createElement("div");
     $tmp.innerHTML = html;
+    return $tmp;
+  },
+
+  tagComponent(id, html, name) {
+    const $tmp = this.getShadow(html);
     const $root = $tmp.firstElementChild;
+
     if ($tmp.children.length > 1 || $root.dataset.rbsWatch)
       throw new Error(`component:'${name}' must have one root node, and cannot be a {{#watch}}`);
 
     $root.dataset.rbsComp = id;
-    return $tmp.innerHTML;
+    const content = $tmp.innerHTML;
+    $tmp.remove();
+    return content;
   },
 
   getStorage(appId, cId) {
@@ -31,6 +52,7 @@ export default {
   },
 
   findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
+  findRef: ($parent, ref) => $parent.querySelector(`[data-rbs-ref="${ref}"]`),
 
   findRefs(parent) {
     const $el = typeof parent === "object" ? parent : this.findComponent(parent);

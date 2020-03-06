@@ -24,6 +24,7 @@ const _makeParams = args => {
         `component:${name} must only pass primitives as argument to a handler. ${JSON.stringify(args, null, 2)}`
       );
     if (typeof param === "string") return `'${param}'`;
+    if (param === null) return `${param}`;
     return param;
   });
 };
@@ -55,7 +56,6 @@ export default {
 
     instance.registerHelper("watch", function(...args) {
       const { fn, hash, data } = args.pop();
-
       const path = args
         .map(arg => _getPath(arg, false))
         .join(".")
@@ -72,6 +72,7 @@ export default {
       const { data } = args.pop();
       const { $_appId, $_componentId } = data.root;
       const params = _makeParams([$_appId, $_componentId, methodName, "[event]"].concat(args));
+
       return new instance.SafeString(`on${eventType}="rbs.handlers.trigger(${params.join(",")})"`);
     });
 

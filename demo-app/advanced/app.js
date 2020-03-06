@@ -27,17 +27,24 @@ export default {
       <button {{ disabledIf null }} {{ method "filter" null }}>Show All</button>
     {{/watch}}
 
-    {{#watch "filter,todos.length" tag="ul"}}
+    {{#watch "filter,todos.*" tag="ul"}}
       {{#each todos as | todo | }}
-        {{#watch todo "done" tag="li" }}
-          {{#ifShowTodo todo }}
-            {{ component "Todo" todo=todo index=@index deleteTodo=@root.methods.deleteTodo }}
-          {{/ifShowTodo}}
-        {{/watch}}
+        {{#ifShowTodo todo }}
+          <li {{ ref todo.id }}>
+            {{
+              component "Todo"
+              todo=todo
+              index=@index
+              deleteTodo=@root.methods.deleteTodo
+              updateTodo=@root.methods.updateTodo
+            }}
+          </li>
+        {{/ifShowTodo}}
       {{/each}}
     {{/watch}}
 
     {{ component "AddTodo" addTodo=methods.addTodo }}
+
   <div>
   `,
 
@@ -53,13 +60,25 @@ export default {
       todos: [
         {
           done: false,
-          name: "Grocery Shopping",
+          name: "Apples",
           id: 33,
         },
         {
           done: true,
-          name: "Paint the House",
+          name: "Blueberries",
           id: 22,
+        },
+
+        {
+          done: false,
+          name: "Cherries",
+          id: 26,
+        },
+
+        {
+          done: true,
+          name: "Grapes",
+          id: 29,
         },
       ],
     };
@@ -87,8 +106,17 @@ export default {
       this.data.filter = null;
     },
 
-    deleteTodo(index) {
-      this.data.todos.splice(index, 1);
+    updateTodo(todo) {
+      const index = this.methods.findIndex(todo);
+      this.data.todos[index] = todo;
+    },
+
+    findIndex(todo) {
+      return this.data.todos.findIndex(t => t.id === todo.id);
+    },
+
+    deleteTodo(todo) {
+      this.data.todos.splice(this.methods.findIndex(todo), 1);
     },
 
     showAdd(event) {

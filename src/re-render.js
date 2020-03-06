@@ -7,7 +7,7 @@ function _restoreCursor($target, activeRef) {
   if (!$input) return;
   if (Array.isArray($input)) {
     console.warn(
-      `component:${name} ref ${activeRef.ref} is used more than once. The focus cannot be restored. If using bind, add a ref="uniqeName" to each`
+      `component:${name} ref ${activeRef.ref} is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each`
     );
   } else {
     $input.focus();
@@ -16,7 +16,7 @@ function _restoreCursor($target, activeRef) {
 }
 
 export default {
-  init({ watchers, appId, compId }) {
+  init({ watchers, appId, compId, name }) {
     const cStore = Utils.getStorage(appId, compId);
     const appStore = Utils.getStorage(appId);
 
@@ -35,6 +35,31 @@ export default {
       });
     }
 
+    function _patchArr($target, html) {
+      const $shadow = Utils.getShadow(html);
+      const $vChilds = Array.from($shadow.children);
+      const $rChilds = Array.from($target.children);
+
+      // do deletes first so its faster
+      $rChilds.forEach($r => {
+        const $v = Utils.findRef($shadow, $r.dataset.rbsRef);
+        if (!$v) $r.remove();
+      });
+
+      // additions
+      let $lastMatch;
+      $vChilds.forEach($v => {
+        const $r = Utils.findRef($target, $v.dataset.rbsRef);
+        if (!$r) {
+          if ($lastMatch && $lastMatch.nextElementSibling) {
+            $target.insertBefore($v.cloneNode(true), $lastMatch.nextElementSibling);
+          } else {
+            $target.append($v.cloneNode(true));
+          }
+        } else $lastMatch = $r;
+      });
+    }
+
     return {
       patch(path) {
         _deleteOrphans();
@@ -45,9 +70,14 @@ export default {
 
           const $target = Utils.findWatcher(renderId);
           if (!$target) return;
-
           const html = handler.render();
-          if ($target.innerHTML === html) return;
+
+          if (Utils.isKeyedNode($target)) {
+            _patchArr($target, html);
+            return;
+          }
+
+          if (Utils.isEqHtml($target.innerHTML, html)) return;
 
           const activeRef = {
             ref: document.activeElement.dataset.rbsRef,

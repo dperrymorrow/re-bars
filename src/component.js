@@ -29,21 +29,17 @@ function create(
   Helpers.register(appId, { instance, methods, helpers, name, components });
 
   return {
-    render(props = {}) {
+    render($props = {}) {
       const compId = Utils.randomId();
-      const scope = { props, methods, name, watchers, data };
+      const scope = { $props, methods, name, watchers, data: data() };
 
       scope.methods = Object.entries(methods).reduce((bound, [name, method]) => {
         bound[name] = method.bind(scope);
         return bound;
       }, {});
 
-      Object.entries(props).forEach(([key, value]) => {
+      Object.entries(scope.$props).forEach(([key, value]) => {
         if (value === undefined) console.warn(`component:${name} was passed undefined for prop '${key}'`);
-        if (typeof value === "function" && !(key in scope.methods)) {
-          scope.methods[key] = value;
-          delete props[key];
-        }
       });
 
       scope.watchers = Object.entries(watchers).reduce((bound, [name, method]) => {
@@ -56,8 +52,8 @@ function create(
         renders: {},
       };
 
-      scope.data = Watcher.create({ ...scope, ...{ appId, compId, props } });
       if (hooks.created) hooks.created.call(scope);
+      scope.data = Watcher.create({ ...scope, ...{ appId, compId } });
       return Utils.tagComponent(compId, templateFn(scope.data), name);
     },
   };

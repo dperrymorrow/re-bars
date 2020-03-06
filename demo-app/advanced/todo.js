@@ -4,19 +4,21 @@ export default {
       {{#watch "editing" tag="div" class="todo" }}
         {{#if editing}}
           <input type="text" {{ bound "todo.name" }}/>
-          <button {{ method "toggleEditing" }}>save</button>
+          <button {{ method "save" }}>save</button>
         {{ else }}
           <label>
-            <input type="checkbox" {{ isChecked todo.done }} {{ method "toggleDone" }} />
-            {{#if todo.done }}
-              <s>{{ todo.name }}</s>
-            {{else}}
-              <strong>{{ todo.name }}</strong>
-            {{/if}}
+            {{#watch "todo.done" }}
+              <input type="checkbox" {{ isChecked todo.done }} {{ method "toggleDone" }} />
+              {{#if todo.done }}
+                <s>{{ todo.name }}</s>
+              {{else}}
+                <strong>{{ todo.name }}</strong>
+              {{/if}}
+            {{/watch}}
           </label>
 
           <div class="actions">
-            <button {{ method "deleteTodo" index }}>delete</button>
+            <button {{ method "remove" }}>delete</button>
             <button {{ method "toggleEditing" }}>edit</button>
           </div>
         {{/if}}
@@ -30,13 +32,23 @@ export default {
     return { editing: false };
   },
 
+  hooks: {
+    created() {
+      this.data.todo = { ...this.$props.todo };
+    },
+  },
+
   helpers: {
     isChecked: val => (val ? "checked" : ""),
   },
 
   methods: {
     remove() {
-      this.data.deleteTodo(this.data.index);
+      this.$props.deleteTodo(this.data.todo);
+    },
+
+    save() {
+      this.$props.updateTodo(this.data.todo);
     },
 
     toggleEditing() {

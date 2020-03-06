@@ -79,61 +79,82 @@
     },
   };
 
-  var Watcher = {
-    create(appId, { id, props, methods, data, watchers, name }) {
-      const cStore = Utils.getStorage(appId, id);
+  function _restoreCursor($target, activeRef) {
+    // this fetches all the refs, is this performant?
+    const $input = Utils.findRefs($target)[activeRef.ref];
+
+    if (!$input) return;
+    if (Array.isArray($input)) ; else {
+      $input.focus();
+      if (activeRef.pos) $input.setSelectionRange(activeRef.pos + 1, activeRef.pos + 1);
+    }
+  }
+
+  var ReRender = {
+    init({ watchers, appId, compId, name }) {
+      const cStore = Utils.getStorage(appId, compId);
       const appStore = Utils.getStorage(appId);
 
-      function _handler(path) {
+      function _checkWatchers(path) {
         Object.entries(watchers).forEach(([watch, fn]) => {
-          if (Utils.shouldRender(path, watch)) fn({ data: proxyData, methods });
-        });
-
-        Object.entries(cStore.renders).forEach(([eId, handler]) => {
-          if (Utils.shouldRender(path, handler.path)) {
-            const $target = Utils.findWatcher(eId);
-            if ($target) {
-              const html = handler.render();
-              const $active = document.activeElement;
-              const activeRef = {
-                ref: $active.dataset.rbsRef,
-                pos: $active.selectionStart,
-              };
-
-              if ($target.innerHTML !== html) {
-                $target.style.display = html === "" ? "none" : "";
-
-                $target.innerHTML = html;
-                const $input = Utils.findRefs($target)[activeRef.ref];
-
-                if ($input) {
-                  if (Array.isArray($input)) ; else {
-                    $input.focus();
-                    if (activeRef.pos) $input.setSelectionRange(activeRef.pos + 1, activeRef.pos + 1);
-                  }
-                }
-              }
-            } else {
-              delete cStore.renders[eId];
-            }
-          }
-        });
-
-        Object.keys(appStore.inst).forEach(cId => {
-          if (!Utils.findComponent(cId)) {
-            // will fire destory hook here...
-            delete appStore.inst[cId];
-          }
+          if (Utils.shouldRender(path, watch)) fn();
         });
       }
 
-      // the proxy building
+      function _deleteOrphans() {
+        Object.keys(appStore.inst).forEach(cId => {
+          if (!Utils.findComponent(cId)) delete appStore.inst[cId];
+        });
+        Object.keys(cStore.renders).forEach(key => {
+          if (!Utils.findWatcher(key)) delete cStore.renders[key];
+        });
+      }
+
+      return {
+        patch(path) {
+          _deleteOrphans();
+          _checkWatchers(path);
+
+          Object.entries(cStore.renders).forEach(([renderId, handler]) => {
+            if (!Utils.shouldRender(path, handler.path)) return;
+
+            const $target = Utils.findWatcher(renderId);
+            if (!$target) return;
+            const html = handler.render();
+            if ($target.innerHTML === html) return;
+
+            if (path.endsWith(".length")) {
+              const $children = Array.from($target.children);
+              if ($children.some($el => !$el.dataset.hbsRef))
+                ;
+            }
+
+            const activeRef = {
+              ref: document.activeElement.dataset.rbsRef,
+              pos: document.activeElement.selectionStart,
+            };
+
+            $target.style.display = html === "" ? "none" : "";
+            $target.innerHTML = html;
+
+            _restoreCursor($target, activeRef);
+          });
+        },
+      };
+    },
+  };
+
+  var Watcher = {
+    create({ appId, compId, props, data, methods }) {
+      const { patch } = ReRender.init(...arguments);
 
       function _buildProxy(raw, tree = []) {
         return new Proxy(raw, {
           get: function(target, prop) {
             if (prop === "ReBarsPath") return tree.join(".");
             const value = Reflect.get(...arguments);
+            // not sure we need this anymore should only proxy the data...
+            if (typeof value === "function" && target.hasOwnProperty(prop)) return value.bind(proxyData);
             if (value !== null && typeof value === "object" && prop !== "methods")
               return _buildProxy(value, tree.concat(prop));
             else return value;
@@ -141,19 +162,19 @@
 
           set: function(target, prop) {
             const ret = Reflect.set(...arguments);
-            _handler(tree.concat(prop).join("."));
+            patch(tree.concat(prop).join("."));
             return ret;
           },
 
           deleteProperty: function(target, prop) {
             const ret = Reflect.deleteProperty(...arguments);
-            _handler(tree.concat(prop).join("."));
+            patch(tree.concat(prop).join("."));
             return ret;
           },
         });
       }
 
-      const proxyData = _buildProxy({ ...data(), $_componentId: id, $_appId: appId, ...props });
+      const proxyData = _buildProxy({ ...props, ...data(), ...{ methods }, $_componentId: compId, $_appId: appId });
       return proxyData;
     },
   };
@@ -191,14 +212,7 @@
       // component
       instance.registerHelper("component", function(cName, { hash: props }) {
         const cDefs = Utils.getStorage(appId).cDefs;
-
-        Object.entries(props).forEach(([key, val]) => {
-          if (typeof val === "function")
-            throw new Error(`cannot pass a function as a prop. in '${name}' child '${cName}' prop '${key}'`);
-        });
-
         if (!cDefs[cName]) throw new Error(`component:${name} child component ${cName} is not registered`);
-
         return new instance.SafeString(cDefs[cName].render(props));
       });
 
@@ -208,9 +222,14 @@
       instance.registerHelper("ref", key => new instance.SafeString(`data-rbs-ref="${key}"`));
       // watch helpers and debug
       instance.registerHelper("debug", function(obj, { data }) {
-        const render = () => `<pre class="debug">${JSON.stringify(obj, null, 2)}</pre>`;
+        const render = () =>
+          `<pre class="debug">${JSON.stringify(
+          obj,
+          (key, val) => (typeof val === "function" ? val + "" : val),
+          2
+        )}</pre>`;
         const eId = _watch(_getPath(obj), render, data);
-        return new instance.SafeString(Utils.wrapWatch(eId, render()));
+        return new instance.SafeString(Utils.wrapWatcher(eId, render()));
       });
 
       instance.registerHelper("watch", function(...args) {
@@ -248,7 +267,10 @@
     },
   };
 
-  function create(appId, { name, template, data, helpers = {}, methods = {}, watchers = {}, components = [] }) {
+  function create(
+    appId,
+    { name, template, data, helpers = {}, hooks = {}, methods = {}, watchers = {}, components = [] }
+  ) {
     const appStore = Utils.getStorage(appId);
 
     data =
@@ -269,26 +291,38 @@
       if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = create(appId, def);
     });
 
-    Helpers.register(appId, { instance, helpers, name, components });
+    Helpers.register(appId, { instance, methods, helpers, name, components });
 
     return {
       render(props = {}) {
-        const id = Utils.randomId();
-        const scope = { props, methods, name };
+        const compId = Utils.randomId();
+        const scope = { props, methods, name, watchers, data };
 
         scope.methods = Object.entries(methods).reduce((bound, [name, method]) => {
           bound[name] = method.bind(scope);
           return bound;
         }, {});
 
-        appStore.inst[id] = {
+        Object.entries(props).forEach(([key, value]) => {
+          if (typeof value === "function" && !(key in scope.methods)) {
+            scope.methods[key] = value;
+            delete props[key];
+          }
+        });
+
+        scope.watchers = Object.entries(watchers).reduce((bound, [name, method]) => {
+          bound[name] = method.bind(scope);
+          return bound;
+        }, {});
+
+        appStore.inst[compId] = {
           scope,
           renders: {},
         };
 
-        const proxyData = Watcher.create(appId, { methods, data, watchers, name, ...{ id, props } });
-        scope.data = proxyData;
-        return Utils.tagComponent(id, templateFn(proxyData), name);
+        scope.data = Watcher.create({ ...scope, ...{ appId, compId, props } });
+        if (hooks.created) hooks.created.call(scope);
+        return Utils.tagComponent(compId, templateFn(scope.data), name);
       },
     };
   }
