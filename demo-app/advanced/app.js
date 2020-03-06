@@ -41,8 +41,6 @@ export default {
       component "AddTodo"
       addTodo=methods.addTodo
     }}
-
-    {{ debug . }}
   <div>
   `,
 
@@ -55,14 +53,18 @@ export default {
         if (this.filters.state === "incomplete") list = this.todos.filter(t => !t.done);
         else if (this.filters.state === "completed") list = this.todos.filter(t => t.done);
 
-        return list.sort((a, b) => {
+        const sorted = list.sort((a, b) => {
           if (this.filters.sortBy === "name") return a.name.localeCompare(b.name);
           else new Date(a.updated) - new Date(b.updated);
         });
+
+        return this.filters.sortDir === "asc" ? sorted : sorted.reverse();
       },
+
       filters: {
         state: null,
         sortBy: "name",
+        sortDir: "asc",
       },
       header: {
         title: "Todos",

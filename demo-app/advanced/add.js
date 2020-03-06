@@ -6,9 +6,6 @@ export default {
         <form>
           {{#watch "newTodo.name" }}
             <h1>{{ newTodo.name }}</h1>
-          {{/watch}}
-
-          {{#watch newTodo }}
             <input type="text" {{ bound "newTodo.name" }} placeholder="the new todo" />
           {{/watch}}
 

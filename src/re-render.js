@@ -35,20 +35,17 @@ export default {
       });
     }
 
-    function _patchArr($target, html, path) {
-      const fullPatch = !path.endsWith(".length");
+    function _patchArr($target, html) {
       const $shadow = Utils.getShadow(html);
       const $vChilds = Array.from($shadow.children);
-      const $rChilds = Array.from($target.children);
 
-      // do deletes first so its faster
-      $rChilds.forEach($r => {
+      // do deletes + changes first so its faster
+      Array.from($target.children).forEach($r => {
         const $v = Utils.findRef($shadow, $r.dataset.rbsRef);
         if (!$v) $r.remove();
-        else if (fullPatch && !Utils.isEqHtml($v, $r)) $r.replaceWith($v.cloneNode(true));
+        else if (!Utils.isEqHtml($v, $r)) $r.replaceWith($v.cloneNode(true));
       });
-
-      // additions
+      // additions;
       let $lastMatch;
       $vChilds.forEach($v => {
         const $r = Utils.findRef($target, $v.dataset.rbsRef);
@@ -60,6 +57,15 @@ export default {
           }
         } else $lastMatch = $r;
       });
+      // sorting
+      $vChilds
+        .reduce((arr, $v) => {
+          arr.push(Utils.findRef($target, $v.dataset.rbsRef));
+          return arr;
+        }, [])
+        .forEach(($el, index) => {
+          if (!$target.children[index].isEqualNode($el)) $target.children[index].replaceWith($el.cloneNode(true));
+        });
     }
 
     return {
@@ -77,6 +83,10 @@ export default {
           if (Utils.isKeyedNode($target)) {
             _patchArr($target, html, path);
             return;
+          } else if (path.endsWith(".length")) {
+            console.warn(
+              `component:${name} patching ${path} if you add a ref to each item in the array it will be much faster`
+            );
           }
 
           if (Utils.isEqHtml($target.innerHTML, html)) return;

@@ -132,7 +132,7 @@ pre.debug {
 
 @keyframes highlight {
   0% {
-    outline: 1px solid orange;
+    outline: 3px solid orange;
   }
 
   100% {

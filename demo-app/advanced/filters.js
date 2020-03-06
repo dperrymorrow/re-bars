@@ -1,18 +1,22 @@
 export default {
   template: /*html*/ `
-    <div>
-      {{#watch "filters" class="filters" }}
-        <div>
-          <button {{ disabledIf "completed" }} {{ method "filterBy" "completed" }}>Show Completed</button>
-          <button {{ disabledIf "incomplete" }} {{ method "filterBy" "incomplete" }}>Show Incompleted</button>
-          <button {{ disabledIf null }} {{ method "filterBy" null }}>Show All</button>
-        </div>
+    <div class="filters">
+      {{#watch "filters.state" tag="div" }}
+        <button {{ disabledIf "completed" }} {{ method "filterBy" "completed" }}>Show Completed</button>
+        <button {{ disabledIf "incomplete" }} {{ method "filterBy" "incomplete" }}>Show Incompleted</button>
+        <button {{ disabledIf null }} {{ method "filterBy" null }}>Show All</button>
+      {{/watch}}
 
-        <select {{ method "sortBy:change" }}>
-          <option {{ selectedIf "name" }} value="name">Sort by Name</option>
-          <option {{ selectedIf "updated" }} value="updated">Sort by Updated at</option>
+      {{#watch filters tag="div" }}
+        <select {{ bound "filters.sortBy" }}>
+          <option {{ selectedIf filters.sortBy "name" }} value="name">Sort by Name</option>
+          <option {{ selectedIf filters.sortBy "updated" }} value="updated">Sort by Updated at</option>
         </select>
-
+        
+        <select {{ bound "filters.sortDir" }}>
+          <option {{ selectedIf filters.sortDir "asc" }} value="asc">Ascending</option>
+          <option {{ selectedIf filters.sortDir "desc" }} value="desc">Descending</option>
+        </select>
       {{/watch}}
     </div>
   `,
@@ -20,15 +24,11 @@ export default {
   name: "filters",
 
   helpers: {
-    selectedIf: (field, { data }) => (data.root.filters.sortyBy === field ? "selected" : ""),
+    selectedIf: (current, option) => (current === option ? "selected" : ""),
     disabledIf: (state, { data }) => (data.root.filters.state === state ? "disabled" : ""),
   },
 
   methods: {
-    sortBy(event) {
-      this.data.filters.sortBy = event.target.value;
-    },
-
     filterBy(event, state) {
       this.data.filters.state = state;
     },
