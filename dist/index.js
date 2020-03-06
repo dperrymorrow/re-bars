@@ -19,15 +19,34 @@
       return `<${tag} ${propStr} ${style} data-rbs-watch="${id}">${html}</${tag}>`;
     },
 
-    tagComponent(id, html, name) {
+    isKeyedNode: $target => Array.from($target.children).every($el => $el.dataset.rbsRef),
+    normalizeHtml: html => html.replace(new RegExp(/="rbs(.*?)"/g), ""),
+
+    isEqHtml(item1, item2) {
+      const $n1 = typeof item1 === "string" ? this.getShadow(item1) : this.getShadow(item1.innerHTML);
+      const $n2 = typeof item2 === "string" ? this.getShadow(item2) : this.getShadow(item2.innerHTML);
+      $n1.innerHTML = this.normalizeHtml($n1.innerHTML);
+      $n2.innerHTML = this.normalizeHtml($n2.innerHTML);
+      return $n1.isEqualNode($n2);
+    },
+
+    getShadow(html) {
       const $tmp = document.createElement("div");
       $tmp.innerHTML = html;
+      return $tmp;
+    },
+
+    tagComponent(id, html, name) {
+      const $tmp = this.getShadow(html);
       const $root = $tmp.firstElementChild;
+
       if ($tmp.children.length > 1 || $root.dataset.rbsWatch)
         throw new Error(`component:'${name}' must have one root node, and cannot be a {{#watch}}`);
 
       $root.dataset.rbsComp = id;
-      return $tmp.innerHTML;
+      const content = $tmp.innerHTML;
+      $tmp.remove();
+      return content;
     },
 
     getStorage(appId, cId) {
@@ -37,6 +56,7 @@
     },
 
     findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
+    findRef: ($parent, ref) => $parent.querySelector(`[data-rbs-ref="${ref}"]`),
 
     findRefs(parent) {
       const $el = typeof parent === "object" ? parent : this.findComponent(parent);
@@ -81,7 +101,7 @@
 
   function _restoreCursor($target, activeRef) {
     // this fetches all the refs, is this performant?
-    const $input = Utils.findRefs($target)[activeRef.ref];
+    const $input = Utils.findRef($target, activeRef.ref);
 
     if (!$input) return;
     if (Array.isArray($input)) ; else {
@@ -110,6 +130,33 @@
         });
       }
 
+      function _patchArr($target, html, path) {
+        const fullPatch = !path.endsWith(".length");
+        const $shadow = Utils.getShadow(html);
+        const $vChilds = Array.from($shadow.children);
+        const $rChilds = Array.from($target.children);
+
+        // do deletes first so its faster
+        $rChilds.forEach($r => {
+          const $v = Utils.findRef($shadow, $r.dataset.rbsRef);
+          if (!$v) $r.remove();
+          else if (fullPatch && !Utils.isEqHtml($v, $r)) $r.replaceWith($v.cloneNode(true));
+        });
+
+        // additions
+        let $lastMatch;
+        $vChilds.forEach($v => {
+          const $r = Utils.findRef($target, $v.dataset.rbsRef);
+          if (!$r) {
+            if ($lastMatch && $lastMatch.nextElementSibling) {
+              $target.insertBefore($v.cloneNode(true), $lastMatch.nextElementSibling);
+            } else {
+              $target.append($v.cloneNode(true));
+            }
+          } else $lastMatch = $r;
+        });
+      }
+
       return {
         patch(path) {
           _deleteOrphans();
@@ -121,13 +168,13 @@
             const $target = Utils.findWatcher(renderId);
             if (!$target) return;
             const html = handler.render();
-            if ($target.innerHTML === html) return;
 
-            if (path.endsWith(".length")) {
-              const $children = Array.from($target.children);
-              if ($children.some($el => !$el.dataset.hbsRef))
-                ;
+            if (Utils.isKeyedNode($target)) {
+              _patchArr($target, html, path);
+              return;
             }
+
+            if (Utils.isEqHtml($target.innerHTML, html)) return;
 
             const activeRef = {
               ref: document.activeElement.dataset.rbsRef,
@@ -145,7 +192,7 @@
   };
 
   var Watcher = {
-    create({ appId, compId, props, data, methods }) {
+    create({ appId, compId, $props, data, methods }) {
       const { patch } = ReRender.init(...arguments);
 
       function _buildProxy(raw, tree = []) {
@@ -174,7 +221,13 @@
         });
       }
 
-      const proxyData = _buildProxy({ ...props, ...data(), ...{ methods }, $_componentId: compId, $_appId: appId });
+      const proxyData = _buildProxy({
+        ...data,
+        ...$props,
+        ...{ methods },
+        $_componentId: compId,
+        $_appId: appId,
+      });
       return proxyData;
     },
   };
@@ -198,11 +251,12 @@
   const _makeParams = args => {
     return args.map(param => {
       if (["[event]"].includes(param)) return param.replace("[", "").replace("]", "");
-      if (param !== null && typeof parm === "object")
+      if (param !== null && typeof param === "object")
         throw new Error(
-          `component:${name} must only pass primitives as argument to a handler. ${JSON.stringify(args, null, 2)}`
+          `component:${name} must only pass primitives as argument to a handler. \n${JSON.stringify(param, null, 2)}`
         );
       if (typeof param === "string") return `'${param}'`;
+      if (param === null) return `${param}`;
       return param;
     });
   };
@@ -234,7 +288,6 @@
 
       instance.registerHelper("watch", function(...args) {
         const { fn, hash, data } = args.pop();
-
         const path = args
           .map(arg => _getPath(arg, false))
           .join(".")
@@ -251,6 +304,7 @@
         const { data } = args.pop();
         const { $_appId, $_componentId } = data.root;
         const params = _makeParams([$_appId, $_componentId, methodName, "[event]"].concat(args));
+
         return new instance.SafeString(`on${eventType}="rbs.handlers.trigger(${params.join(",")})"`);
       });
 
@@ -294,19 +348,20 @@
     Helpers.register(appId, { instance, methods, helpers, name, components });
 
     return {
-      render(props = {}) {
+      render($props = {}) {
         const compId = Utils.randomId();
-        const scope = { props, methods, name, watchers, data };
+        const scope = { $props, methods, name, watchers, data: data(), $refs: () => Utils.findRefs(compId) };
 
         scope.methods = Object.entries(methods).reduce((bound, [name, method]) => {
           bound[name] = method.bind(scope);
           return bound;
         }, {});
 
-        Object.entries(props).forEach(([key, value]) => {
-          if (typeof value === "function" && !(key in scope.methods)) {
+        // validate the props, add the passed methods after you bind them or you will loose scope
+        Object.entries($props).forEach(([key, value]) => {
+          if (typeof value === "function") {
             scope.methods[key] = value;
-            delete props[key];
+            delete $props[key];
           }
         });
 
@@ -320,8 +375,8 @@
           renders: {},
         };
 
-        scope.data = Watcher.create({ ...scope, ...{ appId, compId, props } });
         if (hooks.created) hooks.created.call(scope);
+        scope.data = Watcher.create({ ...scope, ...{ appId, compId } });
         return Utils.tagComponent(compId, templateFn(scope.data), name);
       },
     };

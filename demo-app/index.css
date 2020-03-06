@@ -91,6 +91,10 @@ body {
   border-bottom-right-radius: 10px;
 }
 
+#demo-app ul.simple {
+  border-radius: 10px;
+}
+
 #demo-app ul li {
   border-bottom: 1px solid #ccc;
   background-color: white;

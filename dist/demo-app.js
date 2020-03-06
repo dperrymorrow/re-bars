@@ -7,73 +7,82 @@
   var app = {
     template: /*html*/ `
   <div>
-    {{#watch "header.*" tag="h1" }}
-      <h1 >
-        {{ header.title }}
-        <small>{{ header.description }}</small>
+    <div class="header-container">
+      <h1>
+        {{#watch header }}
+          <span>{{ header.title }}</span>
+          <small>{{ header.description }}</small>
+          {{/watch}}
       </h1>
-    {{/watch}}
 
-    <label>
-      Title:
-      <input value="{{ header.title }}" {{ bind "header.title" }}/>
-    </label>
+      <label>
+        Title:
+        <input type="text" {{ bound "header.title" }}/>
+      </label>
 
-    <label>
-      Description:
-      <input value="{{ header.description }}" {{ bind "header.description" }}/>
-    </label>
+      <label>
+        Description:
+        <input type="text" {{ bound "header.description" }}/>
+      </label>
+    </div>
 
-    {{#watch "todos.length" tag="ul" }}
-      {{#each todos }}
-        {{#watch . tag="li" }}
-          <label>
-            <input type="checkbox" {{ isChecked done }} {{ method "toggleDone" id done }}/>
-            {{#if done }}
-              <s>{{ name }}</s>
-            {{else}}
-              <strong>{{ name }}</strong>
-            {{/if}}
-          </label>
-          <button {{ method "deleteToDo" @index }}>X</button>
-        {{/watch}}
-      {{/each}}
-    {{/watch}}
+    <ul class="simple">
+      {{#watch "todos.*" }}
+        {{#each todos }}
+          <li {{ ref id }}>
+            <div class="todo">
+              <label>
+                <input type="checkbox" {{ isChecked done }} {{ method "toggleDone" id }} />
+                {{#if done }}
+                  <s>{{ name }}</s>
+                {{else}}
+                  <strong>{{ name }}</strong>
+                {{/if}}
+              </label>
 
-    {{#watch "uiState.adding" }}
-      {{#if uiState.adding }}
+              <div class="actions">
+                <button {{ method "deleteTodo" id }}>delete</button>
+              </div>
+            </div>
+          </li>
+        {{/each}}
+      {{/watch}}
+    </ul>
+
+    {{#watch "adding" }}
+      {{#if adding }}
         <form>
           <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
           <button class="push" {{ method "addItem" }}>Add todo</button>
-          <button class="cancel" {{ method "toggleCreate" uiState.adding }}>Cancel</button>
+          <button class="cancel" {{ method "toggleCreate" }}>Cancel</button>
         </form>
       {{else}}
-        <button class="add" {{ method "toggleCreate" uiState.adding }}>Add another</button>
+        <button class="add" {{ method "toggleCreate" }}>Add another</button>
       {{/if}}
     {{/watch}}
   </div>
   `,
 
-    data: {
-      uiState: {
+    data() {
+      return {
         adding: false,
-      },
-      header: {
-        title: "Todos",
-        description: "some things that need done",
-      },
-      todos: [
-        {
-          done: false,
-          name: "Grocery Shopping",
-          id: 22,
+        header: {
+          title: "Todos",
+          description: "some things that need done",
         },
-        {
-          done: true,
-          name: "Paint the House",
-          id: 44,
-        },
-      ],
+        todos: [
+          {
+            done: false,
+            name: "Grocery Shopping",
+            id: 22,
+          },
+          {
+            done: true,
+            name: "Paint the House",
+            id: 44,
+          },
+        ],
+      };
     },
 
     name: "DemoApp",
@@ -83,28 +92,31 @@
     },
 
     methods: {
-      deleteToDo({ data }, event, index) {
-        data.todos.splice(index, 1);
-      },
-
-      addItem({ $refs, data }, event) {
+      addItem(event) {
         event.preventDefault();
+        const $input = this.$refs().newName;
 
-        data.todos.push({
+        this.data.todos.push({
           id: new Date().getTime(),
-          name: $refs.newName.value,
+          name: $input.value,
         });
 
-        $refs.newName.value = "";
+        $input.value = "";
       },
 
-      toggleDone({ data }, event, id, done) {
-        data.todos.find(item => item.id === id).done = !done;
+      deleteTodo(event, id) {
+        const index = this.data.todos.findIndex(todo => todo.id === id);
+        this.data.todos.splice(index, 1);
       },
 
-      toggleCreate({ data }, event, adding) {
+      toggleDone(event, id) {
+        const todo = this.data.todos.find(todo => todo.id === id);
+        todo.done = !todo.done;
+      },
+
+      toggleCreate(event) {
         event.preventDefault();
-        data.uiState.adding = !adding;
+        this.data.adding = !this.data.adding;
       },
     },
   };
