@@ -1,5 +1,6 @@
 import Add from "./add.js";
 import Todo from "./todo.js";
+import Filters from "./filters.js";
 
 export default {
   template: /*html*/ `
@@ -21,13 +22,9 @@ export default {
       </label>
     </div>
 
-    {{#watch "filter" tag="div" class="filters" }}
-      <button {{ disabledIf "completed" }} {{ method "filter" "completed" }}>Show Completed</button>
-      <button {{ disabledIf "incomplete" }} {{ method "filter" "incomplete" }}>Show Incompleted</button>
-      <button {{ disabledIf null }} {{ method "filter" null }}>Show All</button>
-    {{/watch}}
+    {{ component "filters" filters=filters }}
 
-    {{#watch "filter,todos.*" tag="ul"}}
+    {{#watch "filters.*,todos.*" tag="ul"}}
       {{#each filteredTodos as | todo | }}
         <li {{ ref todo.id }}>
           {{
@@ -44,6 +41,8 @@ export default {
       component "AddTodo"
       addTodo=methods.addTodo
     }}
+
+    {{ debug . }}
   <div>
   `,
 
@@ -52,11 +51,19 @@ export default {
   data() {
     return {
       filteredTodos() {
-        if (this.filter === "incomplete") return this.todos.filter(t => !t.done);
-        else if (this.filter === "completed") return this.todos.filter(t => t.done);
-        else return this.todos;
+        let list = this.todos.concat();
+        if (this.filters.state === "incomplete") list = this.todos.filter(t => !t.done);
+        else if (this.filters.state === "completed") list = this.todos.filter(t => t.done);
+
+        return list.sort((a, b) => {
+          if (this.filters.sortBy === "name") return a.name.localeCompare(b.name);
+          else new Date(a.updated) - new Date(b.updated);
+        });
       },
-      filter: null,
+      filters: {
+        state: null,
+        sortBy: "name",
+      },
       header: {
         title: "Todos",
         description: "Some things that need done",
@@ -64,44 +71,40 @@ export default {
       todos: [
         {
           done: false,
-          name: "Apples",
-          id: 33,
+          name: "Wash the car",
+          updated: "3/1/2020, 12:37:10 PM",
+          id: 21,
         },
         {
           done: true,
-          name: "Blueberries",
+          name: "Shopping for groceries",
+          updated: "2/27/2020, 2:37:10 PM",
           id: 22,
         },
 
         {
           done: false,
-          name: "Cherries",
-          id: 26,
+          name: "Code some Javascript",
+          updated: "1/27/2020, 9:37:10 AM",
+          id: 23,
         },
 
         {
           done: true,
-          name: "Grapes",
-          id: 29,
+          name: "Go for a run",
+          updated: "1/15/2020, 10:37:10 PM",
+          id: 24,
         },
       ],
     };
   },
 
-  helpers: {
-    disabledIf: (filter, { data }) => (data.root.filter === filter ? "disabled" : ""),
-  },
-
-  components: [Add, Todo],
+  components: [Add, Todo, Filters],
 
   methods: {
-    filter(event, filter) {
-      this.data.filter = filter;
-    },
-
     addTodo(todo) {
       this.data.todos.push({ ...todo });
-      this.data.filter = null;
+      this.data.filters.state = null;
     },
 
     deleteTodo(event, index) {

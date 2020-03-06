@@ -49,9 +49,11 @@ body {
   border-top-right-radius: 10px;
   padding: 10px 15px;
   border-bottom: none;
+  display: flex;
+  justify-content: space-between;
 }
 
-#demo-app input[type="text"], #demo-app button {
+#demo-app input[type="text"], #demo-app button, #demo-app select {
   background-color: #efefef;
   padding: 5px 10px;
   box-sizing: border-box;
@@ -113,6 +115,11 @@ body {
   align-items: center;
   justify-content: space-between;
   display: flex;
+}
+
+#demo-app ul li .todo .date {
+  font-size: .9em;
+  margin-right: 10px;
 }
 
 pre.debug {

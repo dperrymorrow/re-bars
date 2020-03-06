@@ -1,5 +1,5 @@
 import Utils from "./utils.js";
-import Watcher from "./watcher.js";
+import ProxyTrap from "./proxy-trap.js";
 import Helpers from "./helpers.js";
 
 function create(
@@ -60,8 +60,12 @@ function create(
       };
 
       if (hooks.created) hooks.created.call(scope);
-      scope.data = Watcher.create({ ...scope, ...{ appId, compId } });
-      return Utils.tagComponent(compId, templateFn(scope.data), name);
+
+      const proxyInst = ProxyTrap.create({ ...scope, ...{ appId, compId } });
+      scope.data = proxyInst.data;
+      const html = Utils.tagComponent(compId, templateFn(scope.data), name);
+      proxyInst.watch();
+      return html;
     },
   };
 }

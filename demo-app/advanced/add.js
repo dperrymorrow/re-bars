@@ -30,7 +30,6 @@ export default {
       hasError: false,
       newTodo: {
         name: "",
-        id: null,
       },
     };
   },
@@ -44,10 +43,11 @@ export default {
     addItem(event) {
       event.preventDefault();
       this.data.newTodo.id = new Date().getTime();
+      this.data.newTodo.updated = new Date().toLocaleString();
+
       this.methods.addTodo(this.data.newTodo);
 
       this.data.newTodo.name = "";
-      this.data.newTodo.id = null;
     },
   },
 };

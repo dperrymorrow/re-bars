@@ -15,9 +15,11 @@ export default {
                 <strong>{{ todo.name }}</strong>
               {{/if}}
             {{/watch}}
+
           </label>
 
           <div class="actions">
+            <span class="date">{{ todo.updated }}</span>
             <button {{ method "deleteTodo" index }}>delete</button>
             <button {{ method "toggleEditing" }}>edit</button>
           </div>
@@ -39,6 +41,7 @@ export default {
   methods: {
     save() {
       this.data.todo.name = this.$refs().nameInput.value;
+      this.data.todo.updated = new Date().toLocaleString();
       this.data.editing = false;
     },
 

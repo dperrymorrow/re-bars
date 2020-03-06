@@ -1,7 +1,8 @@
 import ReRender from "./re-render.js";
 
 export default {
-  create({ appId, compId, $props, data, methods }) {
+  create({ appId, compId, $props, data, methods, name }) {
+    let watching = false;
     const { patch } = ReRender.init(...arguments);
 
     function _buildProxy(raw, tree = []) {
@@ -18,13 +19,24 @@ export default {
 
         set: function(target, prop) {
           const ret = Reflect.set(...arguments);
-          patch(tree.concat(prop).join("."));
+          const path = tree.concat(prop).join(".");
+          if (!watching)
+            throw new Error(
+              `component:${name} set '${path}' before being added to the DOM. Usually caused by side effects from a hook or a data function, `
+            );
+          patch(path);
           return ret;
         },
 
         deleteProperty: function(target, prop) {
           const ret = Reflect.deleteProperty(...arguments);
-          patch(tree.concat(prop).join("."));
+          const path = tree.concat(prop).join(".");
+          if (!watching)
+            throw new Error(
+              `component:${name} deleted '${path}' before being added to the DOM. Usually caused by side effects from a hook or a data function`
+            );
+
+          patch(path);
           return ret;
         },
       });
@@ -37,6 +49,9 @@ export default {
       $_componentId: compId,
       $_appId: appId,
     });
-    return proxyData;
+    return {
+      watch: () => (watching = true),
+      data: proxyData,
+    };
   },
 };

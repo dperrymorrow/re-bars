@@ -72,7 +72,6 @@ export default {
       const { data } = args.pop();
       const { $_appId, $_componentId } = data.root;
       const params = _makeParams([$_appId, $_componentId, methodName, "[event]"].concat(args));
-
       return new instance.SafeString(`on${eventType}="rbs.handlers.trigger(${params.join(",")})"`);
     });
 
