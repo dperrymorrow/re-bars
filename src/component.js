@@ -31,15 +31,22 @@ function create(
   return {
     render($props = {}) {
       const compId = Utils.randomId();
-      const scope = { $props, methods, name, watchers, data: data() };
+      const scope = { $props, methods, name, watchers, data: data(), $refs: () => Utils.findRefs(compId) };
 
       scope.methods = Object.entries(methods).reduce((bound, [name, method]) => {
         bound[name] = method.bind(scope);
         return bound;
       }, {});
 
-      Object.entries(scope.$props).forEach(([key, value]) => {
+      // validate the props, add the passed methods after you bind them or you will loose scope
+      Object.entries($props).forEach(([key, value]) => {
         if (value === undefined) console.warn(`component:${name} was passed undefined for prop '${key}'`);
+        if (typeof value === "function") {
+          scope.methods[key] = value;
+          delete $props[key];
+        }
+        if (key in scope.data)
+          console.warn(`component:${name} prop ${key} was overrode with ${scope.data[key]} from data`);
       });
 
       scope.watchers = Object.entries(watchers).reduce((bound, [name, method]) => {

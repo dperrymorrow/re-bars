@@ -104,12 +104,8 @@ export default {
       this.data.filter = null;
     },
 
-    findIndex(todo) {
-      return this.data.todos.findIndex(t => t.id === todo.id);
-    },
-
-    deleteTodo(todo) {
-      this.data.todos.splice(this.methods.findIndex(todo), 1);
+    deleteTodo(event, index) {
+      this.data.todos.splice(index, 1);
     },
 
     showAdd(event) {

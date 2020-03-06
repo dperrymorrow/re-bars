@@ -19,9 +19,9 @@ const _watch = (path, render, { root }) => {
 const _makeParams = args => {
   return args.map(param => {
     if (["[event]"].includes(param)) return param.replace("[", "").replace("]", "");
-    if (param !== null && typeof parm === "object")
+    if (param !== null && typeof param === "object")
       throw new Error(
-        `component:${name} must only pass primitives as argument to a handler. ${JSON.stringify(args, null, 2)}`
+        `component:${name} must only pass primitives as argument to a handler. \n${JSON.stringify(param, null, 2)}`
       );
     if (typeof param === "string") return `'${param}'`;
     if (param === null) return `${param}`;

@@ -10,10 +10,7 @@ export default {
           if (prop === "ReBarsPath") return tree.join(".");
           const value = Reflect.get(...arguments);
           // not sure we need this anymore should only proxy the data...
-          if (typeof value === "function" && target.hasOwnProperty(prop)) {
-            console.log("it was a function", prop);
-            return value.bind(proxyData);
-          }
+          if (typeof value === "function" && target.hasOwnProperty(prop)) return value.bind(proxyData);
           if (value !== null && typeof value === "object" && prop !== "methods")
             return _buildProxy(value, tree.concat(prop));
           else return value;
@@ -35,7 +32,8 @@ export default {
 
     const proxyData = _buildProxy({
       ...data,
-      ...{ methods, $props },
+      ...$props,
+      ...{ methods },
       $_componentId: compId,
       $_appId: appId,
     });
