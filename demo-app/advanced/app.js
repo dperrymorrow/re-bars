@@ -28,17 +28,15 @@ export default {
     {{/watch}}
 
     {{#watch "filter,todos.*" tag="ul"}}
-      {{#each todos as | todo | }}
-        {{#ifShowTodo todo }}
-          <li {{ ref todo.id }}>
-            {{
-              component "Todo"
-              todo=todo
-              index=@index
-              deleteTodo=@root.methods.deleteTodo
-            }}
-          </li>
-        {{/ifShowTodo}}
+      {{#each filteredTodos as | todo | }}
+        <li {{ ref todo.id }}>
+          {{
+            component "Todo"
+            todo=todo
+            index=@index
+            deleteTodo=@root.methods.deleteTodo
+          }}
+        </li>
       {{/each}}
     {{/watch}}
 
@@ -46,7 +44,6 @@ export default {
       component "AddTodo"
       addTodo=methods.addTodo
     }}
-
   <div>
   `,
 
@@ -54,6 +51,11 @@ export default {
 
   data() {
     return {
+      filteredTodos() {
+        if (this.filter === "incomplete") return this.todos.filter(t => !t.done);
+        else if (this.filter === "completed") return this.todos.filter(t => t.done);
+        else return this.todos;
+      },
       filter: null,
       header: {
         title: "Todos",
@@ -88,12 +90,6 @@ export default {
 
   helpers: {
     disabledIf: (filter, { data }) => (data.root.filter === filter ? "disabled" : ""),
-
-    ifShowTodo(todo, { fn, inverse, data }) {
-      let shouldRender = true;
-      if (data.root.filter) shouldRender = data.root.filter === "completed" ? todo.done : !todo.done;
-      return shouldRender ? fn(todo) : inverse(todo);
-    },
   },
 
   components: [Add, Todo],
