@@ -1,5 +1,5 @@
 {
-  "name": "v-bars",
+  "name": "re-bars",
   "version": "1.0.0",
   "description": "VDom patching for handlebars templates",
   "main": "dist/index.js",

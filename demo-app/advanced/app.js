@@ -55,7 +55,7 @@ export default {
 
         const sorted = list.sort((a, b) => {
           if (this.filters.sortBy === "name") return a.name.localeCompare(b.name);
-          else new Date(a.updated) - new Date(b.updated);
+          else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
         });
 
         return this.filters.sortDir === "asc" ? sorted : sorted.reverse();
@@ -104,12 +104,13 @@ export default {
   components: [Add, Todo, Filters],
 
   methods: {
-    addTodo(todo) {
-      this.data.todos.push({ ...todo });
+    addTodo(name) {
+      this.data.todos.push({ name, id: new Date().getTime(), updated: new Date().toLocaleString() });
       this.data.filters.state = null;
     },
 
-    deleteTodo(event, index) {
+    deleteTodo(event, id) {
+      const index = this.data.todos.findIndex(t => t.id === id);
       this.data.todos.splice(index, 1);
     },
 

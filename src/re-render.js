@@ -45,25 +45,25 @@ export default {
         if (!$v) $r.remove();
         else if (!Utils.isEqHtml($v, $r)) $r.replaceWith($v.cloneNode(true));
       });
-      // additions;
 
+      // additions;
       $vChilds.forEach(($v, index) => {
-        const $r = Utils.findRef($target, $v.dataset.rbsRef);
+        const ref = $v.dataset.rbsRef;
+        const $r = Utils.findRef($target, ref);
         if (!$r) {
           const $prev = $target.children[index];
           if ($prev) $target.insertBefore($v.cloneNode(true), $prev);
-          else $target.prepend($v.cloneNode(true));
+          else $target.append($v.cloneNode(true));
         }
       });
+
       // sorting
-      $vChilds
-        .reduce((arr, $v) => {
-          arr.push(Utils.findRef($target, $v.dataset.rbsRef));
-          return arr;
-        }, [])
-        .forEach(($el, index) => {
-          if (!$target.children[index].isEqualNode($el)) $target.children[index].replaceWith($el.cloneNode(true));
-        });
+      $vChilds.forEach(($v, index) => {
+        const ref = $v.dataset.rbsRef;
+        if ($target.children[index].dataset.rbsRef !== ref) {
+          $target.children[index].replaceWith($v.cloneNode(true));
+        }
+      });
     }
 
     return {
@@ -79,7 +79,7 @@ export default {
           const html = handler.render();
 
           if (Utils.isKeyedNode($target)) {
-            _patchArr($target, html, path);
+            _patchArr($target, html);
             return;
           } else if (path.endsWith(".length")) {
             console.warn(

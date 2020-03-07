@@ -15,12 +15,11 @@ export default {
                 <strong>{{ todo.name }}</strong>
               {{/if}}
             {{/watch}}
-
           </label>
 
           <div class="actions">
-            <span class="date">{{ todo.updated }}</span>
-            <button {{ method "deleteTodo" index }}>delete</button>
+            <span class="date">{{ timeAgo todo.updated }}</span>
+            <button {{ method "deleteTodo" todo.id }}>delete</button>
             <button {{ method "toggleEditing" }}>edit</button>
           </div>
         {{/if}}
@@ -36,6 +35,9 @@ export default {
 
   helpers: {
     isChecked: val => (val ? "checked" : ""),
+    timeAgo: val => {
+      return window.moment(new Date(val)).fromNow();
+    },
   },
 
   methods: {
