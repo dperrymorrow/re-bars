@@ -130,30 +130,34 @@
         });
       }
 
-      function _patchArr($target, html, path) {
-        const fullPatch = !path.endsWith(".length");
+      function _patchArr($target, html) {
         const $shadow = Utils.getShadow(html);
         const $vChilds = Array.from($shadow.children);
-        const $rChilds = Array.from($target.children);
 
-        // do deletes first so its faster
-        $rChilds.forEach($r => {
+        // do deletes + changes first so its faster
+        Array.from($target.children).forEach($r => {
           const $v = Utils.findRef($shadow, $r.dataset.rbsRef);
           if (!$v) $r.remove();
-          else if (fullPatch && !Utils.isEqHtml($v, $r)) $r.replaceWith($v.cloneNode(true));
+          else if (!Utils.isEqHtml($v, $r)) $r.replaceWith($v.cloneNode(true));
         });
 
-        // additions
-        let $lastMatch;
-        $vChilds.forEach($v => {
-          const $r = Utils.findRef($target, $v.dataset.rbsRef);
+        // additions;
+        $vChilds.forEach(($v, index) => {
+          const ref = $v.dataset.rbsRef;
+          const $r = Utils.findRef($target, ref);
           if (!$r) {
-            if ($lastMatch && $lastMatch.nextElementSibling) {
-              $target.insertBefore($v.cloneNode(true), $lastMatch.nextElementSibling);
-            } else {
-              $target.append($v.cloneNode(true));
-            }
-          } else $lastMatch = $r;
+            const $prev = $target.children[index];
+            if ($prev) $target.insertBefore($v.cloneNode(true), $prev);
+            else $target.append($v.cloneNode(true));
+          }
+        });
+
+        // sorting
+        $vChilds.forEach(($v, index) => {
+          const ref = $v.dataset.rbsRef;
+          if ($target.children[index].dataset.rbsRef !== ref) {
+            $target.children[index].replaceWith($v.cloneNode(true));
+          }
         });
       }
 
@@ -170,9 +174,9 @@
             const html = handler.render();
 
             if (Utils.isKeyedNode($target)) {
-              _patchArr($target, html, path);
+              _patchArr($target, html);
               return;
-            }
+            } else if (path.endsWith(".length")) ;
 
             if (Utils.isEqHtml($target.innerHTML, html)) return;
 
