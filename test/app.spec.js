@@ -1,7 +1,7 @@
-const test = require("ava");
-const sinon = require("sinon");
-const ReBars = require("../dist/index.js");
-const Handlebars = require("handlebars");
+import test from "ava";
+import sinon from "sinon";
+import ReBars from "../src/index.js";
+import Handlebars from "handlebars";
 
 test.beforeEach(t => {
   window.Handlebars = Handlebars;
@@ -39,14 +39,14 @@ test("can create an app", t => {
 });
 
 test("returns storage", t => {
-  const { storage, id, component } = ReBars({
+  const { storage, id } = ReBars({
     $el: t.context.$el,
     root: { name: "test", template: "<h1>hello world</h1>" },
   });
 
-  t.is(typeof storage.comp, "object");
+  t.is(typeof storage.inst, "object");
+  t.is(typeof storage.cDefs, "object");
   t.is(typeof id, "string");
-  t.is(typeof component, "function");
 });
 
 test("each app gets a unique id", t => {

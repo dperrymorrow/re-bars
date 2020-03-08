@@ -4,6 +4,7 @@ import Helpers from "./helpers.js";
 
 function create(
   appId,
+  Handlebars,
   { name, template, data, helpers = {}, hooks = {}, methods = {}, watchers = {}, components = [] }
 ) {
   const appStore = Utils.getStorage(appId);
@@ -23,7 +24,7 @@ function create(
 
   components.forEach(def => {
     if (!def.name) throw new Error("component needs a name", def);
-    if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = create(appId, def);
+    if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = create(appId, Handlebars, def);
   });
 
   Helpers.register(appId, { instance, methods, helpers, name, components });

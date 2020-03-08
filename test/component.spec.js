@@ -1,7 +1,7 @@
-const test = require("ava");
-const sinon = require("sinon");
-const ReBars = require("../dist/index.js");
-const Handlebars = require("handlebars");
+import test from "ava";
+import sinon from "sinon";
+import ReBars from "../src/index.js";
+import Handlebars from "handlebars";
 
 test.beforeEach(t => {
   window.Handlebars = Handlebars;
@@ -13,8 +13,10 @@ test.beforeEach(t => {
     template: /*html*/ `
       <h1>{{ name }}</h1>
     `,
-    data: {
-      name: "David",
+    data() {
+      return {
+        name: "David",
+      };
     },
   };
 });
@@ -44,4 +46,17 @@ test("makes you add a name", t => {
   );
 
   t.is(error.message, "Each ReBars component should have a name");
+});
+
+test("ensures that data is a function", t => {
+  t.context.component.data = {};
+
+  const error = t.throws(() =>
+    ReBars({
+      $el: t.context.$el,
+      root: t.context.component,
+    })
+  );
+
+  t.is(error.message, "component:tester data must be a function");
 });

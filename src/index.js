@@ -26,7 +26,7 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
 
   if (!document.body.contains($el)) throw new Error("$el must be present in the document");
 
-  $el.innerHTML = Component.create(id, root).render();
+  $el.innerHTML = Component.create(id, Handlebars, root).render();
 
   return {
     id,
