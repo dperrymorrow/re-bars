@@ -1,9 +1,9 @@
 # ReBars
-A simple approach to complicated Javascript frameworks that need pre-compiled, babeled, and Virtial DOM.
+A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a Virtial DOM.
 
 > If you have used Handlebars, you already know ReBars
 
-The main concept of ReBars is a `{{# watch }}` block helper that lets you tell ReBars what and when to re-render.
+The main concept of ReBars is a `{{#watch }}` block helper that lets you tell ReBars what and when to re-render.
 
 ##### For example:
 
@@ -80,45 +80,44 @@ data() {
     name: {
       first: "David",
       last: "Morrow"
-    }
+    },
+    friends: [
+      { name: "Joe", hobby: "boxing" },
+      { name: "Fred", hobby: "cooking" }
+    ]
   }
 }
 ```
 
 Watch allows you to re-render a block of your template on change.
+Watch takes an argument of what property to watch. The argument can be a string or an object.
 
 ```html
-<div>
-  <h1>Hello There</h1>
-  {{#watch name }}
-    <p>My name is {{ name.first }} {{ name.last }}.
-  {{/watch}}
-</div>
+{{#watch name }}
+My name is {{ name.first }} {{ name.last }}.
+{{/watch}}
 ```
 
-Anytime `name` is changed the `<p>` tag would be re-rendered with the updated data.
+Anytime `name` is changed the block would be re-rendered with the updated data.
 
-> If the item you are watching is a primitive instead of an object. You will need to use the path instead.
+> If the item you are watching is a primitive such as a `String`, or `Number`. You will need to use a string as the argument.
+
+- `{{#watch name }}` this will watch all props on `name`
+- `{{#watch "name.*" }} this is the string equvilent of the above
+- `{{#watch "name.first" }} will only watch for changes to `name.first`
+- `{{#watch "name.*,hobby" }} will watch for any change to name or hobby
+
+Watch blocks may be used inside a loop as well.
 
 ```html
-<div>
-  <h1>Hello There</h1>
-  {{#watch "name.first" }}
-    <p>My first name is {{ name.first }}
-  {{/watch}}
-</div>
+{{#each friends as | friend | }}
+  <li {{ ref todo.id }}>
+    {{
+      component "Todo"
+      todo=todo
+      index=@index
+      deleteTodo=@root.methods.deleteTodo
+    }}
+  </li>
+{{/each}}
 ```
-
-You can watch more than one item as well, It must be a string and comma dilemeted though. You can always use strings for a `{{watch}}`, if an Object,
-just use `*` such as `name.*`
-
-```html
-<div>
-  <h1>Hello There</h1>
-  {{#watch "name.*,hobby" }}
-    <p>My first name is {{ name.first }}
-  {{/watch}}
-</div>
-```
-
-The above watch will be re-rendered when hobby or any property on name changes.
