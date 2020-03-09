@@ -3,6 +3,10 @@ A simple alternative to modern Javascript frameworks that need pre-compiled, Bab
 
 > If you have used Handlebars, you already know ReBars
 
+- [ReBars Application](#a-rebars-application)
+- [ReBars Component](#a-rebars-component)
+- [ReBars Helpers](#rebars-built-in-helpers)
+
 The main concept of ReBars is a `{{#watch }}` block helper that lets you tell ReBars what and when to re-render.
 
 **For example:**
