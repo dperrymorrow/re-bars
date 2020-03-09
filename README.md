@@ -5,7 +5,7 @@ A simple alternative to modern Javascript frameworks that need pre-compiled, Bab
 
 The main concept of ReBars is a `{{#watch }}` block helper that lets you tell ReBars what and when to re-render.
 
-##### For example:
+**For example:**
 
 ```html
 {{#watch "name.first" }}
@@ -63,9 +63,9 @@ export default {
 
 The template is the Handlebars template that will be rendered. What is defined as the return from your `data()` function will be the root scope of the template when rendering. Any Handlebars helpers methods you define in `helpers` will be automatically added to the instance rendering the component, and be available for use. ReBars includes several helpers as well.
 
-## ReBars Built In helpers
+---
 
-### `{{#watch}}` helper
+## The `{{#watch}}` helper
 
 The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.
 
@@ -106,7 +106,7 @@ Anytime `name` is changed the block would be re-rendered with the updated data.
 - `{{#watch "name.*,hobby" }}` will watch for any change to name or hobby
 - `{{#watch "friends.*.hobby" }}` will watch for any friend index hobby change
 
-## Watch Element wrappers
+### Watch Element wrappers
 
 Each `{{watch}}` block gets wrapped in a span with an id which is stored to remember what outlet to re-render on change. Sometimes this can get in the way of styling your layouts.
 
@@ -155,6 +155,8 @@ If you are watching inside a loop, you can target the specific object and key by
 </ul>
 ```
 
+---
+
 ## The `{{ref}}` helper
 
 ReBars comes with a `{{ref}}` helper built in. This gives you the ability to save a reference to an element. This also gives a key for Array loop items so that the Array can be patched instead of re-rendered entirely.
@@ -180,6 +182,8 @@ methods: {
 }
 ```
 
+---
+
 ## The `{{bound}}` helper
 
 The `{{bound}` helper is used on input elements such as `<input>` or `<textarea>` elements. The parameter passed will sync the value attribute to the value, and on `input` event update the value.
@@ -195,6 +199,8 @@ You can pass in a ref as a prop to this helper should you need something more sp
 ```html
 <input type="text" {{ bound "name.first" ref="firstName" }} />
 ```
+
+---
 
 ## The `{{method}}` helper
 
@@ -213,10 +219,12 @@ methods: {
 }
 ```
 
-> You method, when invoked, the first argument will always be the event, followed by any additional parameters. Params must be primiteve and not full Objects or Arrays. 
+> You method, when invoked, the first argument will always be the event, followed by any additional parameters. Params must be primiteve and not full Objects or Arrays.
 
 - the first param is the methodName separated by `:eventType`, if none is specified `click` will be the event
 - you can add as many other parameters as you would like to your method call
+
+---
 
 ## The `{{component}}` helper
 
@@ -239,6 +247,8 @@ the "friend" component will have friend defined in it's data.
   {{/each}}
 </ul>
 ```
+
+### Passing Methods as props
 
 You can pass methods to child components as well, they will be merged into the child's methods.
 
@@ -278,11 +288,13 @@ template: `
 ```
 on clicking of the button, the friend would be deleted in the parent.
 
+---
+
 ## The `{{debug}}` helper
 
 this helper allows you to view the state of your data in the template.
 
-> The debug helper is reactive by default, no watch wrapper necessary.
+> The debug helper watches by default, no watch block is needed.
 
 To output all data available to your tempalte, use the Handlebars `.` reference.
 
