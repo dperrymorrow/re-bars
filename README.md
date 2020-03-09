@@ -63,7 +63,15 @@ export default {
 
 The template is the Handlebars template that will be rendered. What is defined as the return from your `data()` function will be the root scope of the template when rendering. Any Handlebars helpers methods you define in `helpers` will be automatically added to the instance rendering the component, and be available for use. ReBars includes several helpers as well.
 
----
+
+
+# ReBars built in helpers
+
+- [watch](#the-watch-helper)
+- [ref](#the-ref-helper)
+- [bound](#the-bound-helper)
+- [method](#the-method-helper)
+- [component](#the-component-helper)
 
 ## The `{{#watch}}` helper
 
