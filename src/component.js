@@ -23,7 +23,7 @@ function create(
   const templateFn = instance.compile(template);
 
   components.forEach(def => {
-    if (!def.name) throw new Error("component needs a name", def);
+    if (!def.name) throw new Error(`component:${name} child component needs a name`, def);
     if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = create(appId, Handlebars, def);
   });
 

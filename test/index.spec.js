@@ -1,5 +1,4 @@
 import test from "ava";
-import sinon from "sinon";
 import ReBars from "../src/index.js";
 import Handlebars from "handlebars";
 
@@ -11,7 +10,6 @@ test.beforeEach(t => {
 
 test.afterEach.always(t => {
   t.context.$el.remove();
-  sinon.restore();
 });
 
 test("ReBars is a function", t => {
@@ -47,6 +45,16 @@ test("returns storage", t => {
   t.is(typeof storage.inst, "object");
   t.is(typeof storage.cDefs, "object");
   t.is(typeof id, "string");
+});
+
+test("adds handlers", t => {
+  ReBars({
+    $el: t.context.$el,
+    root: { name: "test", template: "<h1></h1>" },
+  });
+
+  t.is(typeof window.rbs.handlers.bound, "function");
+  t.is(typeof window.rbs.handlers.trigger, "function");
 });
 
 test("each app gets a unique id", t => {

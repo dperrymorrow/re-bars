@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "http-server . -c-1",
-    "test": "nyc --all ava --verbose",
+    "test": "rollup -c && nyc ava --verbose",
     "demoApp": "rollup demo-app/app.js --file dist/demo-app.js --format umd --name 'DemoApp' ",
     "build": "rollup -c && npm run demoApp"
   },
@@ -31,13 +31,14 @@
     "sinon": "^9.0.0"
   },
   "nyc": {
-    "include": "src",
-    "exclude": "test/**/*.spec.js"
+    "include": "src/*.js",
+    "all": true,
+    "check-coverage": true
   },
   "ava": {
     "require": [
-      "esm",
-      "./test/setup.js"
+      "./test/setup.js",
+      "esm"
     ],
     "files": [
       "./test/**/*.spec.js"

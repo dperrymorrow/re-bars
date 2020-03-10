@@ -34,8 +34,8 @@ export default {
     const $tmp = this.getShadow(html);
     const $root = $tmp.firstElementChild;
 
-    if ($tmp.children.length > 1 || $root.dataset.rbsWatch)
-      throw new Error(`component:'${name}' must have one root node, and cannot be a {{#watch}}`);
+    if (!$root || !$tmp.children || $tmp.children.length > 1 || $root.dataset.rbsWatch)
+      throw new Error(`component:${name} must have one root node, and cannot be a {{#watch}}`);
 
     $root.dataset.rbsComp = id;
     const content = $tmp.innerHTML;

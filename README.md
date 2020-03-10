@@ -121,6 +121,7 @@ methods: {
     // this.data
     // this.methods
     // this.$refs()
+    // this.$props
   }
 }
 ```
