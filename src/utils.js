@@ -1,5 +1,7 @@
 let counter = 1;
 
+import Errors from "./errors.js";
+
 export default {
   findWatcher: id => document.querySelector(`[data-rbs-watch="${id}"]`),
   wrapWatcher: (id, html, hash) => {
@@ -35,7 +37,7 @@ export default {
     const $root = $tmp.firstElementChild;
 
     if (!$root || !$tmp.children || $tmp.children.length > 1 || $root.dataset.rbsWatch)
-      throw new Error(`component:${name} must have one root node, and cannot be a {{#watch}}`);
+      Errors.fail("oneRoot", { name });
 
     $root.dataset.rbsComp = id;
     const content = $tmp.innerHTML;

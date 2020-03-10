@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "http-server . -c-1",
-    "test": "rollup -c && nyc ava --verbose",
+    "test": "ava --verbose",
+    "coverage": "c8 npm run test",
     "demoApp": "rollup demo-app/app.js --file dist/demo-app.js --format umd --name 'DemoApp' ",
     "build": "rollup -c && npm run demoApp"
   },
@@ -14,14 +15,15 @@
   "dependencies": {},
   "devDependencies": {
     "ava": "^3.5.0",
+    "babel-plugin-istanbul": "^6.0.0",
     "browser-env": "^3.3.0",
+    "c8": "7.1.0",
     "eslint": "^6.7.2",
     "eslint-config-prettier": "^6.7.0",
     "eslint-plugin-prettier": "^3.1.1",
     "esm": "^3.2.25",
     "handlebars": "^4.7.3",
     "http-server": "^0.12.0",
-    "nyc": "^15.0.0",
     "prettier": "^1.19.1",
     "rollup": "^1.31.0",
     "rollup-plugin-filesize": "^6.2.1",
@@ -37,8 +39,8 @@
   },
   "ava": {
     "require": [
-      "./test/setup.js",
-      "esm"
+      "esm",
+      "./test/setup.js"
     ],
     "files": [
       "./test/**/*.spec.js"
