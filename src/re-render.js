@@ -57,10 +57,10 @@ export default {
         }
       });
 
-      // sorting
       $vChilds.forEach(($v, index) => {
         const ref = $v.dataset.rbsRef;
-        if ($target.children[index].dataset.rbsRef !== ref) {
+        const $el = $target.children[index];
+        if ($el && $el.dataset.rbsRef !== ref) {
           $target.children[index].replaceWith($v.cloneNode(true));
         }
       });
@@ -80,6 +80,11 @@ export default {
 
           if (Utils.isKeyedNode($target)) {
             _patchArr($target, html);
+            if (appStore.trace) {
+              console.groupCollapsed(`component:${name} "${path}" patching ref Array`);
+              console.log($target);
+              console.groupEnd();
+            }
             return;
           } else if (path.endsWith(".length")) {
             console.warn(
@@ -98,7 +103,12 @@ export default {
           $target.innerHTML = html;
 
           _restoreCursor($target, activeRef);
-          console.log(`component:${name} ${path}`, $target);
+
+          if (appStore.trace) {
+            console.groupCollapsed(`component:${name} "${path}" re-rendering`);
+            console.log($target);
+            console.groupEnd();
+          }
         });
       },
     };

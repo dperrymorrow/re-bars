@@ -2,7 +2,7 @@ import Utils from "./utils.js";
 import Component from "./component.js";
 import Errors from "./errors.js";
 
-export default function({ $el, root, Handlebars = window.Handlebars }) {
+export default function({ $el, root, Handlebars = window.Handlebars, trace = false }) {
   if (!Handlebars) Errors.fail("noHbs");
 
   window.rbs = window.ReBars = window.ReBars || {};
@@ -23,7 +23,7 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
   };
 
   const id = Utils.randomId();
-  const storage = (window.ReBars.apps[id] = { cDefs: {}, inst: {} });
+  const storage = (window.ReBars.apps[id] = { cDefs: {}, inst: {}, trace });
 
   if (!document.body.contains($el)) Errors.fail("noEl");
 

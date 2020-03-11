@@ -48,17 +48,17 @@
       return $n1.isEqualNode($n2);
     },
 
+    bindAll(scope, collection) {
+      return Object.entries(collection).reduce((bound, [name, method]) => {
+        bound[name] = method.bind(scope);
+        return bound;
+      }, {});
+    },
+
     getShadow(html) {
       const $tmp = document.createElement("div");
       $tmp.innerHTML = html;
       return $tmp;
-    },
-
-    pick(obj, keys) {
-      return keys.reduce((newObj, key) => {
-        newObj[key] = obj[key];
-        return newObj;
-      }, {});
     },
 
     tagComponent(id, html, name) {
@@ -177,10 +177,10 @@
           }
         });
 
-        // sorting
         $vChilds.forEach(($v, index) => {
           const ref = $v.dataset.rbsRef;
-          if ($target.children[index].dataset.rbsRef !== ref) {
+          const $el = $target.children[index];
+          if ($el && $el.dataset.rbsRef !== ref) {
             $target.children[index].replaceWith($v.cloneNode(true));
           }
         });
@@ -200,6 +200,7 @@
 
             if (Utils.isKeyedNode($target)) {
               _patchArr($target, html);
+              if (appStore.trace) ;
               return;
             } else if (path.endsWith(".length")) ;
 
@@ -214,6 +215,8 @@
             $target.innerHTML = html;
 
             _restoreCursor($target, activeRef);
+
+            if (appStore.trace) ;
           });
         },
       };
@@ -396,28 +399,18 @@
         const compId = Utils.randomId();
         const scope = { $props, methods, hooks, name, watchers, data: data(), $refs: () => Utils.findRefs(compId) };
 
-        scope.methods = Object.entries(methods).reduce((bound, [name, method]) => {
-          bound[name] = method.bind(scope);
-          return bound;
-        }, {});
+        scope.methods = Utils.bindAll(scope, methods);
+        scope.watchers = Utils.bindAll(scope, watchers);
 
         // validate the props, add the passed methods after you bind them or you will loose scope
         Object.entries($props).forEach(([key, value]) => {
           if (value === undefined) Errors.warn("propUndef", { name, key });
+          if (key in scope.data) Errors.warn("propStomp", { name, key });
           if (typeof value === "function") {
             scope.methods[key] = value;
             delete $props[key];
           }
-
-          if (key in scope.data) {
-            Errors.warn("propStomp", { name, key });
-          }
         });
-
-        scope.watchers = Object.entries(watchers).reduce((bound, [name, method]) => {
-          bound[name] = method.bind(scope);
-          return bound;
-        }, {});
 
         appStore.inst[compId] = {
           scope,
@@ -446,7 +439,7 @@
     register,
   };
 
-  function index({ $el, root, Handlebars = window.Handlebars }) {
+  function index({ $el, root, Handlebars = window.Handlebars, trace = false }) {
     if (!Handlebars) Errors.fail("noHbs");
 
     window.rbs = window.ReBars = window.ReBars || {};
@@ -467,7 +460,7 @@
     };
 
     const id = Utils.randomId();
-    const storage = (window.ReBars.apps[id] = { cDefs: {}, inst: {} });
+    const storage = (window.ReBars.apps[id] = { cDefs: {}, inst: {}, trace });
 
     if (!document.body.contains($el)) Errors.fail("noEl");
 

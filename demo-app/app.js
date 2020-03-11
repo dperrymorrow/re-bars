@@ -6,7 +6,7 @@ export default {
         {{#watch header }}
           <span>{{ header.title }}</span>
           <small>{{ header.description }}</small>
-          {{/watch}}
+        {{/watch}}
       </h1>
 
       <label>
