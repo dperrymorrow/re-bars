@@ -5,8 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "http-server . -c-1",
-    "test": "ava --verbose",
-    "coverage": "c8 npm run test",
+    "test": "c8 ava --verbose",
     "demoApp": "rollup demo-app/app.js --file dist/demo-app.js --format umd --name 'DemoApp' ",
     "build": "rollup -c && npm run demoApp"
   },

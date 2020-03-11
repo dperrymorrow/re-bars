@@ -32,6 +32,13 @@ export default {
     return $tmp;
   },
 
+  pick(obj, keys) {
+    return keys.reduce((newObj, key) => {
+      newObj[key] = obj[key];
+      return newObj;
+    }, {});
+  },
+
   tagComponent(id, html, name) {
     const $tmp = this.getShadow(html);
     const $root = $tmp.firstElementChild;
@@ -88,7 +95,7 @@ export default {
   setKey(obj, path, val) {
     const arr = path.split(".");
     arr.reduce((pointer, key, index) => {
-      if (!(key in pointer)) throw new Error(`${path} was not found in object`, obj);
+      if (!(key in pointer)) Errors.fail("badPath", { path }, obj);
       if (index + 1 === arr.length) pointer[key] = val;
       return pointer[key];
     }, obj);

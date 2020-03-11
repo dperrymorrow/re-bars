@@ -4,6 +4,8 @@ import ReBars from "../src/index.js";
 import Handlebars from "handlebars";
 import Component from "../src/component.js";
 import Helpers from "../src/helpers.js";
+import ProxyTrap from "../src/proxy-trap.js";
+import Utils from "../src/utils.js";
 
 test.beforeEach(t => {
   window.Handlebars = Handlebars;
@@ -107,7 +109,7 @@ test("scope returns keys", t => {
   t.is(typeof inst.hooks, "object");
 });
 
-test("hook created gets called on instance", t => {
+test("hook created gets called with scope of the instance", t => {
   t.context.def.data = () => ({ name: "dave" });
   t.context.def.hooks = {
     created() {
@@ -128,4 +130,32 @@ test("registers helpers for instance", t => {
   t.is(typeof instance, "object");
   t.is(typeof methods, "object");
   t.is(name, "test");
+});
+
+test.serial("creates a proxy trap", t => {
+  const watchStub = sinon.stub();
+  sinon.stub(ProxyTrap, "create").returns({ data: { name: "fred" }, watch: watchStub });
+  const { $props, methods, watchers, data } = Component.register(t.context.id, Handlebars, t.context.def).instance({
+    hello: "prop",
+  });
+  const args = ProxyTrap.create.lastCall.args[0];
+
+  t.is($props.hello, "prop");
+  t.is(data.name, "fred");
+  t.is(methods, args.methods);
+  t.is(watchers, args.watchers);
+  t.is(watchStub.called, false);
+});
+
+test.serial("does not begin watching until after render", t => {
+  const watchStub = sinon.stub();
+
+  sinon.stub(ProxyTrap, "create").returns({ data: {}, watch: watchStub });
+  sinon.stub(Utils, "tagComponent").returns("theWrapper");
+
+  const { render } = Component.register(t.context.id, Handlebars, t.context.def).instance();
+
+  t.is(watchStub.called, false);
+  t.is(render(), "theWrapper");
+  t.is(watchStub.called, true);
 });

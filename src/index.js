@@ -1,8 +1,9 @@
 import Utils from "./utils.js";
 import Component from "./component.js";
+import Errors from "./errors.js";
 
 export default function({ $el, root, Handlebars = window.Handlebars }) {
-  if (!Handlebars) throw new Error("ReBars need Handlebars in order to run!");
+  if (!Handlebars) Errors.fail("noHbs");
 
   window.rbs = window.ReBars = window.ReBars || {};
   window.ReBars.apps = window.ReBars.apps || {};
@@ -11,7 +12,7 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
       const [appId, cId, methodName, ...params] = args;
       const scope = Utils.getStorage(appId, cId).scope;
       const method = scope.methods[methodName];
-      if (!method) throw new Error(`component:${scope.name} ${methodName} is not a defined method`);
+      if (!method) Errors.fail("noMethod", { name: scope.name, methodName });
       method(...params);
     },
 
@@ -24,7 +25,7 @@ export default function({ $el, root, Handlebars = window.Handlebars }) {
   const id = Utils.randomId();
   const storage = (window.ReBars.apps[id] = { cDefs: {}, inst: {} });
 
-  if (!document.body.contains($el)) throw new Error("$el must be present in the document");
+  if (!document.body.contains($el)) Errors.fail("noEl");
 
   $el.innerHTML = Component.register(id, Handlebars, root)
     .instance()

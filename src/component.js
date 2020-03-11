@@ -70,6 +70,7 @@ function register(
 
       return {
         ...scope,
+        ...{ proxyInst },
         render() {
           const html = Utils.tagComponent(compId, templateFn(scope.data), name);
           proxyInst.watch();
