@@ -26,17 +26,17 @@ export default {
     return $n1.isEqualNode($n2);
   },
 
+  bindAll(scope, collection) {
+    return Object.entries(collection).reduce((bound, [name, method]) => {
+      bound[name] = method.bind(scope);
+      return bound;
+    }, {});
+  },
+
   getShadow(html) {
     const $tmp = document.createElement("div");
     $tmp.innerHTML = html;
     return $tmp;
-  },
-
-  pick(obj, keys) {
-    return keys.reduce((newObj, key) => {
-      newObj[key] = obj[key];
-      return newObj;
-    }, {});
   },
 
   tagComponent(id, html, name) {

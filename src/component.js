@@ -35,28 +35,18 @@ function register(
       const compId = Utils.randomId();
       const scope = { $props, methods, hooks, name, watchers, data: data(), $refs: () => Utils.findRefs(compId) };
 
-      scope.methods = Object.entries(methods).reduce((bound, [name, method]) => {
-        bound[name] = method.bind(scope);
-        return bound;
-      }, {});
+      scope.methods = Utils.bindAll(scope, methods);
+      scope.watchers = Utils.bindAll(scope, watchers);
 
       // validate the props, add the passed methods after you bind them or you will loose scope
       Object.entries($props).forEach(([key, value]) => {
         if (value === undefined) Errors.warn("propUndef", { name, key });
+        if (key in scope.data) Errors.warn("propStomp", { name, key });
         if (typeof value === "function") {
           scope.methods[key] = value;
           delete $props[key];
         }
-
-        if (key in scope.data) {
-          Errors.warn("propStomp", { name, key });
-        }
       });
-
-      scope.watchers = Object.entries(watchers).reduce((bound, [name, method]) => {
-        bound[name] = method.bind(scope);
-        return bound;
-      }, {});
 
       appStore.inst[compId] = {
         scope,
