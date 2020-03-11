@@ -4,6 +4,24 @@
   (global = global || self, global.ReBars = factory());
 }(this, (function () { 'use strict';
 
+  var Errors = {
+    noName: () => "Each ReBars component should have a name",
+    dataFn: ({ name } = {}) => `component:${name} must be a function`,
+    tplStr: ({ name } = {}) => `component:${name} needs a template string`,
+    propStomp: ({ name, key } = {}) => `component:${name} data.${key} was overrode by props`,
+    propUndef: ({ name, key } = {}) => `component:${name} was passed undefined for prop "${key}"`,
+    oneRoot: ({ name } = {}) => `component:${name} must have one root node, and cannot be a {{#watch}} block`,
+    noEl: () => "$el must be present in the document",
+    noHbs: () => "ReBars need Handlebars in order to run!",
+    noMethod: ({ name, methodName } = {}) => `component:${name} does not have a method named "${methodName}"`,
+    badPath: ({ path } = {}) => `${path} was not found in object`,
+    warn(key, obj) {
+    },
+    fail(key, obj) {
+      throw new Error(this[key](obj));
+    },
+  };
+
   let counter = 1;
 
   var Utils = {
@@ -36,12 +54,19 @@
       return $tmp;
     },
 
+    pick(obj, keys) {
+      return keys.reduce((newObj, key) => {
+        newObj[key] = obj[key];
+        return newObj;
+      }, {});
+    },
+
     tagComponent(id, html, name) {
       const $tmp = this.getShadow(html);
       const $root = $tmp.firstElementChild;
 
       if (!$root || !$tmp.children || $tmp.children.length > 1 || $root.dataset.rbsWatch)
-        throw new Error(`component:${name} must have one root node, and cannot be a {{#watch}}`);
+        Errors.fail("oneRoot", { name });
 
       $root.dataset.rbsComp = id;
       const content = $tmp.innerHTML;
@@ -92,7 +117,7 @@
     setKey(obj, path, val) {
       const arr = path.split(".");
       arr.reduce((pointer, key, index) => {
-        if (!(key in pointer)) throw new Error(`${path} was not found in object`, obj);
+        if (!(key in pointer)) Errors.fail("badPath", { path }, obj);
         if (index + 1 === arr.length) pointer[key] = val;
         return pointer[key];
       }, obj);
@@ -286,7 +311,7 @@
       instance.registerHelper("component", function(cName, { hash: props }) {
         const cDefs = Utils.getStorage(appId).cDefs;
         if (!cDefs[cName]) throw new Error(`component:${name} child component ${cName} is not registered`);
-        return new instance.SafeString(cDefs[cName].render(props));
+        return new instance.SafeString(cDefs[cName].instance(props).render());
       });
 
       // add component helpers
@@ -339,7 +364,7 @@
     },
   };
 
-  function create(
+  function register(
     appId,
     Handlebars,
     { name, template, data, helpers = {}, hooks = {}, methods = {}, watchers = {}, components = [] }
@@ -352,24 +377,24 @@
         return {};
       };
 
-    if (!name) throw new Error("Each ReBars component should have a name");
-    if (typeof data !== "function") throw new Error(`component:${name} data must be a function`);
-    if (typeof template !== "string") throw new Error(`component:${name} needs a template string`);
+    if (!name) Errors.fail("noName", { def: arguments[2] });
+    if (typeof data !== "function") Errors.fail("dataFn", { name });
+    if (typeof template !== "string") Errors.fail("tmplStr", { name });
 
     const instance = Handlebars.create();
     const templateFn = instance.compile(template);
 
     components.forEach(def => {
-      if (!def.name) throw new Error(`component:${name} child component needs a name`, def);
-      if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = create(appId, Handlebars, def);
+      if (!def.name) Errors.fail("noName", { def });
+      if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = register(appId, Handlebars, def);
     });
 
     Helpers.register(appId, { instance, methods, helpers, name, components });
 
     return {
-      render($props = {}) {
+      instance($props = {}) {
         const compId = Utils.randomId();
-        const scope = { $props, methods, name, watchers, data: data(), $refs: () => Utils.findRefs(compId) };
+        const scope = { $props, methods, hooks, name, watchers, data: data(), $refs: () => Utils.findRefs(compId) };
 
         scope.methods = Object.entries(methods).reduce((bound, [name, method]) => {
           bound[name] = method.bind(scope);
@@ -378,9 +403,14 @@
 
         // validate the props, add the passed methods after you bind them or you will loose scope
         Object.entries($props).forEach(([key, value]) => {
+          if (value === undefined) Errors.warn("propUndef", { name, key });
           if (typeof value === "function") {
             scope.methods[key] = value;
             delete $props[key];
+          }
+
+          if (key in scope.data) {
+            Errors.warn("propStomp", { name, key });
           }
         });
 
@@ -398,19 +428,26 @@
 
         const proxyInst = ProxyTrap.create({ ...scope, ...{ appId, compId } });
         scope.data = proxyInst.data;
-        const html = Utils.tagComponent(compId, templateFn(scope.data), name);
-        proxyInst.watch();
-        return html;
+
+        return {
+          ...scope,
+          ...{ proxyInst },
+          render() {
+            const html = Utils.tagComponent(compId, templateFn(scope.data), name);
+            proxyInst.watch();
+            return html;
+          },
+        };
       },
     };
   }
 
   var Component = {
-    create,
+    register,
   };
 
   function index({ $el, root, Handlebars = window.Handlebars }) {
-    if (!Handlebars) throw new Error("ReBars need Handlebars in order to run!");
+    if (!Handlebars) Errors.fail("noHbs");
 
     window.rbs = window.ReBars = window.ReBars || {};
     window.ReBars.apps = window.ReBars.apps || {};
@@ -419,7 +456,7 @@
         const [appId, cId, methodName, ...params] = args;
         const scope = Utils.getStorage(appId, cId).scope;
         const method = scope.methods[methodName];
-        if (!method) throw new Error(`component:${scope.name} ${methodName} is not a defined method`);
+        if (!method) Errors.fail("noMethod", { name: scope.name, methodName });
         method(...params);
       },
 
@@ -432,9 +469,11 @@
     const id = Utils.randomId();
     const storage = (window.ReBars.apps[id] = { cDefs: {}, inst: {} });
 
-    if (!document.body.contains($el)) throw new Error("$el must be present in the document");
+    if (!document.body.contains($el)) Errors.fail("noEl");
 
-    $el.innerHTML = Component.create(id, Handlebars, root).render();
+    $el.innerHTML = Component.register(id, Handlebars, root)
+      .instance()
+      .render();
 
     return {
       id,
