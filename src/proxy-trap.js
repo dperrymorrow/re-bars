@@ -1,4 +1,5 @@
 import ReRender from "./re-render.js";
+import Msg from "./msg.js";
 
 export default {
   create({ appId, compId, $props, data, methods, name }) {
@@ -20,10 +21,8 @@ export default {
         set: function(target, prop) {
           const ret = Reflect.set(...arguments);
           const path = tree.concat(prop).join(".");
-          if (!watching)
-            throw new Error(
-              `component:${name} set '${path}' before being added to the DOM. Usually caused by side effects from a hook or a data function, `
-            );
+          if (!watching) Msg.fail("preRenderChange", { name, path });
+          Msg.log("pathTrigger", { name, action: "set", path });
           patch(path);
           return ret;
         },
@@ -31,11 +30,8 @@ export default {
         deleteProperty: function(target, prop) {
           const ret = Reflect.deleteProperty(...arguments);
           const path = tree.concat(prop).join(".");
-          if (!watching)
-            throw new Error(
-              `component:${name} deleted '${path}' before being added to the DOM. Usually caused by side effects from a hook or a data function`
-            );
-
+          if (!watching) Msg.fail("preRenderChange", { name, path });
+          Msg.log("pathTrigger", { name, action: "delete", path });
           patch(path);
           return ret;
         },
