@@ -12,7 +12,7 @@ test.beforeEach(t => {
   t.context.$el = document.createElement("div");
   document.body.append(t.context.$el);
 
-  const { id } = ReBars({
+  const { id } = ReBars.app({
     $el: t.context.$el,
     root: { name: "root", template: "<h1></h1>" },
   });

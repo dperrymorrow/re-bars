@@ -1,6 +1,6 @@
 let counter = 1;
 
-import Errors from "./errors.js";
+import Msg from "./msg.js";
 
 export default {
   findWatcher: id => document.querySelector(`[data-rbs-watch="${id}"]`),
@@ -44,7 +44,7 @@ export default {
     const $root = $tmp.firstElementChild;
 
     if (!$root || !$tmp.children || $tmp.children.length > 1 || $root.dataset.rbsWatch)
-      Errors.fail("oneRoot", { name });
+      Msg.fail("oneRoot", { name }, $tmp);
 
     $root.dataset.rbsComp = id;
     const content = $tmp.innerHTML;
@@ -95,7 +95,7 @@ export default {
   setKey(obj, path, val) {
     const arr = path.split(".");
     arr.reduce((pointer, key, index) => {
-      if (!(key in pointer)) Errors.fail("badPath", { path }, obj);
+      if (!(key in pointer)) Msg.fail("badPath", { path }, obj);
       if (index + 1 === arr.length) pointer[key] = val;
       return pointer[key];
     }, obj);

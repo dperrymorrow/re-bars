@@ -1,7 +1,7 @@
 import Utils from "./utils.js";
 import ProxyTrap from "./proxy-trap.js";
 import Helpers from "./helpers.js";
-import Errors from "./errors.js";
+import Msg from "./msg.js";
 
 function register(
   appId,
@@ -16,15 +16,15 @@ function register(
       return {};
     };
 
-  if (!name) Errors.fail("noName", { def: arguments[2] });
-  if (typeof data !== "function") Errors.fail("dataFn", { name });
-  if (typeof template !== "string") Errors.fail("tmplStr", { name });
+  if (!name) Msg.fail("noName", null, arguments[2]);
+  if (typeof data !== "function") Msg.fail("dataFn", { name });
+  if (typeof template !== "string") Msg.fail("tmplStr", { name });
 
   const instance = Handlebars.create();
   const templateFn = instance.compile(template);
 
   components.forEach(def => {
-    if (!def.name) Errors.fail("noName", { def });
+    if (!def.name) Msg.fail("noName", null, def);
     if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = register(appId, Handlebars, def);
   });
 
@@ -40,8 +40,8 @@ function register(
 
       // validate the props, add the passed methods after you bind them or you will loose scope
       Object.entries($props).forEach(([key, value]) => {
-        if (value === undefined) Errors.warn("propUndef", { name, key });
-        if (key in scope.data) Errors.warn("propStomp", { name, key });
+        if (value === undefined) Msg.warn("propUndef", { name, key });
+        if (key in scope.data) Msg.warn("propStomp", { name, key });
         if (typeof value === "function") {
           scope.methods[key] = value;
           delete $props[key];

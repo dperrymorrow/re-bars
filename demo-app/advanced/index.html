@@ -16,10 +16,12 @@
     import ReBars from "../../src/index.js";
     import DemoApp from "./app.js";
 
-    ReBars({
+    ReBars.debug = true;
+
+    ReBars.app({
       $el: document.getElementById("demo-app"),
       root: DemoApp,
-      trace: true
+      trace: true,
     });
   </script>
 </body>

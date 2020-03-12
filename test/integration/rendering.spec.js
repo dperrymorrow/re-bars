@@ -22,17 +22,17 @@ test.afterEach.always(t => {
 });
 
 test("renders data values", t => {
-  ReBars(t.context.app);
+  ReBars.app(t.context.app);
   t.is(document.querySelector("h1").innerHTML, "David");
 });
 
 test("renders data methods", t => {
-  ReBars(t.context.app);
+  ReBars.app(t.context.app);
   t.is(document.querySelector("p").innerHTML, "David, Morrow");
 });
 
 test("re-renders on change", t => {
-  const [id, inst] = _getInst(ReBars(t.context.app));
+  const [id, inst] = _getInst(ReBars.app(t.context.app));
   const $el = Utils.findComponent(id);
 
   t.is(typeof $el, "object");
@@ -42,7 +42,7 @@ test("re-renders on change", t => {
 });
 
 test("event handlers work", async t => {
-  const [id, inst] = _getInst(ReBars(t.context.app));
+  const [id, inst] = _getInst(ReBars.app(t.context.app));
   const $el = Utils.findComponent(id);
 
   inst.scope.methods.changeName(null, "mike");

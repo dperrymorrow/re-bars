@@ -1,4 +1,5 @@
 import Utils from "./utils.js";
+import Msg from "./msg.js";
 
 function _restoreCursor($target, activeRef) {
   // this fetches all the refs, is this performant?
@@ -6,9 +7,7 @@ function _restoreCursor($target, activeRef) {
 
   if (!$input) return;
   if (Array.isArray($input)) {
-    console.warn(
-      `component:${name} ref ${activeRef.ref} is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each`
-    );
+    Msg.warn("focusFail", { ref: activeRef.ref, name }, $input);
   } else {
     $input.focus();
     if (activeRef.pos) $input.setSelectionRange(activeRef.pos + 1, activeRef.pos + 1);
@@ -35,9 +34,11 @@ export default {
       });
     }
 
-    function _patchArr($target, html) {
+    function _patchArr($target, html, path) {
       const $shadow = Utils.getShadow(html);
       const $vChilds = Array.from($shadow.children);
+
+      Msg.log("patching", { name, path }, $target);
 
       // do deletes + changes first so its faster
       Array.from($target.children).forEach($r => {
@@ -79,17 +80,12 @@ export default {
           const html = handler.render();
 
           if (Utils.isKeyedNode($target)) {
-            _patchArr($target, html);
-            if (appStore.trace) {
-              console.groupCollapsed(`component:${name} "${path}" patching ref Array`);
-              console.log($target);
-              console.groupEnd();
-            }
+            _patchArr($target, html, path);
             return;
           } else if (path.endsWith(".length")) {
-            console.warn(
-              `component:${name} patching ${path} if you add a ref to each item in the array it will be much faster`
-            );
+            // console.warn(
+            //   `component:${name} patching ${path} if you add a ref to each item in the array it will be much faster`
+            // );
           }
 
           if (Utils.isEqHtml($target.innerHTML, html)) return;
@@ -103,12 +99,7 @@ export default {
           $target.innerHTML = html;
 
           _restoreCursor($target, activeRef);
-
-          if (appStore.trace) {
-            console.groupCollapsed(`component:${name} "${path}" re-rendering`);
-            console.log($target);
-            console.groupEnd();
-          }
+          Msg.log("reRender", { name, path }, $target);
         });
       },
     };

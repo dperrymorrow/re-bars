@@ -40,7 +40,7 @@ A ReBars application is a collection of components rendered to a DOM element. Yo
   import ReBars from "re-bars";
   import RootComponent from "./app.js";
 
-  ReBars({
+  ReBars.app({
     $el: document.getElementById("demo-app"),
     root: RootComponent,
   });

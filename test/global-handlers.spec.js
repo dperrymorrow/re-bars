@@ -1,7 +1,7 @@
 import test from "ava";
 import ReBars from "../src/index.js";
 import Handlebars from "handlebars";
-import Errors from "../src/errors.js";
+import Msg from "../src/Msg.js";
 import Utils from "../src/utils.js";
 import Component from "../src/component.js";
 import sinon from "sinon";
@@ -16,7 +16,7 @@ test.beforeEach(t => {
       return { render() {} };
     },
   });
-  ReBars({
+  ReBars.app({
     $el: t.context.$el,
     root: {},
   });
@@ -44,7 +44,7 @@ test.serial("trigger: calls the storage to get the scope", t => {
 test.serial("trigger: throws if the method is not found", t => {
   t.context.scope.methods = {};
   const error = t.throws(() => window.rbs.handlers.trigger("appId", "cId", "missing"));
-  t.is(error.message, Errors.noMethod({ name: "test", methodName: "missing" }));
+  t.is(error.message, Msg.messages.noMethod({ name: "test", methodName: "missing" }));
 });
 
 test.serial("bound: will update the path if found", t => {
@@ -59,5 +59,5 @@ test.serial("bound: throws error if path is not found", t => {
   t.context.scope.data = {};
   const event = { target: { value: "Fred" } };
   const error = t.throws(() => window.rbs.handlers.bound("appId", "cId", event, "name.first"));
-  t.is(error.message, Errors.badPath({ path: "name.first" }));
+  t.is(error.message, Msg.messages.badPath({ path: "name.first" }));
 });

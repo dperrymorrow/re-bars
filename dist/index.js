@@ -4,21 +4,23 @@
   (global = global || self, global.ReBars = factory());
 }(this, (function () { 'use strict';
 
-  var Errors = {
+  var Msg = {
     noName: () => "Each ReBars component should have a name",
-    dataFn: ({ name } = {}) => `component:${name} must be a function`,
-    tplStr: ({ name } = {}) => `component:${name} needs a template string`,
-    propStomp: ({ name, key } = {}) => `component:${name} data.${key} was overrode by props`,
-    propUndef: ({ name, key } = {}) => `component:${name} was passed undefined for prop "${key}"`,
-    oneRoot: ({ name } = {}) => `component:${name} must have one root node, and cannot be a {{#watch}} block`,
+    dataFn: ({ name }) => `component:${name} must be a function`,
+    tplStr: ({ name }) => `component:${name} needs a template string`,
+    propStomp: ({ name, key }) => `component:${name} data.${key} was overrode by props`,
+    propUndef: ({ name, key }) => `component:${name} was passed undefined for prop "${key}"`,
+    oneRoot: ({ name }) => `component:${name} must have one root node, and cannot be a {{#watch}} block`,
     noEl: () => "$el must be present in the document",
     noHbs: () => "ReBars need Handlebars in order to run!",
-    noMethod: ({ name, methodName } = {}) => `component:${name} does not have a method named "${methodName}"`,
-    badPath: ({ path } = {}) => `${path} was not found in object`,
+    noMethod: ({ name, methodName }) => `component:${name} does not have a method named "${methodName}"`,
+    badPath: ({ path }) => `${path} was not found in object`,
     warn(key, obj) {
     },
     fail(key, obj) {
       throw new Error(this[key](obj));
+    },
+    log(key, obj) {
     },
   };
 
@@ -65,8 +67,7 @@
       const $tmp = this.getShadow(html);
       const $root = $tmp.firstElementChild;
 
-      if (!$root || !$tmp.children || $tmp.children.length > 1 || $root.dataset.rbsWatch)
-        Errors.fail("oneRoot", { name });
+      if (!$root || !$tmp.children || $tmp.children.length > 1 || $root.dataset.rbsWatch) Msg.fail("oneRoot", { name });
 
       $root.dataset.rbsComp = id;
       const content = $tmp.innerHTML;
@@ -117,7 +118,7 @@
     setKey(obj, path, val) {
       const arr = path.split(".");
       arr.reduce((pointer, key, index) => {
-        if (!(key in pointer)) Errors.fail("badPath", { path }, obj);
+        if (!(key in pointer)) Msg.fail("badPath", { path }, obj);
         if (index + 1 === arr.length) pointer[key] = val;
         return pointer[key];
       }, obj);
@@ -380,15 +381,15 @@
         return {};
       };
 
-    if (!name) Errors.fail("noName", { def: arguments[2] });
-    if (typeof data !== "function") Errors.fail("dataFn", { name });
-    if (typeof template !== "string") Errors.fail("tmplStr", { name });
+    if (!name) Msg.fail("noName", { def: arguments[2] });
+    if (typeof data !== "function") Msg.fail("dataFn", { name });
+    if (typeof template !== "string") Msg.fail("tmplStr", { name });
 
     const instance = Handlebars.create();
     const templateFn = instance.compile(template);
 
     components.forEach(def => {
-      if (!def.name) Errors.fail("noName", { def });
+      if (!def.name) Msg.fail("noName", { def });
       if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = register(appId, Handlebars, def);
     });
 
@@ -404,8 +405,8 @@
 
         // validate the props, add the passed methods after you bind them or you will loose scope
         Object.entries($props).forEach(([key, value]) => {
-          if (value === undefined) Errors.warn("propUndef", { name, key });
-          if (key in scope.data) Errors.warn("propStomp", { name, key });
+          if (value === undefined) Msg.warn("propUndef", { name, key });
+          if (key in scope.data) Msg.warn("propStomp", { name, key });
           if (typeof value === "function") {
             scope.methods[key] = value;
             delete $props[key];
@@ -439,40 +440,53 @@
     register,
   };
 
-  function index({ $el, root, Handlebars = window.Handlebars, trace = false }) {
-    if (!Handlebars) Errors.fail("noHbs");
+  let debugEnabled = false;
 
-    window.rbs = window.ReBars = window.ReBars || {};
-    window.ReBars.apps = window.ReBars.apps || {};
-    window.ReBars.handlers = window.ReBars.handlers || {
-      trigger(...args) {
-        const [appId, cId, methodName, ...params] = args;
-        const scope = Utils.getStorage(appId, cId).scope;
-        const method = scope.methods[methodName];
-        if (!method) Errors.fail("noMethod", { name: scope.name, methodName });
-        method(...params);
+  var index = {
+    app({ $el, root, Handlebars = window.Handlebars, trace = false }) {
+      if (!Handlebars) Msg.fail("noHbs");
+
+      window.rbs = window.ReBars = window.ReBars || {};
+      window.ReBars.apps = window.ReBars.apps || {};
+      window.ReBars.handlers = window.ReBars.handlers || {
+        trigger(...args) {
+          const [appId, cId, methodName, ...params] = args;
+          const scope = Utils.getStorage(appId, cId).scope;
+          const method = scope.methods[methodName];
+          if (!method) Msg.fail("noMethod", { name: scope.name, methodName });
+          method(...params);
+        },
+
+        bound(appId, cId, event, path) {
+          const scope = Utils.getStorage(appId, cId).scope;
+          Utils.setKey(scope.data, path, event.target.value);
+        },
+      };
+
+      const id = Utils.randomId();
+      const storage = (window.ReBars.apps[id] = { cDefs: {}, inst: {}, trace });
+
+      if (!document.body.contains($el)) Msg.fail("noEl");
+
+      $el.innerHTML = Component.register(id, Handlebars, root)
+        .instance()
+        .render();
+
+      return {
+        id,
+        storage,
+      };
+    },
+
+    debug: {
+      get() {
+        return debugEnabled;
       },
-
-      bound(appId, cId, event, path) {
-        const scope = Utils.getStorage(appId, cId).scope;
-        Utils.setKey(scope.data, path, event.target.value);
+      set(val) {
+        debugEnabled = val;
       },
-    };
-
-    const id = Utils.randomId();
-    const storage = (window.ReBars.apps[id] = { cDefs: {}, inst: {}, trace });
-
-    if (!document.body.contains($el)) Errors.fail("noEl");
-
-    $el.innerHTML = Component.register(id, Handlebars, root)
-      .instance()
-      .render();
-
-    return {
-      id,
-      storage,
-    };
-  }
+    },
+  };
 
   return index;
 
