@@ -26,15 +26,6 @@ export default {
     return $n1.isEqualNode($n2);
   },
 
-  debounce(fn, time) {
-    let timeout;
-    return function() {
-      const functionCall = () => fn.apply(this, arguments);
-      clearTimeout(timeout);
-      timeout = setTimeout(functionCall, time);
-    };
-  },
-
   bindAll(scope, collection) {
     return Object.entries(collection).reduce((bound, [name, method]) => {
       bound[name] = method.bind(scope);

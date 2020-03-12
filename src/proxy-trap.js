@@ -5,6 +5,7 @@ export default {
   create({ appId, compId, $props, data, methods, name }) {
     let watching = false;
     const { patch } = ReRender.init(...arguments);
+    // const debounced = Utils.debounce(patch, 10);
 
     function _buildProxy(raw, tree = []) {
       return new Proxy(raw, {
@@ -22,7 +23,7 @@ export default {
           const ret = Reflect.set(...arguments);
           const path = tree.concat(prop).join(".");
           if (!watching) Msg.fail("preRenderChange", { name, path });
-          Msg.log("pathTrigger", { name, action: "set", path });
+
           patch(path);
           return ret;
         },
@@ -31,7 +32,7 @@ export default {
           const ret = Reflect.deleteProperty(...arguments);
           const path = tree.concat(prop).join(".");
           if (!watching) Msg.fail("preRenderChange", { name, path });
-          Msg.log("pathTrigger", { name, action: "delete", path });
+
           patch(path);
           return ret;
         },

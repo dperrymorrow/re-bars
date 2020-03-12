@@ -1,6 +1,6 @@
 const styles = {
   warn: "background: #fff17a; color: black; padding: .1em; font-weight: normal;",
-  log: "background: #349269; color:white; padding: .1em; font-weight: normal;",
+  log: "background: #324645; color:#c9faff; padding: .1em; font-weight: normal;",
 };
 
 const _msg = (type, key, obj = {}, payload) => {
