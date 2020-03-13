@@ -66,7 +66,7 @@ export default {
     const _patch = Utils.debounce(() => {
       _deleteOrphans();
 
-      Msg.log("triggered", { name }, toTrigger.paths, toTrigger);
+      Msg.log("triggered", { name, paths: toTrigger.paths }, toTrigger);
 
       Object.entries(toTrigger.watchers).forEach(([path, fn]) => {
         delete toTrigger.watchers[path];

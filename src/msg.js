@@ -35,7 +35,7 @@ const messages = {
   reRender: ({ name, path }) => `component:${name} re-rendering "${path}"`,
   patching: ({ name, path }) => `component:${name} patching ref Array "${path}"`,
   pathTrigger: ({ path, action, name }) => `component:${name} ${action} "${path}"`,
-  triggered: ({ name }) => `component:${name} data change`,
+  triggered: ({ name, paths }) => `component:${name} data change ${paths.join(", ")}`,
   preRenderChange: ({ name, path }) =>
     `component:${name} set '${path}' before being added to the DOM. Usually caused by side effects from a hook or a data function`,
   focusFail: ({ ref, name }) =>
