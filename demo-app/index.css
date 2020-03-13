@@ -1,25 +1,41 @@
 
-$root: {
+:root {
   --padding-large: 50px;
+  --bg-color: #efefef;
+  --bg-color-2: #ffffff;
+  --txt-color: #333;
+  --txt-color-light: #777;
+  --border-color: #ccc;
+}
+
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-color: #333;
+    --bg-color-2: #444;
+    --txt-color: #999;
+    --txt-color-light: #777;
+    --border-color: #888;
+  }
 }
 
 body {
-  background: rgb(224,224,224);
-  background: linear-gradient(0deg, rgba(224,224,224,1) 0%, rgba(255,255,255,1) 100%);
+  background-color: var(--bg-color);
   font-family: Helvetica, sans-serif;
 }
 
 #demo-app {
-  color: #333;
-  padding: 50px;
+  color: var(--text-color);
+  padding: var(--padding-large);
 }
 
 #demo-app * {
+  color: var(--txt-color);
   animation: highlight .2s linear;
 }
 
 #demo-app .header-container {
-  margin-bottom: 40px;
+  margin-bottom: var(--padding-large);
 }
 
 #demo-app .header-container label {
@@ -30,21 +46,21 @@ body {
 }
 
 #demo-app h1 {
+  color: var(--txt-color);
   font-weight: 300;
   letter-spacing: -.02em;
-  color: #444;
   margin: 0 0 10px 0;
 }
 
 #demo-app h1 small {
   font-weight: 100;
-  color: #999;
+  color: var(--txt-color-light);
   letter-spacing: -.02em;
 }
 
 #demo-app .filters {
-  background-color: white;
-  border: 1px solid #ccc;
+  background-color: var(--bg-color-2);;
+  border: 1px solid var(--border-color);
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
   padding: 10px 15px;
@@ -54,22 +70,22 @@ body {
 }
 
 #demo-app input[type="text"], #demo-app button, #demo-app select {
-  background-color: #efefef;
+  background-color: var(--bg-color);
   padding: 5px 10px;
   box-sizing: border-box;
   border-radius: 5px;
   height: 30px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   font-size: 12px;
 }
 
 #demo-app input[type="text"] {
   min-width: 200px;
-  background-color: white;
+  background-color: var(--bg-color-2);
 }
 
 #demo-app button {
-  color: #555;
+  color: var(--txt-color);
   text-transform: uppercase;
   font-weight: bold;
   cursor: pointer;
@@ -77,9 +93,7 @@ body {
 
 #demo-app button:disabled {
   cursor: not-allowed;
-  color: #999;
-  border-color: #ccc;
-  background-color: #efefef;
+  color: var(--txt-color-light);
   opacity: .6;
 }
 
@@ -88,7 +102,7 @@ body {
   margin: 0 0 20px 0;
   list-style: none;
   overflow: hidden;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-color);
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
 }
@@ -98,13 +112,13 @@ body {
 }
 
 #demo-app ul li {
-  border-bottom: 1px solid #ccc;
-  background-color: white;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-color-2);
   padding: 12px 15px;
 }
 
 #demo-app ul li:nth-child(odd) {
-  background-color: #efefef;
+  background-color: var(--bg-color);
 }
 
 #demo-app ul li:last-child {
@@ -123,9 +137,9 @@ body {
 }
 
 pre.debug {
-  background-color: #efefef;
-  border: 1px solid #ccc;
-  color: #999;
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--bg-color-2);
   font-family: Monaco, monospace;
   padding: 1rem;
 }
