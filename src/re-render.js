@@ -79,16 +79,14 @@ export default {
           if (!$target) return;
           const html = handler.render();
 
+          if (Utils.isEqHtml($target.innerHTML, html)) return;
+
           if (Utils.isKeyedNode($target)) {
             _patchArr($target, html, path);
             return;
           } else if (path.endsWith(".length")) {
-            // console.warn(
-            //   `component:${name} patching ${path} if you add a ref to each item in the array it will be much faster`
-            // );
+            Msg.warn({ name, path }, $target);
           }
-
-          if (Utils.isEqHtml($target.innerHTML, html)) return;
 
           const activeRef = {
             ref: document.activeElement.dataset.rbsRef,

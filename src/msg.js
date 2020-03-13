@@ -39,6 +39,8 @@ const messages = {
     `component:${name} set '${path}' before being added to the DOM. Usually caused by side effects from a hook or a data function`,
   focusFail: ({ ref, name }) =>
     `component:${name} ref "${ref}" is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each`,
+  notKeyed: ({ name, path }) =>
+    `component:${name} patching ${path} if you add a ref to each item in the array it will be much faster`,
 };
 
 export default {
