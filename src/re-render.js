@@ -19,12 +19,6 @@ export default {
     const cStore = Utils.getStorage(appId, compId);
     const appStore = Utils.getStorage(appId);
 
-    function _checkWatchers(path) {
-      Object.entries(watchers).forEach(([watch, fn]) => {
-        if (Utils.shouldRender(path, watch)) fn();
-      });
-    }
-
     function _deleteOrphans() {
       Object.keys(appStore.inst).forEach(cId => {
         if (!Utils.findComponent(cId)) delete appStore.inst[cId];
@@ -34,11 +28,11 @@ export default {
       });
     }
 
-    function _patchArr($target, html, path) {
+    function _patchArr($target, html, handler) {
       const $shadow = Utils.getShadow(html);
       const $vChilds = Array.from($shadow.children);
 
-      Msg.log("patching", { name, path }, $target);
+      // Msg.log("patching", { name, path }, $target);
 
       // do deletes + changes first so its faster
       Array.from($target.children).forEach($r => {
@@ -67,38 +61,68 @@ export default {
       });
     }
 
+    const toTrigger = { watchers: {}, renders: {}, paths: [] };
+
+    const _patch = Utils.debounce(() => {
+      _deleteOrphans();
+
+      Msg.log("triggered", { name }, toTrigger.paths, toTrigger);
+
+      Object.entries(toTrigger.watchers).forEach(([path, fn]) => {
+        delete toTrigger.watchers[path];
+        fn();
+      });
+      Object.entries(toTrigger.renders).forEach(([renderId, handler]) => {
+        const $target = Utils.findWatcher(renderId);
+        if (!$target) return;
+
+        const html = handler.render();
+
+        if (Utils.isEqHtml($target.innerHTML, html)) return;
+
+        if (Utils.isKeyedNode($target)) {
+          _patchArr($target, html, handler);
+          Msg.log("patching", { name, path: handler.path }, $target);
+          delete toTrigger.renders[renderId];
+          return;
+        }
+
+        const lenPath = handler.matching.find(path => path.endsWith(".length"));
+        if (lenPath) Msg.warn("notKeyed", { name, path: lenPath }, $target);
+
+        const activeRef = {
+          ref: document.activeElement.dataset.rbsRef,
+          pos: document.activeElement.selectionStart,
+        };
+
+        $target.style.display = html === "" ? "none" : "";
+        $target.innerHTML = html;
+
+        _restoreCursor($target, activeRef);
+        Msg.log("reRender", { name, path: handler.path }, $target);
+      });
+
+      toTrigger.paths = [];
+    }, 0);
+
     return {
-      patch(path) {
-        _deleteOrphans();
-        _checkWatchers(path);
+      que(path) {
+        _deleteOrphans(); // narrow down the choices first
 
-        Object.entries(cStore.renders).forEach(([renderId, handler]) => {
-          if (!Utils.shouldRender(path, handler.path)) return;
-
-          const $target = Utils.findWatcher(renderId);
-          if (!$target) return;
-          const html = handler.render();
-
-          if (Utils.isEqHtml($target.innerHTML, html)) return;
-
-          if (Utils.isKeyedNode($target)) {
-            _patchArr($target, html, path);
-            return;
-          } else if (path.endsWith(".length")) {
-            Msg.warn({ name, path }, $target);
-          }
-
-          const activeRef = {
-            ref: document.activeElement.dataset.rbsRef,
-            pos: document.activeElement.selectionStart,
-          };
-
-          $target.style.display = html === "" ? "none" : "";
-          $target.innerHTML = html;
-
-          _restoreCursor($target, activeRef);
-          Msg.log("reRender", { name, path }, $target);
+        Object.entries(watchers).forEach(([watchPath, fn]) => {
+          if (Utils.shouldRender(path, watchPath)) toTrigger.watchers[watchPath] = fn;
         });
+
+        Object.entries(cStore.renders).forEach(([id, handler]) => {
+          if (Utils.shouldRender(path, handler.path)) {
+            if (!(id in toTrigger.renders)) toTrigger.renders[id] = { ...handler, matching: [path] };
+            toTrigger.renders[id].matching.push(path);
+          }
+        });
+
+        toTrigger.paths.push(path);
+
+        _patch();
       },
     };
   },

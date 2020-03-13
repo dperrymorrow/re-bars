@@ -23,6 +23,9 @@ export default {
     const $n2 = typeof item2 === "string" ? this.getShadow(item2) : this.getShadow(item2.innerHTML);
     $n1.innerHTML = this.normalizeHtml($n1.innerHTML);
     $n2.innerHTML = this.normalizeHtml($n2.innerHTML);
+
+    // if (!$n1.isEqualNode($n2)) console.log($n1, $n2);
+
     return $n1.isEqualNode($n2);
   },
 
@@ -31,6 +34,22 @@ export default {
       bound[name] = method.bind(scope);
       return bound;
     }, {});
+  },
+
+  debounce(callback, wait, immediate = false) {
+    let timeout = null;
+
+    return function() {
+      const callNow = immediate && !timeout;
+      const next = () => callback.apply(this, arguments);
+
+      clearTimeout(timeout);
+      timeout = setTimeout(next, wait);
+
+      if (callNow) {
+        next();
+      }
+    };
   },
 
   getShadow(html) {
