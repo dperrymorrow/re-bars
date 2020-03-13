@@ -1,38 +1,13 @@
 import Utils from "./utils.js";
 import Msg from "./msg.js";
 
-function _restoreCursor($target, activeRef) {
-  // this fetches all the refs, is this performant?
-  const $input = Utils.findRef($target, activeRef.ref);
-
-  if (!$input) return;
-  if (Array.isArray($input)) {
-    Msg.warn("focusFail", { ref: activeRef.ref, name }, $input);
-  } else {
-    $input.focus();
-    if (activeRef.pos) $input.setSelectionRange(activeRef.pos + 1, activeRef.pos + 1);
-  }
-}
-
 export default {
   init({ watchers, appId, compId, name }) {
     const cStore = Utils.getStorage(appId, compId);
-    const appStore = Utils.getStorage(appId);
 
-    function _deleteOrphans() {
-      Object.keys(appStore.inst).forEach(cId => {
-        if (!Utils.findComponent(cId)) delete appStore.inst[cId];
-      });
-      Object.keys(cStore.renders).forEach(key => {
-        if (!Utils.findWatcher(key)) delete cStore.renders[key];
-      });
-    }
-
-    function _patchArr($target, html, handler) {
+    function _patchArr($target, html) {
       const $shadow = Utils.getShadow(html);
       const $vChilds = Array.from($shadow.children);
-
-      // Msg.log("patching", { name, path }, $target);
 
       // do deletes + changes first so its faster
       Array.from($target.children).forEach($r => {
@@ -64,14 +39,14 @@ export default {
     const toTrigger = { watchers: {}, renders: {}, paths: [] };
 
     const _patch = Utils.debounce(() => {
-      _deleteOrphans();
-
+      Utils.deleteOrphans(appId, compId);
       Msg.log("triggered", { name, paths: toTrigger.paths }, toTrigger);
 
       Object.entries(toTrigger.watchers).forEach(([path, fn]) => {
         delete toTrigger.watchers[path];
         fn();
       });
+
       Object.entries(toTrigger.renders).forEach(([renderId, handler]) => {
         const $target = Utils.findWatcher(renderId);
         if (!$target) return;
@@ -98,7 +73,7 @@ export default {
         $target.style.display = html === "" ? "none" : "";
         $target.innerHTML = html;
 
-        _restoreCursor($target, activeRef);
+        Utils.restoreCursor($target, activeRef);
         Msg.log("reRender", { name, path: handler.path }, $target);
       });
 
@@ -121,7 +96,6 @@ export default {
         });
 
         toTrigger.paths.push(path);
-
         _patch();
       },
     };

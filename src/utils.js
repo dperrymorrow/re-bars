@@ -3,6 +3,30 @@ let counter = 1;
 import Msg from "./msg.js";
 
 export default {
+  restoreCursor($target, activeRef) {
+    const $input = this.findRef($target, activeRef.ref);
+
+    if (!$input) return;
+    if (Array.isArray($input)) {
+      Msg.warn("focusFail", { ref: activeRef.ref, name }, $input);
+    } else {
+      $input.focus();
+      if (activeRef.pos) $input.setSelectionRange(activeRef.pos + 1, activeRef.pos + 1);
+    }
+  },
+
+  deleteOrphans(appId, compId) {
+    const cStore = this.getStorage(appId, compId);
+    const appStore = this.getStorage(appId);
+
+    Object.keys(appStore.inst).forEach(cId => {
+      if (!this.findComponent(cId)) delete appStore.inst[cId];
+    });
+    Object.keys(cStore.renders).forEach(key => {
+      if (!this.findWatcher(key)) delete cStore.renders[key];
+    });
+  },
+
   findWatcher: id => document.querySelector(`[data-rbs-watch="${id}"]`),
   wrapWatcher: (id, html, hash) => {
     const { tag, ...props } = { ...{ tag: "span", class: "rbs-watch" }, ...hash };
