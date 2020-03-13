@@ -4,7 +4,7 @@ import Msg from "./msg.js";
 export default {
   create({ appId, compId, $props, data, methods, name }) {
     let watching = false;
-    const { patch } = ReRender.init(...arguments);
+    const { que } = ReRender.init(...arguments);
     // const debounced = Utils.debounce(patch, 10);
 
     function _buildProxy(raw, tree = []) {
@@ -24,7 +24,7 @@ export default {
           const path = tree.concat(prop).join(".");
           if (!watching) Msg.fail("preRenderChange", { name, path });
 
-          patch(path);
+          que(path);
           return ret;
         },
 
@@ -33,7 +33,7 @@ export default {
           const path = tree.concat(prop).join(".");
           if (!watching) Msg.fail("preRenderChange", { name, path });
 
-          patch(path);
+          que(path);
           return ret;
         },
       });

@@ -1,22 +1,22 @@
 const styles = {
-  warn: "background: #fff17a; color: black; padding: .1em; font-weight: normal;",
+  warn: "background: #484915; color: #ffffbe; padding: .1em; font-weight: normal;",
   log: "background: #324645; color:#c9faff; padding: .1em; font-weight: normal;",
 };
 
-const _msg = (type, key, obj = {}, payload) => {
+const _msg = (type, key, obj = {}, ...payloads) => {
   let str = messages[key](obj);
   if (["warn", "log"].includes(type)) {
     str = "%c " + str + " ";
     if (!window.ReBars.trace) return;
-    if (payload) {
+    if (payloads) {
       console.groupCollapsed(str, styles[type]);
-      console.log(payload);
+      payloads.forEach(p => console.log(p));
       console.groupEnd();
     } else {
       console.log(str, styles[type]);
     }
   } else {
-    if (payload && window.rbs.trace) console.error(payload);
+    if (payloads && window.rbs.trace) payloads.forEach(p => console.error(p));
     throw new Error(str);
   }
 };
@@ -35,12 +35,13 @@ const messages = {
   reRender: ({ name, path }) => `component:${name} re-rendering "${path}"`,
   patching: ({ name, path }) => `component:${name} patching ref Array "${path}"`,
   pathTrigger: ({ path, action, name }) => `component:${name} ${action} "${path}"`,
+  triggered: ({ name }) => `component:${name} data change`,
   preRenderChange: ({ name, path }) =>
     `component:${name} set '${path}' before being added to the DOM. Usually caused by side effects from a hook or a data function`,
   focusFail: ({ ref, name }) =>
     `component:${name} ref "${ref}" is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each`,
   notKeyed: ({ name, path }) =>
-    `component:${name} patching ${path} if you add a ref to each item in the array it will be much faster`,
+    `component:${name} patching "${path}" add a {{ ref }} to avoid re-rendering the entire target`,
 };
 
 export default {
