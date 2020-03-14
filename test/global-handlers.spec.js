@@ -2,7 +2,7 @@ import test from "ava";
 import ReBars from "../src/index.js";
 import Handlebars from "handlebars";
 import Msg from "../src/Msg.js";
-import Utils from "../src/utils.js";
+import Utils from "../src/utils/index.js";
 import Component from "../src/component.js";
 import sinon from "sinon";
 

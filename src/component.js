@@ -1,4 +1,4 @@
-import Utils from "./utils.js";
+import Utils from "./utils/index.js";
 import ProxyTrap from "./proxy-trap.js";
 import Helpers from "./helpers.js";
 import Msg from "./msg.js";

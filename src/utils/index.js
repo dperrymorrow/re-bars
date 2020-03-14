@@ -1,8 +1,10 @@
 let counter = 1;
 
-import Msg from "./msg.js";
+import dom from "./dom.js";
+import Msg from "../msg.js";
 
 export default {
+  dom,
   restoreCursor($target, activeRef) {
     const $input = this.findRef($target, activeRef.ref);
 
@@ -47,8 +49,6 @@ export default {
     const $n2 = typeof item2 === "string" ? this.getShadow(item2) : this.getShadow(item2.innerHTML);
     $n1.innerHTML = this.normalizeHtml($n1.innerHTML);
     $n2.innerHTML = this.normalizeHtml($n2.innerHTML);
-
-    // if (!$n1.isEqualNode($n2)) console.log($n1, $n2);
 
     return $n1.isEqualNode($n2);
   },

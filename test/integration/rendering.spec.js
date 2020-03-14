@@ -2,7 +2,7 @@ import test from "ava";
 import ReBars from "../../src/index.js";
 import Handlebars from "handlebars";
 import DemoComponent from "./component.js";
-import Utils from "../../src/utils.js";
+import Utils from "../../src/utils/index.js";
 
 const _getInst = ({ storage }) => Object.entries(storage.inst)[0];
 

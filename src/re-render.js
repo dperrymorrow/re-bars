@@ -1,4 +1,4 @@
-import Utils from "./utils.js";
+import Utils from "./utils/index.js";
 import Msg from "./msg.js";
 
 export default {

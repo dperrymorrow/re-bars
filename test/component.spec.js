@@ -5,7 +5,7 @@ import Handlebars from "handlebars";
 import Component from "../src/component.js";
 import Helpers from "../src/helpers.js";
 import ProxyTrap from "../src/proxy-trap.js";
-import Utils from "../src/utils.js";
+import Utils from "../src/utils/index.js";
 
 test.beforeEach(t => {
   window.Handlebars = Handlebars;

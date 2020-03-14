@@ -1,4 +1,4 @@
-import Utils from "./utils.js";
+import Utils from "./utils/index.js";
 
 const _getPath = (target, wildcard = true) => {
   if (target === undefined) throw new Error(`have passed undefined to watch helper in component '${name}'`);
