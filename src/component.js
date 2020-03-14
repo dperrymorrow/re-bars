@@ -33,7 +33,7 @@ function register(
   return {
     instance($props = {}) {
       const compId = Utils.randomId();
-      const scope = { $props, methods, hooks, name, watchers, data: data(), $refs: () => Utils.findRefs(compId) };
+      const scope = { $props, methods, hooks, name, watchers, data: data(), $refs: () => Utils.dom.findRefs(compId) };
 
       scope.methods = Utils.bindAll(scope, methods);
       scope.watchers = Utils.bindAll(scope, watchers);
@@ -62,7 +62,7 @@ function register(
         ...scope,
         ...{ proxyInst },
         render() {
-          const html = Utils.tagComponent(compId, templateFn(scope.data), name);
+          const html = Utils.dom.tagComponent(compId, templateFn(scope.data), name);
           proxyInst.watch();
           return html;
         },

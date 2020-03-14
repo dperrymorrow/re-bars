@@ -151,7 +151,7 @@ test.serial("does not begin watching until after render", t => {
   const watchStub = sinon.stub();
 
   sinon.stub(ProxyTrap, "create").returns({ data: {}, watch: watchStub });
-  sinon.stub(Utils, "tagComponent").returns("theWrapper");
+  sinon.stub(Utils.dom, "tagComponent").returns("theWrapper");
 
   const { render } = Component.register(t.context.id, Handlebars, t.context.def).instance();
 

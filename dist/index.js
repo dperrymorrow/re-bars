@@ -4,70 +4,57 @@
   (global = global || self, global.ReBars = factory());
 }(this, (function () { 'use strict';
 
-  var Msg = {
+  const _msg = (type, key, obj = {}, ...payloads) => {
+    let str = messages[key](obj);
+    if (["warn", "log"].includes(type)) {
+      str = "%c " + str + " ";
+      if (!window.ReBars.trace) return;
+      if (payloads) {
+        payloads.forEach(p => void 0);
+      }
+    } else {
+      if (payloads && window.rbs.trace) payloads.forEach(p => void 0);
+      throw new Error(str);
+    }
+  };
+
+  const messages = {
+    noEl: () => "$el must be present in the document",
+    noHbs: () => "ReBars need Handlebars in order to run!",
     noName: () => "Each ReBars component should have a name",
     dataFn: ({ name }) => `component:${name} must be a function`,
     tplStr: ({ name }) => `component:${name} needs a template string`,
-    propStomp: ({ name, key }) => `component:${name} data.${key} was overrode by props`,
+    propStomp: ({ name, key }) => `component:${name} "data.${key}" was overrode by a prop`,
     propUndef: ({ name, key }) => `component:${name} was passed undefined for prop "${key}"`,
     oneRoot: ({ name }) => `component:${name} must have one root node, and cannot be a {{#watch}} block`,
-    noEl: () => "$el must be present in the document",
-    noHbs: () => "ReBars need Handlebars in order to run!",
     noMethod: ({ name, methodName }) => `component:${name} does not have a method named "${methodName}"`,
     badPath: ({ path }) => `${path} was not found in object`,
-    warn(key, obj) {
-    },
-    fail(key, obj) {
-      throw new Error(this[key](obj));
-    },
-    log(key, obj) {
-    },
+    reRender: ({ name, path }) => `component:${name} re-rendering "${path}"`,
+    patching: ({ name, path }) => `component:${name} patching ref Array "${path}"`,
+    pathTrigger: ({ path, action, name }) => `component:${name} ${action} "${path}"`,
+    triggered: ({ name, paths }) => `component:${name} data change "${paths}"`,
+    preRenderChange: ({ name, path }) =>
+      `component:${name} set '${path}' before being added to the DOM. Usually caused by side effects from a hook or a data function`,
+    focusFail: ({ ref, name }) =>
+      `component:${name} ref "${ref}" is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each`,
+    notKeyed: ({ name, path }) =>
+      `component:${name} patching "${path}" add a {{ ref }} to avoid re-rendering the entire target`,
   };
 
-  let counter = 1;
+  var Msg = {
+    messages,
+    warn: _msg.bind(null, "warn"),
+    fail: _msg.bind(null, "throw"),
+    log: _msg.bind(null, "log"),
+  };
 
-  var Utils = {
-    findWatcher: id => document.querySelector(`[data-rbs-watch="${id}"]`),
-    wrapWatcher: (id, html, hash) => {
-      const { tag, ...props } = { ...{ tag: "span", class: "rbs-watch" }, ...hash };
-      const propStr = Object.entries(props)
-        .map(([key, val]) => `${key}="${val}"`)
-        .join(" ");
-
-      const style = !html.length ? "style='display:none;'" : "";
-
-      return `<${tag} ${propStr} ${style} data-rbs-watch="${id}">${html}</${tag}>`;
-    },
-
-    isKeyedNode: $target => Array.from($target.children).every($el => $el.dataset.rbsRef),
-    normalizeHtml: html => html.replace(new RegExp(/="rbs(.*?)"/g), ""),
-
-    isEqHtml(item1, item2) {
-      const $n1 = typeof item1 === "string" ? this.getShadow(item1) : this.getShadow(item1.innerHTML);
-      const $n2 = typeof item2 === "string" ? this.getShadow(item2) : this.getShadow(item2.innerHTML);
-      $n1.innerHTML = this.normalizeHtml($n1.innerHTML);
-      $n2.innerHTML = this.normalizeHtml($n2.innerHTML);
-      return $n1.isEqualNode($n2);
-    },
-
-    bindAll(scope, collection) {
-      return Object.entries(collection).reduce((bound, [name, method]) => {
-        bound[name] = method.bind(scope);
-        return bound;
-      }, {});
-    },
-
-    getShadow(html) {
-      const $tmp = document.createElement("div");
-      $tmp.innerHTML = html;
-      return $tmp;
-    },
-
+  var Dom = {
     tagComponent(id, html, name) {
       const $tmp = this.getShadow(html);
       const $root = $tmp.firstElementChild;
 
-      if (!$root || !$tmp.children || $tmp.children.length > 1 || $root.dataset.rbsWatch) Msg.fail("oneRoot", { name });
+      if (!$root || !$tmp.children || $tmp.children.length > 1 || $root.dataset.rbsWatch)
+        Msg.fail("oneRoot", { name }, $tmp);
 
       $root.dataset.rbsComp = id;
       const content = $tmp.innerHTML;
@@ -75,10 +62,16 @@
       return content;
     },
 
-    getStorage(appId, cId) {
-      return cId
-        ? this.findByPath(window.ReBars, `apps.${appId}.inst.${cId}`)
-        : this.findByPath(window.ReBars, `apps.${appId}`);
+    restoreCursor($target, activeRef) {
+      const $input = this.findRef($target, activeRef.ref);
+
+      if (!$input) return;
+      if (Array.isArray($input)) {
+        Msg.warn("focusFail", { ref: activeRef.ref, name }, $input);
+      } else {
+        $input.focus();
+        if (activeRef.pos) $input.setSelectionRange(activeRef.pos + 1, activeRef.pos + 1);
+      }
     },
 
     findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
@@ -95,8 +88,84 @@
       }, {});
     },
 
+    findWatcher: id => document.querySelector(`[data-rbs-watch="${id}"]`),
+
+    wrapWatcher: (id, html, hash) => {
+      const { tag, ...props } = { ...{ tag: "span", class: "rbs-watch" }, ...hash };
+      const propStr = Object.entries(props)
+        .map(([key, val]) => `${key}="${val}"`)
+        .join(" ");
+
+      const style = !html.length ? "style='display:none;'" : "";
+      return `<${tag} ${propStr} ${style} data-rbs-watch="${id}">${html}</${tag}>`;
+    },
+
+    isKeyedNode: $target => Array.from($target.children).every($el => $el.dataset.rbsRef),
+    normalizeHtml: html => html.replace(new RegExp(/="rbs(.*?)"/g), ""),
+
+    isEqHtml(item1, item2) {
+      const $n1 = typeof item1 === "string" ? this.getShadow(item1) : this.getShadow(item1.innerHTML);
+      const $n2 = typeof item2 === "string" ? this.getShadow(item2) : this.getShadow(item2.innerHTML);
+      $n1.innerHTML = this.normalizeHtml($n1.innerHTML);
+      $n2.innerHTML = this.normalizeHtml($n2.innerHTML);
+
+      return $n1.isEqualNode($n2);
+    },
+
+    getShadow(html) {
+      const $tmp = document.createElement("div");
+      $tmp.innerHTML = html;
+      return $tmp;
+    },
+  };
+
+  let counter = 1;
+
+  var Utils = {
+    dom: Dom,
+
+    deleteOrphans(appId, compId) {
+      const cStore = this.getStorage(appId, compId);
+      const appStore = this.getStorage(appId);
+
+      Object.keys(appStore.inst).forEach(cId => {
+        if (!this.dom.findComponent(cId)) delete appStore.inst[cId];
+      });
+      Object.keys(cStore.renders).forEach(key => {
+        if (!this.dom.findWatcher(key)) delete cStore.renders[key];
+      });
+    },
+
+    bindAll(scope, collection) {
+      return Object.entries(collection).reduce((bound, [name, method]) => {
+        bound[name] = method.bind(scope);
+        return bound;
+      }, {});
+    },
+
+    debounce(callback, wait, immediate = false) {
+      let timeout = null;
+
+      return function() {
+        const callNow = immediate && !timeout;
+        const next = () => callback.apply(this, arguments);
+
+        clearTimeout(timeout);
+        timeout = setTimeout(next, wait);
+
+        if (callNow) {
+          next();
+        }
+      };
+    },
+
+    getStorage(appId, cId) {
+      return cId
+        ? this.findByPath(window.ReBars, `apps.${appId}.inst.${cId}`)
+        : this.findByPath(window.ReBars, `apps.${appId}`);
+    },
+
     findByPath: (data, path) => path.split(".").reduce((pointer, seg) => pointer[seg], data),
-    getPath: (appId, compId) => `rbs.apps.${appId}.inst.${compId}`,
 
     shouldRender(path, watch) {
       const watchPaths = Array.isArray(watch) ? watch : [watch];
@@ -125,52 +194,25 @@
     },
   };
 
-  function _restoreCursor($target, activeRef) {
-    // this fetches all the refs, is this performant?
-    const $input = Utils.findRef($target, activeRef.ref);
-
-    if (!$input) return;
-    if (Array.isArray($input)) ; else {
-      $input.focus();
-      if (activeRef.pos) $input.setSelectionRange(activeRef.pos + 1, activeRef.pos + 1);
-    }
-  }
-
   var ReRender = {
     init({ watchers, appId, compId, name }) {
       const cStore = Utils.getStorage(appId, compId);
-      const appStore = Utils.getStorage(appId);
-
-      function _checkWatchers(path) {
-        Object.entries(watchers).forEach(([watch, fn]) => {
-          if (Utils.shouldRender(path, watch)) fn();
-        });
-      }
-
-      function _deleteOrphans() {
-        Object.keys(appStore.inst).forEach(cId => {
-          if (!Utils.findComponent(cId)) delete appStore.inst[cId];
-        });
-        Object.keys(cStore.renders).forEach(key => {
-          if (!Utils.findWatcher(key)) delete cStore.renders[key];
-        });
-      }
 
       function _patchArr($target, html) {
-        const $shadow = Utils.getShadow(html);
+        const $shadow = Utils.dom.getShadow(html);
         const $vChilds = Array.from($shadow.children);
 
         // do deletes + changes first so its faster
         Array.from($target.children).forEach($r => {
-          const $v = Utils.findRef($shadow, $r.dataset.rbsRef);
+          const $v = Utils.dom.findRef($shadow, $r.dataset.rbsRef);
           if (!$v) $r.remove();
-          else if (!Utils.isEqHtml($v, $r)) $r.replaceWith($v.cloneNode(true));
+          else if (!Utils.dom.isEqHtml($v, $r)) $r.replaceWith($v.cloneNode(true));
         });
 
         // additions;
         $vChilds.forEach(($v, index) => {
           const ref = $v.dataset.rbsRef;
-          const $r = Utils.findRef($target, ref);
+          const $r = Utils.dom.findRef($target, ref);
           if (!$r) {
             const $prev = $target.children[index];
             if ($prev) $target.insertBefore($v.cloneNode(true), $prev);
@@ -187,38 +229,66 @@
         });
       }
 
+      const triggeredPaths = [];
+      const toTrigger = { watchers: {}, renders: {} };
+
+      const _patch = Utils.debounce(() => {
+        Msg.log("triggered", { name, paths: triggeredPaths.join(",") }, toTrigger);
+        triggeredPaths.length = 0;
+
+        Object.entries(toTrigger.watchers).forEach(([path, fn]) => {
+          delete toTrigger.watchers[path];
+          fn();
+        });
+
+        Object.entries(toTrigger.renders).forEach(([renderId, handler]) => {
+          const $target = Utils.dom.findWatcher(renderId);
+          if (!$target) return;
+
+          const html = handler.render();
+
+          if (Utils.dom.isEqHtml($target.innerHTML, html)) return;
+
+          if (Utils.dom.isKeyedNode($target)) {
+            _patchArr($target, html);
+            Msg.log("patching", { name, path: handler.path }, $target);
+            delete toTrigger.renders[renderId];
+            return;
+          }
+
+          const lenPath = handler.matching.find(path => path.endsWith(".length"));
+          if (lenPath) Msg.warn("notKeyed", { name, path: lenPath }, $target);
+
+          const activeRef = {
+            ref: document.activeElement.dataset.rbsRef,
+            pos: document.activeElement.selectionStart,
+          };
+
+          $target.style.display = html === "" ? "none" : "";
+          $target.innerHTML = html;
+
+          Utils.dom.restoreCursor($target, activeRef);
+          Msg.log("reRender", { name, path: handler.path }, $target);
+        });
+      }, 0);
+
       return {
-        patch(path) {
-          _deleteOrphans();
-          _checkWatchers(path);
+        que(path) {
+          Utils.deleteOrphans(appId, compId); // narrow down the choices first
 
-          Object.entries(cStore.renders).forEach(([renderId, handler]) => {
-            if (!Utils.shouldRender(path, handler.path)) return;
-
-            const $target = Utils.findWatcher(renderId);
-            if (!$target) return;
-            const html = handler.render();
-
-            if (Utils.isKeyedNode($target)) {
-              _patchArr($target, html);
-              if (appStore.trace) ;
-              return;
-            } else if (path.endsWith(".length")) ;
-
-            if (Utils.isEqHtml($target.innerHTML, html)) return;
-
-            const activeRef = {
-              ref: document.activeElement.dataset.rbsRef,
-              pos: document.activeElement.selectionStart,
-            };
-
-            $target.style.display = html === "" ? "none" : "";
-            $target.innerHTML = html;
-
-            _restoreCursor($target, activeRef);
-
-            if (appStore.trace) ;
+          Object.entries(watchers).forEach(([watchPath, fn]) => {
+            if (Utils.shouldRender(path, watchPath)) toTrigger.watchers[watchPath] = fn;
           });
+
+          Object.entries(cStore.renders).forEach(([id, handler]) => {
+            if (Utils.shouldRender(path, handler.path)) {
+              if (!(id in toTrigger.renders)) toTrigger.renders[id] = { ...handler, matching: [path] };
+              toTrigger.renders[id].matching.push(path);
+            }
+          });
+
+          triggeredPaths.push(path);
+          _patch();
         },
       };
     },
@@ -227,7 +297,8 @@
   var ProxyTrap = {
     create({ appId, compId, $props, data, methods, name }) {
       let watching = false;
-      const { patch } = ReRender.init(...arguments);
+      const { que } = ReRender.init(...arguments);
+      // const debounced = Utils.debounce(patch, 10);
 
       function _buildProxy(raw, tree = []) {
         return new Proxy(raw, {
@@ -244,23 +315,18 @@
           set: function(target, prop) {
             const ret = Reflect.set(...arguments);
             const path = tree.concat(prop).join(".");
-            if (!watching)
-              throw new Error(
-                `component:${name} set '${path}' before being added to the DOM. Usually caused by side effects from a hook or a data function, `
-              );
-            patch(path);
+            if (!watching) Msg.fail("preRenderChange", { name, path });
+
+            que(path);
             return ret;
           },
 
           deleteProperty: function(target, prop) {
             const ret = Reflect.deleteProperty(...arguments);
             const path = tree.concat(prop).join(".");
-            if (!watching)
-              throw new Error(
-                `component:${name} deleted '${path}' before being added to the DOM. Usually caused by side effects from a hook or a data function`
-              );
+            if (!watching) Msg.fail("preRenderChange", { name, path });
 
-            patch(path);
+            que(path);
             return ret;
           },
         });
@@ -331,7 +397,7 @@
           2
         )}</pre>`;
         const eId = _watch(_getPath(obj), render, data);
-        return new instance.SafeString(Utils.wrapWatcher(eId, render()));
+        return new instance.SafeString(Utils.dom.wrapWatcher(eId, render()));
       });
 
       instance.registerHelper("watch", function(...args) {
@@ -342,7 +408,7 @@
           .split(",");
 
         const eId = _watch(path, () => fn(this), data);
-        return Utils.wrapWatcher(eId, fn(this), hash);
+        return Utils.dom.wrapWatcher(eId, fn(this), hash);
       });
 
       // events, (just curries to the rbs.handlers)
@@ -381,7 +447,7 @@
         return {};
       };
 
-    if (!name) Msg.fail("noName", { def: arguments[2] });
+    if (!name) Msg.fail("noName", null, arguments[2]);
     if (typeof data !== "function") Msg.fail("dataFn", { name });
     if (typeof template !== "string") Msg.fail("tmplStr", { name });
 
@@ -389,7 +455,7 @@
     const templateFn = instance.compile(template);
 
     components.forEach(def => {
-      if (!def.name) Msg.fail("noName", { def });
+      if (!def.name) Msg.fail("noName", null, def);
       if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = register(appId, Handlebars, def);
     });
 
@@ -398,7 +464,7 @@
     return {
       instance($props = {}) {
         const compId = Utils.randomId();
-        const scope = { $props, methods, hooks, name, watchers, data: data(), $refs: () => Utils.findRefs(compId) };
+        const scope = { $props, methods, hooks, name, watchers, data: data(), $refs: () => Utils.dom.findRefs(compId) };
 
         scope.methods = Utils.bindAll(scope, methods);
         scope.watchers = Utils.bindAll(scope, watchers);
@@ -427,7 +493,7 @@
           ...scope,
           ...{ proxyInst },
           render() {
-            const html = Utils.tagComponent(compId, templateFn(scope.data), name);
+            const html = Utils.dom.tagComponent(compId, templateFn(scope.data), name);
             proxyInst.watch();
             return html;
           },
@@ -440,14 +506,13 @@
     register,
   };
 
-  let debugEnabled = false;
-
   var index = {
     app({ $el, root, Handlebars = window.Handlebars, trace = false }) {
       if (!Handlebars) Msg.fail("noHbs");
 
       window.rbs = window.ReBars = window.ReBars || {};
       window.ReBars.apps = window.ReBars.apps || {};
+      window.ReBars.trace = trace;
       window.ReBars.handlers = window.ReBars.handlers || {
         trigger(...args) {
           const [appId, cId, methodName, ...params] = args;
@@ -476,15 +541,6 @@
         id,
         storage,
       };
-    },
-
-    debug: {
-      get() {
-        return debugEnabled;
-      },
-      set(val) {
-        debugEnabled = val;
-      },
     },
   };
 

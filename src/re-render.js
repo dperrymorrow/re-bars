@@ -6,20 +6,20 @@ export default {
     const cStore = Utils.getStorage(appId, compId);
 
     function _patchArr($target, html) {
-      const $shadow = Utils.getShadow(html);
+      const $shadow = Utils.dom.getShadow(html);
       const $vChilds = Array.from($shadow.children);
 
       // do deletes + changes first so its faster
       Array.from($target.children).forEach($r => {
-        const $v = Utils.findRef($shadow, $r.dataset.rbsRef);
+        const $v = Utils.dom.findRef($shadow, $r.dataset.rbsRef);
         if (!$v) $r.remove();
-        else if (!Utils.isEqHtml($v, $r)) $r.replaceWith($v.cloneNode(true));
+        else if (!Utils.dom.isEqHtml($v, $r)) $r.replaceWith($v.cloneNode(true));
       });
 
       // additions;
       $vChilds.forEach(($v, index) => {
         const ref = $v.dataset.rbsRef;
-        const $r = Utils.findRef($target, ref);
+        const $r = Utils.dom.findRef($target, ref);
         if (!$r) {
           const $prev = $target.children[index];
           if ($prev) $target.insertBefore($v.cloneNode(true), $prev);
@@ -36,10 +36,12 @@ export default {
       });
     }
 
-    const toTrigger = { watchers: {}, renders: {}, paths: [] };
+    const triggeredPaths = [];
+    const toTrigger = { watchers: {}, renders: {} };
 
     const _patch = Utils.debounce(() => {
-      Msg.log("triggered", { name, paths: toTrigger.paths }, toTrigger);
+      Msg.log("triggered", { name, paths: triggeredPaths.join(",") }, toTrigger);
+      triggeredPaths.length = 0;
 
       Object.entries(toTrigger.watchers).forEach(([path, fn]) => {
         delete toTrigger.watchers[path];
@@ -47,14 +49,14 @@ export default {
       });
 
       Object.entries(toTrigger.renders).forEach(([renderId, handler]) => {
-        const $target = Utils.findWatcher(renderId);
+        const $target = Utils.dom.findWatcher(renderId);
         if (!$target) return;
 
         const html = handler.render();
 
-        if (Utils.isEqHtml($target.innerHTML, html)) return;
+        if (Utils.dom.isEqHtml($target.innerHTML, html)) return;
 
-        if (Utils.isKeyedNode($target)) {
+        if (Utils.dom.isKeyedNode($target)) {
           _patchArr($target, html, handler);
           Msg.log("patching", { name, path: handler.path }, $target);
           delete toTrigger.renders[renderId];
@@ -72,11 +74,9 @@ export default {
         $target.style.display = html === "" ? "none" : "";
         $target.innerHTML = html;
 
-        Utils.restoreCursor($target, activeRef);
+        Utils.dom.restoreCursor($target, activeRef);
         Msg.log("reRender", { name, path: handler.path }, $target);
       });
-
-      toTrigger.paths = [];
     }, 0);
 
     return {
@@ -94,7 +94,7 @@ export default {
           }
         });
 
-        toTrigger.paths.push(path);
+        triggeredPaths.push(path);
         _patch();
       },
     };

@@ -51,7 +51,7 @@ export default {
           2
         )}</pre>`;
       const eId = _watch(_getPath(obj), render, data);
-      return new instance.SafeString(Utils.wrapWatcher(eId, render()));
+      return new instance.SafeString(Utils.dom.wrapWatcher(eId, render()));
     });
 
     instance.registerHelper("watch", function(...args) {
@@ -62,7 +62,7 @@ export default {
         .split(",");
 
       const eId = _watch(path, () => fn(this), data);
-      return Utils.wrapWatcher(eId, fn(this), hash);
+      return Utils.dom.wrapWatcher(eId, fn(this), hash);
     });
 
     // events, (just curries to the rbs.handlers)

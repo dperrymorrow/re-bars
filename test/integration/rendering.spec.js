@@ -3,6 +3,7 @@ import ReBars from "../../src/index.js";
 import Handlebars from "handlebars";
 import DemoComponent from "./component.js";
 import Utils from "../../src/utils/index.js";
+import Helpers from "../helpers.js";
 
 const _getInst = ({ storage }) => Object.entries(storage.inst)[0];
 
@@ -31,22 +32,24 @@ test("renders data methods", t => {
   t.is(document.querySelector("p").innerHTML, "David, Morrow");
 });
 
-test("re-renders on change", t => {
+test("re-renders on change", async t => {
   const [id, inst] = _getInst(ReBars.app(t.context.app));
-  const $el = Utils.findComponent(id);
+  const $el = Utils.dom.findComponent(id);
 
   t.is(typeof $el, "object");
   t.is($el.querySelector("p").innerHTML, "David, Morrow");
   inst.scope.data.name.first = "fred";
+  await Helpers.wait(0);
   t.is($el.querySelector("h1").innerHTML, "fred");
 });
 
 test("event handlers work", async t => {
   const [id, inst] = _getInst(ReBars.app(t.context.app));
-  const $el = Utils.findComponent(id);
+  const $el = Utils.dom.findComponent(id);
 
   inst.scope.methods.changeName(null, "mike");
-
   t.is(inst.scope.data.name.first, "mike");
+
+  await Helpers.wait(0);
   t.is($el.querySelector("h1").innerHTML, "mike");
 });
