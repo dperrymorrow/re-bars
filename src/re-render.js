@@ -39,7 +39,6 @@ export default {
     const toTrigger = { watchers: {}, renders: {}, paths: [] };
 
     const _patch = Utils.debounce(() => {
-      Utils.deleteOrphans(appId, compId);
       Msg.log("triggered", { name, paths: toTrigger.paths }, toTrigger);
 
       Object.entries(toTrigger.watchers).forEach(([path, fn]) => {
@@ -82,7 +81,7 @@ export default {
 
     return {
       que(path) {
-        _deleteOrphans(); // narrow down the choices first
+        Utils.deleteOrphans(appId, compId); // narrow down the choices first
 
         Object.entries(watchers).forEach(([watchPath, fn]) => {
           if (Utils.shouldRender(path, watchPath)) toTrigger.watchers[watchPath] = fn;
