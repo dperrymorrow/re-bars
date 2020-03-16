@@ -2,10 +2,8 @@ import ReRender from "./re-render.js";
 import Msg from "./msg.js";
 
 export default {
-  create({ appId, compId, $props, data, methods, name }) {
-    let watching = false;
-    const { que } = ReRender.init(...arguments);
-    // const debounced = Utils.debounce(patch, 10);
+  create(data) {
+    let que;
 
     function _buildProxy(raw, tree = []) {
       return new Proxy(raw, {
@@ -22,7 +20,8 @@ export default {
         set: function(target, prop) {
           const ret = Reflect.set(...arguments);
           const path = tree.concat(prop).join(".");
-          if (!watching) Msg.fail("preRenderChange", { name, path });
+
+          if (!que) Msg.fail("preRenderChange", { name: data.$name, path });
 
           que(path);
           return ret;
@@ -31,7 +30,8 @@ export default {
         deleteProperty: function(target, prop) {
           const ret = Reflect.deleteProperty(...arguments);
           const path = tree.concat(prop).join(".");
-          if (!watching) Msg.fail("preRenderChange", { name, path });
+
+          if (!que) Msg.fail("preRenderChange", { name: data.$name, path });
 
           que(path);
           return ret;
@@ -39,15 +39,11 @@ export default {
       });
     }
 
-    const proxyData = _buildProxy({
-      ...data,
-      ...$props,
-      ...{ methods },
-      $_componentId: compId,
-      $_appId: appId,
-    });
+    const proxyData = _buildProxy(data);
     return {
-      watch: () => (watching = true),
+      watch() {
+        que = ReRender.init(proxyData.$_appId, proxyData.$_componentId).que;
+      },
       data: proxyData,
     };
   },

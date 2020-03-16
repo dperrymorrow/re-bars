@@ -1,21 +1,21 @@
 export default {
   template: /*html*/ `
     <div class="filters">
-      {{#watch "filters.state" tag="div" }}
+      {{#watch "$props.filters.state" tag="div" }}
         <button {{ disabledIf "completed" }} {{ method "filterBy" "completed" }}>Show Completed</button>
         <button {{ disabledIf "incomplete" }} {{ method "filterBy" "incomplete" }}>Show Incompleted</button>
         <button {{ disabledIf null }} {{ method "filterBy" null }}>Show All</button>
       {{/watch}}
 
-      {{#watch filters tag="div" }}
-        <select {{ bound "filters.sortBy" }}>
-          <option {{ selectedIf filters.sortBy "name" }} value="name">Sort by Name</option>
-          <option {{ selectedIf filters.sortBy "updated" }} value="updated">Sort by Updated at</option>
+      {{#watch "$props.filters.sortBy,$props.filters.sortDir" tag="div" }}
+        <select {{ bound "$props.filters.sortBy" }}>
+          <option {{ selectedIf $props.filters.sortBy "name" }} value="name">Sort by Name</option>
+          <option {{ selectedIf $props.filters.sortBy "updated" }} value="updated">Sort by Updated at</option>
         </select>
-        
-        <select {{ bound "filters.sortDir" }}>
-          <option {{ selectedIf filters.sortDir "asc" }} value="asc">Ascending</option>
-          <option {{ selectedIf filters.sortDir "desc" }} value="desc">Descending</option>
+
+        <select {{ bound "$props.filters.sortDir" }}>
+          <option {{ selectedIf $props.filters.sortDir "asc" }} value="asc">Ascending</option>
+          <option {{ selectedIf $props.filters.sortDir "desc" }} value="desc">Descending</option>
         </select>
       {{/watch}}
     </div>
@@ -25,12 +25,12 @@ export default {
 
   helpers: {
     selectedIf: (current, option) => (current === option ? "selected" : ""),
-    disabledIf: (state, { data }) => (data.root.filters.state === state ? "disabled" : ""),
+    disabledIf: (state, { data }) => (data.root.$props.filters.state === state ? "disabled" : ""),
   },
 
   methods: {
     filterBy(event, state) {
-      this.data.filters.state = state;
+      this.$props.filters.state = state;
     },
   },
 };

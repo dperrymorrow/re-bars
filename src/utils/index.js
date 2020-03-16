@@ -41,13 +41,32 @@ export default {
     };
   },
 
+  makeParams(args) {
+    return args.map(param => {
+      if (["[event]"].includes(param)) return param.replace("[", "").replace("]", "");
+      if (param !== null && typeof param === "object")
+        throw new Error(
+          `component:${name} must only pass primitives as argument to a handler. \n${JSON.stringify(param, null, 2)}`
+        );
+      if (typeof param === "string") return `'${param}'`;
+      if (param === null) return `${param}`;
+      return param;
+    });
+  },
+
   getStorage(appId, cId) {
     return cId
       ? this.findByPath(window.ReBars, `apps.${appId}.inst.${cId}`)
       : this.findByPath(window.ReBars, `apps.${appId}`);
   },
 
-  findByPath: (data, path) => path.split(".").reduce((pointer, seg) => pointer[seg], data),
+  findByPath: (data, path) => {
+    try {
+      return path.split(".").reduce((pointer, seg) => pointer[seg], data);
+    } catch (err) {
+      Msg.fail("badPath", { path }, data);
+    }
+  },
 
   shouldRender(path, watch) {
     const watchPaths = Array.isArray(watch) ? watch : [watch];

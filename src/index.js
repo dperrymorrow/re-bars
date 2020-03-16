@@ -13,19 +13,19 @@ export default {
       trigger(...args) {
         const [appId, cId, methodName, ...params] = args;
         const scope = Utils.getStorage(appId, cId).scope;
-        const method = scope.methods[methodName];
+        const method = scope.$methods[methodName] || scope.$props[methodName];
         if (!method) Msg.fail("noMethod", { name: scope.name, methodName });
         method(...params);
       },
 
       bound(appId, cId, event, path) {
-        const scope = Utils.getStorage(appId, cId).scope;
-        Utils.setKey(scope.data, path, event.target.value);
+        const { scope } = Utils.getStorage(appId, cId);
+        Utils.setKey(scope, path, event.target.value);
       },
     };
 
     const id = Utils.randomId();
-    const storage = (window.ReBars.apps[id] = { cDefs: {}, inst: {}, trace });
+    const storage = (window.ReBars.apps[id] = { cDefs: {}, inst: {} });
 
     if (!document.body.contains($el)) Msg.fail("noEl");
 

@@ -2,8 +2,8 @@ import Utils from "./utils/index.js";
 import Msg from "./msg.js";
 
 export default {
-  init({ watchers, appId, compId, name }) {
-    const cStore = Utils.getStorage(appId, compId);
+  init(appId, compId) {
+    const { scope, renders } = Utils.getStorage(appId, compId);
 
     function _patchArr($target, html) {
       const $shadow = Utils.dom.getShadow(html);
@@ -83,11 +83,11 @@ export default {
       que(path) {
         Utils.deleteOrphans(appId, compId); // narrow down the choices first
 
-        Object.entries(watchers).forEach(([watchPath, fn]) => {
+        Object.entries(scope.$watchers).forEach(([watchPath, fn]) => {
           if (Utils.shouldRender(path, watchPath)) toTrigger.watchers[watchPath] = fn;
         });
 
-        Object.entries(cStore.renders).forEach(([id, handler]) => {
+        Object.entries(renders).forEach(([id, handler]) => {
           if (Utils.shouldRender(path, handler.path)) {
             if (!(id in toTrigger.renders)) toTrigger.renders[id] = { ...handler, matching: [path] };
             toTrigger.renders[id].matching.push(path);

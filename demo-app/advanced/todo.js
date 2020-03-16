@@ -3,23 +3,24 @@ export default {
     <div>
       {{#watch "editing" tag="div" class="todo" }}
         {{#if editing}}
-          <input type="text" value="{{ todo.name }}" {{ ref "nameInput" }}/>
+          <input type="text" value="{{ $props.todo.name }}" {{ ref "nameInput" }}/>
           <button {{ method "save" }}>save</button>
         {{ else }}
-          <label>
-            {{#watch "todo.done" }}
-              <input type="checkbox" {{ isChecked todo.done }} {{ method "toggleDone" }} />
-              {{#if todo.done }}
-                <s>{{ todo.name }}</s>
+
+          {{#watch $props.todo }}
+            <label>
+              <input type="checkbox" {{ isChecked $props.todo.done }} {{ method "toggleDone" }} />
+              {{#if $props.todo.done }}
+                <s>{{ $props.todo.name }}</s>
               {{else}}
-                <strong>{{ todo.name }}</strong>
+                <strong>{{ $props.todo.name }}</strong>
               {{/if}}
-            {{/watch}}
-          </label>
+            </label>
+          {{/watch}}
 
           <div class="actions">
             <span class="date">{{ timeAgo todo.updated }}</span>
-            <button {{ method "deleteTodo" todo.id }}>delete</button>
+            <button {{ method "remove" }}>delete</button>
             <button {{ method "toggleEditing" }}>edit</button>
           </div>
         {{/if}}
@@ -42,17 +43,21 @@ export default {
 
   methods: {
     save() {
-      this.data.todo.name = this.$refs().nameInput.value;
-      this.data.todo.updated = new Date().toLocaleString();
-      this.data.editing = false;
+      this.$props.todo.name = this.$refs().nameInput.value;
+      this.$props.todo.updated = new Date().toLocaleString();
+      this.editing = false;
+    },
+
+    remove() {
+      this.$props.deleteTodo(this.$props.todo.id);
     },
 
     toggleEditing() {
-      this.data.editing = !this.data.editing;
+      this.editing = !this.editing;
     },
 
     toggleDone() {
-      this.data.todo.done = !this.data.todo.done;
+      this.$props.todo.done = !this.$props.todo.done;
     },
   },
 };

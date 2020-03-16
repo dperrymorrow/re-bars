@@ -32,13 +32,13 @@ export default {
   methods: {
     toggleAdd(event) {
       event.preventDefault();
-      this.data.isAdding = !this.data.isAdding;
+      this.isAdding = !this.isAdding;
     },
 
     addItem(event) {
       event.preventDefault();
-      this.methods.addTodo(this.data.newName);
-      this.data.newName = "";
+      this.$props.addTodo(this.newName);
+      this.newName = "";
     },
   },
 };

@@ -31,7 +31,7 @@ export default {
             component "Todo"
             todo=todo
             index=@index
-            deleteTodo=@root.methods.deleteTodo
+            deleteTodo=@root.$methods.deleteTodo
           }}
         </li>
       {{/each}}
@@ -39,7 +39,7 @@ export default {
 
     {{
       component "AddTodo"
-      addTodo=methods.addTodo
+      addTodo=$methods.addTodo
     }}
   <div>
   `,
@@ -105,18 +105,18 @@ export default {
 
   methods: {
     addTodo(name) {
-      this.data.todos.push({ name, id: new Date().getTime(), updated: new Date().toLocaleString() });
-      this.data.filters.state = null;
+      this.todos.push({ name, id: new Date().getTime(), updated: new Date().toLocaleString() });
+      this.filters.state = null;
     },
 
     deleteTodo(event, id) {
-      const index = this.data.todos.findIndex(t => t.id === id);
-      this.data.todos.splice(index, 1);
+      const index = this.todos.findIndex(t => t.id === id);
+      this.todos.splice(index, 1);
     },
 
     showAdd(event) {
       event.preventDefault();
-      this.data.uiState.adding = true;
+      this.uiState.adding = true;
     },
   },
 };

@@ -1,6 +1,8 @@
 import Utils from "./utils/index.js";
 import ProxyTrap from "./proxy-trap.js";
-import Helpers from "./helpers.js";
+import Core from "./helpers/core.js";
+import Events from "./helpers/events.js";
+import Watch from "./helpers/watch.js";
 import Msg from "./msg.js";
 
 function register(
@@ -28,25 +30,35 @@ function register(
     if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = register(appId, Handlebars, def);
   });
 
-  Helpers.register(appId, { instance, methods, helpers, name, components });
+  Core.register(appId, { instance, methods, helpers, name, components });
+  Events.register(instance, methods);
+  Watch.register(instance);
 
   return {
     instance($props = {}) {
       const compId = Utils.randomId();
-      const scope = { $props, methods, hooks, name, watchers, data: data(), $refs: () => Utils.dom.findRefs(compId) };
-
-      scope.methods = Utils.bindAll(scope, methods);
-      scope.watchers = Utils.bindAll(scope, watchers);
-
+      const instData = data();
       // validate the props, add the passed methods after you bind them or you will loose scope
       Object.entries($props).forEach(([key, value]) => {
         if (value === undefined) Msg.warn("propUndef", { name, key });
-        if (key in scope.data) Msg.warn("propStomp", { name, key });
-        if (typeof value === "function") {
-          scope.methods[key] = value;
-          delete $props[key];
-        }
       });
+
+      const { data: scope, watch } = ProxyTrap.create({
+        ...instData,
+        ...{
+          $props,
+          $methods: methods,
+          $hooks: hooks,
+          $name: name,
+          $watchers: watchers,
+          $_appId: appId,
+          $_componentId: compId,
+          $refs: () => Utils.dom.findRefs(compId),
+        },
+      });
+
+      // trap.data.$methods = Utils.bindAll(trap.data, methods);
+      // trap.data.$watchers = Utils.bindAll(trap.data, watchers);
 
       appStore.inst[compId] = {
         scope,
@@ -55,15 +67,12 @@ function register(
 
       if (hooks.created) hooks.created.call(scope);
 
-      const proxyInst = ProxyTrap.create({ ...scope, ...{ appId, compId } });
-      scope.data = proxyInst.data;
-
       return {
-        ...scope,
-        ...{ proxyInst },
+        scope,
         render() {
-          const html = Utils.dom.tagComponent(compId, templateFn(scope.data), name);
-          proxyInst.watch();
+          const html = Utils.dom.tagComponent(compId, templateFn(scope), name);
+          // dont begin watching until after first render
+          watch();
           return html;
         },
       };
