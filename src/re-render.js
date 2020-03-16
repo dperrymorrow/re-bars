@@ -4,6 +4,7 @@ import Msg from "./msg.js";
 export default {
   init(appId, compId) {
     const { scope, renders } = Utils.getStorage(appId, compId);
+    const { name } = scope;
 
     function _patchArr($target, html) {
       const $shadow = Utils.dom.getShadow(html);

@@ -18,7 +18,7 @@ export default {
   },
   methods: {
     changeName(event, newName) {
-      this.data.name.first = newName;
+      this.name.first = newName;
     },
   },
   name: "test",

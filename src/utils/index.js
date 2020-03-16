@@ -18,13 +18,6 @@ export default {
     });
   },
 
-  bindAll(scope, collection) {
-    return Object.entries(collection).reduce((bound, [name, method]) => {
-      bound[name] = method.bind(scope);
-      return bound;
-    }, {});
-  },
-
   debounce(callback, wait, immediate = false) {
     let timeout = null;
 

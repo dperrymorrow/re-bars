@@ -30,7 +30,7 @@ function register(
     if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = register(appId, Handlebars, def);
   });
 
-  Core.register(appId, { instance, methods, helpers, name, components });
+  Core.register({ appId, instance, methods, helpers, name, components });
   Events.register(instance, methods);
   Watch.register(instance);
 
@@ -56,9 +56,6 @@ function register(
           $refs: () => Utils.dom.findRefs(compId),
         },
       });
-
-      // trap.data.$methods = Utils.bindAll(trap.data, methods);
-      // trap.data.$watchers = Utils.bindAll(trap.data, watchers);
 
       appStore.inst[compId] = {
         scope,

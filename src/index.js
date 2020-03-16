@@ -13,8 +13,8 @@ export default {
       trigger(...args) {
         const [appId, cId, methodName, ...params] = args;
         const scope = Utils.getStorage(appId, cId).scope;
-        const method = scope.$methods[methodName] || scope.$props[methodName];
-        if (!method) Msg.fail("noMethod", { name: scope.name, methodName });
+        const method = scope.$methods[methodName];
+        if (!method) Msg.fail("noMethod", { name: scope.$name, methodName });
         method(...params);
       },
 

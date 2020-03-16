@@ -80,16 +80,6 @@ test("ensures that data is a function", t => {
   t.is(error.message, Msg.messages.dataFn(t.context.def));
 });
 
-test.serial("warns if you are overwriting a data prop", t => {
-  sinon.stub(Msg, "warn");
-  t.context.def.data = () => ({ key: "value" });
-  Component.register(t.context.id, Handlebars, t.context.def).instance({ key: "newValue" });
-  const args = Msg.warn.lastCall.args;
-
-  t.is(args[0], "propStomp");
-  t.deepEqual(args[1], { name: "test", key: "key" });
-});
-
 test.serial("warns if you are pass undefined as a prop", t => {
   sinon.stub(Msg, "warn");
   Component.register(t.context.id, Handlebars, t.context.def).instance({ bad: undefined });

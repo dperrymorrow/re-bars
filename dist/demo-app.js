@@ -96,7 +96,7 @@
         event.preventDefault();
         const $input = this.$refs().newName;
 
-        this.data.todos.push({
+        this.todos.push({
           id: new Date().getTime(),
           name: $input.value,
         });
@@ -105,18 +105,18 @@
       },
 
       deleteTodo(event, id) {
-        const index = this.data.todos.findIndex(todo => todo.id === id);
-        this.data.todos.splice(index, 1);
+        const index = this.todos.findIndex(todo => todo.id === id);
+        this.todos.splice(index, 1);
       },
 
       toggleDone(event, id) {
-        const todo = this.data.todos.find(todo => todo.id === id);
+        const todo = this.todos.find(todo => todo.id === id);
         todo.done = !todo.done;
       },
 
       toggleCreate(event) {
         event.preventDefault();
-        this.data.adding = !this.data.adding;
+        this.adding = !this.adding;
       },
     },
   };

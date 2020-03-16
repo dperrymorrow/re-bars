@@ -159,13 +159,32 @@
       };
     },
 
+    makeParams(args) {
+      return args.map(param => {
+        if (["[event]"].includes(param)) return param.replace("[", "").replace("]", "");
+        if (param !== null && typeof param === "object")
+          throw new Error(
+            `component:${name} must only pass primitives as argument to a handler. \n${JSON.stringify(param, null, 2)}`
+          );
+        if (typeof param === "string") return `'${param}'`;
+        if (param === null) return `${param}`;
+        return param;
+      });
+    },
+
     getStorage(appId, cId) {
       return cId
         ? this.findByPath(window.ReBars, `apps.${appId}.inst.${cId}`)
         : this.findByPath(window.ReBars, `apps.${appId}`);
     },
 
-    findByPath: (data, path) => path.split(".").reduce((pointer, seg) => pointer[seg], data),
+    findByPath: (data, path) => {
+      try {
+        return path.split(".").reduce((pointer, seg) => pointer[seg], data);
+      } catch (err) {
+        Msg.fail("badPath", { path }, data);
+      }
+    },
 
     shouldRender(path, watch) {
       const watchPaths = Array.isArray(watch) ? watch : [watch];
@@ -195,8 +214,8 @@
   };
 
   var ReRender = {
-    init({ watchers, appId, compId, name }) {
-      const cStore = Utils.getStorage(appId, compId);
+    init(appId, compId) {
+      const { scope, renders } = Utils.getStorage(appId, compId);
 
       function _patchArr($target, html) {
         const $shadow = Utils.dom.getShadow(html);
@@ -276,11 +295,11 @@
         que(path) {
           Utils.deleteOrphans(appId, compId); // narrow down the choices first
 
-          Object.entries(watchers).forEach(([watchPath, fn]) => {
+          Object.entries(scope.$watchers).forEach(([watchPath, fn]) => {
             if (Utils.shouldRender(path, watchPath)) toTrigger.watchers[watchPath] = fn;
           });
 
-          Object.entries(cStore.renders).forEach(([id, handler]) => {
+          Object.entries(renders).forEach(([id, handler]) => {
             if (Utils.shouldRender(path, handler.path)) {
               if (!(id in toTrigger.renders)) toTrigger.renders[id] = { ...handler, matching: [path] };
               toTrigger.renders[id].matching.push(path);
@@ -295,10 +314,8 @@
   };
 
   var ProxyTrap = {
-    create({ appId, compId, $props, data, methods, name }) {
-      let watching = false;
-      const { que } = ReRender.init(...arguments);
-      // const debounced = Utils.debounce(patch, 10);
+    create(data) {
+      let que;
 
       function _buildProxy(raw, tree = []) {
         return new Proxy(raw, {
@@ -315,7 +332,8 @@
           set: function(target, prop) {
             const ret = Reflect.set(...arguments);
             const path = tree.concat(prop).join(".");
-            if (!watching) Msg.fail("preRenderChange", { name, path });
+
+            if (!que) Msg.fail("preRenderChange", { name: data.$name, path });
 
             que(path);
             return ret;
@@ -324,7 +342,8 @@
           deleteProperty: function(target, prop) {
             const ret = Reflect.deleteProperty(...arguments);
             const path = tree.concat(prop).join(".");
-            if (!watching) Msg.fail("preRenderChange", { name, path });
+
+            if (!que) Msg.fail("preRenderChange", { name: data.$name, path });
 
             que(path);
             return ret;
@@ -332,23 +351,55 @@
         });
       }
 
-      const proxyData = _buildProxy({
-        ...data,
-        ...$props,
-        ...{ methods },
-        $_componentId: compId,
-        $_appId: appId,
-      });
+      const proxyData = _buildProxy(data);
       return {
-        watch: () => (watching = true),
+        watch() {
+          que = ReRender.init(proxyData.$_appId, proxyData.$_componentId).que;
+        },
         data: proxyData,
       };
     },
   };
 
-  const _getPath = (target, wildcard = true) => {
-    if (target === undefined) throw new Error(`have passed undefined to watch helper in component '${name}'`);
-    return typeof target === "object" ? `${target.ReBarsPath}${wildcard ? ".*" : ""}` : target;
+  var Core = {
+    register(appId, { instance, helpers, name }) {
+      // component
+      instance.registerHelper("component", function(cName, { hash: props }) {
+        const cDefs = Utils.getStorage(appId).cDefs;
+        if (!cDefs[cName]) throw new Error(`component:${name} child component ${cName} is not registered`);
+        return new instance.SafeString(cDefs[cName].instance(props).render());
+      });
+
+      // add component helpers
+      Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
+      // add ref helper
+      instance.registerHelper("ref", key => new instance.SafeString(`data-rbs-ref="${key}"`));
+    },
+  };
+
+  var Events = {
+    register(instance) {
+      // events, (just curries to the rbs.handlers)
+      instance.registerHelper("method", function() {
+        const [str, ...args] = arguments;
+        const [methodName, eventType = "click"] = str.split(":");
+        const { data } = args.pop();
+        const { $_appId, $_componentId } = data.root;
+        const params = Utils.makeParams([$_appId, $_componentId, methodName, "[event]"].concat(args));
+        return new instance.SafeString(`on${eventType}="rbs.handlers.trigger(${params.join(",")})"`);
+      });
+
+      instance.registerHelper("bound", (path, { hash = {}, data }) => {
+        const { $_appId, $_componentId } = data.root;
+        const val = Utils.findByPath(data.root, path);
+        const ref = hash.ref || path;
+        const params = Utils.makeParams([$_appId, $_componentId, "[event]", path]);
+
+        return new instance.SafeString(
+          `value="${val}" data-rbs-ref="${ref}" oninput="rbs.handlers.bound(${params.join(",")})"`
+        );
+      });
+    },
   };
 
   const _watch = (path, render, { root }) => {
@@ -362,32 +413,13 @@
     return eId;
   };
 
-  const _makeParams = args => {
-    return args.map(param => {
-      if (["[event]"].includes(param)) return param.replace("[", "").replace("]", "");
-      if (param !== null && typeof param === "object")
-        throw new Error(
-          `component:${name} must only pass primitives as argument to a handler. \n${JSON.stringify(param, null, 2)}`
-        );
-      if (typeof param === "string") return `'${param}'`;
-      if (param === null) return `${param}`;
-      return param;
-    });
-  };
+  var Watch = {
+    register(instance) {
+      const _getPath = (name, target, wildcard = true) => {
+        if (target === undefined) throw new Error(`have passed undefined to watch helper in component '${name}'`);
+        return typeof target === "object" ? `${target.ReBarsPath}${wildcard ? ".*" : ""}` : target;
+      };
 
-  var Helpers = {
-    register(appId, { instance, helpers, name }) {
-      // component
-      instance.registerHelper("component", function(cName, { hash: props }) {
-        const cDefs = Utils.getStorage(appId).cDefs;
-        if (!cDefs[cName]) throw new Error(`component:${name} child component ${cName} is not registered`);
-        return new instance.SafeString(cDefs[cName].instance(props).render());
-      });
-
-      // add component helpers
-      Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
-      // add ref helper
-      instance.registerHelper("ref", key => new instance.SafeString(`data-rbs-ref="${key}"`));
       // watch helpers and debug
       instance.registerHelper("debug", function(obj, { data }) {
         const render = () =>
@@ -396,40 +428,19 @@
           (key, val) => (typeof val === "function" ? val + "" : val),
           2
         )}</pre>`;
-        const eId = _watch(_getPath(obj), render, data);
+        const eId = _watch(_getPath(data.root.$name, obj), render, data);
         return new instance.SafeString(Utils.dom.wrapWatcher(eId, render()));
       });
 
       instance.registerHelper("watch", function(...args) {
         const { fn, hash, data } = args.pop();
         const path = args
-          .map(arg => _getPath(arg, false))
+          .map(arg => _getPath(data.root.$name, arg, false))
           .join(".")
           .split(",");
 
         const eId = _watch(path, () => fn(this), data);
         return Utils.dom.wrapWatcher(eId, fn(this), hash);
-      });
-
-      // events, (just curries to the rbs.handlers)
-      instance.registerHelper("method", function() {
-        const [str, ...args] = arguments;
-        const [methodName, eventType = "click"] = str.split(":");
-        const { data } = args.pop();
-        const { $_appId, $_componentId } = data.root;
-        const params = _makeParams([$_appId, $_componentId, methodName, "[event]"].concat(args));
-        return new instance.SafeString(`on${eventType}="rbs.handlers.trigger(${params.join(",")})"`);
-      });
-
-      instance.registerHelper("bound", (path, { hash = {}, data }) => {
-        const { $_appId, $_componentId } = data.root;
-        const val = Utils.findByPath(data.root, path);
-        const ref = hash.ref || path;
-        const params = _makeParams([$_appId, $_componentId, "[event]", path]);
-
-        return new instance.SafeString(
-          `value="${val}" data-rbs-ref="${ref}" oninput="rbs.handlers.bound(${params.join(",")})"`
-        );
       });
     },
   };
@@ -459,25 +470,35 @@
       if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = register(appId, Handlebars, def);
     });
 
-    Helpers.register(appId, { instance, methods, helpers, name, components });
+    Core.register(appId, { instance, methods, helpers, name, components });
+    Events.register(instance, methods);
+    Watch.register(instance);
 
     return {
       instance($props = {}) {
         const compId = Utils.randomId();
-        const scope = { $props, methods, hooks, name, watchers, data: data(), $refs: () => Utils.dom.findRefs(compId) };
-
-        scope.methods = Utils.bindAll(scope, methods);
-        scope.watchers = Utils.bindAll(scope, watchers);
-
+        const instData = data();
         // validate the props, add the passed methods after you bind them or you will loose scope
         Object.entries($props).forEach(([key, value]) => {
           if (value === undefined) Msg.warn("propUndef", { name, key });
-          if (key in scope.data) Msg.warn("propStomp", { name, key });
-          if (typeof value === "function") {
-            scope.methods[key] = value;
-            delete $props[key];
-          }
         });
+
+        const { data: scope, watch } = ProxyTrap.create({
+          ...instData,
+          ...{
+            $props,
+            $methods: methods,
+            $hooks: hooks,
+            $name: name,
+            $watchers: watchers,
+            $_appId: appId,
+            $_componentId: compId,
+            $refs: () => Utils.dom.findRefs(compId),
+          },
+        });
+
+        // trap.data.$methods = Utils.bindAll(trap.data, methods);
+        // trap.data.$watchers = Utils.bindAll(trap.data, watchers);
 
         appStore.inst[compId] = {
           scope,
@@ -486,15 +507,12 @@
 
         if (hooks.created) hooks.created.call(scope);
 
-        const proxyInst = ProxyTrap.create({ ...scope, ...{ appId, compId } });
-        scope.data = proxyInst.data;
-
         return {
-          ...scope,
-          ...{ proxyInst },
+          scope,
           render() {
-            const html = Utils.dom.tagComponent(compId, templateFn(scope.data), name);
-            proxyInst.watch();
+            const html = Utils.dom.tagComponent(compId, templateFn(scope), name);
+            // dont begin watching until after first render
+            watch();
             return html;
           },
         };
@@ -517,19 +535,19 @@
         trigger(...args) {
           const [appId, cId, methodName, ...params] = args;
           const scope = Utils.getStorage(appId, cId).scope;
-          const method = scope.methods[methodName];
+          const method = scope.$methods[methodName] || scope.$props[methodName];
           if (!method) Msg.fail("noMethod", { name: scope.name, methodName });
           method(...params);
         },
 
         bound(appId, cId, event, path) {
-          const scope = Utils.getStorage(appId, cId).scope;
-          Utils.setKey(scope.data, path, event.target.value);
+          const { scope } = Utils.getStorage(appId, cId);
+          Utils.setKey(scope, path, event.target.value);
         },
       };
 
       const id = Utils.randomId();
-      const storage = (window.ReBars.apps[id] = { cDefs: {}, inst: {}, trace });
+      const storage = (window.ReBars.apps[id] = { cDefs: {}, inst: {} });
 
       if (!document.body.contains($el)) Msg.fail("noEl");
 

@@ -3,9 +3,11 @@ import sinon from "sinon";
 import ReBars from "../src/index.js";
 import Handlebars from "handlebars";
 import Component from "../src/component.js";
-import Helpers from "../src/helpers.js";
 import ProxyTrap from "../src/proxy-trap.js";
 import Utils from "../src/utils/index.js";
+import Core from "../src/helpers/core.js";
+import Events from "../src/helpers/events.js";
+import Watch from "../src/helpers/watch.js";
 
 test.beforeEach(t => {
   window.Handlebars = Handlebars;
@@ -40,8 +42,8 @@ test("will render the component as root", t => {
   t.is(output.includes("data-rbs-comp="), true);
 });
 
-test("combines props with data for scope", t => {
-  t.context.def.template = "<div>{{ name }} {{ hobby }}</div>";
+test("keeps $props separated", t => {
+  t.context.def.template = "<div>{{ name }} {{ $props.hobby }}</div>";
   const output = Component.register(t.context.id, Handlebars, t.context.def)
     .instance({ hobby: "bonsai" })
     .render();
@@ -50,41 +52,20 @@ test("combines props with data for scope", t => {
   t.is(output.includes("bonsai"), true);
 });
 
-test("props take precident over data", t => {
-  sinon.stub(console, "warn");
-  const output = Component.register(t.context.id, Handlebars, t.context.def)
-    .instance({ name: "morrow" })
-    .render();
-
-  t.is(output.includes("David"), false);
-  t.is(output.includes("morrow"), true);
-});
-
-test("prop functions are combined with methods", t => {
-  t.context.def.methods = { sup() {} };
-
-  const { methods, $props } = Component.register(t.context.id, Handlebars, t.context.def).instance({ propMethod() {} });
-
-  t.is("propMethod" in methods, true);
-  t.is("sup" in methods, true);
-  t.is("propMethod" in $props, false);
-});
-
 test("methods are scoped to the scope", t => {
   t.context.def.methods = {
     sup() {
-      t.is("methods" in this, true);
-      t.is("data" in this, true);
+      t.is("$methods" in this, true);
       t.is("$props" in this, true);
       t.is("$refs" in this, true);
     },
   };
 
-  const { methods } = Component.register(t.context.id, Handlebars, t.context.def).instance();
-  methods.sup();
+  const { scope } = Component.register(t.context.id, Handlebars, t.context.def).instance();
+  scope.$methods.sup();
 });
 
-test("data functions are scoped to data", t => {
+test("data functions are scoped", t => {
   t.context.def.data = function() {
     return {
       name: "fred",
@@ -95,55 +76,67 @@ test("data functions are scoped to data", t => {
     };
   };
 
-  const { data } = Component.register(t.context.id, Handlebars, t.context.def).instance();
-  t.is(data.computed(), "fred");
+  const { scope } = Component.register(t.context.id, Handlebars, t.context.def).instance();
+  t.is(scope.computed(), "fred");
 });
 
 test("scope returns keys", t => {
-  const inst = Component.register(t.context.id, Handlebars, t.context.def).instance();
-  t.is(typeof inst.data, "object");
-  t.is(typeof inst.$refs, "function");
-  t.is(typeof inst.$props, "object");
-  t.is(typeof inst.methods, "object");
-  t.is(typeof inst.watchers, "object");
-  t.is(typeof inst.hooks, "object");
+  const { scope } = Component.register(t.context.id, Handlebars, t.context.def).instance();
+  t.is(typeof scope.$refs, "function");
+  t.is(typeof scope.$props, "object");
+  t.is(typeof scope.$methods, "object");
+  t.is(typeof scope.$watchers, "object");
+  t.is(typeof scope.$hooks, "object");
+  t.is(typeof scope.$name, "string");
 });
 
 test("hook created gets called with scope of the instance", t => {
   t.context.def.data = () => ({ name: "dave" });
   t.context.def.hooks = {
     created() {
-      t.is(this.data.name, "dave");
+      t.is(this.name, "dave");
     },
   };
 
   Component.register(t.context.id, Handlebars, t.context.def).instance();
 });
 
-test("registers helpers for instance", t => {
-  sinon.stub(Helpers, "register");
-  Component.register(t.context.id, Handlebars, t.context.def).instance();
-  const { components, helpers, instance, methods, name } = Helpers.register.lastCall.args[1];
+test.serial("registers core helpers for instance", t => {
+  sinon.stub(Core, "register");
 
-  t.is(Array.isArray(components), true);
+  Component.register(t.context.id, Handlebars, t.context.def).instance();
+  const { appId, instance, helpers, name } = Core.register.lastCall.args[0];
+
   t.is(typeof helpers, "object");
+  t.is(typeof appId, "string");
   t.is(typeof instance, "object");
-  t.is(typeof methods, "object");
   t.is(name, "test");
+});
+
+test.serial("registers event helpers for instance", t => {
+  sinon.stub(Events, "register");
+  Component.register(t.context.id, Handlebars, t.context.def).instance();
+  t.is(typeof Events.register.lastCall.args[0], "object");
+});
+
+test.serial("registers watch helpers for instance", t => {
+  sinon.stub(Watch, "register");
+  Component.register(t.context.id, Handlebars, t.context.def).instance();
+  t.is(typeof Watch.register.lastCall.args[0], "object");
 });
 
 test.serial("creates a proxy trap", t => {
   const watchStub = sinon.stub();
-  sinon.stub(ProxyTrap, "create").returns({ data: { name: "fred" }, watch: watchStub });
-  const { $props, methods, watchers, data } = Component.register(t.context.id, Handlebars, t.context.def).instance({
+  sinon.stub(ProxyTrap, "create").returns({ data: { name: "fred", $props: { thing: true } }, watch: watchStub });
+  const { scope } = Component.register(t.context.id, Handlebars, t.context.def).instance({
     hello: "prop",
   });
   const args = ProxyTrap.create.lastCall.args[0];
 
-  t.is($props.hello, "prop");
-  t.is(data.name, "fred");
-  t.is(methods, args.methods);
-  t.is(watchers, args.watchers);
+  t.is(args.$props.hello, "prop");
+  t.is(args.$name, "test");
+  t.is(scope.$props.thing, true);
+  t.is(scope.name, "fred");
   t.is(watchStub.called, false);
 });
 

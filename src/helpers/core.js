@@ -1,7 +1,7 @@
 import Utils from "../utils/index.js";
 
 export default {
-  register(appId, { instance, helpers, name }) {
+  register({ appId, instance, helpers, name }) {
     // component
     instance.registerHelper("component", function(cName, { hash: props }) {
       const cDefs = Utils.getStorage(appId).cDefs;

@@ -38,7 +38,7 @@ test("re-renders on change", async t => {
 
   t.is(typeof $el, "object");
   t.is($el.querySelector("p").innerHTML, "David, Morrow");
-  inst.scope.data.name.first = "fred";
+  inst.scope.name.first = "fred";
   await Helpers.wait(0);
   t.is($el.querySelector("h1").innerHTML, "fred");
 });
@@ -47,8 +47,8 @@ test("event handlers work", async t => {
   const [id, inst] = _getInst(ReBars.app(t.context.app));
   const $el = Utils.dom.findComponent(id);
 
-  inst.scope.methods.changeName(null, "mike");
-  t.is(inst.scope.data.name.first, "mike");
+  inst.scope.$methods.changeName(null, "mike");
+  t.is(inst.scope.name.first, "mike");
 
   await Helpers.wait(0);
   t.is($el.querySelector("h1").innerHTML, "mike");
