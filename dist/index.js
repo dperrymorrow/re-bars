@@ -136,13 +136,6 @@
       });
     },
 
-    bindAll(scope, collection) {
-      return Object.entries(collection).reduce((bound, [name, method]) => {
-        bound[name] = method.bind(scope);
-        return bound;
-      }, {});
-    },
-
     debounce(callback, wait, immediate = false) {
       let timeout = null;
 
@@ -216,6 +209,7 @@
   var ReRender = {
     init(appId, compId) {
       const { scope, renders } = Utils.getStorage(appId, compId);
+      const { name } = scope;
 
       function _patchArr($target, html) {
         const $shadow = Utils.dom.getShadow(html);
@@ -333,7 +327,7 @@
             const ret = Reflect.set(...arguments);
             const path = tree.concat(prop).join(".");
 
-            if (!que) Msg.fail("preRenderChange", { name: data.$name, path });
+            if (!que) Msg.fail("preRenderChange", { name: proxyData.$name, path });
 
             que(path);
             return ret;
@@ -343,7 +337,7 @@
             const ret = Reflect.deleteProperty(...arguments);
             const path = tree.concat(prop).join(".");
 
-            if (!que) Msg.fail("preRenderChange", { name: data.$name, path });
+            if (!que) Msg.fail("preRenderChange", { name: proxyData.$name, path });
 
             que(path);
             return ret;
@@ -362,7 +356,7 @@
   };
 
   var Core = {
-    register(appId, { instance, helpers, name }) {
+    register({ appId, instance, helpers, name }) {
       // component
       instance.registerHelper("component", function(cName, { hash: props }) {
         const cDefs = Utils.getStorage(appId).cDefs;
@@ -470,7 +464,7 @@
       if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = register(appId, Handlebars, def);
     });
 
-    Core.register(appId, { instance, methods, helpers, name, components });
+    Core.register({ appId, instance, methods, helpers, name, components });
     Events.register(instance, methods);
     Watch.register(instance);
 
@@ -496,9 +490,6 @@
             $refs: () => Utils.dom.findRefs(compId),
           },
         });
-
-        // trap.data.$methods = Utils.bindAll(trap.data, methods);
-        // trap.data.$watchers = Utils.bindAll(trap.data, watchers);
 
         appStore.inst[compId] = {
           scope,
@@ -535,8 +526,8 @@
         trigger(...args) {
           const [appId, cId, methodName, ...params] = args;
           const scope = Utils.getStorage(appId, cId).scope;
-          const method = scope.$methods[methodName] || scope.$props[methodName];
-          if (!method) Msg.fail("noMethod", { name: scope.name, methodName });
+          const method = scope.$methods[methodName];
+          if (!method) Msg.fail("noMethod", { name: scope.$name, methodName });
           method(...params);
         },
 

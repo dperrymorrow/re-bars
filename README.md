@@ -43,6 +43,7 @@ A ReBars application is a collection of components rendered to a DOM element. Yo
   ReBars.app({
     $el: document.getElementById("demo-app"),
     root: RootComponent,
+    trace: false // default to true
   });
 </script>
 ```
@@ -118,8 +119,7 @@ Methods defined in a component are avalable for use with the [`{{method}}`](#the
 ```javascript
 methods: {
   save(event, name) {
-    // this.data
-    // this.methods
+    // this.$methods
     // this.$refs()
     // this.$props
   }
@@ -131,10 +131,10 @@ methods: {
 ```javascript
 methods: {
   findFriend(name) {
-    this.data.friends.find(friend => friend.name === name);
+    this.friends.find(friend => friend.name === name);
   },
   save(event, name) {
-    const friend = this.methods.findFriend(name);
+    const friend = this.$methods.findFriend(name);
   }
 }
 ```
@@ -183,7 +183,7 @@ Anytime `name` is changed the block would be re-rendered with the updated data.
 
 > If the item you are watching is a primitive such as a `String`, or `Number`. You will need to use a string as the argument.
 
-- `{{#watch name }}` this will watch all props on `name`
+- `{{#watch name }}` this will watch all keys on Object `name`
 - `{{#watch "name.*" }}` this is the string equvilent of the above
 - `{{#watch "name.first" }}` will only watch for changes to `name.first`
 - `{{#watch "name.*,hobby" }}` will watch for any change to name or hobby
