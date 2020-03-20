@@ -1,5 +1,4 @@
 import ReRender from "./re-render.js";
-import Msg from "./msg.js";
 
 export default {
   create(data) {
@@ -21,9 +20,7 @@ export default {
           const ret = Reflect.set(...arguments);
           const path = tree.concat(prop).join(".");
 
-          if (!que) Msg.fail("preRenderChange", { name: proxyData.$name, path });
-
-          que(path);
+          if (que) que(path);
           return ret;
         },
 
@@ -31,9 +28,7 @@ export default {
           const ret = Reflect.deleteProperty(...arguments);
           const path = tree.concat(prop).join(".");
 
-          if (!que) Msg.fail("preRenderChange", { name: proxyData.$name, path });
-
-          que(path);
+          if (que) que(path);
           return ret;
         },
       });

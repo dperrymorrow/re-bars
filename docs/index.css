@@ -1,0 +1,19 @@
+
+body {
+  padding: 0;
+  margin: 0;
+  font-family: Helvetica;
+}
+
+main {
+  display: flex;
+  flex-diretion: row;
+}
+
+section {
+  flex: 1;
+}
+
+nav ul li a.active {
+  color: red;
+}

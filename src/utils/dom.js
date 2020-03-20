@@ -52,7 +52,7 @@ export default {
     return `<${tag} ${propStr} ${style} data-rbs-watch="${id}">${html}</${tag}>`;
   },
 
-  isKeyedNode: $target => Array.from($target.children).every($el => $el.dataset.rbsRef),
+  isKeyedNode: $target => $target.children.length && Array.from($target.children).every($el => $el.dataset.rbsRef),
   normalizeHtml: html => html.replace(new RegExp(/="rbs(.*?)"/g), ""),
 
   isEqHtml(item1, item2) {

@@ -2,24 +2,21 @@
 <html>
 
 <head>
-  <link rel="stylesheet" href="../index.css">
+  <link rel="stylesheet" href="index.css">
 </head>
 
 <body>
   <div id="demo-app"></div>
-  <!-- moment for the relative time stamps -->
-  <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
   <!-- include Handlebars Templating engine -->
   <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
 
   <script type="module">
-    import ReBars from "../../src/index.js";
+    import ReBars from "/src/index.js";
     import DemoApp from "./app.js";
 
     ReBars.app({
       $el: document.getElementById("demo-app"),
       root: DemoApp,
-      trace: true
     });
   </script>
 </body>

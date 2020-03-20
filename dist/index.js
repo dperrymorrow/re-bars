@@ -33,6 +33,9 @@
     patching: ({ name, path }) => `component:${name} patching ref Array "${path}"`,
     pathTrigger: ({ path, action, name }) => `component:${name} ${action} "${path}"`,
     triggered: ({ name, paths }) => `component:${name} data change "${paths}"`,
+    noComp: ({ name, cName }) => `component:${name} child component "${cName}" is not registered`,
+    restrictedKey: ({ name, key }) =>
+      `component:${name} cannot use restricted key "${key}" in your data as it's a helper`,
     preRenderChange: ({ name, path }) =>
       `component:${name} set '${path}' before being added to the DOM. Usually caused by side effects from a hook or a data function`,
     focusFail: ({ ref, name }) =>
@@ -100,7 +103,7 @@
       return `<${tag} ${propStr} ${style} data-rbs-watch="${id}">${html}</${tag}>`;
     },
 
-    isKeyedNode: $target => Array.from($target.children).every($el => $el.dataset.rbsRef),
+    isKeyedNode: $target => $target.children.length && Array.from($target.children).every($el => $el.dataset.rbsRef),
     normalizeHtml: html => html.replace(new RegExp(/="rbs(.*?)"/g), ""),
 
     isEqHtml(item1, item2) {
@@ -209,7 +212,7 @@
   var ReRender = {
     init(appId, compId) {
       const { scope, renders } = Utils.getStorage(appId, compId);
-      const { name } = scope;
+      const { $name: name } = scope;
 
       function _patchArr($target, html) {
         const $shadow = Utils.dom.getShadow(html);
@@ -327,9 +330,7 @@
             const ret = Reflect.set(...arguments);
             const path = tree.concat(prop).join(".");
 
-            if (!que) Msg.fail("preRenderChange", { name: proxyData.$name, path });
-
-            que(path);
+            if (que) que(path);
             return ret;
           },
 
@@ -337,9 +338,7 @@
             const ret = Reflect.deleteProperty(...arguments);
             const path = tree.concat(prop).join(".");
 
-            if (!que) Msg.fail("preRenderChange", { name: proxyData.$name, path });
-
-            que(path);
+            if (que) que(path);
             return ret;
           },
         });
@@ -356,17 +355,20 @@
   };
 
   var Core = {
-    register({ appId, instance, helpers, name }) {
-      // component
-      instance.registerHelper("component", function(cName, { hash: props }) {
-        const cDefs = Utils.getStorage(appId).cDefs;
-        if (!cDefs[cName]) throw new Error(`component:${name} child component ${cName} is not registered`);
+    register(instance, helpers) {
+      Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
+
+      instance.registerHelper("component", function(cName, { hash: props, data }) {
+        const { cDefs } = Utils.getStorage(data.root.$_appId);
+        if (!cDefs[cName]) Msg.fail("noComp", { name: data.root.$name, cName });
         return new instance.SafeString(cDefs[cName].instance(props).render());
       });
 
-      // add component helpers
-      Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
-      // add ref helper
+      instance.registerHelper("isComponent", function(cName, { data }) {
+        const { cDefs } = Utils.getStorage(data.root.$_appId);
+        return Object.keys(cDefs).includes(cName);
+      });
+
       instance.registerHelper("ref", key => new instance.SafeString(`data-rbs-ref="${key}"`));
     },
   };
@@ -439,6 +441,8 @@
     },
   };
 
+  const restricted = ["component", "ref", "debug", "isComponent", "method", "bound", "watch", "isComponent"];
+
   function register(
     appId,
     Handlebars,
@@ -464,7 +468,11 @@
       if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = register(appId, Handlebars, def);
     });
 
-    Core.register({ appId, instance, methods, helpers, name, components });
+    Object.keys(data()).forEach(key => {
+      if (restricted.concat(Object.keys(helpers)).includes(key)) Msg.fail("restrictedKey", { name, key });
+    });
+
+    Core.register(instance, { ...helpers, ...appStore.helpers });
     Events.register(instance, methods);
     Watch.register(instance);
 
@@ -516,9 +524,7 @@
   };
 
   var index = {
-    app({ $el, root, Handlebars = window.Handlebars, trace = false }) {
-      if (!Handlebars) Msg.fail("noHbs");
-
+    app({ $el, root, Handlebars = window.Handlebars, helpers = {}, trace = false }) {
       window.rbs = window.ReBars = window.ReBars || {};
       window.ReBars.apps = window.ReBars.apps || {};
       window.ReBars.trace = trace;
@@ -537,10 +543,11 @@
         },
       };
 
-      const id = Utils.randomId();
-      const storage = (window.ReBars.apps[id] = { cDefs: {}, inst: {} });
-
+      if (!Handlebars) Msg.fail("noHbs");
       if (!document.body.contains($el)) Msg.fail("noEl");
+
+      const id = Utils.randomId();
+      const storage = (window.ReBars.apps[id] = { helpers, cDefs: {}, inst: {} });
 
       $el.innerHTML = Component.register(id, Handlebars, root)
         .instance()

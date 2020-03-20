@@ -36,6 +36,9 @@ const messages = {
   patching: ({ name, path }) => `component:${name} patching ref Array "${path}"`,
   pathTrigger: ({ path, action, name }) => `component:${name} ${action} "${path}"`,
   triggered: ({ name, paths }) => `component:${name} data change "${paths}"`,
+  noComp: ({ name, cName }) => `component:${name} child component "${cName}" is not registered`,
+  restrictedKey: ({ name, key }) =>
+    `component:${name} cannot use restricted key "${key}" in your data as it's a helper`,
   preRenderChange: ({ name, path }) =>
     `component:${name} set '${path}' before being added to the DOM. Usually caused by side effects from a hook or a data function`,
   focusFail: ({ ref, name }) =>

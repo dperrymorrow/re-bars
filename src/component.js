@@ -5,6 +5,8 @@ import Events from "./helpers/events.js";
 import Watch from "./helpers/watch.js";
 import Msg from "./msg.js";
 
+const restricted = ["component", "ref", "debug", "isComponent", "method", "bound", "watch", "isComponent"];
+
 function register(
   appId,
   Handlebars,
@@ -30,7 +32,11 @@ function register(
     if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = register(appId, Handlebars, def);
   });
 
-  Core.register({ appId, instance, methods, helpers, name, components });
+  Object.keys(data()).forEach(key => {
+    if (restricted.concat(Object.keys(helpers)).includes(key)) Msg.fail("restrictedKey", { name, key });
+  });
+
+  Core.register(instance, { ...helpers, ...appStore.helpers });
   Events.register(instance, methods);
   Watch.register(instance);
 
