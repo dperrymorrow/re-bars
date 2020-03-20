@@ -12,7 +12,7 @@ export default {
         {{else}}
           404
         {{/if}}
-    </section>
+      </section>
     {{/watch}}
   </div>
   `,

@@ -1,5 +1,5 @@
 import App from "./main.js";
-import ReBars from "/src/index.js";
+import ReBars from "../../src/index.js";
 
 export default function() {
   return ReBars.app({
