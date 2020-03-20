@@ -8,7 +8,11 @@ const _getTplString = (template, { loc, data }) => {
   const leadingSpaces = Array(lines[0].length - lines[0].trim().length).join(" ");
   lines[0] = lines[0].substr(loc.start.column);
   lines[lines.length - 1] = lines[lines.length - 1].substr(0, loc.end.column);
-  return ["", `component: ${data.root.$name}, line: ${loc.start.line}`, "============================================"]
+  return [
+    "",
+    `component: ${data.root.$name}, template line: ${loc.start.line}`,
+    "============================================",
+  ]
     .concat(lines.map(line => line.replace(leadingSpaces, "")))
     .join("\n");
 };
@@ -50,6 +54,11 @@ const messages = {
 
   paramUndef({ data, template, loc }) {
     return `component:${data.root.$name} passed undefined to a helper
+      ${_getTplString(template, { data, loc })}
+    `;
+  },
+  badWatchParam({ data, template, loc, path }) {
+    return `component:${data.root.$name} could not find "${path}" to watch. If primitve wrap in quotes
       ${_getTplString(template, { data, loc })}
     `;
   },
