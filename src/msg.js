@@ -3,8 +3,19 @@ const styles = {
   log: "background: #324645; color:#c9faff; padding: .1em; font-weight: normal;",
 };
 
+const _getTplString = (template, { loc, data }) => {
+  const lines = template.split("\n").slice(loc.start.line - 1, loc.end.line);
+  const leadingSpaces = Array(lines[0].length - lines[0].trim().length).join(" ");
+  lines[0] = lines[0].substr(loc.start.column);
+  lines[lines.length - 1] = lines[lines.length - 1].substr(0, loc.end.column);
+  return ["", `component: ${data.root.$name}, line: ${loc.start.line}`, "============================================"]
+    .concat(lines.map(line => line.replace(leadingSpaces, "")))
+    .join("\n");
+};
+
 const _msg = (type, key, obj = {}, ...payloads) => {
   let str = messages[key](obj);
+
   if (["warn", "log"].includes(type)) {
     str = "%c " + str + " ";
     if (!window.ReBars.trace) return;
@@ -16,7 +27,7 @@ const _msg = (type, key, obj = {}, ...payloads) => {
       console.log(str, styles[type]);
     }
   } else {
-    if (payloads && window.rbs.trace) payloads.forEach(p => console.error(p));
+    payloads.forEach(p => console.error(p));
     throw new Error(str);
   }
 };
@@ -36,11 +47,19 @@ const messages = {
   patching: ({ name, path }) => `component:${name} patching ref Array "${path}"`,
   pathTrigger: ({ path, action, name }) => `component:${name} ${action} "${path}"`,
   triggered: ({ name, paths }) => `component:${name} data change "${paths}"`,
-  noComp: ({ name, cName }) => `component:${name} child component "${cName}" is not registered`,
+
+  paramUndef({ data, template, loc }) {
+    return `component:${data.root.$name} passed undefined to a helper
+      ${_getTplString(template, { data, loc })}
+    `;
+  },
+  noComp({ data, loc, template, cName }) {
+    return `component:${data.root.$name} child component "${cName}" is not registered
+      ${_getTplString(template, { data, loc })}
+    `;
+  },
   restrictedKey: ({ name, key }) =>
     `component:${name} cannot use restricted key "${key}" in your data as it's a helper`,
-  preRenderChange: ({ name, path }) =>
-    `component:${name} set '${path}' before being added to the DOM. Usually caused by side effects from a hook or a data function`,
   focusFail: ({ ref, name }) =>
     `component:${name} ref "${ref}" is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each`,
   notKeyed: ({ name, path }) =>
@@ -49,6 +68,7 @@ const messages = {
 
 export default {
   messages,
+  getStr: (key, obj) => messages[key](obj),
   warn: _msg.bind(null, "warn"),
   fail: _msg.bind(null, "throw"),
   log: _msg.bind(null, "log"),

@@ -1,12 +1,14 @@
 import Nav from "./nav.js";
 import Application from "./pages/application.js";
+import Components from "./pages/components.js";
 
 export default {
   template: /*html*/ `
   <div>
-    {{#watch "currentHash" tag="main" }}
+    {{#watch "mainComponent" tag="main" }}
       {{ component "nav" tag="div" class="nav" currentHash=currentHash }}
       <section>
+      {{ mainComponent }}
         {{#if (isComponent mainComponent) }}
           {{ component mainComponent }}
         {{else}}
@@ -18,7 +20,7 @@ export default {
   `,
 
   name: "DocsApp",
-  components: [Nav, Application],
+  components: [Nav, Application, Components],
 
   hooks: {
     created() {

@@ -36,9 +36,9 @@ function register(
     if (restricted.concat(Object.keys(helpers)).includes(key)) Msg.fail("restrictedKey", { name, key });
   });
 
-  Core.register(instance, { ...helpers, ...appStore.helpers });
+  Core.register(instance, { ...helpers, ...appStore.helpers }, template);
   Events.register(instance, methods);
-  Watch.register(instance);
+  Watch.register(instance, template);
 
   return {
     instance($props = {}) {

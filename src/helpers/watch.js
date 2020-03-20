@@ -1,43 +1,29 @@
 import Utils from "../utils/index.js";
-
-const _watch = (path, render, { root }) => {
-  const eId = Utils.randomId();
-  const store = Utils.getStorage(root.$_appId, root.$_componentId);
-
-  store.renders[eId] = {
-    path,
-    render,
-  };
-  return eId;
-};
+import Msg from "../msg.js";
 
 export default {
-  register(instance) {
-    const _getPath = (name, target, wildcard = true) => {
-      if (target === undefined) throw new Error(`have passed undefined to watch helper in component '${name}'`);
-      return typeof target === "object" ? `${target.ReBarsPath}${wildcard ? ".*" : ""}` : target;
-    };
-
-    // watch helpers and debug
-    instance.registerHelper("debug", function(obj, { data }) {
-      const render = () =>
-        `<pre class="debug">${JSON.stringify(
-          obj,
-          (key, val) => (typeof val === "function" ? val + "" : val),
-          2
-        )}</pre>`;
-      const eId = _watch(_getPath(data.root.$name, obj), render, data);
-      return new instance.SafeString(Utils.dom.wrapWatcher(eId, render()));
-    });
-
+  register(instance, template) {
     instance.registerHelper("watch", function(...args) {
-      const { fn, hash, data } = args.pop();
+      const { fn, hash, data, loc } = args.pop();
+
+      const _getPath = (target, wildcard = true) => {
+        if (target === undefined) Msg.fail("paramUndef", { template, loc, data });
+        return typeof target === "object" ? `${target.ReBarsPath}${wildcard ? ".*" : ""}` : target;
+      };
+
       const path = args
-        .map(arg => _getPath(data.root.$name, arg, false))
+        .map(arg => _getPath(arg, false))
         .join(".")
         .split(",");
 
-      const eId = _watch(path, () => fn(this), data);
+      const eId = Utils.randomId();
+      const store = Utils.getStorage(data.root.$_appId, data.root.$_componentId);
+
+      store.renders[eId] = {
+        path,
+        render: () => fn(this),
+      };
+
       return Utils.dom.wrapWatcher(eId, fn(this), hash);
     });
   },

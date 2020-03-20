@@ -1,6 +1,11 @@
 export default {
   template: /*html*/ `
   <div>
+              {{#watch sdfsdf }}
+              my butt
+              {{/watch}}
+
+
     {{#markdown}}
       A ReBars application is a collection of components rendered to a DOM element. You can have more than one app on a page if you desire.
 
@@ -23,8 +28,8 @@ export default {
 
       To start and app, there is minimal code on the page. You create a new ReBars app with an Object containing two keys.
 
-      - ^$el^ the Element that your app will be rendered into
-      - ^root^ to top level component in your app.
+      - ~~$el~~ the Element that your app will be rendered into
+      - ~~root~~ to top level component in your app.
     {{/markdown}}
   </div>
 `,
