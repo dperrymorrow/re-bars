@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>ReBars Docs: Application</title>
+    <link rel="stylesheet" href="../../css/index.css">
+  </head>
+
+  <body>
+
+    <main>
+      <nav id="docs-nav"></nav>
+      <section>
+        <div id="demo-app"></div>
+      </section>
+    </main>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+
+    <script type="module">
+      import ReBars from "../../js/rebars.min.js"
+      // import ReBars from "../../src/index.js";
+      import App from "../../js/index.js"
+      import DemoApp from "./app.js";
+
+      App();
+
+      ReBars.app({
+        $el: document.getElementById("demo-app"),
+        root: DemoApp,
+      });
+    </script>
+  </body>
+</html>

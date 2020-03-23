@@ -53,13 +53,12 @@ export default {
       : this.findByPath(window.ReBars, `apps.${appId}`);
   },
 
-  findByPath: (data, path, handle = true) => {
+  findByPath: (data, path) => {
     try {
       if (!path.includes(".")) return data[path];
       return path.split(".").reduce((pointer, seg) => pointer[seg], data);
     } catch (err) {
-      if (handle) Msg.fail("badPath", { path }, data);
-      return false;
+      Msg.fail("badPath", { path }, data);
     }
   },
 

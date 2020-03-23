@@ -16,8 +16,6 @@ export default {
         .join(".")
         .split(",");
 
-      if (!Utils.findByPath(this, path, false)) Msg.fail("badWatchParam", { data, path, loc, template });
-
       const eId = Utils.randomId();
       const store = Utils.getStorage(data.root.$_appId, data.root.$_componentId);
 

@@ -8,6 +8,7 @@
     "plugin:prettier/recommended"
   ],
   "globals": {
+    "Prism": "readonly",
     "ReBars": "readonly",
     "_": "readonly",
     "Handlebars": "readonly",

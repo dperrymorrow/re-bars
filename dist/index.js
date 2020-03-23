@@ -4,8 +4,23 @@
   (global = global || self, global.ReBars = factory());
 }(this, (function () { 'use strict';
 
+  const _getTplString = (template, { loc, data }) => {
+    const lines = template.split("\n").slice(loc.start.line - 1, loc.end.line);
+    const leadingSpaces = Array(lines[0].length - lines[0].trim().length).join(" ");
+    lines[0] = lines[0].substr(loc.start.column);
+    lines[lines.length - 1] = lines[lines.length - 1].substr(0, loc.end.column);
+    return [
+      "",
+      `component: ${data.root.$name}, template line: ${loc.start.line}`,
+      "============================================",
+    ]
+      .concat(lines.map(line => line.replace(leadingSpaces, "")))
+      .join("\n");
+  };
+
   const _msg = (type, key, obj = {}, ...payloads) => {
     let str = messages[key](obj);
+
     if (["warn", "log"].includes(type)) {
       str = "%c " + str + " ";
       if (!window.ReBars.trace) return;
@@ -13,7 +28,7 @@
         payloads.forEach(p => void 0);
       }
     } else {
-      if (payloads && window.rbs.trace) payloads.forEach(p => void 0);
+      payloads.forEach(p => void 0);
       throw new Error(str);
     }
   };
@@ -33,11 +48,24 @@
     patching: ({ name, path }) => `component:${name} patching ref Array "${path}"`,
     pathTrigger: ({ path, action, name }) => `component:${name} ${action} "${path}"`,
     triggered: ({ name, paths }) => `component:${name} data change "${paths}"`,
-    noComp: ({ name, cName }) => `component:${name} child component "${cName}" is not registered`,
+
+    paramUndef({ data, template, loc }) {
+      return `component:${data.root.$name} passed undefined to a helper
+      ${_getTplString(template, { data, loc })}
+    `;
+    },
+    badWatchParam({ data, template, loc, path }) {
+      return `component:${data.root.$name} could not find "${path}" to watch. If primitve wrap in quotes
+      ${_getTplString(template, { data, loc })}
+    `;
+    },
+    noComp({ data, loc, template, cName }) {
+      return `component:${data.root.$name} child component "${cName}" is not registered
+      ${_getTplString(template, { data, loc })}
+    `;
+    },
     restrictedKey: ({ name, key }) =>
       `component:${name} cannot use restricted key "${key}" in your data as it's a helper`,
-    preRenderChange: ({ name, path }) =>
-      `component:${name} set '${path}' before being added to the DOM. Usually caused by side effects from a hook or a data function`,
     focusFail: ({ ref, name }) =>
       `component:${name} ref "${ref}" is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each`,
     notKeyed: ({ name, path }) =>
@@ -46,6 +74,7 @@
 
   var Msg = {
     messages,
+    getStr: (key, obj) => messages[key](obj),
     warn: _msg.bind(null, "warn"),
     fail: _msg.bind(null, "throw"),
     log: _msg.bind(null, "log"),
@@ -176,6 +205,7 @@
 
     findByPath: (data, path) => {
       try {
+        if (!path.includes(".")) return data[path];
         return path.split(".").reduce((pointer, seg) => pointer[seg], data);
       } catch (err) {
         Msg.fail("badPath", { path }, data);
@@ -355,12 +385,15 @@
   };
 
   var Core = {
-    register(instance, helpers) {
+    register(instance, helpers, template) {
       Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
 
-      instance.registerHelper("component", function(cName, { hash: props, data }) {
+      instance.registerHelper("component", function(...args) {
+        const { hash: props, data, loc } = args.pop();
         const { cDefs } = Utils.getStorage(data.root.$_appId);
-        if (!cDefs[cName]) Msg.fail("noComp", { name: data.root.$name, cName });
+
+        const cName = args[0];
+        if (!cDefs[cName]) Msg.fail("noComp", { data, loc, template, cName });
         return new instance.SafeString(cDefs[cName].instance(props).render());
       });
 
@@ -370,6 +403,12 @@
       });
 
       instance.registerHelper("ref", key => new instance.SafeString(`data-rbs-ref="${key}"`));
+
+      instance.registerHelper("debug", (obj, { data, loc }) => {
+        if (obj === undefined) Msg.fail("paramUndef", { template, data, loc });
+        const parser = (key, val) => (typeof val === "function" ? val + "" : val);
+        return new instance.SafeString(`<pre class="debug">${JSON.stringify(obj, parser, 2)}</pre>`);
+      });
     },
   };
 
@@ -398,44 +437,29 @@
     },
   };
 
-  const _watch = (path, render, { root }) => {
-    const eId = Utils.randomId();
-    const store = Utils.getStorage(root.$_appId, root.$_componentId);
-
-    store.renders[eId] = {
-      path,
-      render,
-    };
-    return eId;
-  };
-
   var Watch = {
-    register(instance) {
-      const _getPath = (name, target, wildcard = true) => {
-        if (target === undefined) throw new Error(`have passed undefined to watch helper in component '${name}'`);
-        return typeof target === "object" ? `${target.ReBarsPath}${wildcard ? ".*" : ""}` : target;
-      };
-
-      // watch helpers and debug
-      instance.registerHelper("debug", function(obj, { data }) {
-        const render = () =>
-          `<pre class="debug">${JSON.stringify(
-          obj,
-          (key, val) => (typeof val === "function" ? val + "" : val),
-          2
-        )}</pre>`;
-        const eId = _watch(_getPath(data.root.$name, obj), render, data);
-        return new instance.SafeString(Utils.dom.wrapWatcher(eId, render()));
-      });
-
+    register(instance, template) {
       instance.registerHelper("watch", function(...args) {
-        const { fn, hash, data } = args.pop();
+        const { fn, hash, data, loc } = args.pop();
+
+        const _getPath = (target, wildcard = true) => {
+          if (target === undefined) Msg.fail("paramUndef", { template, loc, data });
+          return typeof target === "object" ? `${target.ReBarsPath}${wildcard ? ".*" : ""}` : target;
+        };
+
         const path = args
-          .map(arg => _getPath(data.root.$name, arg, false))
+          .map(arg => _getPath(arg, false))
           .join(".")
           .split(",");
 
-        const eId = _watch(path, () => fn(this), data);
+        const eId = Utils.randomId();
+        const store = Utils.getStorage(data.root.$_appId, data.root.$_componentId);
+
+        store.renders[eId] = {
+          path,
+          render: () => fn(this),
+        };
+
         return Utils.dom.wrapWatcher(eId, fn(this), hash);
       });
     },
@@ -472,9 +496,9 @@
       if (restricted.concat(Object.keys(helpers)).includes(key)) Msg.fail("restrictedKey", { name, key });
     });
 
-    Core.register(instance, { ...helpers, ...appStore.helpers });
+    Core.register(instance, { ...helpers, ...appStore.helpers }, template);
     Events.register(instance, methods);
-    Watch.register(instance);
+    Watch.register(instance, template);
 
     return {
       instance($props = {}) {

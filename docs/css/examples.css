@@ -19,12 +19,10 @@
   }
 }
 
-body {
-  background-color: var(--bg-color);
-  font-family: Helvetica, sans-serif;
-}
 
 #demo-app {
+  font-family: Helvetica, sans-serif;
+  background-color: var(--bg-color);
   color: var(--text-color);
   padding: var(--padding-large);
 }

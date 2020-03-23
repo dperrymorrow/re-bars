@@ -1,4 +1,4 @@
-import ReBars from "../../src/index.js";
+import ReBars from "./rebars.min.js";
 import Loader from "./loader.js";
 import Nav from "./nav.js";
 
