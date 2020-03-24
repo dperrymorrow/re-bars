@@ -69,15 +69,16 @@ p code, li code, h1 code {
 }
 
 blockquote {
-  border-left: 5px solid var(--bg-2);
+  border-left: 5px solid var(--highlight-dark);
+  color: var(--txt-dark);
   margin-left: 0;
   padding-left: var(--padding-sm);
   background-color: var(--highlight);
   margin: 0;
-  padding:  var(--padding-xs) var(--padding-xs);
+  padding:  var(--padding-xs) var(--padding-sm);
 }
 
-ul li {
+.markdown-body ul li {
   margin-bottom: var(--padding-xs);
 }
 

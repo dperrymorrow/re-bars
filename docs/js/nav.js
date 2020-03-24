@@ -86,6 +86,8 @@ export default {
               { label: "Template", path: `${this.prefix}component.html#template` },
               { label: "Name", path: `${this.prefix}component.html#name` },
               { label: "Data", path: `${this.prefix}component.html#data` },
+              { label: "Watchers", path: `${this.prefix}component.html#watchers` },
+              { label: "Hooks", path: `${this.prefix}component.html#hooks` },
               { label: "Methods", path: `${this.prefix}component.html#methods` },
             ],
           },

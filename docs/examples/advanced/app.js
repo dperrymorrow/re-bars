@@ -67,7 +67,7 @@ export default {
         sortDir: "asc",
       },
       header: {
-        title: "Todos",
+        title: "ReBars Todos",
         description: "Some things that need done",
       },
       todos: [

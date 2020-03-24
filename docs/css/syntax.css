@@ -106,7 +106,7 @@ pre[class*="language-"] {
 }
 
 .token.comment {
-  color: #546e7a;
+  color: #999;
 }
 
 .token.constant {

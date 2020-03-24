@@ -37,7 +37,7 @@ export default {
   helpers: {
     isChecked: val => (val ? "checked" : ""),
     timeAgo: val => {
-      return window.moment(new Date(val)).fromNow();
+      return window.moment(val).fromNow();
     },
   },
 

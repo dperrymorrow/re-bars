@@ -44,7 +44,7 @@
 
 .demo-app input[type="text"] {
   min-width: 200px;
-  background-color: var(--bg-2);
+  background-color: var(--bg-light);
 }
 
 .demo-app button {

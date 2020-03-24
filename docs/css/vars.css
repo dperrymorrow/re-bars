@@ -13,7 +13,8 @@
   --font-size: 18px;
   --border: #ccc;
   --border-radius: 4px;
-  --highlight: #fcffe0;
+  --highlight: #ebfbfe;
+  --highlight-dark: #8da1c9;
   --font-header: "Roboto Slab", Helvetica, Arial, "Lucida Grande", sans-serif;
   --font-body: "Merriweather", serif;
 }
