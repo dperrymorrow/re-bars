@@ -174,8 +174,7 @@ You can pass methods to child components as well, they will be merged into the c
 
 **Parent component:**
 
-```javascript
-template: `
+```html
 <ul>
   {{#watch friends }}
     {{#each friends as | friend | }}
@@ -183,14 +182,16 @@ template: `
         component "friend"
         friend=friend
         index=@index
-        deleteFriend=methods.deleteFriend
+        deleteFriend=$methods.deleteFriend
       }}
     {{/each}}
   {{/watch}}
-</ul>`,
+</ul>
+```
 
+```javascript
 methods: {
-  deleteFriend(event, idnex) {
+  deleteFriend(event, index) {
     this.friends.splice(index, 1)
   },
 }
@@ -199,19 +200,22 @@ methods: {
 **Child component:**
 
 ```html
-<div>
-  {{ friend.name }} {{ friend.hobby }}
-  <button {{ action "deleteFriend" index }}>Delete</button>
-</div>
+<button {{ method "remove" }}>Delete Joe</button>
 ```
-on clicking of the button, the friend would be deleted in the parent.
+
+```javascript
+methods: {
+  remove(event, name) {
+    this.$props.deleteFriend(this.$props.index)
+  }
+}
+```
+on clicking of the button, the friend would be deleted in the parent. Any watch blocks watching the `friends.*` or `friend[index]` would be re-rendered.
 
 ## The `{{debug}}` helper
 this helper allows you to view the state of your data in the template.
 
-> The debug helper watches by default, no watch block is needed.
-
-To output all data available to your template, use the Handlebars `.` reference.
+To output all data for your template, use the Handlebars `.` reference.
 
 ```html
 <!-- full debug -->

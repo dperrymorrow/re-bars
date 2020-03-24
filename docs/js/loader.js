@@ -16,7 +16,7 @@ export default async function($el) {
   });
 
   Array.from($el.querySelectorAll(".language-html")).forEach($code => {
-    $code.innerHTML = Prism.highlight($code.innerText, Prism.languages.javascript, "html");
+    $code.innerHTML = Prism.highlight($code.innerText, Prism.languages.javascript, "handlebars");
   });
 
   const hash = window.location.hash;

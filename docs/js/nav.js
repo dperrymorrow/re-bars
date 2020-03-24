@@ -91,7 +91,7 @@ export default {
           },
           {
             label: "ReBars Helpers",
-            path: "helpers.html",
+            path: `${this.prefix}helpers.html`,
             pages: [
               { label: "watch", path: `${this.prefix}helpers.html#the-watch-helper` },
               { label: "ref", path: `${this.prefix}helpers.html#the-ref-helper` },
