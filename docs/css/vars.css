@@ -1,0 +1,19 @@
+:root {
+  --padding-sm: 20px;
+  --padding-lg: 50px;
+  --padding-xs: 10px;
+  --bg: #f8f8f8;
+  --bg-2: #dedede;
+  --bg-light: #fff;
+  --txt-link: #d61e05;
+  --bg-link: #f3dad6;
+  --txt: #595959;
+  --txt-dark: #595959;
+  --txt-light: #777;
+  --font-size: 18px;
+  --border: #ccc;
+  --border-radius: 4px;
+  --highlight: #fcffe0;
+  --font-header: "Roboto Slab", Helvetica, Arial, "Lucida Grande", sans-serif;
+  --font-body: "Merriweather", serif;
+}

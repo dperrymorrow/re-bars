@@ -1,64 +1,28 @@
-
-:root {
-  --padding-large: 50px;
-  --bg-color: #efefef;
-  --bg-color-2: #ffffff;
-  --txt-color: #333;
-  --txt-color-light: #777;
-  --border-color: #ccc;
-}
-
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-color: #333;
-    --bg-color-2: #444;
-    --txt-color: #999;
-    --txt-color-light: #777;
-    --border-color: #888;
-  }
-}
-
-
-#demo-app {
+.demo-app {
   font-family: Helvetica, sans-serif;
-  background-color: var(--bg-color);
   color: var(--text-color);
-  padding: var(--padding-large);
+  padding: var(--padding-lg);
 }
 
-#demo-app * {
-  color: var(--txt-color);
+.demo-app * {
+  color: var(--txt);
   animation: highlight .2s linear;
 }
 
-#demo-app .header-container {
-  margin-bottom: var(--padding-large);
+.demo-app .header-container {
+  margin-bottom: var(--padding-lg);
 }
 
-#demo-app .header-container label {
+.demo-app .header-container label {
   text-transform: uppercase;
   font-weight: bold;
   font-size: 11px;
   margin-right: 6px;
 }
 
-#demo-app h1 {
-  color: var(--txt-color);
-  font-weight: 300;
-  letter-spacing: -.02em;
-  margin: 0 0 10px 0;
-}
-
-#demo-app h1 small {
-  font-weight: 100;
-  color: var(--txt-color-light);
-  letter-spacing: -.02em;
-}
-
-#demo-app .filters {
-  background-color: var(--bg-color-2);;
-  border: 1px solid var(--border-color);
+.demo-app .filters {
+  background-color: var(--bg-2);
+  border: 1px solid var(--border);
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
   padding: 10px 15px;
@@ -67,77 +31,78 @@
   justify-content: space-between;
 }
 
-#demo-app input[type="text"], #demo-app button, #demo-app select {
-  background-color: var(--bg-color);
+.demo-app input[type="text"], .demo-app button, .demo-app select {
+  background-color: var(--bg);
   padding: 5px 10px;
   box-sizing: border-box;
   border-radius: 5px;
   height: 30px;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
   font-size: 12px;
+  font-family: var(--font-header);
 }
 
-#demo-app input[type="text"] {
+.demo-app input[type="text"] {
   min-width: 200px;
-  background-color: var(--bg-color-2);
+  background-color: var(--bg-2);
 }
 
-#demo-app button {
-  color: var(--txt-color);
+.demo-app button {
+  color: var(--txt);
   text-transform: uppercase;
   font-weight: bold;
   cursor: pointer;
 }
 
-#demo-app button:disabled {
+.demo-app button:disabled {
   cursor: not-allowed;
-  color: var(--txt-color-light);
+  color: var(--txt-light);
   opacity: .6;
 }
 
-#demo-app ul {
+.demo-app ul {
   padding: 0;
   margin: 0 0 20px 0;
   list-style: none;
   overflow: hidden;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border);
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
 }
 
-#demo-app ul.simple {
+.demo-app ul.simple {
   border-radius: 10px;
 }
 
-#demo-app ul li {
-  border-bottom: 1px solid var(--border-color);
-  background-color: var(--bg-color-2);
+.demo-app ul li {
+  border-bottom: 1px solid var(--border);
+  background-color: var(--bg-2);
   padding: 12px 15px;
 }
 
-#demo-app ul li:nth-child(odd) {
-  background-color: var(--bg-color);
+.demo-app ul li:nth-child(odd) {
+  background-color: var(--bg);
 }
 
-#demo-app ul li:last-child {
+.demo-app ul li:last-child {
   border: none;
 }
 
-#demo-app ul li .todo {
+.demo-app ul li .todo {
   align-items: center;
   justify-content: space-between;
   display: flex;
 }
 
-#demo-app ul li .todo .date {
+.demo-app ul li .todo .date {
   font-size: .9em;
   margin-right: 10px;
 }
 
 pre.debug {
-  background-color: var(--bg-color);
-  border: 1px solid var(--border-color);
-  color: var(--bg-color-2);
+  background-color: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--bg-2);
   font-family: Monaco, monospace;
   padding: 1rem;
 }

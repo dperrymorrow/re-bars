@@ -85,7 +85,7 @@ export default {
             pages: [
               { label: "Template", path: `${this.prefix}component.html#template` },
               { label: "Name", path: `${this.prefix}component.html#name` },
-              { label: "Date", path: `${this.prefix}component.html#data` },
+              { label: "Data", path: `${this.prefix}component.html#data` },
               { label: "Methods", path: `${this.prefix}component.html#methods` },
             ],
           },

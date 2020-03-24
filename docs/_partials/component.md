@@ -1,7 +1,5 @@
-# ReBars Components
-Components are where everything happens. Each component has it's own `Handlebars.instance` so their helpers are isolated from other components/applications.
 
-### An component's properties:
+
 ```javascript
 export default {
   template: `<div></div>`, // your Handlebars template
@@ -15,10 +13,15 @@ export default {
 ```
 
 ## Template:
-The template is the Handlebars template that will be rendered. What is defined as the return from your `data()` function will be the root scope of the template when rendering. Any Handlebars helpers methods you define in `helpers` will be automatically added to the instance rendering the component, and be available for use. ReBars includes several helpers as well.
+The template is the Handlebars template that will be rendered. What is defined as the return from your `data()` function will be the root scope of the template when rendering.
+
+
+## Helpers
+
+Any methods you define under Handlebars helpers methods you define in `helpers` will be automatically added to the instance rendering the component, and be available for use. ReBars includes several helpers as well.
 
 ## Name
-Each component must define a name. This is is the string you will use to render components using the [`{{component}}`](helpers.html#component) helper within your template.
+Each component must define a name. This is is the string you will use to render components using the [component](helpers.html#the-component-helper) helper within your template.
 
 ## Data
 The data for the component. Must be a function that retuns an Object.
@@ -54,7 +57,7 @@ data() {
 ```
 
 ## Methods
-Methods defined in a component are avalable for use with the [`{{method}}`](helpers.html#method) helper, or can be called from within another method.
+Methods defined in a component are avalable for use with the [method](helpers.html#method) helper, or can be called from within another method.
 
 > all functions are bound to the component `this`
 

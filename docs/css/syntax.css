@@ -1,5 +1,6 @@
-pre, code {
-  background-color: #333;
+pre {
+  background-color: #303845;
+  border-radius: 8px;
 }
 
 code[class*="language-"],
@@ -9,16 +10,14 @@ pre[class*="language-"] {
   word-spacing: normal;
   word-break: normal;
   word-wrap: normal;
-  color: #c3cee3;
-  background: #263238;
+  color: #d9d9d9;
+  background: transparent;
   font-family: Monaco, Mono, monospace;
   font-size: 1em;
   line-height: 1.5em;
-
   -moz-tab-size: 4;
   -o-tab-size: 4;
   tab-size: 4;
-
   -webkit-hyphens: none;
   -moz-hyphens: none;
   -ms-hyphens: none;
