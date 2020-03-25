@@ -1,20 +1,22 @@
 :root {
   --padding-sm: 20px;
+  --padding-md: 30px;
   --padding-lg: 50px;
   --padding-xs: 10px;
-  --bg: #f8f8f8;
-  --bg-2: #dedede;
+  --bg: #EBF5F5;
+  --bg-2: #E0EDED;
   --bg-light: #fff;
-  --txt-link: #d61e05;
-  --bg-link: #f3dad6;
-  --txt: #595959;
-  --txt-dark: #595959;
+  --link-txt: #B11B06;
+  --link-bg: #FFEBE7;
+  --txt: #343D44;
+  --txt-dark: #242C2F;
   --txt-light: #777;
-  --font-size: 18px;
-  --border: #ccc;
+  --font-size: 17px;
+  --border: #C5D9DE;
   --border-radius: 4px;
-  --highlight: #ebfbfe;
-  --highlight-dark: #8da1c9;
+  --highlight-bg: #FEFFF0;
+  --highlight-bg-dark: #9F986C;
+  --highlight-txt: #2B2B21;
   --font-header: "Roboto Slab", Helvetica, Arial, "Lucida Grande", sans-serif;
   --font-body: "Merriweather", serif;
 }

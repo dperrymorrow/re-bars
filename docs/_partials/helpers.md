@@ -1,12 +1,8 @@
-# ReBars built in helpers
 
-ReBars comes with a few very powerfull helpers. Of course you can add your own to any component or at the application level just as you would with any Handlebars application.
 
 ## The `{{#watch}}` helper
 
 The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.
-
-Suppose we can a component with data as such.
 
 ```javascript
 data() {

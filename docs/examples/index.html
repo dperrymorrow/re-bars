@@ -11,11 +11,16 @@
     <main>
       <nav id="docs-nav"></nav>
       <section>
-        <div id="demo-app" class="demo-app content"></div>
+        <div class="content">
+          <div id="demo-app" class="demo-app"></div>
+          <div data-src="app.js"></div>
+        </div>
       </section>
     </main>
 
+    <script src="//cdnjs.cloudflare.com/ajax/libs/marked/0.8.1/marked.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/prism/1.19.0/prism.min.js" data-manual></script>
 
     <script type="module">
       import ReBars from "../js/rebars.min.js"

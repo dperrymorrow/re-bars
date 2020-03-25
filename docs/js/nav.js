@@ -1,7 +1,7 @@
 export default {
   template: /*html*/ `
-    <ul class="main-nav">
-      {{#watch "currentHash" }}
+    <div>
+      {{#watch "currentHash" tag="ul" class="side-bar-nav" }}
         {{#each pages as |page| }}
           <li>
             <a class="{{ active page.path }}" href="{{ page.path }}">
@@ -21,7 +21,7 @@ export default {
           </li>
         {{/each}}
       {{/watch}}
-    </ul>
+    </div>
   `,
 
   name: "nav",

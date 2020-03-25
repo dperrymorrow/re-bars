@@ -6,7 +6,8 @@ export default async function($el) {
 
   if (src.endsWith(".md")) {
     $el.innerHTML = window.marked(txt);
-    $el.classList.add("markdown-body");
+  } else if (src.endsWith(".js")) {
+    $el.innerHTML = window.marked("```javascript\n" + txt + "```");
   } else {
     $el.innerHTML = txt;
   }
@@ -16,7 +17,7 @@ export default async function($el) {
   });
 
   Array.from($el.querySelectorAll(".language-html")).forEach($code => {
-    $code.innerHTML = Prism.highlight($code.innerText, Prism.languages.javascript, "handlebars");
+    $code.innerHTML = Prism.highlight($code.innerText, Prism.languages.javascript, "html");
   });
 
   const hash = window.location.hash;

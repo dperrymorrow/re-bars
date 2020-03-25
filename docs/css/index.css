@@ -14,6 +14,8 @@ body, html {
   font-size: var(--font-size);
 }
 
+/* typography and headers */
+
 h1, h2, h3, h4, h5, h6 {
   color: var(--txt-dark);
   font-family: var(--font-header);
@@ -28,7 +30,6 @@ h1 {
 h2 {
   font-size: 1.8em;
   margin-bottom: var(--padding-sm);
-  padding-bottom: var(--padding-xs);
   border-bottom: 1px solid var(--border);
 }
 
@@ -43,57 +44,22 @@ h1 small {
   margin-top: var(--padding-sm);
 }
 
-a {
-  color: var(--txt-link);
-  background-color: var(--bg-link);
-  padding: 0 .2em;
-}
-
 main {
   display: flex;
   height: 100%;
   flex-direction: row-reverse;
 }
 
-p {
-  line-height: 1.8em;
-  margin-top: var(--padding-sm);
-}
-
-p code, li code, h1 code {
-  line-height: 1em;
-  background-color: var(--bg-light);
-  padding: 0 .2em;
-  color: var(--txt-dark);
-  border: 1px solid var(--border);
-}
-
-blockquote {
-  border-left: 5px solid var(--highlight-dark);
-  color: var(--txt-dark);
-  margin-left: 0;
-  padding-left: var(--padding-sm);
-  background-color: var(--highlight);
-  margin: 0;
-  padding:  var(--padding-xs) var(--padding-sm);
-}
-
-.markdown-body ul li {
-  margin-bottom: var(--padding-xs);
-}
-
-blockquote p {
-  line-height: 1.5em;
-  margin: 0;
-  padding: 0;
-}
-
 section {
   flex: 1;
-  padding-bottom: var(--padding-lg);
+  overflow: auto;
+  height: 100%;
 }
 
+/* content styling */
+
 .content {
+  margin-bottom: var(--padding-lg);
   box-sizing: border-box;
   min-width: 200px;
   max-width: 980px;
@@ -102,51 +68,111 @@ section {
   padding-bottom: var(--padding-lg);
 }
 
-.markdown-body pre {
+.content ul li {
+  margin-bottom: var(--padding-xs);
+}
+
+.content blockquote p {
+  line-height: 1.7em;
+  margin: 0;
+  padding: 0;
+}
+
+.content a {
+  color: var(--link-txt);
+  background-color: var(--link-bg);
+  padding: 0 .2em;
+}
+
+.content pre {
   background-color: #444;
   font-size: 1em;
   color: var(--txt);
   font-family: Monaco, monospace;
   padding: var(--padding-sm);
+  margin: 0;
+  border-top: 2px solid var(--bg);
 }
 
-nav {
-  border-left: 1px solid var(--border);
-  position: sticky;
-  top: 0;
+.content p {
+  line-height: 1.8em;
+  margin-top: var(--padding-sm);
+}
+
+.content p code, .content li code, .content h1 code {
+  line-height: 1em;
+  background-color: white;
+  padding: .1em .25em;
+  color: var(--txt-dark);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--highlight-txt);
+}
+
+.content blockquote {
+  /* border: 2px solid white; */
+  border-left: 5px solid var(--highlight-bg-dark);
+  color: var(--highlight-txt);
+  margin: var(--padding-md) 0;
+  border-radius: var(--border-radius);
+  padding: var(--padding-sm) var(--padding-md);
+  font-size: 1.15em;
+  background-color: var(--highlight-bg);
+  box-shadow: -2px 2px 2px var(--highlight-bg-dark);
+  line-height: 300%;
+}
+
+/* nav */
+
+#nav-container {
   background-color: var(--bg-2);
-  height: 100%;
+  height: 100vh;
+  overflow: auto;
+  border-left: 1px solid var(--border);
+}
+
+.side-bar-nav {
   padding: var(--padding-sm) var(--padding-lg);
 }
 
-nav ul {
-  padding: 0;
-}
-
-nav ul, nav ul li {
+.side-bar-nav ul, nav ul li {
   list-style: none;
-  padding: .2em;
 }
 
-/* nav ul li {
-  border-bottom: 1px solid black;
-} */
-
-nav ul li > ul {
-  padding-left: var(--padding-sm);
+.side-bar-nav a {
+  color: var(--txt-dark);
+  text-decoration: none;
+  padding: .2em .4em;
+  border-radius: var(--border-radius);
 }
 
-.main-nav {
-  position: sticky;
-  top: var(--padding-sm);
+.side-bar-nav > li {
+  margin-top: var(--padding-sm);
 }
 
-nav ul li a.active {
-  color: red;
+.side-bar-nav > li > a {
+  font-family: var(--font-header);
+  font-size: .9em;
+  text-transform: uppercase;
+}
+
+.side-bar-nav li > ul {
+  padding-left: var(--padding-xs);
+  font-family: var(--font-body);
+  text-transform: capitalize;
+  margin-top: var(--padding-xs);
+}
+
+.side-bar-nav li > ul li {
+  margin: .4em 0;
+}
+
+.side-bar-nav a.active {
+  color: var(--txt-dark);
+  /* font-weight: bold; */
+  background-color: var(--highlight-bg);
 }
 
 @media (max-width: 767px) {
-  .markdown-body {
-    top: var(--padding-sm);
-  }
+  /* do stuff with .content here... */
 }

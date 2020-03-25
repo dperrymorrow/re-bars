@@ -139,12 +139,11 @@ hooks: {
 
 ## Helpers
 
-Any methods you define under Handlebars helpers methods you define in `helpers` will be automatically added to the instance rendering the component, and be available for use. ReBars includes several helpers as well.
+Any methods you define under Handlebars helpers methods you define in `helpers` will be automatically added to the instance rendering the component, and be available for use. ReBars includes several [helpers](helpers.html) as well.
 
 ```html
 <input type="checkbox" {{ isChecked someBoolean }} />
 ```
-
 ```javascript
 helpers: {
   isChecked: val => (val ? "checked" : ""),
