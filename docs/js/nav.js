@@ -30,6 +30,7 @@ export default {
     active(val, { data }) {
       const page = window.location.pathname.split("/docs/")[1];
       const hash = window.location.hash;
+      // console.log(page, hash, val.replace(data.root.prefix, ""));
       return [page, `${page}${hash}`].includes(val.replace(data.root.prefix, "")) ? "active" : "";
     },
   },
@@ -58,7 +59,7 @@ export default {
   data() {
     return {
       prefix: "",
-      currentHash: "application",
+      currentHash: "",
       pages() {
         return [
           {
@@ -70,7 +71,7 @@ export default {
             label: "Examples",
             path: `${this.prefix}examples/`,
             pages: [
-              { label: "Simple", path: `${this.prefix}examples/index.html` },
+              { label: "Simple", path: `${this.prefix}examples/` },
               { label: "Advanced", path: `${this.prefix}examples/advanced/index.html` },
             ],
           },

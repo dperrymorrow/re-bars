@@ -58,7 +58,7 @@ section {
 
 /* content styling */
 
-.content {
+.content  {
   margin-bottom: var(--padding-lg);
   box-sizing: border-box;
   min-width: 200px;
@@ -68,23 +68,23 @@ section {
   padding-bottom: var(--padding-lg);
 }
 
-.content ul li {
+.markdown-content ul li {
   margin-bottom: var(--padding-xs);
 }
 
-.content blockquote p {
+.markdown-content  blockquote p {
   line-height: 1.7em;
   margin: 0;
   padding: 0;
 }
 
-.content a {
+.markdown-content  a {
   color: var(--link-txt);
   background-color: var(--link-bg);
   padding: 0 .2em;
 }
 
-.content pre {
+.markdown-content  pre {
   background-color: #444;
   font-size: 1em;
   color: var(--txt);
@@ -94,12 +94,12 @@ section {
   border-top: 2px solid var(--bg);
 }
 
-.content p {
+.markdown-content  p {
   line-height: 1.8em;
   margin-top: var(--padding-sm);
 }
 
-.content p code, .content li code, .content h1 code {
+.markdown-content p code, .content li code, .content h1 code {
   line-height: 1em;
   background-color: white;
   padding: .1em .25em;
@@ -144,6 +144,8 @@ section {
   text-decoration: none;
   padding: .2em .4em;
   border-radius: var(--border-radius);
+  background: transparent;
+  transition: all .3s ease-out;
 }
 
 .side-bar-nav > li {
@@ -168,9 +170,13 @@ section {
 }
 
 .side-bar-nav a.active {
-  color: var(--txt-dark);
-  /* font-weight: bold; */
-  background-color: var(--highlight-bg);
+  color: var(--link-txt);
+  background-color: var(--link-bg);
+}
+
+.side-bar-nav a:hover {
+  color: var(--link-txt);
+  text-decoration: underline;
 }
 
 @media (max-width: 767px) {

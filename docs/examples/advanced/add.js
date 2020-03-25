@@ -5,7 +5,7 @@ export default {
       {{#if isAdding }}
         <form>
           {{#watch "newName" }}
-            <h1>{{ newName }}</h1>
+            <h3>{{ newName }}</h3>
             <input type="text" {{ bound "newName" }} placeholder="the new todo" />
           {{/watch}}
 

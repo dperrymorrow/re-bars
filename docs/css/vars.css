@@ -3,11 +3,11 @@
   --padding-md: 30px;
   --padding-lg: 50px;
   --padding-xs: 10px;
-  --bg: #EBF5F5;
+  --bg: rgb(244,251,251);
   --bg-2: #E0EDED;
   --bg-light: #fff;
-  --link-txt: #B11B06;
-  --link-bg: #FFEBE7;
+  --link-txt: #780886;
+  --link-bg: #FEE7FF;
   --txt: #343D44;
   --txt-dark: #242C2F;
   --txt-light: #777;

@@ -73,7 +73,11 @@
   border-radius: 10px;
 }
 
+.demo-app ul, .demo-app li {
+}
+
 .demo-app ul li {
+  margin-bottom: 0;
   border-bottom: 1px solid var(--border);
   background-color: var(--bg-2);
   padding: 12px 15px;
