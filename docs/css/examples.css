@@ -1,6 +1,13 @@
 .demo-app {
-  font-family: Helvetica, sans-serif;
   color: var(--text-color);
+  margin: var(--padding-md) 0;
+}
+
+.demo-app.demo-inline {
+  padding: var(--padding-md);
+  border-radius: var(--border-radius);
+  border: 10px solid var(--border);
+  background-color: white;
 }
 
 .demo-app * {

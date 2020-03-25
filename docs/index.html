@@ -11,18 +11,36 @@
     <main>
       <nav id="nav-container"></nav>
       <section>
-        <div data-src="_partials/introduction.md" class="content"></div>
+        <div class="content">
+          <h1>
+            ReBars
+            <small>
+              A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a Virtial DOM.
+            </small>
+          </h1>
+          <div data-src="_partials/introduction.md"></div>
+          <div id="counter-demo" class="demo-app demo-inline"></div>
+          <div data-src="examples/counter.js" data-syntax="javascript"></div>
+        </div>
       </section>
     </main>
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/marked/0.8.1/marked.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/prism/1.19.0/components/prism-handlebars.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/prism/1.19.0/prism.min.js" data-manual></script>
 
     <script type="module">
+      import Counter from "./examples/counter.js";
+      import ReBars from "./js/rebars.min.js";
       import App from "./js/index.js"
+
       App();
+
+      ReBars.app({
+        $el: document.getElementById("counter-demo"),
+        root: Counter,
+      });
+
     </script>
 
   </body>

@@ -64,7 +64,7 @@ export default {
         return [
           {
             label: "ReBars Introduction",
-            path: `${this.prefix}`,
+            path: `${this.prefix}index.html`,
           },
 
           {
@@ -79,6 +79,10 @@ export default {
           {
             label: "A ReBars Application",
             path: `${this.prefix}application.html`,
+            pages: [
+              { label: "Global Helpers", path: `${this.prefix}application.html#global-helpers` },
+              { label: "Handlebars", path: `${this.prefix}application.html#handlebars` },
+            ],
           },
           {
             label: "A ReBars Component",
