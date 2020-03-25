@@ -41,7 +41,6 @@ h1 small {
   font-size: .34em;
   letter-spacing: .001em;
   line-height: 1.4em;
-  margin-top: var(--padding-sm);
 }
 
 main {
@@ -105,7 +104,7 @@ section {
   padding: .1em .25em;
   color: var(--txt-dark);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius:var(--border-radius);
   color: var(--highlight-txt);
 }
 

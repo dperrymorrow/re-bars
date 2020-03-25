@@ -3,15 +3,18 @@
   margin: var(--padding-md) 0;
 }
 
-.demo-app.demo-inline {
+.demo-app {
   padding: var(--padding-md);
   border-radius: var(--border-radius);
   border: 10px solid var(--border);
   background-color: white;
 }
 
+.demo-app h1 {
+  margin-top: 0;
+}
+
 .demo-app * {
-  color: var(--txt);
   animation: highlight .2s linear;
 }
 
@@ -21,9 +24,13 @@
 
 .demo-app .header-container label {
   text-transform: uppercase;
-  font-weight: bold;
-  font-size: 11px;
-  margin-right: 6px;
+  font-family: var(--font-header);
+  font-size: .8em;
+  margin-right: var(--padding-xs);
+}
+
+.demo-app label input[type="text"] {
+  margin-left: var(--padding-xs);
 }
 
 .demo-app .filters {
@@ -39,10 +46,9 @@
 
 .demo-app input[type="text"], .demo-app button, .demo-app select {
   background-color: var(--bg);
-  padding: 5px 10px;
+  padding: var(--padding-xs) var(--padding-sm);
   box-sizing: border-box;
-  border-radius: 5px;
-  height: 30px;
+  border-radius: var(--border-radius);
   border: 1px solid var(--border);
   font-size: 12px;
   font-family: var(--font-header);
@@ -51,6 +57,7 @@
 .demo-app input[type="text"] {
   min-width: 200px;
   background-color: var(--bg-light);
+  font-family: var(--font-body);
 }
 
 .demo-app button {
@@ -77,10 +84,7 @@
 }
 
 .demo-app ul.simple {
-  border-radius: 10px;
-}
-
-.demo-app ul, .demo-app li {
+  border-radius: var(--border-radius);
 }
 
 .demo-app ul li {

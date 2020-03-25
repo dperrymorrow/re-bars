@@ -1,6 +1,6 @@
 
 
-## The `{{#watch}}` helper
+## The {{#watch}} helper
 
 The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.
 
@@ -86,7 +86,7 @@ If you are watching inside a loop, you can target the specific object and key by
 </ul>
 ```
 
-## The `{{ref}}` helper
+## The {{ref}} helper
 ReBars comes with a `{{ref}}` helper built in. This gives you the ability to save a reference to an element. This also gives a key for Array loop items so that the Array can be patched instead of re-rendered entirely.
 
 - takes one param, the `String` for the reference
@@ -110,7 +110,7 @@ methods: {
 }
 ```
 
-## The `{{bound}}` helper
+## The {{bound}} helper
 The `{{bound}` helper is used on input elements such as `<input>` or `<textarea>` elements. The parameter passed will sync the value attribute to the value, and on `input` event update the value.
 
 ```html
@@ -125,7 +125,7 @@ You can pass in a ref as a prop to this helper should you need something more sp
 <input type="text" {{ bound "name.first" ref="firstName" }} />
 ```
 
-## The `{{method}}` helper
+## The {{method}} helper
 This allows you to bind your component's methods to events in your template.
 
 ```html
@@ -146,7 +146,7 @@ methods: {
 - the first param is the methodName separated by `:eventType`, if none is specified `click` will be the event
 - you can add as many other parameters as you would like to your method call
 
-## The `{{component}}` helper
+## The {{component}} helper
 This allows you to render child components from withing the compnent you are in. It takes one parameter, the name of the component to render. This will render a registered component to the DOM of the parent component.
 
 > The "name" of the component is the name property in the component's definition. Not the name you imported it as.
@@ -208,7 +208,7 @@ methods: {
 ```
 on clicking of the button, the friend would be deleted in the parent. Any watch blocks watching the `friends.*` or `friend[index]` would be re-rendered.
 
-## The `{{debug}}` helper
+## The {{debug}} helper
 this helper allows you to view the state of your data in the template.
 
 To output all data for your template, use the Handlebars `.` reference.
