@@ -47,14 +47,14 @@ data() {
   }
 }
 ```
-```handlebars
+```html
 <p>{{ fullName }}</p>
 ```
 
 ## Methods
 Methods defined in a component are avalable for use with the [method](helpers.html#method) helper, or can be called from within another method.
 
-```handlebars
+```html
 <button {{ method "save:click" "fred" }}>save</button>
 ```
 
@@ -141,7 +141,7 @@ hooks: {
 
 Any methods you define under Handlebars helpers methods you define in `helpers` will be automatically added to the instance rendering the component, and be available for use. ReBars includes several [helpers](helpers.html) as well.
 
-```handlebars
+```html
 <input type="checkbox" {{ isChecked someBoolean }} />
 ```
 ```javascript

@@ -1,36 +1,34 @@
+const filters = {
+  rebars($el, content) {
+    const regex = /\/\*html\*\/ `([^]+)`/;
+    const tpl = content.match(regex)[1];
+
+    const [start, end] = content.split(tpl);
+
+    let output = "```javascript\n" + start + "\n```\n";
+    output += "```handlebars\n" + tpl.replace("\n", "") + "\n```\n";
+    output += "```javascript\n  " + end + "\n```\n";
+    $el.innerHTML = window.marked(output);
+    $el.classList.add("rebars-component");
+  },
+
+  markdown($el, content) {
+    $el.innerHTML = window.marked(content);
+  },
+};
+
 async function _loadPartial($el) {
   const src = $el.dataset.src;
-
+  const filter = $el.dataset.filter;
   const res = await fetch(src);
   const txt = await res.text();
-  const classes = [];
 
-  if (src.endsWith(".md")) {
-    $el.innerHTML = window.marked(txt);
-    classes.push("markdown-content");
-  } else if (src.endsWith(".js")) {
-    $el.innerHTML = window.marked("```javascript\n" + txt + "```");
-    classes.push("markdown-content");
-  } else {
-    $el.innerHTML = txt;
-  }
-
-  $el.classList.add(classes);
-
-  const hash = window.location.hash;
-  if (hash) {
-    $el = document.getElementById(hash.replace("#", ""));
-
-    if ($el) {
-      $el.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-      });
-    }
-  }
+  if (filter) filters[filter]($el, txt);
+  else $el.innerHTML = txt;
 }
 
 export default {
+  filters,
   addScripts(srcs) {
     return Promise.all(
       srcs.map(src => {
@@ -51,5 +49,17 @@ export default {
         return _loadPartial($el);
       })
     );
+
+    const hash = window.location.hash;
+    if (hash) {
+      const $el = document.getElementById(hash.replace("#", ""));
+
+      if ($el) {
+        $el.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
+      }
+    }
   },
 };

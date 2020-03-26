@@ -8,11 +8,11 @@ ReBars is really just Handlebars with some built in helpers and the notion of [c
 
 > If you have used Handlebars, you already know ReBars
 
-```handlebars
+```html
 <div>
-{{#watch "name.first" }}
-  {{ name.first }}
-{{/watch}}
+  {{#watch "name.first" }}
+    {{ name.first }}
+  {{/watch}}
 </div>
 ```
 
