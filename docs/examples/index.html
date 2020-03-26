@@ -7,7 +7,6 @@
   </head>
 
   <body>
-
     <main>
       <nav id="nav-container"></nav>
       <section>
@@ -18,22 +17,19 @@
       </section>
     </main>
 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/marked/0.8.1/marked.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/prism/1.19.0/prism.min.js" data-manual></script>
-
     <script type="module">
       import ReBars from "../js/rebars.min.js"
       // import ReBars from "../../src/index.js";
       import App from "../js/index.js"
       import DemoApp from "./app.js";
 
-      App();
-
-      ReBars.app( {
-        $el: document.getElementById("demo-app"),
-        root: DemoApp
-      });
+      (async function() {
+        await App();
+        ReBars.app( {
+          $el: document.getElementById("demo-app"),
+          root: DemoApp
+        });
+      }());
     </script>
   </body>
 </html>

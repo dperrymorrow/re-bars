@@ -8,10 +8,12 @@ ReBars is really just Handlebars with some built in helpers and the notion of [c
 
 > If you have used Handlebars, you already know ReBars
 
-```html
+```handlebars
+<div>
 {{#watch "name.first" }}
   {{ name.first }}
 {{/watch}}
+</div>
 ```
 
 Each time the value passed to watch is changed, *just* that Handlebars block will re-render. No Virtial DOM patching, no re-render of entire template. The block function from the helper is stored at first render, and simply invoked again each time a value changes.

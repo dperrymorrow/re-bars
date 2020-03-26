@@ -23,7 +23,7 @@ data() {
 Watch allows you to re-render a block of your template on change.
 Watch takes an argument of what property to watch. The argument can be a string or an object.
 
-```html
+```handlebars
 {{#watch name }}
   My name is {{ name.first }} {{ name.last }}.
 {{/watch}}
@@ -44,7 +44,7 @@ Each `{{watch}}` block gets wrapped in a span with an id which is stored to reme
 
 As a solution you can add a tag, class id, any attribute you want to the watch block.
 
-```html
+```handlebars
 {{#watch name tag="p" class="intro" id="intro-p" }}
   {{ name.first }} {{ name.last }}
 {{/watch}}
@@ -60,7 +60,7 @@ As a solution you can add a tag, class id, any attribute you want to the watch b
 
 > Be sure to add a `{{ ref }}` to each item enabling ReBars to only re-render changed items. _Each ref must be unique_
 
-```html
+```handlebars
 <ul>
   {{#watch friends }}
     {{#each friends as | friend | }}
@@ -74,7 +74,7 @@ As a solution you can add a tag, class id, any attribute you want to the watch b
 
 If you are watching inside a loop, you can target the specific object and key by passing further arguments. The example below will only trigger a re-render on that `friend.name` _(the item in the loop)_ change
 
-```html
+```handlebars
 <ul>
   {{#each friends as | friend | }}
     <li>
@@ -93,7 +93,7 @@ ReBars comes with a `{{ref}}` helper built in. This gives you the ability to sav
 
 > The ref helper is also needed on any input or other elements that need focused restored after a re-render.
 
-```html
+```handlebars
 <div>
   <h1 {{ ref "header" }}>Header</h1>
 </div>
@@ -113,7 +113,7 @@ methods: {
 ## The {{bound}} helper
 The `{{bound}` helper is used on input elements such as `<input>` or `<textarea>` elements. The parameter passed will sync the value attribute to the value, and on `input` event update the value.
 
-```html
+```handlebars
 <input type="text" {{ bound "name.first" }} />
 ```
 
@@ -121,14 +121,14 @@ an item that is bound will automatically get a ref added as the path of the prop
 
 You can pass in a ref as a prop to this helper should you need something more specific.
 
-```html
+```handlebars
 <input type="text" {{ bound "name.first" ref="firstName" }} />
 ```
 
 ## The {{method}} helper
 This allows you to bind your component's methods to events in your template.
 
-```html
+```handlebars
 <button {{ method "save:click" "param1" "param2" }}>Save</button>
 ```
 
@@ -151,13 +151,13 @@ This allows you to render child components from withing the compnent you are in.
 
 > The "name" of the component is the name property in the component's definition. Not the name you imported it as.
 
-```html
+```handlebars
 {{ component "myComponentName" }}
 ```
 
 You can pass props to the component. Any props sent in will be merged with the component's data. If a prop is a method, it will be merged into the child component's methods. The "friend" component will have friend defined in it's data.
 
-```html
+```handlebars
 <ul>
   {{#each friends as | friend | }}
     {{ component "friend" friend=friend }}
@@ -170,7 +170,7 @@ You can pass methods to child components as well, they will be merged into the c
 
 **Parent component:**
 
-```html
+```handlebars
 <ul>
   {{#watch friends }}
     {{#each friends as | friend | }}
@@ -195,7 +195,7 @@ methods: {
 
 **Child component:**
 
-```html
+```handlebars
 <button {{ method "remove" }}>Delete Joe</button>
 ```
 
@@ -213,7 +213,7 @@ this helper allows you to view the state of your data in the template.
 
 To output all data for your template, use the Handlebars `.` reference.
 
-```html
+```handlebars
 <!-- full debug -->
 {{ debug . }}
 <!-- debug name object -->

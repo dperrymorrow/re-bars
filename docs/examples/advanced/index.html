@@ -18,23 +18,22 @@
       </section>
     </main>
 
-    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/marked/0.8.1/marked.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/prism/1.19.0/prism.min.js" data-manual></script>
-
     <script type="module">
       import ReBars from "../../js/rebars.min.js"
       // import ReBars from "../../src/index.js";
       import App from "../../js/index.js"
+      import Loader from "../../js/loader.js";
       import DemoApp from "./app.js";
 
-      App();
+      (async function() {
+        await Loader.addScripts(["//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"]);
+        await App()
 
-      ReBars.app({
-        $el: document.getElementById("demo-app"),
-        root: DemoApp,
-      });
+        ReBars.app({
+          $el: document.getElementById("demo-app"),
+          root: DemoApp,
+        });
+      }())
     </script>
   </body>
 </html>

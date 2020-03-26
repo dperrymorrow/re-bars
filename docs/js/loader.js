@@ -1,4 +1,4 @@
-export default async function($el) {
+async function _loadPartial($el) {
   const src = $el.dataset.src;
 
   const res = await fetch(src);
@@ -17,31 +17,6 @@ export default async function($el) {
 
   $el.classList.add(classes);
 
-  Array.from($el.querySelectorAll(".language-javascript")).forEach($code => {
-    let toHighlight = $code.innerText;
-    const isComponent = toHighlight.includes("/*html*/ ");
-
-    if (isComponent) {
-      const [tpl, html] = toHighlight.match(/\/\*html\*\/ `([^]+)`/);
-      toHighlight = toHighlight.replace(tpl, html);
-      const prefix = Prism.highlight("/*html*/ `", Prism.languages.javascript, "javascript");
-      const suffix = Prism.highlight("`", Prism.languages.javascript, "javascript");
-      const htmlSyntax = Prism.highlight(html, Prism.languages.javascript, "javascript");
-      const syntax = Prism.highlight(toHighlight, Prism.languages.javascript, "javascript").replace(
-        htmlSyntax,
-        `${prefix}${htmlSyntax}${suffix}`
-      );
-
-      $code.innerHTML = syntax;
-    } else {
-      $code.innerHTML = Prism.highlight($code.innerText, Prism.languages.javascript, "javascript");
-    }
-  });
-
-  Array.from($el.querySelectorAll(".language-html")).forEach($code => {
-    $code.innerHTML = Prism.highlight($code.innerText, Prism.languages.javascript, "html");
-  });
-
   const hash = window.location.hash;
   if (hash) {
     $el = document.getElementById(hash.replace("#", ""));
@@ -54,3 +29,27 @@ export default async function($el) {
     }
   }
 }
+
+export default {
+  addScripts(srcs) {
+    return Promise.all(
+      srcs.map(src => {
+        return new Promise(resolve => {
+          var script = document.createElement("script");
+          script.type = "text/javascript";
+          script.src = src;
+          script.onload = resolve;
+          document.head.appendChild(script);
+        });
+      })
+    );
+  },
+
+  async loadPartials() {
+    await Promise.all(
+      Array.from(document.querySelectorAll("[data-src]")).map($el => {
+        return _loadPartial($el);
+      })
+    );
+  },
+};
