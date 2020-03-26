@@ -6,6 +6,7 @@
   --bg: rgb(244,251,251);
   --bg-2: #E0EDED;
   --bg-light: #fff;
+  --bg-top: #6B7E88;
   --link-txt: #780886;
   --link-bg: #FEE7FF;
   --txt: #343D44;
@@ -19,4 +20,6 @@
   --highlight-txt: #494937;
   --font-header: "Roboto Slab", Helvetica, Arial, "Lucida Grande", sans-serif;
   --font-body: "Merriweather", serif;
+  --min-width: 200px;
+  --max-width: 980px;
 }

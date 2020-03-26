@@ -60,8 +60,8 @@ section {
 .content  {
   margin-bottom: var(--padding-lg);
   box-sizing: border-box;
-  min-width: 200px;
-  max-width: 980px;
+  min-width: var(--min-width);
+  max-width: var(--max-width);
   margin: 0 auto;
   top: var(--padding-lg);
   padding-bottom: var(--padding-lg);
@@ -151,7 +151,20 @@ section {
 }
 
 .side-bar-nav {
-  padding: var(--padding-sm) var(--padding-lg);
+  padding: var(--padding-xs) var(--padding-lg);
+}
+
+#nav-container .logo {
+  font-family: var(--font-header);
+  font-size: 3.2em;
+  width: 100%;
+  text-align: center;
+  background-color: var(--bg-top);
+  padding: var(--padding-sm) 0;
+  color: var(--bg-2);
+  border-bottom: 2px solid var(--border);
+  text-shadow: -1px -1px 1px var(--txt-dark);
+  letter-spacing: -.03em;
 }
 
 .side-bar-nav ul, nav ul li {

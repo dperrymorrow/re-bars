@@ -1,6 +1,9 @@
 export default {
   template: /*html*/ `
     <div>
+
+      <div class="logo">ReBars</div>
+
       {{#watch "currentHash" tag="ul" class="side-bar-nav" }}
         {{#each pages as |page| }}
           <li>
