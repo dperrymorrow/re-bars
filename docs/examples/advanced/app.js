@@ -24,7 +24,7 @@ export default {
 
     {{ component "filters" filters=filters }}
 
-    {{#watch "filters.*,todos.length" tag="ul"}}
+    {{#watch "filters.*,todos.length,todos.*.done" tag="ul"}}
       {{#each filteredTodos as | todo | }}
         <li {{ ref todo.id }}>
           {{

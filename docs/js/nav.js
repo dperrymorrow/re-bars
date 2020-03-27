@@ -33,8 +33,9 @@ export default {
     active(val, { data }) {
       const page = window.location.pathname.split("/docs/")[1];
       const hash = window.location.hash;
-      // console.log(page, hash, val.replace(data.root.prefix, ""));
-      return [page, `${page}${hash}`].includes(val.replace(data.root.prefix, "")) ? "active" : "";
+
+      const slug = val.replace(data.root.prefix, "");
+      return [page, `${page}${hash}`].includes(slug) ? "active" : "";
     },
   },
 
@@ -67,7 +68,7 @@ export default {
         return [
           {
             label: "ReBars Introduction",
-            path: `${this.prefix}index.html`,
+            path: `${this.prefix}`,
           },
 
           {
