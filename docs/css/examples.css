@@ -53,6 +53,7 @@
   font-size: 12px;
   color: var(--txt-dark);
   font-family: var(--font-header);
+  outline: none;
 }
 
 .demo-app input[type="text"] {

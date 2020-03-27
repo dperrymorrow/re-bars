@@ -1,15 +1,13 @@
 export default {
   template: /*html*/ `
-    <div>
-      <h3>
-        Button have been clicked
-          {{#watch "clicked" }}
-            <span>{{ clicked }}</span>
-          {{/watch}}
-        times
-      </h3>
+    <h3>
+      Button have been clicked
+        {{#watch "clicked" }}
+          <span>{{ clicked }}</span>
+        {{/watch}}
+      times
       <button {{ method "step" }}>Click Me</button>
-    </div>
+    </h3>
   `,
 
   name: "counter",

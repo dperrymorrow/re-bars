@@ -41,6 +41,8 @@ h1 small {
   font-size: .34em;
   letter-spacing: .001em;
   line-height: 1.4em;
+  background-color: white;
+  box-shadow: 0px 0px 20px 10px white;
 }
 
 main {
@@ -78,7 +80,7 @@ section {
 }
 
 .markdown-content  pre {
-  background-color: #444;
+  background-color: var(--syntax-bg);
   font-size: 1em;
   color: var(--txt);
   font-family: Monaco, monospace;
@@ -89,6 +91,7 @@ section {
 
 .markdown-content  p {
   line-height: 1.8em;
+  font-size: 1.1rem;
   margin-top: var(--padding-sm);
 }
 
@@ -102,14 +105,54 @@ section {
   color: var(--highlight-txt);
 }
 
+nav.tabs {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--padding-xs);
+  display: flex;
+}
+
+.tab-content div {
+  display: none;
+}
+
+.tab-content .active {
+  display: block;
+}
+
+nav.tabs button {
+  padding: var(--padding-xs) var(--padding-md);
+  background-color: var(--bg-2);
+  font-family:var(--font-header);
+  font-size: 1em;
+  color: var(--txt);
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
+  border: 1px solid var(--border);
+  outline: none;
+  cursor: pointer;
+}
+
+nav.tabs button.active {
+  background-color: white;
+}
+
+/* the tripple display of rebars components */
+
+.rebars-component {
+  overflow-x: auto;
+  border-radius: var(--border-radius);
+  background-color: var(--syntax-bg);
+}
+
+.rebars-component pre {
+  overflow: visible;
+  border: none;
+}
+
 .rebars-component pre.language-handlebars {
   padding-top: 0;
   padding-bottom: 0;
   border-radius: 0;
-}
-
-.rebars-component pre {
-  border: none;
 }
 
 .rebars-component pre:first-of-type {

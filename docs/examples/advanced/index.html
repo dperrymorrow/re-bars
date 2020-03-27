@@ -7,13 +7,28 @@
   </head>
 
   <body>
-
     <main>
       <nav id="nav-container"></nav>
       <section>
         <div class="content">
           <div id="demo-app" class="demo-app"></div>
-          <div data-src="app.js" data-filter="rebars" class="markdown-content"></div>
+
+
+          <div class="tab-container">
+            <nav class="tabs">
+              <button class="active" data-target="app">app.js</button>
+              <button data-target="add">add.js</button>
+              <button data-target="filters">filters.js</button>
+              <button data-target="todo">todo.js</button>
+            </nav>
+
+            <div class="tab-content">
+              <div id="app" class="active" data-src="app.js" data-filter="rebars" class="markdown-content"></div>
+              <div id="add" data-src="add.js" data-filter="rebars" class="markdown-content"></div>
+              <div id="filters" data-src="filters.js" data-filter="rebars" class="markdown-content"></div>
+              <div id="todo" data-src="todo.js" data-filter="rebars" class="markdown-content"></div>
+            </div>
+          </div>
         </div>
       </section>
     </main>

@@ -12,7 +12,7 @@ export default {
 }
 ```
 
-## Template:
+## Template
 The template is the Handlebars template that will be rendered. What is defined as the return from your `data()` function will be the root scope of the template when rendering.
 
 ## Name

@@ -2,6 +2,7 @@ import ReBars from "./rebars.min.js";
 import Loader from "./loader.js";
 import Nav from "./nav.js";
 import Syntax from "./syntax.js";
+import Tabs from "./tabs.js";
 
 export default async function(prefix = "") {
   window.Prism = window.Prism || {};
@@ -15,6 +16,7 @@ export default async function(prefix = "") {
 
   await Loader.loadPartials();
   Syntax.highlightDOM();
+  Tabs.init();
 
   ReBars.app({
     root: Nav,
