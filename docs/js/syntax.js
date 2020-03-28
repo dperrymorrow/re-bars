@@ -15,5 +15,13 @@ export default {
     });
 
     Prism.highlightAll();
+
+    Array.from(document.querySelectorAll("code.language-javascript .token.string"))
+      .filter($el => {
+        return $el.innerText.startsWith("~~hbs~~");
+      })
+      .forEach($el => {
+        $el.innerHTML = Prism.highlight($el.innerText.replace("~~hbs~~", ""), Prism.languages.handlebars, "handlebars");
+      });
   },
 };

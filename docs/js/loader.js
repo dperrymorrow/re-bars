@@ -1,15 +1,9 @@
 const filters = {
-  rebars($el, content) {
-    const regex = /\/\*html\*\/ `([^]+)`/;
+  javascript($el, content) {
+    const regex = /\/\*html\*\/ `([^]+?)`/;
     const tpl = content.match(regex)[1];
-
-    const [start, end] = content.split(tpl);
-
-    let output = "```javascript\n" + start + "\n```\n";
-    output += "```handlebars\n" + tpl.replace("\n", "") + "\n```\n";
-    output += "```javascript\n  " + end + "\n```\n";
+    const output = "```javascript\n" + content.replace(tpl, `~~hbs~~${tpl}`) + "\n```\n";
     $el.innerHTML = window.marked(output);
-    $el.classList.add("rebars-component");
   },
 
   markdown($el, content) {

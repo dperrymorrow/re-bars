@@ -3,6 +3,10 @@
   margin: var(--padding-md) 0;
 }
 
+.demo-app:empty {
+  display: none;
+}
+
 .demo-app {
   padding: var(--padding-md);
   border-radius: var(--border-radius);

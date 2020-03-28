@@ -22,16 +22,19 @@
               <button data-target="todo">todo.js</button>
             </nav>
 
-            <div class="tab-content">
-              <div id="app" class="active" data-src="app.js" data-filter="rebars" class="markdown-content"></div>
-              <div id="add" data-src="add.js" data-filter="rebars" class="markdown-content"></div>
-              <div id="filters" data-src="filters.js" data-filter="rebars" class="markdown-content"></div>
-              <div id="todo" data-src="todo.js" data-filter="rebars" class="markdown-content"></div>
+            <div class="tab-content markdown-content">
+              <div id="app" class="active" data-src="app.js" data-filter="javascript"></div>
+              <div id="add" data-src="add.js" data-filter="javascript"></div>
+              <div id="filters" data-src="filters.js" data-filter="javascript"></div>
+              <div id="todo" data-src="todo.js" data-filter="javascript"></div>
             </div>
           </div>
         </div>
       </section>
     </main>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 
     <script type="module">
       // import ReBars from "../../js/rebars.min.js"
@@ -41,13 +44,13 @@
       import DemoApp from "./app.js";
 
       (async function() {
-        await Loader.addScripts(["//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"]);
-        await App("../../")
 
         ReBars.app({
           $el: document.getElementById("demo-app"),
           root: DemoApp,
         });
+
+        await App("../../")
       }())
     </script>
   </body>

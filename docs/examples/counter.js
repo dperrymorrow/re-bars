@@ -5,7 +5,7 @@ export default {
         {{#watch "clicked" }}
           <span>{{ clicked }}</span>
         {{/watch}}
-      times
+        {{ pluralize "time" }}
       <button {{ method "step" }}>Click Me</button>
     </h3>
   `,
@@ -14,6 +14,12 @@ export default {
 
   data() {
     return { clicked: 0 };
+  },
+
+  helpers: {
+    pluralize(val, { data }) {
+      return data.root.clicked == 1 ? val : `${val}s`;
+    },
   },
 
   methods: {
