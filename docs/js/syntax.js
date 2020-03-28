@@ -1,5 +1,3 @@
-import Loader from "./loader.js";
-
 export default {
   highlightDOM() {
     document.querySelectorAll(".language-html").forEach($el => {
@@ -9,19 +7,12 @@ export default {
       }
     });
 
-    document.querySelectorAll("code.language-rebars").forEach($el => {
-      Loader.filters.rebars($el, $el.innerText);
-      $el.classList.remove("language-rebars");
-    });
-
     Prism.highlightAll();
 
     Array.from(document.querySelectorAll("code.language-javascript .token.string"))
-      .filter($el => {
-        return $el.innerText.startsWith("~~hbs~~");
-      })
+      .filter($el => $el.innerText.startsWith("/*hbs*/"))
       .forEach($el => {
-        $el.innerHTML = Prism.highlight($el.innerText.replace("~~hbs~~", ""), Prism.languages.handlebars, "handlebars");
+        $el.innerHTML = Prism.highlight($el.innerText.replace("/*hbs*/", ""), Prism.languages.handlebars, "handlebars");
       });
   },
 };
