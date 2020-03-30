@@ -2,7 +2,7 @@
 
 ```javascript
 export default {
-  template: /*html*/ `/*hbs*/<div></div>`, // your Handlebars template
+  template: /*html*/ `<div></div>`, // your Handlebars template
   name: "myComponent", // must have a name
   data() { return {} }, // data for your template
   methods: {}, // event handlers

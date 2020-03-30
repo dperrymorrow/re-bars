@@ -1,8 +1,6 @@
 const filters = {
   javascript($el, content) {
-    const regex = /\/\*html\*\/ `([^]+?)`/;
-    const tpl = content.match(regex)[1];
-    const output = "```javascript\n" + content.replace(tpl, `/*hbs*/${tpl}`) + "\n```\n";
+    const output = "```javascript\n" + content + "\n```\n";
     $el.innerHTML = window.marked(output);
   },
 

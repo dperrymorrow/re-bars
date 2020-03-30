@@ -10,7 +10,7 @@ export default {
     Prism.highlightAll();
 
     Array.from(document.querySelectorAll("code.language-javascript .token.string"))
-      .filter($el => $el.innerText.startsWith("/*hbs*/"))
+      .filter($el => $el.innerText.trim().startsWith("<") && $el.innerText.trim().endsWith(">"))
       .forEach($el => {
         $el.innerHTML = Prism.highlight($el.innerText.replace("/*hbs*/", ""), Prism.languages.handlebars, "handlebars");
       });
