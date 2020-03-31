@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>ReBars Docs: Application</title>
+    <link rel="stylesheet" href="../../css/index.css">
+  </head>
+
+  <body>
+    <main>
+      <nav id="nav-container"></nav>
+      <section>
+        <div class="content">
+          <div id="demo-app" class="demo-app"></div>
+
+
+          <div class="tab-container">
+            <nav class="tabs">
+              <button class="active" data-target="app">app.js</button>
+              <button data-target="add">add.js</button>
+              <button data-target="filters">filters.js</button>
+              <button data-target="todo">todo.js</button>
+            </nav>
+
+            <div class="tab-content markdown-content">
+              <div id="app" class="active" data-src="app.js" data-filter="javascript"></div>
+              <div id="add" data-src="add.js" data-filter="javascript"></div>
+              <div id="filters" data-src="filters.js" data-filter="javascript"></div>
+              <div id="todo" data-src="todo.js" data-filter="javascript"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+    <script type="module">
+      import ReBars from "../../js/rebars.min.js"
+      // import ReBars from "../../../src/index.js";
+      import App from "../../js/index.js"
+      import Loader from "../../js/loader.js";
+      import DemoApp from "./app.js";
+
+      ReBars.app({
+        $el: document.getElementById("demo-app"),
+        root: DemoApp,
+      });
+
+      App();
+    </script>
+  </body>
+</html>

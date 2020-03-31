@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>ReBars Docs: Introduction</title>
+    <link rel="stylesheet" href="css/index.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-markup-templating.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-handlebars.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.8.1/marked.min.js"></script>
+  </head>
+
+  <body>
+
+    <main>
+      <nav id="nav-container">
+
+        <div class="logo">ReBars</div>
+
+
+      </nav>
+      <section>
+        <div class="content">
+          <div class="markdown-content">
+            <%- yield %>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="js/index.js"></script>
+  </body>
+</html>

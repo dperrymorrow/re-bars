@@ -4,41 +4,73 @@
     <meta charset="utf-8">
     <title>ReBars Docs: Introduction</title>
     <link rel="stylesheet" href="css/index.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-markup-templating.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-handlebars.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.8.1/marked.min.js"></script>
   </head>
 
   <body>
 
     <main>
-      <nav id="nav-container"></nav>
+      <nav id="nav-container">
+
+        <div class="logo">ReBars</div>
+
+
+      </nav>
       <section>
         <div class="content">
-          <h1>
-            ReBars
-            <small>
-              A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a Virtial DOM.
-            </small>
-          </h1>
+          <div class="markdown-content">
+            <h1>ReBars</h1><p>A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a Virtial DOM.</p>
+<p>ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling.</p>
+<p>ReBars handles keeping your DOM in sync with your data, and gets out of your way. You can get back to just writing Javascript.</p>
+<p>ReBars is really just Handlebars with some built in helpers and the notion of <a href="component.html">components</a>. The main concept of ReBars is a <a href="helpers.html#watch">{{#watch}}</a> block helper that lets you tell ReBars what and when to re-render.</p>
+<blockquote>
+<p>If you have used Handlebars, you already know ReBars</p>
+</blockquote>
+<pre><code class="language-javascript">template: /*html*/ `
+  &lt;h3&gt;
+    Button have been clicked
+      {{#watch &quot;clicked&quot; }}
+        {{ clicked }}
+      {{/watch}}
+    times
+    &lt;button {{ method &quot;step&quot; }}&gt;Click Me&lt;/button&gt;
+  &lt;/h3&gt;
+`,
 
-          <div data-src="_partials/introduction.md" data-filter="markdown" class="markdown-content"></div>
-          <div id="counter-demo" class="demo-app"></div>
-          <div data-src="examples/counter.js" data-filter="javascript" class="markdown-content"></div>
+name: &quot;counter&quot;,
+
+data() {
+  return { clicked: 0 };
+},
+
+methods: {
+  step() {
+    this.clicked ++;
+  },
+}</code></pre>
+<p>Each time the value passed to watch is changed, <em>just</em> that Handlebars block will re-render. No Virtial DOM patching, no re-render of entire template. The block function from the helper is stored at first render, and simply invoked again each time a value changes.</p>
+
+<div id="counter-demo" class="demo-app"></div>
+
+<script type="module">
+  import Counter from "./examples/counter.js";
+  import ReBars from "./js/rebars.min.js";
+
+  ReBars.app({
+    $el: document.getElementById("counter-demo"),
+    root: Counter,
+  });
+</script>
+          </div>
         </div>
       </section>
     </main>
 
-    <script type="module">
-      import Counter from "./examples/counter.js";
-      import ReBars from "./js/rebars.min.js";
-      import App from "./js/index.js"
-
-      (async function(){
-        await App();
-        ReBars.app({
-          $el: document.getElementById("counter-demo"),
-          root: Counter,
-        });
-      }());
-    </script>
-
+    <script src="js/index.js"></script>
   </body>
 </html>

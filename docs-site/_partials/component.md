@@ -1,5 +1,10 @@
 
 
+# ReBars Components
+
+Components are where everything happens. Each component has it's own `Handlebars.instance` so their helpers are isolated from other components/applications.
+
+
 ```javascript
 export default {
   template: /*html*/ `<div></div>`, // your Handlebars template

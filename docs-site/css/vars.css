@@ -1,0 +1,26 @@
+:root {
+  --padding-sm: 20px;
+  --padding-md: 30px;
+  --padding-lg: 50px;
+  --padding-xs: 10px;
+  --bg: rgb(244,251,251);
+  --bg-2: #E0EDED;
+  --bg-light: #fff;
+  --bg-top: #6B7E88;
+  --link-txt: #780886;
+  --link-bg: #FEE7FF;
+  --txt: #343D44;
+  --txt-dark: #242C2F;
+  --txt-light: #777;
+  --font-size: 18px;
+  --border: #C5D9DE;
+  --border-radius: 5px;
+  --highlight-bg: #FEFFF0;
+  --highlight-bg-dark: #CDC58B;
+  --highlight-txt: #494937;
+  --font-header: "Roboto Slab", Helvetica, Arial, "Lucida Grande", sans-serif;
+  --font-body: "Merriweather", serif;
+  --syntax-bg: #383940;
+  --min-width: 200px;
+  --max-width: 980px;
+}
