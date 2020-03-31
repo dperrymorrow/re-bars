@@ -25,13 +25,12 @@
       import App from "../js/index.js"
       import DemoApp from "./app.js";
 
-      (async function() {
-        ReBars.app( {
-          $el: document.getElementById("demo-app"),
-          root: DemoApp
-        });
-        App("../");
-      }());
+      ReBars.app( {
+        $el: document.getElementById("demo-app"),
+        root: DemoApp
+      });
+
+      App();
     </script>
   </body>
 </html>

@@ -6,7 +6,6 @@ export default {
 
       $el.addEventListener("click", event => {
         event.preventDefault();
-        console.log($el.dataset);
 
         $tabs.forEach($tab => $tab.classList.remove("active"));
         $containers.forEach($content => $content.classList.remove("active"));

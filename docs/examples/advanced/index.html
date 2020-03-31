@@ -37,21 +37,18 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 
     <script type="module">
-      // import ReBars from "../../js/rebars.min.js"
-      import ReBars from "../../../src/index.js";
+      import ReBars from "../../js/rebars.min.js"
+      // import ReBars from "../../../src/index.js";
       import App from "../../js/index.js"
       import Loader from "../../js/loader.js";
       import DemoApp from "./app.js";
 
-      (async function() {
+      ReBars.app({
+        $el: document.getElementById("demo-app"),
+        root: DemoApp,
+      });
 
-        ReBars.app({
-          $el: document.getElementById("demo-app"),
-          root: DemoApp,
-        });
-
-        await App("../../")
-      }())
+      App();
     </script>
   </body>
 </html>
