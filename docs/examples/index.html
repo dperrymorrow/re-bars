@@ -12,7 +12,6 @@
       <section>
         <div class="content">
           <div id="demo-app" class="demo-app"></div>
-          <div data-src="app.js" data-filter="javascript" class="markdown-content"></div>
         </div>
       </section>
     </main>
@@ -22,15 +21,12 @@
     <script type="module">
       import ReBars from "../js/rebars.min.js"
       // import ReBars from "../../src/index.js";
-      import App from "../js/index.js"
       import DemoApp from "./app.js";
 
       ReBars.app( {
         $el: document.getElementById("demo-app"),
         root: DemoApp
       });
-
-      App();
     </script>
   </body>
 </html>

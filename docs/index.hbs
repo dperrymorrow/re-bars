@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>ReBars Docs</title>
+    <link rel="stylesheet" href="css/index.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-markup-templating.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-handlebars.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <main>
+      <nav id="nav-container">
+        <div class="logo">ReBars</div>
+
+        <ul class="side-bar-nav">
+          {{#each pages as |page| }}
+            <li>
+              <a href="{{ page.path }}">{{ page.label }}</a>
+                {{#if page.pages }}
+                  <ul>
+                    {{#each page.pages as |subPage| }}
+                      <li>
+                        <a href="{{ subPage.path }}">{{ subPage.label }}</a>
+                      </li>
+                    {{/each}}
+                  </ul>
+                {{/if}}
+            </li>
+          {{/each}}
+        </ul>
+
+      </nav>
+      <section>
+        <div class="content">
+
+          <div class="page">
+            {{ render "_partials/introduction.md" }}
+            <div id="counter-demo" class="demo-app"></div>
+          </div>
+
+          <div class="page">{{ render "_partials/application.md" }}</div>
+          <div class="page">{{ render "_partials/component.md" }}</div>
+          <div class="page">{{ render "_partials/helpers.md" }}</div>
+
+
+          <div class="page">
+            <h2 id="example-simple">Todo List Simple</h2>
+            <div id="demo-app-simple" class="demo-app"></div>
+            {{ render "examples/app.js" }}
+
+            <h2 id="example-advanced">Todo List Advanced</h2>
+            <div id="demo-app-advanced" class="demo-app"></div>
+
+            <div class="tab-container">
+              <nav class="tabs">
+                <button class="active" data-target="app">app.js</button>
+                <button data-target="add">add.js</button>
+                <button data-target="filters">filters.js</button>
+                <button data-target="todo">todo.js</button>
+              </nav>
+
+              <div class="tab-content">
+                <div id="app" class="active">{{ render "examples/advanced/app.js" }}</div>
+                <div id="add">{{ render "examples/advanced/add.js" }}</div>
+                <div id="filters">{{ render "examples/advanced/filters.js" }}</div>
+                <div id="todo">{{ render "examples/advanced/todo.js" }}</div>
+              </div>
+            </div>
+
+            <script type="module">
+              import ReBars from "./js/rebars.min.js";
+              import Simple from "./examples/app.js";
+              import Advanced from "./examples/advanced/app.js";
+              import Counter from "./examples/counter.js";
+
+              ReBars.app( {
+                $el: document.getElementById("demo-app-simple"),
+                root: Simple
+              });
+
+              ReBars.app( {
+                $el: document.getElementById("demo-app-advanced"),
+                root: Advanced
+              });
+
+              ReBars.app({
+                $el: document.getElementById("counter-demo"),
+                root: Counter,
+              });
+            </script>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <script src="js/index.js"></script>
+
+  </body>
+</html>

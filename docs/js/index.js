@@ -13,5 +13,18 @@ Prism.highlightAll();
 Array.from(document.querySelectorAll("code.language-javascript .token.string"))
   .filter($el => $el.innerText.trim().startsWith("<") && $el.innerText.trim().endsWith(">"))
   .forEach($el => {
-    $el.innerHTML = Prism.highlight($el.innerText.replace("/*hbs*/", ""), Prism.languages.handlebars, "handlebars");
+    $el.innerHTML = Prism.highlight($el.innerText, Prism.languages.handlebars, "handlebars");
   });
+
+document.querySelectorAll("nav.tabs button").forEach($el => {
+  const $tabs = $el.parentElement.querySelectorAll("*");
+  const $containers = $el.parentElement.parentElement.querySelectorAll(".tab-content *");
+
+  $el.addEventListener("click", event => {
+    event.preventDefault();
+    $tabs.forEach($tab => $tab.classList.remove("active"));
+    $containers.forEach($content => $content.classList.remove("active"));
+    $el.classList.add("active");
+    document.getElementById($el.dataset.target).classList.add("active");
+  });
+});

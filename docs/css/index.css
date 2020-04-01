@@ -1,4 +1,4 @@
-@import url("//fonts.googleapis.com/css?family=Merriweather|Roboto+Slab:700");
+@import url("https://fonts.googleapis.com/css?family=Merriweather|Roboto+Slab:700");
 @import url("vars.css");
 @import url("syntax.css");
 @import url("examples.css");
@@ -33,7 +33,7 @@ h2 {
   border-bottom: 1px solid var(--border);
 }
 
-.markdown-content > p:first-of-type {
+.page > p:first-of-type, h1 small {
   display: block;
   font-weight: normal;
   font-family: var(--font-body);
@@ -56,6 +56,15 @@ section {
   flex: 1;
   overflow: auto;
   height: 100%;
+}
+
+.page {
+  border-top: 1px solid var(--txt-light);
+  padding-bottom: var(--padding-lg);
+}
+
+.page:first-child {
+  border-top: none;
 }
 
 /* content styling */
@@ -112,11 +121,11 @@ nav.tabs {
   display: flex;
 }
 
-.tab-content div {
+.tab-content > div {
   display: none;
 }
 
-.tab-content .active {
+.tab-content > .active {
   display: block;
 }
 
