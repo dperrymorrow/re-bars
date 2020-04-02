@@ -37,12 +37,14 @@ h2
   font-weight: normal
   font-family: $font-body
   color: $txt-light
-  font-size: 2rem
+  font-size: 1.7rem
   letter-spacing: .001em
-  line-height: 1.4em
-  background-color: white
-  box-shadow: 0px 0px 20px 10px white
+  line-height: 1.6em
+  background-color: rgba(white, .7)
+  box-shadow: 0px 0px 20px 10px rgba(white, .7)
   margin-bottom: $padding-lg
+  padding: $padding-sm $padding-md
+  margin-top: 0
 
 main
   display: flex
@@ -55,12 +57,22 @@ section
   height: 100%
 
 .page
-  border-top: 1px solid $txt-light
   padding-bottom: $padding-lg
+  padding-top: $padding-lg
+
+  &:before
+    content: ""
+    display: block
+    height: 10px
+    background-color: rgba($border, .5)
+    border-radius: 5px
+    box-shadow: 0px 0px 20px 10px rgba(white, .8)
 
   &:first-child
-    border-top: none
+    padding-top: $padding-sm
 
+    &:before
+      display: none
 
 /* content styling */
 

@@ -25,8 +25,17 @@ export default {
 
     _highlight();
     _tabs();
+    window.addEventListener("hashchange", _activeLink, false);
+    _activeLink();
   },
 };
+
+function _activeLink() {
+  document.querySelectorAll("ul.side-bar-nav a").forEach($link => {
+    if ($link.getAttribute("href") === window.location.hash) $link.classList.add("active");
+    else $link.classList.remove("active");
+  });
+}
 
 function _highlight() {
   document.querySelectorAll(".language-html").forEach($el => {

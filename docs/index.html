@@ -103,7 +103,7 @@
 <p>A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a Virtial DOM.</p>
 <p>ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling.</p>
 <p>ReBars handles keeping your DOM in sync with your data, and gets out of your way. You can get back to just writing Javascript.</p>
-<p>ReBars is really just Handlebars with some built in helpers and the notion of <a href="component.html">components</a>. The main concept of ReBars is a <a href="helpers.html#watch">{{#watch}}</a> block helper that lets you tell ReBars what and when to re-render.</p>
+<p>ReBars is really just Handlebars with some built in helpers and the notion of <a href="#rebars-components">components</a>. The main concept of ReBars is a <a href="#the-watch-helper">{{#watch}}</a> block helper that lets you tell ReBars what and when to re-render.</p>
 <blockquote>
 <p>If you have used Handlebars, you already know ReBars</p>
 </blockquote>
@@ -189,7 +189,7 @@ ReBars.app({
 <h2 id="template">Template</h2>
 <p>The template is the Handlebars template that will be rendered. What is defined as the return from your <code>data()</code> function will be the root scope of the template when rendering.</p>
 <h2 id="name">Name</h2>
-<p>Each component must define a name. This is is the string you will use to render components using the <a href="helpers.html#the-component-helper">component</a> helper within your template.</p>
+<p>Each component must define a name. This is is the string you will use to render components using the <a href="#the-component-helper">component</a> helper within your template.</p>
 <h2 id="data">Data</h2>
 <p>The data for the component. Must be a function that retuns an Object.</p>
 <pre><code class="language-javascript">data() {
@@ -216,7 +216,7 @@ ReBars.app({
 }</code></pre>
 <pre><code class="language-html">&lt;p&gt;{{ fullName }}&lt;/p&gt;</code></pre>
 <h2 id="methods">Methods</h2>
-<p>Methods defined in a component are avalable for use with the <a href="helpers.html#method">method</a> helper, or can be called from within another method.</p>
+<p>Methods defined in a component are avalable for use with the <a href="#the-method-helper">method</a> helper, or can be called from within another method.</p>
 <pre><code class="language-html">&lt;button {{ method &quot;save:click&quot; &quot;fred&quot; }}&gt;save&lt;/button&gt;</code></pre>
 <pre><code class="language-javascript">methods: {
   save(event, name) {
@@ -289,7 +289,7 @@ hooks: {
 <pre><code class="language-javascript">helpers: {
   isChecked: val =&gt; (val ? &quot;checked&quot; : &quot;&quot;),
 }</code></pre>
-<p>These helpers are only available for the context of the component you are defining. If you would like to define helpers that are global. Add them to the <a href="application.html">ReBars application</a>.</p>
+<p>These helpers are only available for the context of the component you are defining. If you would like to define helpers that are global. Add them to the <a href="#a-rebars-application">ReBars application</a>.</p>
 </div></div>
           <div class="page"><div class="markdown-content"><h1 id="rebars-built-in-helpers">ReBars built in helpers</h1>
 <p>ReBars comes with a few very powerfull helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.</p>
