@@ -5,7 +5,6 @@ const { register, root } = require("./helpers.js");
 register();
 
 const data = require(root + "_src/data.json");
-data.pages.pop();
-const tpl = Handlebars.compile(fs.readFileSync(root + "_src/README.hbs", "utf-8"));
+const tpl = Handlebars.compile(fs.readFileSync(root + "_src/index.hbs", "utf-8"));
 
-fs.writeFileSync(process.cwd() + "/README.md", tpl(data));
+fs.writeFileSync(root + "index.html", tpl(data));

@@ -3,14 +3,16 @@
   "version": "0.0.1-beta.1",
   "description": "Handlebars templates with re-render / watch blocks",
   "repository": "https://github.com/dperrymorrow/re-bars",
-  "main": "dist/index.js",
+  "main": "dist/index.umd.min.js",
   "scripts": {
+    "prepublishOnly": "npm run build-all",
     "examples": "http-server ./ --port=3000 -c-1",
-    "docs:build": "npm run docs:stylus && node _scripts/compile-site.js",
-    "test": "c8 ava --verbose",
+    "docs:build": "npm run docs:stylus && node _scripts/build-docs.js",
     "docs:stylus": "stylus --inline --hoist-atrules --compress --include-css ./docs/_src/styl/docs.styl -o ./docs/dist/docs.min.css",
     "docs:stylus:watch": "npm run docs:stylus -- --watch",
-    "build-all": "rollup -c && npm run docs:build"
+    "readme:build": "node _scripts/build-readme.js",
+    "test": "c8 ava --verbose",
+    "build-all": "rollup -c && npm run docs:build && npm run readme:build"
   },
   "author": "David Morrow",
   "license": "MIT",

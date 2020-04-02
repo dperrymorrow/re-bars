@@ -1,23 +1,62 @@
+
+[Documentation](https://dperrymorrow.github.io/re-bars) |
+[Examples](https://dperrymorrow.github.io/re-bars#examples)
+
+> A simple, modern approach to Obvervables and DOM re-rendering and patching.
+
+
+
+
 # ReBars
+
 A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a Virtial DOM.
+
+ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling.
+
+ReBars handles keeping your DOM in sync with your data, and gets out of your way. You can get back to just writing Javascript.
+
+ReBars is really just Handlebars with some built in helpers and the notion of [components](#rebars-components). The main concept of ReBars is a [{{#watch}}](#the-watch-helper) block helper that lets you tell ReBars what and when to re-render.
 
 > If you have used Handlebars, you already know ReBars
 
-The main concept of ReBars is a `{{#watch }}` block helper that lets you tell ReBars what and when to re-render.
+```javascript
+template: /*html*/ `
+  <h3>
+    Button have been clicked
+      {{#watch "clicked" }}
+        {{ clicked }}
+      {{/watch}}
+    times
+    <button {{ method "step" }}>Click Me</button>
+  </h3>
+`,
 
-```html
-{{#watch "name.first" }}
-  {{ name.first }}
-{{/watch}}
+name: "counter",
+
+data() {
+  return { clicked: 0 };
+},
+
+methods: {
+  step() {
+    this.clicked ++;
+  },
+}
 ```
 
-Each time that `name.first` is changed, just that Handlebars block will re-render. No Virtial DOM patching, the block function from the helper is stored, and simply invoked again. Still interested? Cool, let's get to it...
+Each time the value passed to watch is changed, *just* that Handlebars block will re-render. No Virtial DOM patching, no re-render of entire template. The block function from the helper is stored at first render, and simply invoked again each time a value changes.
 
-- [ReBars Application](#a-rebars-application)
-- [ReBars Component](#a-rebars-component)
+
+- [ReBars Introduction](#rebars)
+- [A ReBars Application](#a-rebars-application)
+  - [Global Helpers](#global-helpers)
+  - [Handlebars](#handlebars)
+- [A ReBars Component](#rebars-components)
   - [Template](#template)
   - [Name](#name)
-  - [Date](#data)
+  - [Data](#data)
+  - [Watchers](#watchers)
+  - [Hooks](#hooks)
   - [Methods](#methods)
 - [ReBars Helpers](#rebars-built-in-helpers)
   - [watch](#the-watch-helper)
@@ -27,12 +66,19 @@ Each time that `name.first` is changed, just that Handlebars block will re-rende
   - [component](#the-component-helper)
   - [debug](#the-debug-helper)
 
+
 # A ReBars Application
+
 A ReBars application is a collection of components rendered to a DOM element. You can have more than one app on a page if you desire.
+
+To start an app, there is minimal code on the page. You create a new ReBars app with an Object containing two keys.
+
+- `$el` the Element that your app will be rendered into
+- `root` the top level [component](component.html) in your app.
 
 > You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.
 
-```html
+``` html
 <div id="demo-app"></div>
 <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
 
@@ -43,23 +89,48 @@ A ReBars application is a collection of components rendered to a DOM element. Yo
   ReBars.app({
     $el: document.getElementById("demo-app"),
     root: RootComponent,
-    trace: false // default to true
   });
 </script>
 ```
 
-To start and app, there is minimal code on the page. You create a new ReBars app with an Object containing two keys.
+## Global Helpers
 
-- `$el` the Element that your app will be rendered into
-- `root` to top level component in your app.
+If you would like to add helpers to all components within this application you can pass a helpers Object to the `ReBars.app` function, You would then be able to use your `isChecked` helper in any component in your application.
+
+```javascript
+ReBars.app({
+  $el: document.getElementById("demo-app"),
+  root: RootComponent,
+  helpers: {
+    isChecked: val => (val ? "checked" : ""),
+  }
+});
+```
+
+## Handlebars
+
+If you would like use Handlebars from a source other than on `window` _such as loading from a CDN_, you can pass your instance of Handlebars to the `ReBars.app` function.
+
+```javascript
+import Handlebars from "somewhere";
+
+ReBars.app({
+  Handlebars,
+  $el: document.getElementById("demo-app"),
+  root: RootComponent,
+});
+```
+
+
 
 # ReBars Components
+
 Components are where everything happens. Each component has it's own `Handlebars.instance` so their helpers are isolated from other components/applications.
 
-### An component's properties:
+
 ```javascript
 export default {
-  template: `<div></div>`, // your Handlebars template
+  template: /*html*/ `<div></div>`, // your Handlebars template
   name: "myComponent", // must have a name
   data() { return {} }, // data for your template
   methods: {}, // event handlers
@@ -69,11 +140,11 @@ export default {
 }
 ```
 
-## Template:
-The template is the Handlebars template that will be rendered. What is defined as the return from your `data()` function will be the root scope of the template when rendering. Any Handlebars helpers methods you define in `helpers` will be automatically added to the instance rendering the component, and be available for use. ReBars includes several helpers as well.
+## Template
+The template is the Handlebars template that will be rendered. What is defined as the return from your `data()` function will be the root scope of the template when rendering.
 
 ## Name
-Each component must define a name. This is is the string you will use to render components using the [`{{component}}`](#the-component-helper) helper within your template.
+Each component must define a name. This is is the string you will use to render components using the [component](#the-component-helper) helper within your template.
 
 ## Data
 The data for the component. Must be a function that retuns an Object.
@@ -89,7 +160,7 @@ data() {
 }
 ```
 
-It is also possible to return a function as a key in your data. This can be very useful.
+> It is also possible to return a function as a key in your data. This can be very useful.
 
 ```javascript
 data() {
@@ -109,13 +180,12 @@ data() {
 ```
 
 ## Methods
-Methods defined in a component are avalable for use with the [`{{method}}`](#the-method-helper) helper, or can be called from within another method.
-
-> all functions are bound to the component `this`
+Methods defined in a component are avalable for use with the [method](#the-method-helper) helper, or can be called from within another method.
 
 ```html
-<button {{ method save "fred" }}>save</button>
+<button {{ method "save:click" "fred" }}>save</button>
 ```
+
 ```javascript
 methods: {
   save(event, name) {
@@ -126,7 +196,7 @@ methods: {
 }
 ```
 
-> They can also be referenced from other Methods
+> Methods can reference other methods.
 
 ```javascript
 methods: {
@@ -135,24 +205,90 @@ methods: {
   },
   save(event, name) {
     const friend = this.$methods.findFriend(name);
+    // save your friend
   }
 }
 ```
 
+## Watchers
+
+Watchers give you the ability to fire _"hooks"_ when a property in your data has change. You can watch any items in  your data or `$props`
+
+> You cannot, however watch a method in your data. Methods defined in your data are only for convienance for your template rendering.
+
+```javascript
+data() {
+  return {
+    name: {
+      first: "david"
+    }
+  };
+},
+
+watchers: {
+  "name.first"() {
+    console.log(this.name.first); // david
+    // this.$refs()
+    // this.$methods
+    // this.$props
+  }
+}
+```
+
+Each time `name.first` is changed the method will be triggered with the same context you would have in a method.
+
+## Hooks
+
+Hooks are triggered at different points in the component instance's life.
+
+- `created` triggered when the component is instantiated and prior to rendering
+- `attached` the component has been rendered and added to the DOM
+- `teardown` the component is about to be deleted, but at this point is still on the DOM
+
+> `this.$refs()` cannot be used in the created hook. The component is not yet on the DOM. If you need to do something with the component's `$refs` or DOM. Use the attached hook instead.
+
+
+```javascript
+data() {
+  return {
+    name: {
+      first: "David"
+    }
+  }
+},
+
+hooks: {
+  created() {
+    // you can set items here pre render
+    this.name.first = "Mike";
+  }
+}
+```
+
+## Helpers
+
+Any methods you define under Handlebars helpers methods you define in `helpers` will be automatically added to the instance rendering the component, and be available for use. ReBars includes several [helpers](helpers.html) as well.
+
+```html
+<input type="checkbox" {{ isChecked someBoolean }} />
+```
+```javascript
+helpers: {
+  isChecked: val => (val ? "checked" : ""),
+}
+```
+
+These helpers are only available for the context of the component you are defining. If you would like to define helpers that are global. Add them to the [ReBars application](#a-rebars-application).
+
+
 # ReBars built in helpers
 
-- [watch](#the-watch-helper)
-- [ref](#the-ref-helper)
-- [bound](#the-bound-helper)
-- [method](#the-method-helper)
-- [component](#the-component-helper)
-- [debug](#the-debug-helper)
+ReBars comes with a few very powerfull helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.
 
-## The `{{#watch}}` helper
+
+## The {{#watch}} helper
 
 The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.
-
-Suppose we can a component with data as such.
 
 ```javascript
 data() {
@@ -236,7 +372,7 @@ If you are watching inside a loop, you can target the specific object and key by
 </ul>
 ```
 
-## The `{{ref}}` helper
+## The {{ref}} helper
 ReBars comes with a `{{ref}}` helper built in. This gives you the ability to save a reference to an element. This also gives a key for Array loop items so that the Array can be patched instead of re-rendered entirely.
 
 - takes one param, the `String` for the reference
@@ -260,7 +396,7 @@ methods: {
 }
 ```
 
-## The `{{bound}}` helper
+## The {{bound}} helper
 The `{{bound}` helper is used on input elements such as `<input>` or `<textarea>` elements. The parameter passed will sync the value attribute to the value, and on `input` event update the value.
 
 ```html
@@ -275,7 +411,7 @@ You can pass in a ref as a prop to this helper should you need something more sp
 <input type="text" {{ bound "name.first" ref="firstName" }} />
 ```
 
-## The `{{method}}` helper
+## The {{method}} helper
 This allows you to bind your component's methods to events in your template.
 
 ```html
@@ -296,7 +432,7 @@ methods: {
 - the first param is the methodName separated by `:eventType`, if none is specified `click` will be the event
 - you can add as many other parameters as you would like to your method call
 
-## The `{{component}}` helper
+## The {{component}} helper
 This allows you to render child components from withing the compnent you are in. It takes one parameter, the name of the component to render. This will render a registered component to the DOM of the parent component.
 
 > The "name" of the component is the name property in the component's definition. Not the name you imported it as.
@@ -320,8 +456,7 @@ You can pass methods to child components as well, they will be merged into the c
 
 **Parent component:**
 
-```javascript
-template: `
+```html
 <ul>
   {{#watch friends }}
     {{#each friends as | friend | }}
@@ -329,14 +464,16 @@ template: `
         component "friend"
         friend=friend
         index=@index
-        deleteFriend=methods.deleteFriend
+        deleteFriend=$methods.deleteFriend
       }}
     {{/each}}
   {{/watch}}
-</ul>`,
+</ul>
+```
 
+```javascript
 methods: {
-  deleteFriend(event, idnex) {
+  deleteFriend(event, index) {
     this.friends.splice(index, 1)
   },
 }
@@ -345,19 +482,22 @@ methods: {
 **Child component:**
 
 ```html
-<div>
-  {{ friend.name }} {{ friend.hobby }}
-  <button {{ action "deleteFriend" index }}>Delete</button>
-</div>
+<button {{ method "remove" }}>Delete Joe</button>
 ```
-on clicking of the button, the friend would be deleted in the parent.
 
-## The `{{debug}}` helper
+```javascript
+methods: {
+  remove(event, name) {
+    this.$props.deleteFriend(this.$props.index)
+  }
+}
+```
+on clicking of the button, the friend would be deleted in the parent. Any watch blocks watching the `friends.*` or `friend[index]` would be re-rendered.
+
+## The {{debug}} helper
 this helper allows you to view the state of your data in the template.
 
-> The debug helper watches by default, no watch block is needed.
-
-To output all data available to your template, use the Handlebars `.` reference.
+To output all data for your template, use the Handlebars `.` reference.
 
 ```html
 <!-- full debug -->
@@ -365,3 +505,4 @@ To output all data available to your template, use the Handlebars `.` reference.
 <!-- debug name object -->
 {{ debug name }}
 ```
+

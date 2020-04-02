@@ -10,12 +10,9 @@
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-markup-templating.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-handlebars.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
-
-
   </head>
 
   <body>
-
     <main>
       <nav id="nav-container">
         <div class="logo">ReBars</div>
@@ -42,19 +39,19 @@
         <div class="content">
 
           <div class="page">
-            {{ render "_src/md/introduction.md" }}
+            {{ render "markdown" "_src/md/introduction.md" }}
             <div id="counter-demo" class="demo-app"></div>
           </div>
 
-          <div class="page">{{ render "_src/md/application.md" }}</div>
-          <div class="page">{{ render "_src/md/component.md" }}</div>
-          <div class="page">{{ render "_src/md/helpers.md" }}</div>
+          <div class="page">{{ render "md" "_src/md/application.md" }}</div>
+          <div class="page">{{ render "md" "_src/md/component.md" }}</div>
+          <div class="page">{{ render "md" "_src/md/helpers.md" }}</div>
 
 
           <div class="page">
             <h2 id="example-simple">Todo List Simple</h2>
             <div id="demo-app-simple" class="demo-app"></div>
-            {{ render "examples/app.js" }}
+            {{ render "md:js" "examples/app.js" }}
 
             <h2 id="example-advanced">Todo List Advanced</h2>
             <div id="demo-app-advanced" class="demo-app"></div>
@@ -68,10 +65,10 @@
               </nav>
 
               <div class="tab-content">
-                <div id="app" class="active">{{ render "examples/advanced/app.js" }}</div>
-                <div id="add">{{ render "examples/advanced/add.js" }}</div>
-                <div id="filters">{{ render "examples/advanced/filters.js" }}</div>
-                <div id="todo">{{ render "examples/advanced/todo.js" }}</div>
+                <div id="app" class="active">{{ render "md:js" "examples/advanced/app.js" }}</div>
+                <div id="add">{{ render "md:js" "examples/advanced/add.js" }}</div>
+                <div id="filters">{{ render "md:js" "examples/advanced/filters.js" }}</div>
+                <div id="todo">{{ render "md:js" "examples/advanced/todo.js" }}</div>
               </div>
             </div>
           </div>
