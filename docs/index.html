@@ -96,33 +96,26 @@
         <div class="content">
 
           <div class="page">
-            
-
-# ReBars
-
-A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a Virtial DOM.
-
-ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling.
-
-ReBars handles keeping your DOM in sync with your data, and gets out of your way. You can get back to just writing Javascript.
-
-ReBars is really just Handlebars with some built in helpers and the notion of [components](#rebars-components). The main concept of ReBars is a [{{#watch}}](#the-watch-helper) block helper that lets you tell ReBars what and when to re-render.
-
-> If you have used Handlebars, you already know ReBars
-
-```javascript
-template: /*html*/ `
-  <h3>
+            <div class="markdown-content"><h1 id="rebars">ReBars</h1>
+<p>A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a Virtial DOM.</p>
+<p>ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling.</p>
+<p>ReBars handles keeping your DOM in sync with your data, and gets out of your way. You can get back to just writing Javascript.</p>
+<p>ReBars is really just Handlebars with some built in helpers and the notion of <a href="#rebars-components">components</a>. The main concept of ReBars is a <a href="#the-watch-helper">{{#watch}}</a> block helper that lets you tell ReBars what and when to re-render.</p>
+<blockquote>
+<p>If you have used Handlebars, you already know ReBars</p>
+</blockquote>
+<pre><code class="language-javascript">template: /*html*/ `
+  &lt;h3&gt;
     Button have been clicked
-      {{#watch "clicked" }}
+      {{#watch &quot;clicked&quot; }}
         {{ clicked }}
       {{/watch}}
     times
-    <button {{ method "step" }}>Click Me</button>
-  </h3>
+    &lt;button {{ method &quot;step&quot; }}&gt;Click Me&lt;/button&gt;
+  &lt;/h3&gt;
 `,
 
-name: "counter",
+name: &quot;counter&quot;,
 
 data() {
   return { clicked: 0 };
@@ -132,11 +125,9 @@ methods: {
   step() {
     this.clicked ++;
   },
-}
-```
-
-Each time the value passed to watch is changed, *just* that Handlebars block will re-render. No Virtial DOM patching, no re-render of entire template. The block function from the helper is stored at first render, and simply invoked again each time a value changes.
-
+}</code></pre>
+<p>Each time the value passed to watch is changed, <em>just</em> that Handlebars block will re-render. No Virtial DOM patching, no re-render of entire template. The block function from the helper is stored at first render, and simply invoked again each time a value changes.</p>
+</div>
             <div id="counter-demo" class="demo-app"></div>
           </div>
 
