@@ -5,10 +5,11 @@
   "repository": "https://github.com/dperrymorrow/re-bars",
   "main": "dist/index.js",
   "scripts": {
-    "start": "http-server ./docs --port=3000 -c-1",
-    "build-docs": "node _scripts/compile-site.js",
+    "examples": "http-server ./ --port=3000 -c-1",
+    "build-docs": "npm run stylus && node _scripts/compile-site.js",
     "test": "c8 ava --verbose",
-    "build": "rollup -c"
+    "stylus": "stylus --inline --hoist-atrules --compress --include-css ./docs/_src/styl/docs.styl -o ./docs/dist/docs.min.css",
+    "build-all": "rollup -c && npm run build-docs"
   },
   "author": "David Morrow",
   "license": "MIT",
@@ -22,17 +23,18 @@
     "eslint-config-prettier": "^6.7.0",
     "eslint-plugin-prettier": "^3.1.1",
     "esm": "^3.2.25",
-    "handlebars": "^4.7.3",
+    "handlebars": "4.7.4",
     "http-server": "^0.12.0",
     "marked": "0.8.2",
     "prettier": "^1.19.1",
     "rollup": "^1.31.0",
-    "rollup-plugin-copy": "3.3.0",
+    "rollup-plugin-css-only": "2.0.0",
     "rollup-plugin-filesize": "^6.2.1",
     "rollup-plugin-gzip": "^2.3.0",
     "rollup-plugin-strip": "^1.2.2",
     "rollup-plugin-terser": "^5.2.0",
-    "sinon": "^9.0.0"
+    "sinon": "^9.0.0",
+    "stylus": "0.54.7"
   },
   "ava": {
     "require": [

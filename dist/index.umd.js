@@ -4,6 +4,11 @@
   (global = global || self, global.ReBars = factory());
 }(this, (function () { 'use strict';
 
+  const styles = {
+    warn: "background: #484915; color: #ffffbe; padding: .1em; font-weight: normal;",
+    log: "background: #324645; color:#c9faff; padding: .1em; font-weight: normal;",
+  };
+
   const _getTplString = (template, { loc, data }) => {
     const lines = template.split("\n").slice(loc.start.line - 1, loc.end.line);
     const leadingSpaces = Array(lines[0].length - lines[0].trim().length).join(" ");
@@ -25,10 +30,14 @@
       str = "%c " + str + " ";
       if (!window.ReBars.trace) return;
       if (payloads) {
-        payloads.forEach(p => void 0);
+        console.groupCollapsed(str, styles[type]);
+        payloads.forEach(p => console.log(p));
+        console.groupEnd();
+      } else {
+        console.log(str, styles[type]);
       }
     } else {
-      payloads.forEach(p => void 0);
+      payloads.forEach(p => console.error(p));
       throw new Error(str);
     }
   };

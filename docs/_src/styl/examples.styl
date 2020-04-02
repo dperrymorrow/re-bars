@@ -1,0 +1,116 @@
+.demo-app
+  color: $text-color
+  margin: $padding-md 0
+  padding: $padding-md
+  border-radius: $border-radius
+  border: 10px solid $border
+  background-color: white
+
+
+  &:empty
+    display: none
+
+  pre.debug
+    background-color: $bg
+    border: 1px solid $border
+    color: $bg-2
+    font-family: Monaco, monospace
+    padding: 1rem
+
+  h1
+    margin-top: 0
+
+  *
+    animation: highlight .2s linear
+
+  .header-container
+    margin-bottom: $padding-lg
+
+    label
+      text-transform: uppercase
+      font-family: $font-header
+      font-size: .8em
+      margin-right: $padding-xs
+
+  label input[type="text"]
+    margin-left: $padding-xs
+
+  .filters
+    background-color: $bg-2
+    border: 1px solid $border
+    border-top-left-radius: 10px
+    border-top-right-radius: 10px
+    padding: 10px 15px
+    border-bottom: none
+    display: flex
+    justify-content: space-between
+
+  input[type="text"], button, select
+    background-color: $bg
+    padding: $padding-xs $padding-sm
+    box-sizing: border-box
+    border-radius: $border-radius
+    border: 1px solid $border
+    font-size: 12px
+    color: $txt-dark
+    font-family: $font-header
+    outline: none
+
+  input[type="text"]
+    min-width: 200px
+    background-color: $bg-light
+    font-family: $font-body
+
+  select
+    height: 100%
+
+  button
+    color: $txt
+    text-transform: uppercase
+    font-weight: bold
+    cursor: pointer
+
+    &:disabled
+      color: $txt-light
+      opacity: .6
+
+  ul
+    padding: 0
+    margin: 0 0 20px 0
+    list-style: none
+    overflow: hidden
+    border: 1px solid $border
+    border-bottom-left-radius: 10px
+    border-bottom-right-radius: 10px
+
+    &.simple
+      border-radius: $border-radius
+
+    li
+      margin-bottom: 0
+      border-bottom: 1px solid $border
+      background-color: $bg-2
+      padding: $padding-xs $padding-sm
+
+      &:nth-child(odd)
+        background-color: $bg
+
+      &:last-child
+        border: none
+
+      .todo
+        align-items: center
+        justify-content: space-between
+        display: flex
+
+        .date
+          font-size: .9em
+          margin-right: 10px
+
+
+@keyframes highlight
+  0%
+    box-shadow: orange 0px 0px 14px
+
+  100%
+    box-shadow: inherit

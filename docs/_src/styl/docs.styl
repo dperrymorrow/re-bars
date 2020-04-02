@@ -1,0 +1,154 @@
+@import url("https://fonts.googleapis.com/css?family=Merriweather|Roboto+Slab:700")
+@import "vars.styl"
+@import "syntax.styl"
+@import "examples.styl"
+@import "nav.styl"
+
+body, html
+  padding: 0
+  margin: 0
+  font-family: $font-body
+  scroll-behavior: smooth
+  background-color: $bg
+  height: 100%
+  color: $txt
+  font-size: $font-size
+
+/* typography and headers */
+
+h1, h2, h3, h4, h5
+  color: $txt-dark
+  font-family: $font-header
+
+h1
+  letter-spacing: -0.036em
+  font-size: 5em
+  margin-bottom: 0
+
+
+h2
+  font-size: 1.8em
+  margin-bottom: $padding-sm
+  border-bottom: 1px solid $border
+
+
+.markdown-content > p:first-of-type, h1 small
+  display: block
+  font-weight: normal
+  font-family: $font-body
+  color: $txt-light
+  font-size: 2rem
+  letter-spacing: .001em
+  line-height: 1.4em
+  background-color: white
+  box-shadow: 0px 0px 20px 10px white
+  margin-bottom: $padding-lg
+
+main
+  display: flex
+  height: 100%
+  flex-direction: row-reverse
+
+section
+  flex: 1
+  overflow: auto
+  height: 100%
+
+.page
+  border-top: 1px solid $txt-light
+  padding-bottom: $padding-lg
+
+  &:first-child
+    border-top: none
+
+
+/* content styling */
+
+.content
+  margin-bottom: $padding-lg
+  box-sizing: border-box
+  min-width: $min-width
+  max-width: $max-width
+  margin: 0 auto
+  top: $padding-lg
+  padding-bottom: $padding-lg
+
+  blockquote
+    border: 1px solid $highlight-bg-dark
+    border-left: 5px solid $highlight-bg-dark
+    color: $highlight-txt
+    margin: $padding-md 0
+    border-radius: $border-radius
+    padding: $padding-sm $padding-md
+    font-size: 1.15em
+    background-color: $highlight-bg
+
+    p
+      line-height: 1.7em
+      margin: 0
+      padding: 0
+
+.markdown-content
+  li
+    margin-bottom: $padding-xs
+
+  a
+    color: $link-txt
+    background-color: $link-bg
+    padding: 0 .2em
+
+  pre
+    background-color: $syntax-bg
+    font-size: 1em
+    color: $txt
+    font-family: Monaco, monospace
+    padding: $padding-sm
+    margin: 0
+    border-top: 2px solid $bg
+
+  p
+    line-height: 1.8em
+    font-size: 1.1rem
+    margin-top: $padding-sm
+
+
+p code, .content li code, .content h1 code
+  line-height: 1em
+  background-color: white
+  padding: .1em .25em
+  color: $txt-dark
+  border: 1px solid $border
+  border-radius:$border-radius
+  color: $highlight-txt
+
+nav.tabs
+  border-bottom: 1px solid $border
+  margin-bottom: $padding-xs
+  display: flex
+
+
+.tab-content
+  > div
+    display: none
+
+  > .active
+    display: block
+
+nav.tabs button
+  padding: $padding-xs $padding-md
+  background-color: $bg-2
+  font-family:$font-header
+  font-size: 1em
+  color: $txt
+  border-top-left-radius: $border-radius
+  border-top-right-radius: $border-radius
+  border: 1px solid $border
+  outline: none
+  cursor: pointer
+
+  &.active
+    background-color: white
+
+
+@media (max-width: 767px)
+  /* do stuff with .content here... */

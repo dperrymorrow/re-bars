@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>ReBars Docs</title>
-    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="dist/docs.min.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/prism.min.js"></script>
@@ -858,35 +858,16 @@ export default {
 </div></div>
               </div>
             </div>
-
-            <script type="module">
-              import ReBars from "./js/rebars.min.js";
-              import Simple from "./examples/app.js";
-              import Advanced from "./examples/advanced/app.js";
-              import Counter from "./examples/counter.js";
-
-              ReBars.app( {
-                $el: document.getElementById("demo-app-simple"),
-                root: SimpleExample
-              });
-
-              ReBars.app( {
-                $el: document.getElementById("demo-app-advanced"),
-                root: AdvancedExample
-              });
-
-              ReBars.app({
-                $el: document.getElementById("counter-demo"),
-                root: Counter,
-              });
-            </script>
           </div>
 
         </div>
       </section>
     </main>
 
-    <script src="js/index.js"></script>
+    <script src="dist/docs.min.js"></script>
+    <script>
+      DocsApp.init();
+    </script>
 
   </body>
 </html>
