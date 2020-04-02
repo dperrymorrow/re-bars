@@ -2,42 +2,877 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>ReBars Docs: Introduction</title>
-    <link rel="stylesheet" href="css/index.css">
+    <title>ReBars Docs</title>
+    <link rel="stylesheet" href="dist/docs.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-markup-templating.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-handlebars.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
   </head>
 
   <body>
-
     <main>
-      <nav id="nav-container"></nav>
+      <nav id="nav-container">
+        <div class="logo">ReBars</div>
+
+        <ul class="side-bar-nav">
+            <li>
+              <a href="#rebars">ReBars Introduction</a>
+            </li>
+            <li>
+              <a href="#a-rebars-application">A ReBars Application</a>
+                  <ul>
+                      <li>
+                        <a href="#global-helpers">Global Helpers</a>
+                      </li>
+                      <li>
+                        <a href="#handlebars">Handlebars</a>
+                      </li>
+                  </ul>
+            </li>
+            <li>
+              <a href="#rebars-components">A ReBars Component</a>
+                  <ul>
+                      <li>
+                        <a href="#template">Template</a>
+                      </li>
+                      <li>
+                        <a href="#name">Name</a>
+                      </li>
+                      <li>
+                        <a href="#data">Data</a>
+                      </li>
+                      <li>
+                        <a href="#watchers">Watchers</a>
+                      </li>
+                      <li>
+                        <a href="#hooks">Hooks</a>
+                      </li>
+                      <li>
+                        <a href="#methods">Methods</a>
+                      </li>
+                  </ul>
+            </li>
+            <li>
+              <a href="#rebars-built-in-helpers">ReBars Helpers</a>
+                  <ul>
+                      <li>
+                        <a href="#the-watch-helper">watch</a>
+                      </li>
+                      <li>
+                        <a href="#the-ref-helper">ref</a>
+                      </li>
+                      <li>
+                        <a href="#the-bound-helper">bound</a>
+                      </li>
+                      <li>
+                        <a href="#the-method-helper">method</a>
+                      </li>
+                      <li>
+                        <a href="#the-component-helper">component</a>
+                      </li>
+                      <li>
+                        <a href="#the-debug-helper">debug</a>
+                      </li>
+                  </ul>
+            </li>
+            <li>
+              <a href="#example-simple">Examples</a>
+                  <ul>
+                      <li>
+                        <a href="#example-simple">Simple</a>
+                      </li>
+                      <li>
+                        <a href="#example-advanced">Advanced</a>
+                      </li>
+                  </ul>
+            </li>
+        </ul>
+
+      </nav>
       <section>
         <div class="content">
-          <h1>
-            ReBars
-            <small>
-              A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a Virtial DOM.
-            </small>
-          </h1>
 
-          <div data-src="_partials/introduction.md" data-filter="markdown" class="markdown-content"></div>
-          <div id="counter-demo" class="demo-app"></div>
-          <div data-src="examples/counter.js" data-filter="javascript" class="markdown-content"></div>
+          <div class="page">
+            
+
+# ReBars
+
+A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a Virtial DOM.
+
+ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling.
+
+ReBars handles keeping your DOM in sync with your data, and gets out of your way. You can get back to just writing Javascript.
+
+ReBars is really just Handlebars with some built in helpers and the notion of [components](#rebars-components). The main concept of ReBars is a [{{#watch}}](#the-watch-helper) block helper that lets you tell ReBars what and when to re-render.
+
+> If you have used Handlebars, you already know ReBars
+
+```javascript
+template: /*html*/ `
+  <h3>
+    Button have been clicked
+      {{#watch "clicked" }}
+        {{ clicked }}
+      {{/watch}}
+    times
+    <button {{ method "step" }}>Click Me</button>
+  </h3>
+`,
+
+name: "counter",
+
+data() {
+  return { clicked: 0 };
+},
+
+methods: {
+  step() {
+    this.clicked ++;
+  },
+}
+```
+
+Each time the value passed to watch is changed, *just* that Handlebars block will re-render. No Virtial DOM patching, no re-render of entire template. The block function from the helper is stored at first render, and simply invoked again each time a value changes.
+
+            <div id="counter-demo" class="demo-app"></div>
+          </div>
+
+          <div class="page"><div class="markdown-content"><h1 id="a-rebars-application">A ReBars Application</h1>
+<p>A ReBars application is a collection of components rendered to a DOM element. You can have more than one app on a page if you desire.</p>
+<p>To start an app, there is minimal code on the page. You create a new ReBars app with an Object containing two keys.</p>
+<ul>
+<li><code>$el</code> the Element that your app will be rendered into</li>
+<li><code>root</code> the top level <a href="component.html">component</a> in your app.</li>
+</ul>
+<blockquote>
+<p>You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.</p>
+</blockquote>
+<pre><code class="language-html">&lt;div id=&quot;demo-app&quot;&gt;&lt;/div&gt;
+&lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js&quot;&gt;&lt;/script&gt;
+
+&lt;script type=&quot;module&quot;&gt;
+  import ReBars from &quot;re-bars&quot;;
+  import RootComponent from &quot;./app.js&quot;;
+
+  ReBars.app({
+    $el: document.getElementById(&quot;demo-app&quot;),
+    root: RootComponent,
+  });
+&lt;/script&gt;</code></pre>
+<h2 id="global-helpers">Global Helpers</h2>
+<p>If you would like to add helpers to all components within this application you can pass a helpers Object to the <code>ReBars.app</code> function, You would then be able to use your <code>isChecked</code> helper in any component in your application.</p>
+<pre><code class="language-javascript">ReBars.app({
+  $el: document.getElementById(&quot;demo-app&quot;),
+  root: RootComponent,
+  helpers: {
+    isChecked: val =&gt; (val ? &quot;checked&quot; : &quot;&quot;),
+  }
+});</code></pre>
+<h2 id="handlebars">Handlebars</h2>
+<p>If you would like use Handlebars from a source other than on <code>window</code> <em>such as loading from a CDN</em>, you can pass your instance of Handlebars to the <code>ReBars.app</code> function.</p>
+<pre><code class="language-javascript">import Handlebars from &quot;somewhere&quot;;
+
+ReBars.app({
+  Handlebars,
+  $el: document.getElementById(&quot;demo-app&quot;),
+  root: RootComponent,
+});</code></pre>
+</div></div>
+          <div class="page"><div class="markdown-content"><h1 id="rebars-components">ReBars Components</h1>
+<p>Components are where everything happens. Each component has it&#39;s own <code>Handlebars.instance</code> so their helpers are isolated from other components/applications.</p>
+<pre><code class="language-javascript">export default {
+  template: /*html*/ `&lt;div&gt;&lt;/div&gt;`, // your Handlebars template
+  name: &quot;myComponent&quot;, // must have a name
+  data() { return {} }, // data for your template
+  methods: {}, // event handlers
+  hooks: {}, // lifecycle hooks
+  watchers: {}, // methods to fire on change of data
+  helpers: {} // Handlebars helpers just for this component
+}</code></pre>
+<h2 id="template">Template</h2>
+<p>The template is the Handlebars template that will be rendered. What is defined as the return from your <code>data()</code> function will be the root scope of the template when rendering.</p>
+<h2 id="name">Name</h2>
+<p>Each component must define a name. This is is the string you will use to render components using the <a href="#the-component-helper">component</a> helper within your template.</p>
+<h2 id="data">Data</h2>
+<p>The data for the component. Must be a function that retuns an Object.</p>
+<pre><code class="language-javascript">data() {
+  return {
+    name: {
+      first: &quot;David&quot;,
+      last: &quot;Morrow&quot;
+    }
+  }
+}</code></pre>
+<blockquote>
+<p>It is also possible to return a function as a key in your data. This can be very useful.</p>
+</blockquote>
+<pre><code class="language-javascript">data() {
+  return {
+    fullName() {
+      return `${this.name.first}, ${this.name.last}`;
+    },
+    name: {
+      first: &quot;David&quot;,
+      last: &quot;Morrow&quot;
+    }
+  }
+}</code></pre>
+<pre><code class="language-html">&lt;p&gt;{{ fullName }}&lt;/p&gt;</code></pre>
+<h2 id="methods">Methods</h2>
+<p>Methods defined in a component are avalable for use with the <a href="#the-method-helper">method</a> helper, or can be called from within another method.</p>
+<pre><code class="language-html">&lt;button {{ method &quot;save:click&quot; &quot;fred&quot; }}&gt;save&lt;/button&gt;</code></pre>
+<pre><code class="language-javascript">methods: {
+  save(event, name) {
+    // this.$methods
+    // this.$refs()
+    // this.$props
+  }
+}</code></pre>
+<blockquote>
+<p>Methods can reference other methods.</p>
+</blockquote>
+<pre><code class="language-javascript">methods: {
+  findFriend(name) {
+    this.friends.find(friend =&gt; friend.name === name);
+  },
+  save(event, name) {
+    const friend = this.$methods.findFriend(name);
+    // save your friend
+  }
+}</code></pre>
+<h2 id="watchers">Watchers</h2>
+<p>Watchers give you the ability to fire <em>&quot;hooks&quot;</em> when a property in your data has change. You can watch any items in  your data or <code>$props</code></p>
+<blockquote>
+<p>You cannot, however watch a method in your data. Methods defined in your data are only for convienance for your template rendering.</p>
+</blockquote>
+<pre><code class="language-javascript">data() {
+  return {
+    name: {
+      first: &quot;david&quot;
+    }
+  };
+},
+
+watchers: {
+  &quot;name.first&quot;() {
+    console.log(this.name.first); // david
+    // this.$refs()
+    // this.$methods
+    // this.$props
+  }
+}</code></pre>
+<p>Each time <code>name.first</code> is changed the method will be triggered with the same context you would have in a method.</p>
+<h2 id="hooks">Hooks</h2>
+<p>Hooks are triggered at different points in the component instance&#39;s life.</p>
+<ul>
+<li><code>created</code> triggered when the component is instantiated and prior to rendering</li>
+<li><code>attached</code> the component has been rendered and added to the DOM</li>
+<li><code>teardown</code> the component is about to be deleted, but at this point is still on the DOM</li>
+</ul>
+<blockquote>
+<p><code>this.$refs()</code> cannot be used in the created hook. The component is not yet on the DOM. If you need to do something with the component&#39;s <code>$refs</code> or DOM. Use the attached hook instead.</p>
+</blockquote>
+<pre><code class="language-javascript">data() {
+  return {
+    name: {
+      first: &quot;David&quot;
+    }
+  }
+},
+
+hooks: {
+  created() {
+    // you can set items here pre render
+    this.name.first = &quot;Mike&quot;;
+  }
+}</code></pre>
+<h2 id="helpers">Helpers</h2>
+<p>Any methods you define under Handlebars helpers methods you define in <code>helpers</code> will be automatically added to the instance rendering the component, and be available for use. ReBars includes several <a href="helpers.html">helpers</a> as well.</p>
+<pre><code class="language-html">&lt;input type=&quot;checkbox&quot; {{ isChecked someBoolean }} /&gt;</code></pre>
+<pre><code class="language-javascript">helpers: {
+  isChecked: val =&gt; (val ? &quot;checked&quot; : &quot;&quot;),
+}</code></pre>
+<p>These helpers are only available for the context of the component you are defining. If you would like to define helpers that are global. Add them to the <a href="#a-rebars-application">ReBars application</a>.</p>
+</div></div>
+          <div class="page"><div class="markdown-content"><h1 id="rebars-built-in-helpers">ReBars built in helpers</h1>
+<p>ReBars comes with a few very powerfull helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.</p>
+<h2 id="the-watch-helper">The {{#watch}} helper</h2>
+<p>The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.</p>
+<pre><code class="language-javascript">data() {
+  return {
+    hobby: &quot;running&quot;,
+    name: {
+      first: &quot;David&quot;,
+      last: &quot;Morrow&quot;
+    },
+    friends: [
+      { name: &quot;Joe&quot;, hobby: &quot;boxing&quot; },
+      { name: &quot;Fred&quot;, hobby: &quot;cooking&quot; }
+    ]
+  }
+}</code></pre>
+<p>Watch allows you to re-render a block of your template on change.
+Watch takes an argument of what property to watch. The argument can be a string or an object.</p>
+<pre><code class="language-html">{{#watch name }}
+  My name is {{ name.first }} {{ name.last }}.
+{{/watch}}</code></pre>
+<p>Anytime <code>name</code> is changed the block would be re-rendered with the updated data.</p>
+<blockquote>
+<p>If the item you are watching is a primitive such as a <code>String</code>, or <code>Number</code>. You will need to use a string as the argument.</p>
+</blockquote>
+<ul>
+<li><code>{{#watch name }}</code> this will watch all keys on Object <code>name</code></li>
+<li><code>{{#watch &quot;name.*&quot; }}</code> this is the string equvilent of the above</li>
+<li><code>{{#watch &quot;name.first&quot; }}</code> will only watch for changes to <code>name.first</code></li>
+<li><code>{{#watch &quot;name.*,hobby&quot; }}</code> will watch for any change to name or hobby</li>
+<li><code>{{#watch &quot;friends.*.hobby&quot; }}</code> will watch for any friend index hobby change</li>
+</ul>
+<h3 id="watch-element-wrappers">Watch Element wrappers</h3>
+<p>Each <code>{{watch}}</code> block gets wrapped in a span with an id which is stored to remember what outlet to re-render on change. Sometimes this can get in the way of styling your layouts.</p>
+<p>As a solution you can add a tag, class id, any attribute you want to the watch block.</p>
+<pre><code class="language-html">{{#watch name tag=&quot;p&quot; class=&quot;intro&quot; id=&quot;intro-p&quot; }}
+  {{ name.first }} {{ name.last }}
+{{/watch}}
+
+&lt;!-- outputs --&gt;
+&lt;p class=&quot;intro&quot; id=&quot;intro-p&quot; data-rbs-watch=&quot;rbs4&quot;&gt;
+  David Morrow
+&lt;/p&gt;</code></pre>
+<h3 id="watching-arrays">Watching Arrays</h3>
+<p><code>{{#watch}}</code> can be used on an <code>Array</code> as well.</p>
+<blockquote>
+<p>Be sure to add a <code>{{ ref }}</code> to each item enabling ReBars to only re-render changed items. <em>Each ref must be unique</em></p>
+</blockquote>
+<pre><code class="language-html">&lt;ul&gt;
+  {{#watch friends }}
+    {{#each friends as | friend | }}
+      &lt;li {{ ref friend.name }}&gt;
+        {{ friend.name }} likes to {{ friend.hobby }}
+      &lt;/li&gt;
+    {{/each}}
+  {{/watch}}
+&lt;/ul&gt;</code></pre>
+<p>If you are watching inside a loop, you can target the specific object and key by passing further arguments. The example below will only trigger a re-render on that <code>friend.name</code> <em>(the item in the loop)</em> change</p>
+<pre><code class="language-html">&lt;ul&gt;
+  {{#each friends as | friend | }}
+    &lt;li&gt;
+      {{#watch friend &quot;name&quot; }}
+        {{ friend.name }}
+      {{/watch}}
+    &lt;/li&gt;
+  {{/each}}
+&lt;/ul&gt;</code></pre>
+<h2 id="the-ref-helper">The {{ref}} helper</h2>
+<p>ReBars comes with a <code>{{ref}}</code> helper built in. This gives you the ability to save a reference to an element. This also gives a key for Array loop items so that the Array can be patched instead of re-rendered entirely.</p>
+<ul>
+<li>takes one param, the <code>String</code> for the reference</li>
+</ul>
+<blockquote>
+<p>The ref helper is also needed on any input or other elements that need focused restored after a re-render.</p>
+</blockquote>
+<pre><code class="language-html">&lt;div&gt;
+  &lt;h1 {{ ref &quot;header&quot; }}&gt;Header&lt;/h1&gt;
+&lt;/div&gt;</code></pre>
+<p>inside of a method, you can reference any ref by using the <code>$refs()</code> function from a method in your component.</p>
+<pre><code class="language-javascript">methods: {
+  save() {
+    this.$refs().header;
+    // returns the &lt;h1&gt; element
+  }
+}</code></pre>
+<h2 id="the-bound-helper">The {{bound}} helper</h2>
+<p>The <code>{{bound}</code> helper is used on input elements such as <code>&lt;input&gt;</code> or <code>&lt;textarea&gt;</code> elements. The parameter passed will sync the value attribute to the value, and on <code>input</code> event update the value.</p>
+<pre><code class="language-html">&lt;input type=&quot;text&quot; {{ bound &quot;name.first&quot; }} /&gt;</code></pre>
+<p>an item that is bound will automatically get a ref added as the path of the property. this is used for resetting focus and cursor position after a re-render. If you have more than one item with the same bound property, you may need to add another reference</p>
+<p>You can pass in a ref as a prop to this helper should you need something more specific.</p>
+<pre><code class="language-html">&lt;input type=&quot;text&quot; {{ bound &quot;name.first&quot; ref=&quot;firstName&quot; }} /&gt;</code></pre>
+<h2 id="the-method-helper">The {{method}} helper</h2>
+<p>This allows you to bind your component&#39;s methods to events in your template.</p>
+<pre><code class="language-html">&lt;button {{ method &quot;save:click&quot; &quot;param1&quot; &quot;param2&quot; }}&gt;Save&lt;/button&gt;</code></pre>
+<pre><code class="language-javascript">methods: {
+  save(event, arg1, arg1) {
+    console.log(arg1, arg1);
+    // param1 param2
+  }
+}</code></pre>
+<blockquote>
+<p>You method, when invoked, the first argument will always be the event, followed by any additional parameters. Params must be primiteve and not full Objects or Arrays.</p>
+</blockquote>
+<ul>
+<li>the first param is the methodName separated by <code>:eventType</code>, if none is specified <code>click</code> will be the event</li>
+<li>you can add as many other parameters as you would like to your method call</li>
+</ul>
+<h2 id="the-component-helper">The {{component}} helper</h2>
+<p>This allows you to render child components from withing the compnent you are in. It takes one parameter, the name of the component to render. This will render a registered component to the DOM of the parent component.</p>
+<blockquote>
+<p>The &quot;name&quot; of the component is the name property in the component&#39;s definition. Not the name you imported it as.</p>
+</blockquote>
+<pre><code class="language-html">{{ component &quot;myComponentName&quot; }}</code></pre>
+<p>You can pass props to the component. Any props sent in will be merged with the component&#39;s data. If a prop is a method, it will be merged into the child component&#39;s methods. The &quot;friend&quot; component will have friend defined in it&#39;s data.</p>
+<pre><code class="language-html">&lt;ul&gt;
+  {{#each friends as | friend | }}
+    {{ component &quot;friend&quot; friend=friend }}
+  {{/each}}
+&lt;/ul&gt;</code></pre>
+<h3 id="passing-methods-as-props">Passing Methods as props</h3>
+<p>You can pass methods to child components as well, they will be merged into the child&#39;s methods.</p>
+<p><strong>Parent component:</strong></p>
+<pre><code class="language-html">&lt;ul&gt;
+  {{#watch friends }}
+    {{#each friends as | friend | }}
+      {{
+        component &quot;friend&quot;
+        friend=friend
+        index=@index
+        deleteFriend=$methods.deleteFriend
+      }}
+    {{/each}}
+  {{/watch}}
+&lt;/ul&gt;</code></pre>
+<pre><code class="language-javascript">methods: {
+  deleteFriend(event, index) {
+    this.friends.splice(index, 1)
+  },
+}</code></pre>
+<p><strong>Child component:</strong></p>
+<pre><code class="language-html">&lt;button {{ method &quot;remove&quot; }}&gt;Delete Joe&lt;/button&gt;</code></pre>
+<pre><code class="language-javascript">methods: {
+  remove(event, name) {
+    this.$props.deleteFriend(this.$props.index)
+  }
+}</code></pre>
+<p>on clicking of the button, the friend would be deleted in the parent. Any watch blocks watching the <code>friends.*</code> or <code>friend[index]</code> would be re-rendered.</p>
+<h2 id="the-debug-helper">The {{debug}} helper</h2>
+<p>this helper allows you to view the state of your data in the template.</p>
+<p>To output all data for your template, use the Handlebars <code>.</code> reference.</p>
+<pre><code class="language-html">&lt;!-- full debug --&gt;
+{{ debug . }}
+&lt;!-- debug name object --&gt;
+{{ debug name }}</code></pre>
+</div></div>
+
+
+          <div class="page">
+            <h2 id="example-simple">Todo List Simple</h2>
+            <div id="demo-app-simple" class="demo-app"></div>
+            <div class="markdown-content"><pre><code class="language-javascript">export default {
+  template: /*html*/ `
+  &lt;div&gt;
+    &lt;div class=&quot;header-container&quot;&gt;
+      &lt;h1&gt;
+        {{#watch header }}
+          &lt;span&gt;{{ header.title }}&lt;/span&gt;
+          &lt;small&gt;{{ header.description }}&lt;/small&gt;
+        {{/watch}}
+      &lt;/h1&gt;
+
+      &lt;label&gt;
+        Title:
+        &lt;input type=&quot;text&quot; {{ bound &quot;header.title&quot; }}/&gt;
+      &lt;/label&gt;
+
+      &lt;label&gt;
+        Description:
+        &lt;input type=&quot;text&quot; {{ bound &quot;header.description&quot; }}/&gt;
+      &lt;/label&gt;
+    &lt;/div&gt;
+
+    &lt;ul class=&quot;simple&quot;&gt;
+      {{#watch &quot;todos.*&quot; }}
+        {{#each todos }}
+          &lt;li {{ ref id }}&gt;
+            &lt;div class=&quot;todo&quot;&gt;
+              &lt;label&gt;
+                &lt;input type=&quot;checkbox&quot; {{ isChecked done }} {{ method &quot;toggleDone&quot; id }} /&gt;
+                {{#if done }}
+                  &lt;s&gt;{{ name }}&lt;/s&gt;
+                {{else}}
+                  &lt;strong&gt;{{ name }}&lt;/strong&gt;
+                {{/if}}
+              &lt;/label&gt;
+
+              &lt;div class=&quot;actions&quot;&gt;
+                &lt;button {{ method &quot;deleteTodo&quot; id }}&gt;delete&lt;/button&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/li&gt;
+        {{/each}}
+      {{/watch}}
+    &lt;/ul&gt;
+
+    {{#watch &quot;adding&quot; }}
+      {{#if adding }}
+        &lt;form&gt;
+          &lt;input type=&quot;text&quot; name=&quot;name&quot; {{ ref &quot;newName&quot; }} placeholder=&quot;the new todo&quot; /&gt;
+          &lt;button class=&quot;push&quot; {{ method &quot;addItem&quot; }}&gt;Add todo&lt;/button&gt;
+          &lt;button class=&quot;cancel&quot; {{ method &quot;toggleCreate&quot; }}&gt;Cancel&lt;/button&gt;
+        &lt;/form&gt;
+      {{else}}
+        &lt;button class=&quot;add&quot; {{ method &quot;toggleCreate&quot; }}&gt;Add another&lt;/button&gt;
+      {{/if}}
+    {{/watch}}
+  &lt;/div&gt;
+  `,
+
+  data() {
+    return {
+      adding: false,
+      header: {
+        title: &quot;Todos&quot;,
+        description: &quot;some things that need done&quot;,
+      },
+      todos: [
+        {
+          done: false,
+          name: &quot;Grocery Shopping&quot;,
+          id: 22,
+        },
+        {
+          done: true,
+          name: &quot;Paint the House&quot;,
+          id: 44,
+        },
+      ],
+    };
+  },
+
+  name: &quot;DemoApp&quot;,
+
+  helpers: {
+    isChecked: val =&gt; (val ? &quot;checked&quot; : &quot;&quot;),
+  },
+
+  methods: {
+    addItem(event) {
+      event.preventDefault();
+      const $input = this.$refs().newName;
+
+      this.todos.push({
+        id: new Date().getTime(),
+        name: $input.value,
+      });
+
+      $input.value = &quot;&quot;;
+    },
+
+    deleteTodo(event, id) {
+      const index = this.todos.findIndex(todo =&gt; todo.id === id);
+      this.todos.splice(index, 1);
+    },
+
+    toggleDone(event, id) {
+      const todo = this.todos.find(todo =&gt; todo.id === id);
+      todo.done = !todo.done;
+    },
+
+    toggleCreate(event) {
+      event.preventDefault();
+      this.adding = !this.adding;
+    },
+  },
+};
+</code></pre>
+</div>
+
+            <h2 id="example-advanced">Todo List Advanced</h2>
+            <div id="demo-app-advanced" class="demo-app"></div>
+
+            <div class="tab-container">
+              <nav class="tabs">
+                <button class="active" data-target="app">app.js</button>
+                <button data-target="add">add.js</button>
+                <button data-target="filters">filters.js</button>
+                <button data-target="todo">todo.js</button>
+              </nav>
+
+              <div class="tab-content">
+                <div id="app" class="active"><div class="markdown-content"><pre><code class="language-javascript">import Add from &quot;./add.js&quot;;
+import Todo from &quot;./todo.js&quot;;
+import Filters from &quot;./filters.js&quot;;
+
+export default {
+  template: /*html*/ `
+  &lt;div&gt;
+    &lt;div class=&quot;header-container&quot;&gt;
+      {{#watch &quot;header.*&quot; tag=&quot;h1&quot; }}
+        &lt;span&gt;{{ header.title }}&lt;/span&gt;
+        &lt;small&gt;{{ header.description }}&lt;/small&gt;
+      {{/watch}}
+
+      &lt;label&gt;
+        Title:
+        &lt;input type=&quot;text&quot; {{ bound &quot;header.title&quot; }}/&gt;
+      &lt;/label&gt;
+
+      &lt;label&gt;
+        Description:
+        &lt;input type=&quot;text&quot; {{ bound &quot;header.description&quot; }}/&gt;
+      &lt;/label&gt;
+    &lt;/div&gt;
+
+    {{ component &quot;filters&quot; filters=filters }}
+
+    {{#watch &quot;filters.*,todos.length,todos.*.done&quot; tag=&quot;ul&quot;}}
+      {{#each filteredTodos as | todo | }}
+        &lt;li {{ ref todo.id }}&gt;
+          {{
+            component &quot;Todo&quot;
+            todo=todo
+            index=@index
+            deleteTodo=@root.$methods.deleteTodo
+          }}
+        &lt;/li&gt;
+      {{/each}}
+    {{/watch}}
+
+    {{
+      component &quot;AddTodo&quot;
+      addTodo=$methods.addTodo
+    }}
+  &lt;div&gt;
+  `,
+
+  name: &quot;DemoApp&quot;,
+
+  data() {
+    return {
+      filteredTodos() {
+        let list = this.todos.concat();
+        if (this.filters.state === &quot;incomplete&quot;) list = this.todos.filter(t =&gt; !t.done);
+        else if (this.filters.state === &quot;completed&quot;) list = this.todos.filter(t =&gt; t.done);
+
+        const sorted = list.sort((a, b) =&gt; {
+          if (this.filters.sortBy === &quot;name&quot;) return a.name.localeCompare(b.name);
+          else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
+        });
+
+        return this.filters.sortDir === &quot;asc&quot; ? sorted : sorted.reverse();
+      },
+
+      filters: {
+        state: null,
+        sortBy: &quot;name&quot;,
+        sortDir: &quot;asc&quot;,
+      },
+      header: {
+        title: &quot;ReBars Todos&quot;,
+        description: &quot;Some things that need done&quot;,
+      },
+      todos: [
+        {
+          done: false,
+          name: &quot;Wash the car&quot;,
+          updated: &quot;3/1/2020, 12:37:10 PM&quot;,
+          id: 21,
+        },
+        {
+          done: true,
+          name: &quot;Shopping for groceries&quot;,
+          updated: &quot;2/27/2020, 2:37:10 PM&quot;,
+          id: 22,
+        },
+
+        {
+          done: false,
+          name: &quot;Code some Javascript&quot;,
+          updated: &quot;1/27/2020, 9:37:10 AM&quot;,
+          id: 23,
+        },
+
+        {
+          done: true,
+          name: &quot;Go for a run&quot;,
+          updated: &quot;1/15/2020, 10:37:10 PM&quot;,
+          id: 24,
+        },
+      ],
+    };
+  },
+
+  components: [Add, Todo, Filters],
+
+  methods: {
+    addTodo(name) {
+      this.todos.push({ name, id: new Date().getTime(), updated: new Date().toLocaleString() });
+      this.filters.state = null;
+    },
+
+    deleteTodo(event, id) {
+      const index = this.todos.findIndex(t =&gt; t.id === id);
+      this.todos.splice(index, 1);
+    },
+
+    showAdd(event) {
+      event.preventDefault();
+      this.uiState.adding = true;
+    },
+  },
+};
+</code></pre>
+</div></div>
+                <div id="add"><div class="markdown-content"><pre><code class="language-javascript">export default {
+  template: /*html*/ `
+  &lt;div&gt;
+    {{#watch &quot;isAdding&quot; }}
+      {{#if isAdding }}
+        &lt;form&gt;
+          {{#watch &quot;newName&quot; }}
+            &lt;h3&gt;{{ newName }}&lt;/h3&gt;
+            &lt;input type=&quot;text&quot; {{ bound &quot;newName&quot; }} placeholder=&quot;the new todo&quot; /&gt;
+          {{/watch}}
+
+          &lt;button class=&quot;push&quot; {{ method &quot;addItem&quot; }}&gt;Add todo&lt;/button&gt;
+          &lt;button class=&quot;cancel&quot; {{ method &quot;toggleAdd&quot; }}&gt;Cancel&lt;/button&gt;
+        &lt;/form&gt;
+      {{ else }}
+        &lt;button class=&quot;add&quot; {{ method &quot;toggleAdd&quot; }}&gt;Add another&lt;/button&gt;
+      {{/if}}
+    {{/watch}}
+  &lt;/div&gt;
+  `,
+
+  name: &quot;AddTodo&quot;,
+
+  data() {
+    return {
+      isAdding: false,
+      hasError: false,
+      newName: &quot;&quot;,
+    };
+  },
+
+  methods: {
+    toggleAdd(event) {
+      event.preventDefault();
+      this.isAdding = !this.isAdding;
+    },
+
+    addItem(event) {
+      event.preventDefault();
+      this.$props.addTodo(this.newName);
+      this.newName = &quot;&quot;;
+    },
+  },
+};
+</code></pre>
+</div></div>
+                <div id="filters"><div class="markdown-content"><pre><code class="language-javascript">export default {
+  template: /*html*/ `
+    &lt;div class=&quot;filters&quot;&gt;
+      {{#watch &quot;$props.filters.state&quot; tag=&quot;div&quot; }}
+        &lt;button {{ disabledIf &quot;completed&quot; }} {{ method &quot;filterBy&quot; &quot;completed&quot; }}&gt;Show Completed&lt;/button&gt;
+        &lt;button {{ disabledIf &quot;incomplete&quot; }} {{ method &quot;filterBy&quot; &quot;incomplete&quot; }}&gt;Show Incompleted&lt;/button&gt;
+        &lt;button {{ disabledIf null }} {{ method &quot;filterBy&quot; null }}&gt;Show All&lt;/button&gt;
+      {{/watch}}
+
+      {{#watch &quot;$props.filters.sortBy,$props.filters.sortDir&quot; tag=&quot;div&quot; }}
+        &lt;select {{ bound &quot;$props.filters.sortBy&quot; }}&gt;
+          &lt;option {{ selectedIf $props.filters.sortBy &quot;name&quot; }} value=&quot;name&quot;&gt;Sort by Name&lt;/option&gt;
+          &lt;option {{ selectedIf $props.filters.sortBy &quot;updated&quot; }} value=&quot;updated&quot;&gt;Sort by Updated at&lt;/option&gt;
+        &lt;/select&gt;
+
+        &lt;select {{ bound &quot;$props.filters.sortDir&quot; }}&gt;
+          &lt;option {{ selectedIf $props.filters.sortDir &quot;asc&quot; }} value=&quot;asc&quot;&gt;Ascending&lt;/option&gt;
+          &lt;option {{ selectedIf $props.filters.sortDir &quot;desc&quot; }} value=&quot;desc&quot;&gt;Descending&lt;/option&gt;
+        &lt;/select&gt;
+      {{/watch}}
+    &lt;/div&gt;
+  `,
+
+  name: &quot;filters&quot;,
+
+  helpers: {
+    selectedIf: (current, option) =&gt; (current === option ? &quot;selected&quot; : &quot;&quot;),
+    disabledIf: (state, { data }) =&gt; (data.root.$props.filters.state === state ? &quot;disabled&quot; : &quot;&quot;),
+  },
+
+  methods: {
+    filterBy(event, state) {
+      this.$props.filters.state = state;
+    },
+  },
+};
+</code></pre>
+</div></div>
+                <div id="todo"><div class="markdown-content"><pre><code class="language-javascript">export default {
+  template: /*html*/ `
+    &lt;div&gt;
+      {{#watch &quot;editing&quot; tag=&quot;div&quot; class=&quot;todo&quot; }}
+        {{#if editing}}
+          &lt;input type=&quot;text&quot; value=&quot;{{ $props.todo.name }}&quot; {{ ref &quot;nameInput&quot; }}/&gt;
+          &lt;button {{ method &quot;save&quot; }}&gt;save&lt;/button&gt;
+        {{ else }}
+
+          {{#watch $props.todo }}
+            &lt;label&gt;
+              &lt;input type=&quot;checkbox&quot; {{ isChecked $props.todo.done }} {{ method &quot;toggleDone&quot; }} /&gt;
+              {{#if $props.todo.done }}
+                &lt;s&gt;{{ $props.todo.name }}&lt;/s&gt;
+              {{else}}
+                &lt;strong&gt;{{ $props.todo.name }}&lt;/strong&gt;
+              {{/if}}
+            &lt;/label&gt;
+          {{/watch}}
+
+          &lt;div class=&quot;actions&quot;&gt;
+            &lt;span class=&quot;date&quot;&gt;{{ timeAgo todo.updated }}&lt;/span&gt;
+            &lt;button {{ method &quot;remove&quot; }}&gt;delete&lt;/button&gt;
+            &lt;button {{ method &quot;toggleEditing&quot; }}&gt;edit&lt;/button&gt;
+          &lt;/div&gt;
+        {{/if}}
+      {{/watch}}
+    &lt;/div&gt;
+  `,
+
+  name: &quot;Todo&quot;,
+
+  data() {
+    return { editing: false };
+  },
+
+  helpers: {
+    isChecked: val =&gt; (val ? &quot;checked&quot; : &quot;&quot;),
+    timeAgo: val =&gt; {
+      return window.moment(val).fromNow();
+    },
+  },
+
+  methods: {
+    save() {
+      this.$props.todo.name = this.$refs().nameInput.value;
+      this.$props.todo.updated = new Date().toLocaleString();
+      this.editing = false;
+    },
+
+    remove() {
+      this.$props.deleteTodo(this.$props.todo.id);
+    },
+
+    toggleEditing() {
+      this.editing = !this.editing;
+    },
+
+    toggleDone() {
+      this.$props.todo.done = !this.$props.todo.done;
+    },
+  },
+};
+</code></pre>
+</div></div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
     </main>
 
-    <script type="module">
-      import Counter from "./examples/counter.js";
-      import ReBars from "./js/rebars.min.js";
-      import App from "./js/index.js"
-
-      (async function(){
-        await App();
-        ReBars.app({
-          $el: document.getElementById("counter-demo"),
-          root: Counter,
-        });
-      }());
+    <script src="dist/docs.min.js"></script>
+    <script>
+      DocsApp.init();
     </script>
 
   </body>

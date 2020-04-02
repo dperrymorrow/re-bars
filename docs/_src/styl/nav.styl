@@ -1,0 +1,58 @@
+
+#nav-container
+  background-color: $bg-2
+  height: 100vh
+  overflow: auto
+  border-left: 1px solid $border
+
+  .logo
+    font-family: $font-header
+    font-size: 3.2em
+    width: 100%
+    text-align: center
+    background-color: $bg-top
+    padding: $padding-sm 0
+    color: $bg-2
+    border-bottom: 2px solid $border
+    text-shadow: -1px -1px 1px $txt-dark
+    letter-spacing: -.03em
+
+  .side-bar-nav
+    padding: $padding-xs $padding-lg
+    list-style: none
+
+    ul, li
+      list-style: none
+
+    a
+      color: $txt-dark
+      text-decoration: none
+      padding: .2em .4em
+      border-radius: $border-radius
+      background: transparent
+      transition: all .3s ease-out
+
+      &.active
+        color: $link-txt
+        background-color: $link-bg
+
+      &:hover
+        color: $link-txt
+        text-decoration: underline
+
+    > li
+      margin-top: $padding-sm
+
+      > a
+        font-family: $font-header
+        font-size: .9em
+        text-transform: uppercase
+
+      > ul
+        padding-left: $padding-xs
+        font-family: $font-body
+        text-transform: capitalize
+        margin-top: $padding-xs
+
+        li
+          margin: .4em 0

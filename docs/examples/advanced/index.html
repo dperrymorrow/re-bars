@@ -12,23 +12,6 @@
       <section>
         <div class="content">
           <div id="demo-app" class="demo-app"></div>
-
-
-          <div class="tab-container">
-            <nav class="tabs">
-              <button class="active" data-target="app">app.js</button>
-              <button data-target="add">add.js</button>
-              <button data-target="filters">filters.js</button>
-              <button data-target="todo">todo.js</button>
-            </nav>
-
-            <div class="tab-content markdown-content">
-              <div id="app" class="active" data-src="app.js" data-filter="javascript"></div>
-              <div id="add" data-src="add.js" data-filter="javascript"></div>
-              <div id="filters" data-src="filters.js" data-filter="javascript"></div>
-              <div id="todo" data-src="todo.js" data-filter="javascript"></div>
-            </div>
-          </div>
         </div>
       </section>
     </main>
@@ -37,18 +20,13 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 
     <script type="module">
-      import ReBars from "../../js/rebars.min.js"
-      // import ReBars from "../../../src/index.js";
-      import App from "../../js/index.js"
-      import Loader from "../../js/loader.js";
+      import ReBars from "../../../src/index.js";
       import DemoApp from "./app.js";
 
       ReBars.app({
         $el: document.getElementById("demo-app"),
         root: DemoApp,
       });
-
-      App();
     </script>
   </body>
 </html>

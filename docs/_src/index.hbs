@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>ReBars Docs</title>
+    <link rel="stylesheet" href="dist/docs.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-markup-templating.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-handlebars.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+  </head>
+
+  <body>
+    <main>
+      <nav id="nav-container">
+        <div class="logo">ReBars</div>
+
+        <ul class="side-bar-nav">
+          {{#each pages as |page| }}
+            <li>
+              <a href="{{ page.path }}">{{ page.label }}</a>
+                {{#if page.pages }}
+                  <ul>
+                    {{#each page.pages as |subPage| }}
+                      <li>
+                        <a href="{{ subPage.path }}">{{ subPage.label }}</a>
+                      </li>
+                    {{/each}}
+                  </ul>
+                {{/if}}
+            </li>
+          {{/each}}
+        </ul>
+
+      </nav>
+      <section>
+        <div class="content">
+
+          <div class="page">
+            {{ render "markdown" "_src/md/introduction.md" }}
+            <div id="counter-demo" class="demo-app"></div>
+          </div>
+
+          <div class="page">{{ render "md" "_src/md/application.md" }}</div>
+          <div class="page">{{ render "md" "_src/md/component.md" }}</div>
+          <div class="page">{{ render "md" "_src/md/helpers.md" }}</div>
+
+
+          <div class="page">
+            <h2 id="example-simple">Todo List Simple</h2>
+            <div id="demo-app-simple" class="demo-app"></div>
+            {{ render "md:js" "examples/app.js" }}
+
+            <h2 id="example-advanced">Todo List Advanced</h2>
+            <div id="demo-app-advanced" class="demo-app"></div>
+
+            <div class="tab-container">
+              <nav class="tabs">
+                <button class="active" data-target="app">app.js</button>
+                <button data-target="add">add.js</button>
+                <button data-target="filters">filters.js</button>
+                <button data-target="todo">todo.js</button>
+              </nav>
+
+              <div class="tab-content">
+                <div id="app" class="active">{{ render "md:js" "examples/advanced/app.js" }}</div>
+                <div id="add">{{ render "md:js" "examples/advanced/add.js" }}</div>
+                <div id="filters">{{ render "md:js" "examples/advanced/filters.js" }}</div>
+                <div id="todo">{{ render "md:js" "examples/advanced/todo.js" }}</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <script src="dist/docs.min.js"></script>
+    <script>
+      DocsApp.init();
+    </script>
+
+  </body>
+</html>

@@ -1,3 +1,8 @@
+
+# A ReBars Application
+
+A ReBars application is a collection of components rendered to a DOM element. You can have more than one app on a page if you desire.
+
 To start an app, there is minimal code on the page. You create a new ReBars app with an Object containing two keys.
 
 - `$el` the Element that your app will be rendered into

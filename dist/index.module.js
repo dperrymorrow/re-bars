@@ -1,3 +1,8 @@
+const styles = {
+  warn: "background: #484915; color: #ffffbe; padding: .1em; font-weight: normal;",
+  log: "background: #324645; color:#c9faff; padding: .1em; font-weight: normal;",
+};
+
 const _getTplString = (template, { loc, data }) => {
   const lines = template.split("\n").slice(loc.start.line - 1, loc.end.line);
   const leadingSpaces = Array(lines[0].length - lines[0].trim().length).join(" ");
@@ -19,10 +24,14 @@ const _msg = (type, key, obj = {}, ...payloads) => {
     str = "%c " + str + " ";
     if (!window.ReBars.trace) return;
     if (payloads) {
-      payloads.forEach(p => void 0);
+      console.groupCollapsed(str, styles[type]);
+      payloads.forEach(p => console.log(p));
+      console.groupEnd();
+    } else {
+      console.log(str, styles[type]);
     }
   } else {
-    payloads.forEach(p => void 0);
+    payloads.forEach(p => console.error(p));
     throw new Error(str);
   }
 };
@@ -35,7 +44,8 @@ const messages = {
   tplStr: ({ name }) => `component:${name} needs a template string`,
   propStomp: ({ name, key }) => `component:${name} "data.${key}" was overrode by a prop`,
   propUndef: ({ name, key }) => `component:${name} was passed undefined for prop "${key}"`,
-  oneRoot: ({ name }) => `component:${name} must have one root node, and cannot be a {{#watch}} block`,
+  oneRoot: ({ name }) =>
+    `component:${name} must have one root node, and cannot be a {{#watch}} block. \nThis error can also be caused by malformed html.`,
   noMethod: ({ name, methodName }) => `component:${name} does not have a method named "${methodName}"`,
   badPath: ({ path }) => `${path} was not found in object`,
   reRender: ({ name, path }) => `component:${name} re-rendering "${path}"`,

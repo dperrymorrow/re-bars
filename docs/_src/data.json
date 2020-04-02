@@ -1,0 +1,96 @@
+{
+  "pages": [
+    {
+      "label": "ReBars Introduction",
+      "path": "#rebars"
+    },
+    {
+      "label": "A ReBars Application",
+      "path": "#a-rebars-application",
+      "pages": [
+        {
+          "label": "Global Helpers",
+          "path": "#global-helpers"
+        },
+        {
+          "label": "Handlebars",
+          "path": "#handlebars"
+        }
+      ]
+    },
+    {
+      "label": "A ReBars Component",
+      "path": "#rebars-components",
+      "pages": [
+        {
+          "label": "Template",
+          "path": "#template"
+        },
+        {
+          "label": "Name",
+          "path": "#name"
+        },
+        {
+          "label": "Data",
+          "path": "#data"
+        },
+        {
+          "label": "Watchers",
+          "path": "#watchers"
+        },
+        {
+          "label": "Hooks",
+          "path": "#hooks"
+        },
+        {
+          "label": "Methods",
+          "path": "#methods"
+        }
+      ]
+    },
+    {
+      "label": "ReBars Helpers",
+      "path": "#rebars-built-in-helpers",
+      "pages": [
+        {
+          "label": "watch",
+          "path": "#the-watch-helper"
+        },
+        {
+          "label": "ref",
+          "path": "#the-ref-helper"
+        },
+        {
+          "label": "bound",
+          "path": "#the-bound-helper"
+        },
+        {
+          "label": "method",
+          "path": "#the-method-helper"
+        },
+        {
+          "label": "component",
+          "path": "#the-component-helper"
+        },
+        {
+          "label": "debug",
+          "path": "#the-debug-helper"
+        }
+      ]
+    },
+    {
+      "label": "Examples",
+      "path": "#example-simple",
+      "pages": [
+        {
+          "label": "Simple",
+          "path": "#example-simple"
+        },
+        {
+          "label": "Advanced",
+          "path": "#example-advanced"
+        }
+      ]
+    }
+  ]
+}

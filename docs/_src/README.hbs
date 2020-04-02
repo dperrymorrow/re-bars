@@ -1,0 +1,21 @@
+
+[Documentation](https://dperrymorrow.github.io/re-bars) |
+[Examples](https://dperrymorrow.github.io/re-bars#examples)
+
+> A simple, modern approach to Obvervables and DOM re-rendering and patching.
+
+
+{{ render "raw" "_src/md/introduction.md" }}
+
+{{#each pages as |page| }}
+- [{{ page.label }}]({{ page.path }})
+{{#if page.pages }}
+  {{#each page.pages as |subPage| }}
+  - [{{ subPage.label }}]({{ subPage.path }})
+  {{/each}}
+{{/if}}
+{{/each}}
+
+{{ render "raw" "_src/md/application.md" }}
+{{ render "raw" "_src/md/component.md" }}
+{{ render "raw" "_src/md/helpers.md" }}

@@ -1,16 +1,15 @@
 import { terser } from "rollup-plugin-terser";
-import strip from "rollup-plugin-strip";
+// import strip from "rollup-plugin-strip";
 import filesize from "rollup-plugin-filesize";
 import gzipPlugin from "rollup-plugin-gzip";
-import copy from "rollup-plugin-copy";
 
 export default [
   {
     input: "src/index.js",
     output: [
-      { file: "dist/index.js", format: "umd", name: "ReBars" },
+      { file: "dist/index.umd.js", format: "umd", name: "ReBars" },
       {
-        file: "dist/index.min.js",
+        file: "dist/index.umd.min.js",
         format: "umd",
         name: "ReBars",
         sourcemap: true,
@@ -18,7 +17,7 @@ export default [
       },
     ],
 
-    plugins: [strip()],
+    // plugins: [strip()],
   },
   {
     input: "src/index.js",
@@ -29,18 +28,23 @@ export default [
         format: "module",
         name: "ReBars",
         sourcemap: true,
-        plugins: [terser(), gzipPlugin(), filesize()],
+        plugins: [terser(), gzipPlugin()],
       },
     ],
 
-    plugins: [
-      strip(),
-      copy({
-        targets: [
-          { src: "dist/index.module.min.js", dest: "docs/js", rename: "rebars.min.js" },
-          { src: "dist/index.module.min.js.map", dest: "docs/js" },
-        ],
-      }),
+    // plugins: [strip()],
+  },
+
+  // doc site rollups...
+  {
+    input: "docs/_src/docs.js",
+    output: [
+      {
+        file: "docs/dist/docs.min.js",
+        format: "umd",
+        name: "DocsApp",
+        plugins: [terser()],
+      },
     ],
   },
 ];

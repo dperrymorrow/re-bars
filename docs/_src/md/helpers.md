@@ -1,4 +1,8 @@
 
+# ReBars built in helpers
+
+ReBars comes with a few very powerfull helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.
+
 
 ## The {{#watch}} helper
 
