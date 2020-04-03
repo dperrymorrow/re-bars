@@ -1,8 +1,8 @@
-@import url("https://fonts.googleapis.com/css?family=Merriweather|Roboto+Slab:700")
-@import "vars.styl"
-@import "syntax.styl"
-@import "examples.styl"
-@import "nav.styl"
+@import url('https://fonts.googleapis.com/css?family=Merriweather|Roboto+Slab:700')
+@import 'vars.styl'
+@import 'syntax.styl'
+@import 'examples.styl'
+@import 'nav.styl'
 
 body, html
   padding: 0
@@ -15,7 +15,6 @@ body, html
   font-size: $font-size
 
 /* typography and headers */
-
 h1, h2, h3, h4, h5
   color: $txt-dark
   font-family: $font-header
@@ -25,12 +24,10 @@ h1
   font-size: 5em
   margin-bottom: 0
 
-
 h2
   font-size: 1.8em
   margin-bottom: $padding-sm
   border-bottom: 1px solid $border
-
 
 .markdown-content > p:first-of-type, h1 small
   display: block
@@ -38,10 +35,10 @@ h2
   font-family: $font-body
   color: $txt-light
   font-size: 1.7rem
-  letter-spacing: .001em
+  letter-spacing: 0.001em
   line-height: 1.6em
-  background-color: rgba(white, .7)
-  box-shadow: 0px 0px 20px 10px rgba(white, .7)
+  background-color: rgba(white, 0.7)
+  box-shadow: 0px 0px 20px 10px rgba(white, 0.7)
   margin-bottom: $padding-lg
   padding: $padding-sm $padding-md
   margin-top: 0
@@ -61,12 +58,12 @@ section
   padding-top: $padding-lg
 
   &:before
-    content: ""
+    content: ''
     display: block
     height: 10px
-    background-color: rgba($border, .5)
+    background-color: rgba($border, 0.5)
     border-radius: 5px
-    box-shadow: 0px 0px 20px 10px rgba(white, .8)
+    box-shadow: 0px 0px 20px 10px rgba(white, 0.8)
 
   &:first-child
     padding-top: $padding-sm
@@ -75,7 +72,6 @@ section
       display: none
 
 /* content styling */
-
 .content
   margin-bottom: $padding-lg
   box-sizing: border-box
@@ -107,7 +103,7 @@ section
   a
     color: $link-txt
     background-color: $link-bg
-    padding: 0 .2em
+    padding: 0 0.2em
 
   pre
     background-color: $syntax-bg
@@ -123,21 +119,19 @@ section
     font-size: 1.1rem
     margin-top: $padding-sm
 
-
 p code, .content li code, .content h1 code
   line-height: 1em
   background-color: white
-  padding: .1em .25em
+  padding: 0.1em 0.25em
   color: $txt-dark
   border: 1px solid $border
-  border-radius:$border-radius
+  border-radius: $border-radius
   color: $highlight-txt
 
 nav.tabs
   border-bottom: 1px solid $border
   margin-bottom: $padding-xs
   display: flex
-
 
 .tab-content
   > div
@@ -149,7 +143,7 @@ nav.tabs
 nav.tabs button
   padding: $padding-xs $padding-md
   background-color: $bg-2
-  font-family:$font-header
+  font-family: $font-header
   font-size: 1em
   color: $txt
   border-top-left-radius: $border-radius
@@ -160,7 +154,6 @@ nav.tabs button
 
   &.active
     background-color: white
-
 
 @media (max-width: 767px)
   /* do stuff with .content here... */

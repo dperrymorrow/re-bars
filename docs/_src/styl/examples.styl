@@ -6,7 +6,6 @@
   border: 10px solid $border
   background-color: white
 
-
   &:empty
     display: none
 
@@ -21,7 +20,7 @@
     margin-top: 0
 
   *
-    animation: highlight .2s linear
+    animation: highlight 0.2s linear
 
   .header-container
     margin-bottom: $padding-lg
@@ -29,10 +28,10 @@
     label
       text-transform: uppercase
       font-family: $font-header
-      font-size: .8em
+      font-size: 0.8em
       margin-right: $padding-xs
 
-  label input[type="text"]
+  label input[type='text']
     margin-left: $padding-xs
 
   .filters
@@ -45,7 +44,7 @@
     display: flex
     justify-content: space-between
 
-  input[type="text"], button, select
+  input[type='text'], button, select
     background-color: $bg
     padding: $padding-xs $padding-sm
     box-sizing: border-box
@@ -56,7 +55,7 @@
     font-family: $font-header
     outline: none
 
-  input[type="text"]
+  input[type='text']
     min-width: 200px
     background-color: $bg-light
     font-family: $font-body
@@ -72,7 +71,7 @@
 
     &:disabled
       color: $txt-light
-      opacity: .6
+      opacity: 0.6
 
   ul
     padding: 0
@@ -104,9 +103,8 @@
         display: flex
 
         .date
-          font-size: .9em
+          font-size: 0.9em
           margin-right: 10px
-
 
 @keyframes highlight
   0%
