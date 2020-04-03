@@ -6,7 +6,7 @@
   "main": "dist/index.umd.min.js",
   "scripts": {
     "prepublishOnly": "npm run build-all",
-    "examples": "http-server ./ --port=3000 -c-1",
+    "examples": "node _scripts/dev-server.js",
     "docs:build": "npm run docs:stylus && node _scripts/build-docs.js",
     "docs:stylus": "stylus --inline --hoist-atrules --compress --include-css ./docs/_src/styl/docs.styl -o ./docs/dist/docs.min.css",
     "docs:stylus:watch": "npm run docs:stylus -- --watch",
@@ -27,7 +27,6 @@
     "eslint-plugin-prettier": "^3.1.1",
     "esm": "^3.2.25",
     "handlebars": "4.7.4",
-    "http-server": "^0.12.0",
     "marked": "0.8.2",
     "prettier": "^1.19.1",
     "rollup": "^1.31.0",
