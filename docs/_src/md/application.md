@@ -3,16 +3,35 @@
 
 A ReBars application is a collection of components rendered to a DOM element. You can have more than one app on a page if you desire.
 
+## Getting Started
+
+> You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.
+
+```html
+<!-- Handlebars from CDN --->
+<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+<!-- ReBars from CDN --->
+<script src="https://cdn.jsdelivr.net/npm/re-bars@0.0.1-beta.2/dist/index.umd.min.js"></script>
+```
+
+Or using NPM
+
+```
+npm i --save-dev handlebars re-bars
+```
+
+```javascript
+import Handlebars from "handlebars";
+import ReBars from "re-bars";
+```
+
 To start an app, there is minimal code on the page. You create a new ReBars app with an Object containing two keys.
 
 - `$el` the Element that your app will be rendered into
 - `root` the top level [component](component.html) in your app.
 
-> You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.
-
 ``` html
 <div id="demo-app"></div>
-<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
 
 <script type="module">
   import ReBars from "re-bars";

@@ -1,9 +1,7 @@
 
-[Documentation](https://dperrymorrow.github.io/re-bars) |
-[Examples](https://dperrymorrow.github.io/re-bars#examples)
-
 > A simple, modern approach to Obvervables and DOM re-rendering and patching.
 
+## [Documentation](https://dperrymorrow.github.io/re-bars) | [Examples](https://dperrymorrow.github.io/re-bars#example-simple)
 
 
 
@@ -147,7 +145,7 @@ The template is the Handlebars template that will be rendered. What is defined a
 Each component must define a name. This is is the string you will use to render components using the [component](#the-component-helper) helper within your template.
 
 ## Data
-The data for the component. Must be a function that retuns an Object.
+The data for the component. Must be a function that returns an Object.
 
 ```javascript
 data() {
@@ -180,7 +178,7 @@ data() {
 ```
 
 ## Methods
-Methods defined in a component are avalable for use with the [method](#the-method-helper) helper, or can be called from within another method.
+Methods defined in a component are available for use with the [method](#the-method-helper) helper, or can be called from within another method.
 
 ```html
 <button {{ method "save:click" "fred" }}>save</button>
@@ -214,20 +212,20 @@ methods: {
 
 Watchers give you the ability to fire _"hooks"_ when a property in your data has change. You can watch any items in  your data or `$props`
 
-> You cannot, however watch a method in your data. Methods defined in your data are only for convienance for your template rendering.
+> You cannot, however watch a method in your data. Methods defined in your data are only for convenience for your template rendering.
 
 ```javascript
 data() {
   return {
     name: {
-      first: "david"
+      first: "David"
     }
   };
 },
 
 watchers: {
   "name.first"() {
-    console.log(this.name.first); // david
+    console.log(this.name.first); // David
     // this.$refs()
     // this.$methods
     // this.$props
@@ -259,7 +257,7 @@ data() {
 
 hooks: {
   created() {
-    // you can set items here pre render
+    // you can set items here pre-render
     this.name.first = "Mike";
   }
 }
@@ -283,7 +281,7 @@ These helpers are only available for the context of the component you are defini
 
 # ReBars built in helpers
 
-ReBars comes with a few very powerfull helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.
+ReBars comes with a few very powerful helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.
 
 
 ## The {{#watch}} helper
@@ -320,7 +318,7 @@ Anytime `name` is changed the block would be re-rendered with the updated data.
 > If the item you are watching is a primitive such as a `String`, or `Number`. You will need to use a string as the argument.
 
 - `{{#watch name }}` this will watch all keys on Object `name`
-- `{{#watch "name.*" }}` this is the string equvilent of the above
+- `{{#watch "name.*" }}` this is the string equivalent of the above
 - `{{#watch "name.first" }}` will only watch for changes to `name.first`
 - `{{#watch "name.*,hobby" }}` will watch for any change to name or hobby
 - `{{#watch "friends.*.hobby" }}` will watch for any friend index hobby change
@@ -375,7 +373,7 @@ If you are watching inside a loop, you can target the specific object and key by
 ## The {{ref}} helper
 ReBars comes with a `{{ref}}` helper built in. This gives you the ability to save a reference to an element. This also gives a key for Array loop items so that the Array can be patched instead of re-rendered entirely.
 
-- takes one param, the `String` for the reference
+- takes one parameter, the `String` for the reference
 
 > The ref helper is also needed on any input or other elements that need focused restored after a re-render.
 
@@ -427,13 +425,13 @@ methods: {
 }
 ```
 
-> You method, when invoked, the first argument will always be the event, followed by any additional parameters. Params must be primiteve and not full Objects or Arrays.
+> You method, when invoked, the first argument will always be the event, followed by any additional parameters. Parameters must be primitive and not full Objects or Arrays.
 
-- the first param is the methodName separated by `:eventType`, if none is specified `click` will be the event
+- the first parameter is the methodName separated by `:eventType`, if none is specified `click` will be the event
 - you can add as many other parameters as you would like to your method call
 
 ## The {{component}} helper
-This allows you to render child components from withing the compnent you are in. It takes one parameter, the name of the component to render. This will render a registered component to the DOM of the parent component.
+This allows you to render child components from withing the component you are in. It takes one parameter, the name of the component to render. This will render a registered component to the DOM of the parent component.
 
 > The "name" of the component is the name property in the component's definition. Not the name you imported it as.
 

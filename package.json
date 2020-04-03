@@ -3,7 +3,11 @@
   "version": "0.0.1-beta.2",
   "description": "Handlebars templates with re-render / watch blocks",
   "repository": "https://github.com/dperrymorrow/re-bars",
-  "main": "dist/index.umd.min.js",
+  "main": "dist/re-bars.umd.min.js",
+  "module": "dist/re-bars.esm.min.js",
+  "unpkg": "dist/re-bars.umd.min.js",
+  "homepage": "https://dperrymorrow.github.io/re-bars",
+  "jsdelivr": "dist/re-bars.umd.min.js",
   "scripts": {
     "prepublishOnly": "npm run build-all",
     "examples": "node _scripts/dev-server.js",

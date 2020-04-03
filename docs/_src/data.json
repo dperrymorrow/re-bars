@@ -9,6 +9,10 @@
       "path": "#a-rebars-application",
       "pages": [
         {
+          "label": "Getting Started",
+          "path": "#getting-started"
+        },
+        {
           "label": "Global Helpers",
           "path": "#global-helpers"
         },

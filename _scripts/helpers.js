@@ -10,7 +10,7 @@ function _wrap(content) {
 module.exports = {
   root,
   register() {
-    Handlebars.registerHelper("render", function(parse, file) {
+    Handlebars.registerHelper("render", function (parse, file) {
       let content = fs.readFileSync(root + file, "utf-8");
       if (parse === "md") return _wrap(Marked(content));
       if (parse === "md:js") return _wrap(Marked(`\`\`\`javascript\n${content}\n\`\`\``));

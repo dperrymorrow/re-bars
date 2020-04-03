@@ -7,9 +7,9 @@ export default [
   {
     input: "src/index.js",
     output: [
-      { file: "dist/index.umd.js", format: "umd", name: "ReBars" },
+      { file: "dist/re-bars.umd.js", format: "umd", name: "ReBars" },
       {
-        file: "dist/index.umd.min.js",
+        file: "dist/re-bars.umd.min.js",
         format: "umd",
         name: "ReBars",
         sourcemap: true,
@@ -22,9 +22,9 @@ export default [
   {
     input: "src/index.js",
     output: [
-      { file: "dist/index.module.js", format: "module", name: "ReBars" },
+      { file: "dist/re-bars.esm.js", format: "module", name: "ReBars" },
       {
-        file: "dist/index.module.min.js",
+        file: "dist/re-bars.esm.min.js",
         format: "module",
         name: "ReBars",
         sourcemap: true,
