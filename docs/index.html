@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/prism.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-markup-templating.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-handlebars.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
   </head>
 
   <body>
@@ -24,6 +24,9 @@
             <li>
               <a href="#a-rebars-application">A ReBars Application</a>
                   <ul>
+                      <li>
+                        <a href="#getting-started">Getting Started</a>
+                      </li>
                       <li>
                         <a href="#global-helpers">Global Helpers</a>
                       </li>
@@ -97,7 +100,10 @@
 
           <div class="page">
             <div class="markdown-content"><h1 id="rebars">ReBars</h1>
-<p>A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a Virtial DOM.</p>
+<p>A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a running Virtial DOM.</p>
+<blockquote>
+<p>ReBars is under 5k gzipped!</p>
+</blockquote>
 <p>ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling.</p>
 <p>ReBars handles keeping your DOM in sync with your data, and gets out of your way. You can get back to just writing Javascript.</p>
 <p>ReBars is really just Handlebars with some built in helpers and the notion of <a href="#rebars-components">components</a>. The main concept of ReBars is a <a href="#the-watch-helper">{{#watch}}</a> block helper that lets you tell ReBars what and when to re-render.</p>
@@ -133,16 +139,24 @@ methods: {
 
           <div class="page"><div class="markdown-content"><h1 id="a-rebars-application">A ReBars Application</h1>
 <p>A ReBars application is a collection of components rendered to a DOM element. You can have more than one app on a page if you desire.</p>
+<h2 id="getting-started">Getting Started</h2>
+<blockquote>
+<p>You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.</p>
+</blockquote>
+<pre><code class="language-html">&lt;!-- Handlebars from CDN ---&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.min.js&quot;&gt;&lt;/script&gt;
+&lt;!-- ReBars from CDN ---&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/re-bars@latest/dist/index.umd.min.js&quot;&gt;&lt;/script&gt;</code></pre>
+<p>Or using NPM</p>
+<pre><code class="language-shell">npm i --save-dev handlebars re-bars</code></pre>
+<pre><code class="language-javascript">import Handlebars from &quot;handlebars&quot;;
+import ReBars from &quot;re-bars&quot;;</code></pre>
 <p>To start an app, there is minimal code on the page. You create a new ReBars app with an Object containing two keys.</p>
 <ul>
 <li><code>$el</code> the Element that your app will be rendered into</li>
 <li><code>root</code> the top level <a href="component.html">component</a> in your app.</li>
 </ul>
-<blockquote>
-<p>You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.</p>
-</blockquote>
 <pre><code class="language-html">&lt;div id=&quot;demo-app&quot;&gt;&lt;/div&gt;
-&lt;script src=&quot;//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js&quot;&gt;&lt;/script&gt;
 
 &lt;script type=&quot;module&quot;&gt;
   import ReBars from &quot;re-bars&quot;;

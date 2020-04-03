@@ -28,7 +28,7 @@ export default [
         format: "module",
         name: "ReBars",
         sourcemap: true,
-        plugins: [terser(), gzipPlugin()],
+        plugins: [terser(), gzipPlugin(), filesize()],
       },
     ],
 

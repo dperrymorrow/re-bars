@@ -2,7 +2,9 @@
 
 # ReBars
 
-A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a Virtial DOM.
+A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a running Virtial DOM.
+
+> ReBars is under 5k gzipped!
 
 ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling.
 

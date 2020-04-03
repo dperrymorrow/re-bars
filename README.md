@@ -7,7 +7,9 @@
 
 # ReBars
 
-A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a Virtial DOM.
+A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a running Virtial DOM.
+
+> ReBars is under 5k gzipped!
 
 ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling.
 
@@ -47,6 +49,7 @@ Each time the value passed to watch is changed, *just* that Handlebars block wil
 
 - [ReBars Introduction](#rebars)
 - [A ReBars Application](#a-rebars-application)
+  - [Getting Started](#getting-started)
   - [Global Helpers](#global-helpers)
   - [Handlebars](#handlebars)
 - [A ReBars Component](#rebars-components)
@@ -69,16 +72,35 @@ Each time the value passed to watch is changed, *just* that Handlebars block wil
 
 A ReBars application is a collection of components rendered to a DOM element. You can have more than one app on a page if you desire.
 
+## Getting Started
+
+> You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.
+
+```html
+<!-- Handlebars from CDN --->
+<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.min.js"></script>
+<!-- ReBars from CDN --->
+<script src="https://cdn.jsdelivr.net/npm/re-bars@latest/dist/index.umd.min.js"></script>
+```
+
+Or using NPM
+
+```shell
+npm i --save-dev handlebars re-bars
+```
+
+```javascript
+import Handlebars from "handlebars";
+import ReBars from "re-bars";
+```
+
 To start an app, there is minimal code on the page. You create a new ReBars app with an Object containing two keys.
 
 - `$el` the Element that your app will be rendered into
 - `root` the top level [component](component.html) in your app.
 
-> You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.
-
 ``` html
 <div id="demo-app"></div>
-<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
 
 <script type="module">
   import ReBars from "re-bars";

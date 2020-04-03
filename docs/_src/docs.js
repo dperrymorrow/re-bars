@@ -25,15 +25,25 @@ export default {
 
     _highlight();
     _tabs();
-    window.addEventListener("hashchange", _activeLink, false);
-    _activeLink();
+    _scrollSpy();
   },
 };
 
-function _activeLink() {
-  document.querySelectorAll("ul.side-bar-nav a").forEach($link => {
-    if ($link.getAttribute("href") === window.location.hash) $link.classList.add("active");
-    else $link.classList.remove("active");
+function _scrollSpy() {
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      const id = entry.target.getAttribute("id");
+      const $link = document.querySelector(`.side-bar-nav a[href="#${id}"]`);
+      if ($link) {
+        if (entry.intersectionRatio > 0) $link.classList.add("active");
+        else $link.classList.remove("active");
+      }
+    });
+  });
+
+  // Track all sections that have an `id` applied
+  document.querySelectorAll("h1,h2").forEach(section => {
+    observer.observe(section);
   });
 }
 

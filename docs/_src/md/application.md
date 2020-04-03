@@ -9,14 +9,14 @@ A ReBars application is a collection of components rendered to a DOM element. Yo
 
 ```html
 <!-- Handlebars from CDN --->
-<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.min.js"></script>
 <!-- ReBars from CDN --->
-<script src="https://cdn.jsdelivr.net/npm/re-bars@0.0.1-beta.2/dist/index.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/re-bars@latest/dist/index.umd.min.js"></script>
 ```
 
 Or using NPM
 
-```
+```shell
 npm i --save-dev handlebars re-bars
 ```
 
