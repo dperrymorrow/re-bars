@@ -82,7 +82,7 @@
                   </ul>
             </li>
             <li>
-              <a href="#example-simple">Examples</a>
+              <a href="#examples">Examples</a>
                   <ul>
                       <li>
                         <a href="#example-simple">Simple</a>
@@ -93,12 +93,12 @@
                   </ul>
             </li>
         </ul>
-
       </nav>
+
       <section>
         <div class="content">
 
-          <div class="page">
+          <div class="page" data-anchor="rebars">
             <div class="markdown-content"><h1 id="rebars">ReBars</h1>
 <p>A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a running Virtial DOM.</p>
 <blockquote>
@@ -137,7 +137,7 @@ methods: {
             <div id="counter-demo" class="demo-app"></div>
           </div>
 
-          <div class="page"><div class="markdown-content"><h1 id="a-rebars-application">A ReBars Application</h1>
+          <div class="page" data-anchor="a-rebars-application"><div class="markdown-content"><h1 id="a-rebars-application">A ReBars Application</h1>
 <p>A ReBars application is a collection of components rendered to a DOM element. You can have more than one app on a page if you desire.</p>
 <h2 id="getting-started">Getting Started</h2>
 <blockquote>
@@ -186,7 +186,7 @@ ReBars.app({
   root: RootComponent,
 });</code></pre>
 </div></div>
-          <div class="page"><div class="markdown-content"><h1 id="rebars-components">ReBars Components</h1>
+          <div class="page" data-anchor="rebars-components"><div class="markdown-content"><h1 id="rebars-components">ReBars Components</h1>
 <p>Components are where everything happens. Each component has it&#39;s own <code>Handlebars.instance</code> so their helpers are isolated from other components/applications.</p>
 <pre><code class="language-javascript">export default {
   template: /*html*/ `&lt;div&gt;&lt;/div&gt;`, // your Handlebars template
@@ -302,7 +302,7 @@ hooks: {
 }</code></pre>
 <p>These helpers are only available for the context of the component you are defining. If you would like to define helpers that are global. Add them to the <a href="#a-rebars-application">ReBars application</a>.</p>
 </div></div>
-          <div class="page"><div class="markdown-content"><h1 id="rebars-built-in-helpers">ReBars built in helpers</h1>
+          <div class="page" data-anchor="rebars-built-in-helpers"><div class="markdown-content"><h1 id="rebars-built-in-helpers">ReBars built in helpers</h1>
 <p>ReBars comes with a few very powerful helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.</p>
 <h2 id="the-watch-helper">The {{#watch}} helper</h2>
 <p>The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.</p>
@@ -459,11 +459,14 @@ Watch takes an argument of what property to watch. The argument can be a string 
 {{ debug name }}</code></pre>
 </div></div>
 
-
-          <div class="page">
-            <h2 id="example-simple">Todo List Simple</h2>
-            <div id="demo-app-simple" class="demo-app"></div>
-            <div class="markdown-content"><pre><code class="language-javascript">export default {
+          <div class="page" id="examples">
+            <div id="example-simple">
+              <h2>Todo List Simple</h2>
+              <p>
+                A simple, one component application that tracks todos.
+              </p>
+              <div id="demo-app-simple" class="demo-app"></div>
+              <div class="markdown-content"><pre><code class="language-javascript">export default {
   template: /*html*/ `
   &lt;div&gt;
     &lt;div class=&quot;header-container&quot;&gt;
@@ -581,20 +584,25 @@ Watch takes an argument of what property to watch. The argument can be a string 
 };
 </code></pre>
 </div>
+            </div>
 
-            <h2 id="example-advanced">Todo List Advanced</h2>
-            <div id="demo-app-advanced" class="demo-app"></div>
+            <div id="example-advanced">
+              <h2>Todo List Advanced</h2>
+              <p>
+                Same concept, a little more advanced with sub components, sorting and filtering.
+              </p>
+              <div id="demo-app-advanced" class="demo-app"></div>
 
-            <div class="tab-container">
-              <nav class="tabs">
-                <button class="active" data-target="app">app.js</button>
-                <button data-target="add">add.js</button>
-                <button data-target="filters">filters.js</button>
-                <button data-target="todo">todo.js</button>
-              </nav>
+              <div class="tab-container">
+                <nav class="tabs">
+                  <button class="active" data-target="app">app.js</button>
+                  <button data-target="add">add.js</button>
+                  <button data-target="filters">filters.js</button>
+                  <button data-target="todo">todo.js</button>
+                </nav>
 
-              <div class="tab-content">
-                <div id="app" class="active"><div class="markdown-content"><pre><code class="language-javascript">import Add from &quot;./add.js&quot;;
+                <div class="tab-content">
+                  <div id="app" class="active"><div class="markdown-content"><pre><code class="language-javascript">import Add from &quot;./add.js&quot;;
 import Todo from &quot;./todo.js&quot;;
 import Filters from &quot;./filters.js&quot;;
 
@@ -718,7 +726,7 @@ export default {
 };
 </code></pre>
 </div></div>
-                <div id="add"><div class="markdown-content"><pre><code class="language-javascript">export default {
+                  <div id="add"><div class="markdown-content"><pre><code class="language-javascript">export default {
   template: /*html*/ `
   &lt;div&gt;
     {{#watch &quot;isAdding&quot; }}
@@ -764,7 +772,7 @@ export default {
 };
 </code></pre>
 </div></div>
-                <div id="filters"><div class="markdown-content"><pre><code class="language-javascript">export default {
+                  <div id="filters"><div class="markdown-content"><pre><code class="language-javascript">export default {
   template: /*html*/ `
     &lt;div class=&quot;filters&quot;&gt;
       {{#watch &quot;$props.filters.state&quot; tag=&quot;div&quot; }}
@@ -802,7 +810,7 @@ export default {
 };
 </code></pre>
 </div></div>
-                <div id="todo"><div class="markdown-content"><pre><code class="language-javascript">export default {
+                  <div id="todo"><div class="markdown-content"><pre><code class="language-javascript">export default {
   template: /*html*/ `
     &lt;div&gt;
       {{#watch &quot;editing&quot; tag=&quot;div&quot; class=&quot;todo&quot; }}
@@ -867,6 +875,7 @@ export default {
 };
 </code></pre>
 </div></div>
+                </div>
               </div>
             </div>
           </div>
@@ -876,9 +885,6 @@ export default {
     </main>
 
     <script src="dist/docs.min.js"></script>
-    <script>
-      DocsApp.init();
-    </script>
 
   </body>
 </html>

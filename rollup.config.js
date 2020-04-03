@@ -41,8 +41,7 @@ export default [
     output: [
       {
         file: "docs/dist/docs.min.js",
-        format: "umd",
-        name: "DocsApp",
+        format: "cjs",
         plugins: [terser()],
       },
     ],

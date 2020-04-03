@@ -33,42 +33,51 @@
             </li>
           {{/each}}
         </ul>
-
       </nav>
+
       <section>
         <div class="content">
 
-          <div class="page">
+          <div class="page" data-anchor="rebars">
             {{ render "md" "_src/md/introduction.md" }}
             <div id="counter-demo" class="demo-app"></div>
           </div>
 
-          <div class="page">{{ render "md" "_src/md/application.md" }}</div>
-          <div class="page">{{ render "md" "_src/md/component.md" }}</div>
-          <div class="page">{{ render "md" "_src/md/helpers.md" }}</div>
+          <div class="page" data-anchor="a-rebars-application">{{ render "md" "_src/md/application.md" }}</div>
+          <div class="page" data-anchor="rebars-components">{{ render "md" "_src/md/component.md" }}</div>
+          <div class="page" data-anchor="rebars-built-in-helpers">{{ render "md" "_src/md/helpers.md" }}</div>
 
+          <div class="page" id="examples">
+            <div id="example-simple">
+              <h2>Todo List Simple</h2>
+              <p>
+                A simple, one component application that tracks todos.
+              </p>
+              <div id="demo-app-simple" class="demo-app"></div>
+              {{ render "md:js" "examples/app.js" }}
+            </div>
 
-          <div class="page">
-            <h2 id="example-simple">Todo List Simple</h2>
-            <div id="demo-app-simple" class="demo-app"></div>
-            {{ render "md:js" "examples/app.js" }}
+            <div id="example-advanced">
+              <h2>Todo List Advanced</h2>
+              <p>
+                Same concept, a little more advanced with sub components, sorting and filtering.
+              </p>
+              <div id="demo-app-advanced" class="demo-app"></div>
 
-            <h2 id="example-advanced">Todo List Advanced</h2>
-            <div id="demo-app-advanced" class="demo-app"></div>
+              <div class="tab-container">
+                <nav class="tabs">
+                  <button class="active" data-target="app">app.js</button>
+                  <button data-target="add">add.js</button>
+                  <button data-target="filters">filters.js</button>
+                  <button data-target="todo">todo.js</button>
+                </nav>
 
-            <div class="tab-container">
-              <nav class="tabs">
-                <button class="active" data-target="app">app.js</button>
-                <button data-target="add">add.js</button>
-                <button data-target="filters">filters.js</button>
-                <button data-target="todo">todo.js</button>
-              </nav>
-
-              <div class="tab-content">
-                <div id="app" class="active">{{ render "md:js" "examples/advanced/app.js" }}</div>
-                <div id="add">{{ render "md:js" "examples/advanced/add.js" }}</div>
-                <div id="filters">{{ render "md:js" "examples/advanced/filters.js" }}</div>
-                <div id="todo">{{ render "md:js" "examples/advanced/todo.js" }}</div>
+                <div class="tab-content">
+                  <div id="app" class="active">{{ render "md:js" "examples/advanced/app.js" }}</div>
+                  <div id="add">{{ render "md:js" "examples/advanced/add.js" }}</div>
+                  <div id="filters">{{ render "md:js" "examples/advanced/filters.js" }}</div>
+                  <div id="todo">{{ render "md:js" "examples/advanced/todo.js" }}</div>
+                </div>
               </div>
             </div>
           </div>
@@ -78,9 +87,6 @@
     </main>
 
     <script src="dist/docs.min.js"></script>
-    <script>
-      DocsApp.init();
-    </script>
 
   </body>
 </html>
