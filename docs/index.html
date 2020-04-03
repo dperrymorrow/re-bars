@@ -188,7 +188,7 @@ ReBars.app({
 <h2 id="name">Name</h2>
 <p>Each component must define a name. This is is the string you will use to render components using the <a href="#the-component-helper">component</a> helper within your template.</p>
 <h2 id="data">Data</h2>
-<p>The data for the component. Must be a function that retuns an Object.</p>
+<p>The data for the component. Must be a function that returns an Object.</p>
 <pre><code class="language-javascript">data() {
   return {
     name: {
@@ -213,7 +213,7 @@ ReBars.app({
 }</code></pre>
 <pre><code class="language-html">&lt;p&gt;{{ fullName }}&lt;/p&gt;</code></pre>
 <h2 id="methods">Methods</h2>
-<p>Methods defined in a component are avalable for use with the <a href="#the-method-helper">method</a> helper, or can be called from within another method.</p>
+<p>Methods defined in a component are available for use with the <a href="#the-method-helper">method</a> helper, or can be called from within another method.</p>
 <pre><code class="language-html">&lt;button {{ method &quot;save:click&quot; &quot;fred&quot; }}&gt;save&lt;/button&gt;</code></pre>
 <pre><code class="language-javascript">methods: {
   save(event, name) {
@@ -237,19 +237,19 @@ ReBars.app({
 <h2 id="watchers">Watchers</h2>
 <p>Watchers give you the ability to fire <em>&quot;hooks&quot;</em> when a property in your data has change. You can watch any items in  your data or <code>$props</code></p>
 <blockquote>
-<p>You cannot, however watch a method in your data. Methods defined in your data are only for convienance for your template rendering.</p>
+<p>You cannot, however watch a method in your data. Methods defined in your data are only for convenience for your template rendering.</p>
 </blockquote>
 <pre><code class="language-javascript">data() {
   return {
     name: {
-      first: &quot;david&quot;
+      first: &quot;David&quot;
     }
   };
 },
 
 watchers: {
   &quot;name.first&quot;() {
-    console.log(this.name.first); // david
+    console.log(this.name.first); // David
     // this.$refs()
     // this.$methods
     // this.$props
@@ -276,7 +276,7 @@ watchers: {
 
 hooks: {
   created() {
-    // you can set items here pre render
+    // you can set items here pre-render
     this.name.first = &quot;Mike&quot;;
   }
 }</code></pre>
@@ -289,7 +289,7 @@ hooks: {
 <p>These helpers are only available for the context of the component you are defining. If you would like to define helpers that are global. Add them to the <a href="#a-rebars-application">ReBars application</a>.</p>
 </div></div>
           <div class="page"><div class="markdown-content"><h1 id="rebars-built-in-helpers">ReBars built in helpers</h1>
-<p>ReBars comes with a few very powerfull helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.</p>
+<p>ReBars comes with a few very powerful helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.</p>
 <h2 id="the-watch-helper">The {{#watch}} helper</h2>
 <p>The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.</p>
 <pre><code class="language-javascript">data() {
@@ -316,7 +316,7 @@ Watch takes an argument of what property to watch. The argument can be a string 
 </blockquote>
 <ul>
 <li><code>{{#watch name }}</code> this will watch all keys on Object <code>name</code></li>
-<li><code>{{#watch &quot;name.*&quot; }}</code> this is the string equvilent of the above</li>
+<li><code>{{#watch &quot;name.*&quot; }}</code> this is the string equivalent of the above</li>
 <li><code>{{#watch &quot;name.first&quot; }}</code> will only watch for changes to <code>name.first</code></li>
 <li><code>{{#watch &quot;name.*,hobby&quot; }}</code> will watch for any change to name or hobby</li>
 <li><code>{{#watch &quot;friends.*.hobby&quot; }}</code> will watch for any friend index hobby change</li>
@@ -359,7 +359,7 @@ Watch takes an argument of what property to watch. The argument can be a string 
 <h2 id="the-ref-helper">The {{ref}} helper</h2>
 <p>ReBars comes with a <code>{{ref}}</code> helper built in. This gives you the ability to save a reference to an element. This also gives a key for Array loop items so that the Array can be patched instead of re-rendered entirely.</p>
 <ul>
-<li>takes one param, the <code>String</code> for the reference</li>
+<li>takes one parameter, the <code>String</code> for the reference</li>
 </ul>
 <blockquote>
 <p>The ref helper is also needed on any input or other elements that need focused restored after a re-render.</p>
@@ -390,14 +390,14 @@ Watch takes an argument of what property to watch. The argument can be a string 
   }
 }</code></pre>
 <blockquote>
-<p>You method, when invoked, the first argument will always be the event, followed by any additional parameters. Params must be primiteve and not full Objects or Arrays.</p>
+<p>You method, when invoked, the first argument will always be the event, followed by any additional parameters. Parameters must be primitive and not full Objects or Arrays.</p>
 </blockquote>
 <ul>
-<li>the first param is the methodName separated by <code>:eventType</code>, if none is specified <code>click</code> will be the event</li>
+<li>the first parameter is the methodName separated by <code>:eventType</code>, if none is specified <code>click</code> will be the event</li>
 <li>you can add as many other parameters as you would like to your method call</li>
 </ul>
 <h2 id="the-component-helper">The {{component}} helper</h2>
-<p>This allows you to render child components from withing the compnent you are in. It takes one parameter, the name of the component to render. This will render a registered component to the DOM of the parent component.</p>
+<p>This allows you to render child components from withing the component you are in. It takes one parameter, the name of the component to render. This will render a registered component to the DOM of the parent component.</p>
 <blockquote>
 <p>The &quot;name&quot; of the component is the name property in the component&#39;s definition. Not the name you imported it as.</p>
 </blockquote>

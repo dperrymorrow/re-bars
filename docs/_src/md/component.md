@@ -24,7 +24,7 @@ The template is the Handlebars template that will be rendered. What is defined a
 Each component must define a name. This is is the string you will use to render components using the [component](#the-component-helper) helper within your template.
 
 ## Data
-The data for the component. Must be a function that retuns an Object.
+The data for the component. Must be a function that returns an Object.
 
 ```javascript
 data() {
@@ -57,7 +57,7 @@ data() {
 ```
 
 ## Methods
-Methods defined in a component are avalable for use with the [method](#the-method-helper) helper, or can be called from within another method.
+Methods defined in a component are available for use with the [method](#the-method-helper) helper, or can be called from within another method.
 
 ```html
 <button {{ method "save:click" "fred" }}>save</button>
@@ -91,20 +91,20 @@ methods: {
 
 Watchers give you the ability to fire _"hooks"_ when a property in your data has change. You can watch any items in  your data or `$props`
 
-> You cannot, however watch a method in your data. Methods defined in your data are only for convienance for your template rendering.
+> You cannot, however watch a method in your data. Methods defined in your data are only for convenience for your template rendering.
 
 ```javascript
 data() {
   return {
     name: {
-      first: "david"
+      first: "David"
     }
   };
 },
 
 watchers: {
   "name.first"() {
-    console.log(this.name.first); // david
+    console.log(this.name.first); // David
     // this.$refs()
     // this.$methods
     // this.$props
@@ -136,7 +136,7 @@ data() {
 
 hooks: {
   created() {
-    // you can set items here pre render
+    // you can set items here pre-render
     this.name.first = "Mike";
   }
 }
