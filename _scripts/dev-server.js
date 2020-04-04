@@ -16,3 +16,5 @@ http
     });
   })
   .listen(8080);
+
+console.log("localhost:8080/docs/examples/index.html");

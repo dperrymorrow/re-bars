@@ -95,7 +95,7 @@ ReBars comes with a `{{ref}}` helper built in. This gives you the ability to sav
 
 - takes one parameter, the `String` for the reference
 
-> The ref helper is also needed on any input or other elements that need focused restored after a re-render.
+> The ref helper is also needed on any input or other elements that need focused restored after a re-render. See [bound helper](#bound)
 
 ```html
 <div>
@@ -113,6 +113,26 @@ methods: {
   }
 }
 ```
+
+> If you have multiple elements with the same ref, the key will be returned as an Array.
+
+```html
+<ul>
+  <li {{ ref "listItem" }}>item one</li>
+  <li {{ ref "listItem" }}>item one</li>
+</ul>
+```
+
+```javascript
+
+methods: {
+  save() {
+    this.$refs().listItem
+    // return [li, li]
+  }
+}
+```
+
 
 ## The {{bound}} helper
 The `{{bound}` helper is used on input elements such as `<input>` or `<textarea>` elements. The parameter passed will sync the value attribute to the value, and on `input` event update the value.

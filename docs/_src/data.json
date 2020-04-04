@@ -39,6 +39,10 @@
           "path": "#data"
         },
         {
+          "label": "Methods",
+          "path": "#methods"
+        },
+        {
           "label": "Watchers",
           "path": "#watchers"
         },
@@ -47,8 +51,8 @@
           "path": "#hooks"
         },
         {
-          "label": "Methods",
-          "path": "#methods"
+          "label": "Helpers",
+          "path": "#helpers"
         }
       ]
     },

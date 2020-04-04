@@ -2,6 +2,7 @@ export default {
   template: /*html*/ `
     <div>
       {{#watch "editing" tag="div" class="todo" }}
+        {{ $_componentId }}
         {{#if editing}}
           <input type="text" value="{{ $props.todo.name }}" {{ ref "nameInput" }}/>
           <button {{ method "save" }}>save</button>
@@ -38,6 +39,12 @@ export default {
     isChecked: val => (val ? "checked" : ""),
     timeAgo: val => {
       return window.moment(val).fromNow();
+    },
+  },
+
+  hooks: {
+    detached() {
+      console.log(this.$_componentId, this.$props.todo.name);
     },
   },
 
