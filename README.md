@@ -56,9 +56,10 @@ Each time the value passed to watch is changed, *just* that Handlebars block wil
   - [Template](#template)
   - [Name](#name)
   - [Data](#data)
+  - [Methods](#methods)
   - [Watchers](#watchers)
   - [Hooks](#hooks)
-  - [Methods](#methods)
+  - [Helpers](#helpers)
 - [ReBars Helpers](#rebars-built-in-helpers)
   - [watch](#the-watch-helper)
   - [ref](#the-ref-helper)
@@ -232,7 +233,7 @@ methods: {
 
 ## Watchers
 
-Watchers give you the ability to fire _"hooks"_ when a property in your data has change. You can watch any items in  your data or `$props`
+Watchers give you the ability to call a function when a property in your data has change. You can watch any items in  your data or `$props`
 
 > You cannot, however watch a method in your data. Methods defined in your data are only for convenience for your template rendering.
 
@@ -263,7 +264,7 @@ Hooks are triggered at different points in the component instance's life.
 
 - `created` triggered when the component is instantiated and prior to rendering
 - `attached` the component has been rendered and added to the DOM
-- `teardown` the component is about to be deleted, but at this point is still on the DOM
+- `detached` the component is no longer on the DOM and is being garbage collected
 
 > `this.$refs()` cannot be used in the created hook. The component is not yet on the DOM. If you need to do something with the component's `$refs` or DOM. Use the attached hook instead.
 
@@ -397,7 +398,7 @@ ReBars comes with a `{{ref}}` helper built in. This gives you the ability to sav
 
 - takes one parameter, the `String` for the reference
 
-> The ref helper is also needed on any input or other elements that need focused restored after a re-render.
+> The ref helper is also needed on any input or other elements that need focused restored after a re-render. See [bound helper](#bound)
 
 ```html
 <div>
@@ -415,6 +416,26 @@ methods: {
   }
 }
 ```
+
+> If you have multiple elements with the same ref, the key will be returned as an Array.
+
+```html
+<ul>
+  <li {{ ref "listItem" }}>item one</li>
+  <li {{ ref "listItem" }}>item one</li>
+</ul>
+```
+
+```javascript
+
+methods: {
+  save() {
+    this.$refs().listItem
+    // return [li, li]
+  }
+}
+```
+
 
 ## The {{bound}} helper
 The `{{bound}` helper is used on input elements such as `<input>` or `<textarea>` elements. The parameter passed will sync the value attribute to the value, and on `input` event update the value.
