@@ -75,7 +75,13 @@ function register(
         render() {
           const html = Utils.dom.tagComponent(compId, templateFn(scope), name);
           // dont begin watching until after first render
+
           watch();
+          if (hooks.attached) {
+            setTimeout(() => {
+              hooks.attached.call(scope);
+            }, 0);
+          }
           return html;
         },
       };

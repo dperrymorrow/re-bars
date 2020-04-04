@@ -48,13 +48,16 @@
                         <a href="#data">Data</a>
                       </li>
                       <li>
+                        <a href="#methods">Methods</a>
+                      </li>
+                      <li>
                         <a href="#watchers">Watchers</a>
                       </li>
                       <li>
                         <a href="#hooks">Hooks</a>
                       </li>
                       <li>
-                        <a href="#methods">Methods</a>
+                        <a href="#helpers">Helpers</a>
                       </li>
                   </ul>
             </li>
@@ -249,7 +252,7 @@ ReBars.app({
   }
 }</code></pre>
 <h2 id="watchers">Watchers</h2>
-<p>Watchers give you the ability to fire <em>&quot;hooks&quot;</em> when a property in your data has change. You can watch any items in  your data or <code>$props</code></p>
+<p>Watchers give you the ability to call a function when a property in your data has change. You can watch any items in  your data or <code>$props</code></p>
 <blockquote>
 <p>You cannot, however watch a method in your data. Methods defined in your data are only for convenience for your template rendering.</p>
 </blockquote>
@@ -275,7 +278,7 @@ watchers: {
 <ul>
 <li><code>created</code> triggered when the component is instantiated and prior to rendering</li>
 <li><code>attached</code> the component has been rendered and added to the DOM</li>
-<li><code>teardown</code> the component is about to be deleted, but at this point is still on the DOM</li>
+<li><code>detached</code> the component is no longer on the DOM and is being garbage collected</li>
 </ul>
 <blockquote>
 <p><code>this.$refs()</code> cannot be used in the created hook. The component is not yet on the DOM. If you need to do something with the component&#39;s <code>$refs</code> or DOM. Use the attached hook instead.</p>
@@ -376,7 +379,7 @@ Watch takes an argument of what property to watch. The argument can be a string 
 <li>takes one parameter, the <code>String</code> for the reference</li>
 </ul>
 <blockquote>
-<p>The ref helper is also needed on any input or other elements that need focused restored after a re-render.</p>
+<p>The ref helper is also needed on any input or other elements that need focused restored after a re-render. See <a href="#bound">bound helper</a></p>
 </blockquote>
 <pre><code class="language-html">&lt;div&gt;
   &lt;h1 {{ ref &quot;header&quot; }}&gt;Header&lt;/h1&gt;
@@ -386,6 +389,20 @@ Watch takes an argument of what property to watch. The argument can be a string 
   save() {
     this.$refs().header;
     // returns the &lt;h1&gt; element
+  }
+}</code></pre>
+<blockquote>
+<p>If you have multiple elements with the same ref, the key will be returned as an Array.</p>
+</blockquote>
+<pre><code class="language-html">&lt;ul&gt;
+  &lt;li {{ ref &quot;listItem&quot; }}&gt;item one&lt;/li&gt;
+  &lt;li {{ ref &quot;listItem&quot; }}&gt;item one&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+<pre><code class="language-javascript">
+methods: {
+  save() {
+    this.$refs().listItem
+    // return [li, li]
   }
 }</code></pre>
 <h2 id="the-bound-helper">The {{bound}} helper</h2>
@@ -814,6 +831,7 @@ export default {
   template: /*html*/ `
     &lt;div&gt;
       {{#watch &quot;editing&quot; tag=&quot;div&quot; class=&quot;todo&quot; }}
+        {{ $_componentId }}
         {{#if editing}}
           &lt;input type=&quot;text&quot; value=&quot;{{ $props.todo.name }}&quot; {{ ref &quot;nameInput&quot; }}/&gt;
           &lt;button {{ method &quot;save&quot; }}&gt;save&lt;/button&gt;
@@ -850,6 +868,12 @@ export default {
     isChecked: val =&gt; (val ? &quot;checked&quot; : &quot;&quot;),
     timeAgo: val =&gt; {
       return window.moment(val).fromNow();
+    },
+  },
+
+  hooks: {
+    detached() {
+      console.log(this.$_componentId, this.$props.todo.name);
     },
   },
 
