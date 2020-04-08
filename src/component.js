@@ -79,7 +79,16 @@ function register(
         scope,
         hooks,
         renders,
-        init() {
+        bound(event) {
+          const [id, path] = JSON.parse(event.target.dataset.rbsBound);
+          Utils.setKey(scope, path, event.target.value);
+        },
+        handler(event) {
+          const [id, type, method, ...args] = JSON.parse(event.target.dataset.rbsMethod);
+          scope.$methods[method](event, ...args);
+        },
+        detached() {},
+        attached() {
           if (hooks.attached) hooks.attached.call(scope);
         },
         render() {

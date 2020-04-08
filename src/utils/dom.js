@@ -29,13 +29,15 @@ export default {
   findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
   findRef: ($parent, ref) => $parent.querySelector(`[data-rbs-ref="${ref}"]`),
 
-  findRefs(parent) {
-    const $el = typeof parent === "object" ? parent : this.findComponent(parent);
+  findRefs(cId) {
+    const $root = this.findComponent(cId);
 
-    return Array.from($el.querySelectorAll("[data-rbs-ref]")).reduce((obj, $el) => {
-      const key = $el.dataset.rbsRef;
-      const target = obj[$el.dataset.rbsRef];
-      obj[key] = target ? [target].concat($el) : $el;
+    return Array.from($root.querySelectorAll("[data-rbs-ref]")).reduce((obj, $el) => {
+      const [id, key] = $el.dataset.rbsRef.split(":");
+      if (id === cId) {
+        const target = obj[$el.dataset.rbsRef];
+        obj[key] = target ? [target].concat($el) : $el;
+      }
       return obj;
     }, {});
   },
@@ -71,21 +73,26 @@ export default {
   },
 
   handleNewNode($node, app) {
-    const _comp = $el => app.components.instances[$el.dataset.rbsComp].init();
+    const _comp = $el => app.components.instances[$el.dataset.rbsComp].attached();
     const _method = $method => {
-      const [method, type, cId, ...args] = JSON.parse($method.dataset.rbsMethod);
-      const { scope } = app.components.instances[cId];
-      $method.addEventListener(type, event => {
-        scope.$methods[method].call(scope, event, ...args);
-      });
+      const [cId, type] = JSON.parse($method.dataset.rbsMethod);
+      const { handler } = app.components.instances[cId];
+      $method.addEventListener(type, handler);
+    };
+    const _bound = $bound => {
+      const [cId, path] = JSON.parse($bound.dataset.rbsBound);
+      const { bound } = app.components.instances[cId];
+      $bound.addEventListener("input", bound);
     };
 
     if ($node.nodeType === Node.TEXT_NODE) return;
     if ($node.dataset.rbsComp) _comp($node);
     if ($node.dataset.rbsMethod) _method($node);
+    if ($node.dataset.rbsBound) _bound($node);
 
     $node.querySelectorAll("[data-rbs-comp]").forEach(_comp);
     $node.querySelectorAll("[data-rbs-method]").forEach(_method);
+    $node.querySelectorAll("[data-rbs-bound]").forEach(_bound);
   },
 
   observeEl($el, callback) {

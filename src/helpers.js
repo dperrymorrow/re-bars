@@ -1,13 +1,14 @@
 import Msg from "./msg.js";
 import Utils from "./utils/index.js";
 
-const _tag = data => `data-rbs-cid="${data.root.$_componentId}"`;
-
 export default {
   register({ app, instance, components, helpers, template }) {
     Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
     instance.registerHelper("isComponent", cName => Object.keys(components).includes(cName));
-    instance.registerHelper("ref", (key, { data }) => new instance.SafeString(`data-rbs-ref="${key}" ${_tag(data)}`));
+    instance.registerHelper(
+      "ref",
+      (key, { data }) => new instance.SafeString(`data-rbs-ref="${data.root.$_componentId}:${key}"`)
+    );
 
     instance.registerHelper("component", function(...args) {
       const { hash: props, data, loc } = args.pop();
@@ -54,20 +55,18 @@ export default {
 
       const { data } = args.pop();
       const { $_componentId } = data.root;
-      let params = [method, type, $_componentId];
+      let params = [$_componentId, type, method];
       if (args && args.length) params = params.concat(args);
       return new instance.SafeString(`data-rbs-method='${JSON.stringify(params)}'`);
     });
 
     instance.registerHelper("bound", (path, { hash = {}, data }) => {
-      return "bound";
-      const { $_appId, $_componentId } = data.root;
-      const val = Utils.findByPath(data.root, path);
-      const ref = hash.ref || path;
-      const params = Utils.makeParams([$_appId, $_componentId, "[event]", path]);
+      const { $_componentId } = data.root;
+      const params = [$_componentId, path];
 
       return new instance.SafeString(
-        `value="${val}" data-rbs-ref="${ref}" oninput="rbs.handlers.bound(${params.join(",")})"`
+        `value="${Utils.findByPath(data.root, path)}" data-rbs-ref="${hash.ref ||
+          path}" data-rbs-bound='${JSON.stringify(params)}'`
       );
     });
   },

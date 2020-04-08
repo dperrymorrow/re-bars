@@ -113,13 +113,15 @@ var Dom = {
   findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
   findRef: ($parent, ref) => $parent.querySelector(`[data-rbs-ref="${ref}"]`),
 
-  findRefs(parent) {
-    const $el = typeof parent === "object" ? parent : this.findComponent(parent);
+  findRefs(cId) {
+    const $root = this.findComponent(cId);
 
-    return Array.from($el.querySelectorAll("[data-rbs-ref]")).reduce((obj, $el) => {
-      const key = $el.dataset.rbsRef;
-      const target = obj[$el.dataset.rbsRef];
-      obj[key] = target ? [target].concat($el) : $el;
+    return Array.from($root.querySelectorAll("[data-rbs-ref]")).reduce((obj, $el) => {
+      const [id, key] = $el.dataset.rbsRef.split(":");
+      if (id === cId) {
+        const target = obj[$el.dataset.rbsRef];
+        obj[key] = target ? [target].concat($el) : $el;
+      }
       return obj;
     }, {});
   },
@@ -153,6 +155,43 @@ var Dom = {
     $tmp.innerHTML = html;
     return $tmp;
   },
+
+  handleNewNode($node, app) {
+    const _comp = $el => app.components.instances[$el.dataset.rbsComp].attached();
+    const _method = $method => {
+      const [cId, type] = JSON.parse($method.dataset.rbsMethod);
+      const { handler } = app.components.instances[cId];
+      $method.addEventListener(type, handler);
+    };
+    const _bound = $bound => {
+      const [cId, path] = JSON.parse($bound.dataset.rbsBound);
+      const { bound } = app.components.instances[cId];
+      $bound.addEventListener("input", bound);
+    };
+
+    if ($node.nodeType === Node.TEXT_NODE) return;
+    if ($node.dataset.rbsComp) _comp($node);
+    if ($node.dataset.rbsMethod) _method($node);
+    if ($node.dataset.rbsBound) _bound($node);
+
+    $node.querySelectorAll("[data-rbs-comp]").forEach(_comp);
+    $node.querySelectorAll("[data-rbs-method]").forEach(_method);
+    $node.querySelectorAll("[data-rbs-bound]").forEach(_bound);
+  },
+
+  observeEl($el, callback) {
+    const observer = new MutationObserver(mutationList =>
+      mutationList.forEach(({ addedNodes, removedNodes }) => callback(addedNodes, removedNodes))
+    );
+
+    observer.observe($el, {
+      childList: true,
+      attributes: true,
+      subtree: true,
+    });
+
+    return observer;
+  },
 };
 
 let counter = 1;
@@ -176,7 +215,7 @@ var Utils = {
     });
   },
 
-  debounce(callback, wait, immediate = false) {
+  debounce(callback, wait = 0, immediate = false) {
     let timeout = null;
 
     return function() {
@@ -250,7 +289,18 @@ var Utils = {
 // import ReRender from "./re-render.js";
 
 var ProxyTrap = {
-  create(data) {
+  create(data, callback) {
+    let que = [];
+
+    const _debounced = Utils.debounce(() => {
+      callback(que);
+      que = [];
+    });
+
+    const _addToQue = path => {
+      que.push(path);
+      _debounced(que);
+    };
 
     function _buildProxy(raw, tree = []) {
       return new Proxy(raw, {
@@ -267,12 +317,16 @@ var ProxyTrap = {
         set: function(target, prop) {
           const ret = Reflect.set(...arguments);
           const path = tree.concat(prop).join(".");
+
+          _addToQue(path);
           return ret;
         },
 
         deleteProperty: function(target, prop) {
           const ret = Reflect.deleteProperty(...arguments);
           const path = tree.concat(prop).join(".");
+
+          _addToQue(path);
           return ret;
         },
       });
@@ -280,66 +334,31 @@ var ProxyTrap = {
 
     const proxyData = _buildProxy(data);
     return proxyData;
-
-    // {
-    //   watch() {
-    //     que = ReRender.init(proxyData.$_appId, proxyData.$_componentId).que;
-    //   },
-    //   data: proxyData,
-    // };
   },
 };
 
-// import Utils from "../utils/index.js";
-
-var Core = {
-  register({ instance, helpers, components, template }) {
+var Helpers = {
+  register({ app, instance, components, helpers, template }) {
     Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
+    instance.registerHelper("isComponent", cName => Object.keys(components).includes(cName));
+    instance.registerHelper(
+      "ref",
+      (key, { data }) => new instance.SafeString(`data-rbs-ref="${data.root.$_componentId}:${key}"`)
+    );
 
     instance.registerHelper("component", function(...args) {
       const { hash: props, data, loc } = args.pop();
-
       const cName = args[0];
       if (!components[cName]) Msg.fail("noComp", { data, loc, template, cName });
       return new instance.SafeString(components[cName].instance(props).render());
     });
-
-    instance.registerHelper("isComponent", function(cName) {
-      // const { cDefs } = Utils.getStorage(data.root.$_appId);
-      return Object.keys(components).includes(cName);
-    });
-
-    instance.registerHelper("ref", key => new instance.SafeString(`data-rbs-ref="${key}"`));
 
     instance.registerHelper("debug", (obj, { data, loc }) => {
       if (obj === undefined) Msg.fail("paramUndef", { template, data, loc });
       const parser = (key, val) => (typeof val === "function" ? val + "" : val);
       return new instance.SafeString(`<pre class="debug">${JSON.stringify(obj, parser, 2)}</pre>`);
     });
-  },
-};
 
-var Events = {
-  register(instance) {
-    instance.registerHelper("method", function() {
-      const [str, ...args] = arguments;
-      const [method, type = "click"] = str.split(":");
-
-      const { data } = args.pop();
-      const { $_componentId } = data.root;
-      let params = [method, type, $_componentId];
-      if (args && args.length) params = params.concat(args);
-      return new instance.SafeString(`data-rbs-method='${JSON.stringify(params)}'`);
-    });
-
-    instance.registerHelper("bound", (path, { hash = {}, data }) => {
-      return "bound";
-    });
-  },
-};
-
-var Watch = {
-  register(app, instance, template) {
     instance.registerHelper("watch", function(...args) {
       const { fn, hash, data, loc } = args.pop();
       const instId = data.root.$_componentId;
@@ -365,6 +384,63 @@ var Watch = {
 
       return Utils.dom.wrapWatcher(eId, fn(this), hash);
     });
+
+    instance.registerHelper("method", function() {
+      const [str, ...args] = arguments;
+      const [method, type = "click"] = str.split(":");
+
+      const { data } = args.pop();
+      const { $_componentId } = data.root;
+      let params = [$_componentId, type, method];
+      if (args && args.length) params = params.concat(args);
+      return new instance.SafeString(`data-rbs-method='${JSON.stringify(params)}'`);
+    });
+
+    instance.registerHelper("bound", (path, { hash = {}, data }) => {
+      const { $_componentId } = data.root;
+      const params = [$_componentId, path];
+
+      return new instance.SafeString(
+        `value="${Utils.findByPath(data.root, path)}" data-rbs-ref="${hash.ref ||
+          path}" data-rbs-bound='${JSON.stringify(params)}'`
+      );
+    });
+  },
+};
+
+var ReRender = {
+  renderPaths({ paths, renders, name }) {
+    Object.entries(renders)
+      .filter(([renderId, handler]) => {
+        const matches = paths.some(path => Utils.shouldRender(path, handler.path));
+        return matches && Utils.dom.findWatcher(renderId);
+      })
+      .forEach(([renderId, handler]) => {
+        const $target = Utils.dom.findWatcher(renderId);
+        const html = handler.render();
+        if (Utils.dom.isEqHtml($target.innerHTML, html)) return;
+
+        // if (Utils.dom.isKeyedNode($target)) {
+        //   _patchArr($target, html, handler);
+        //   Msg.log("patching", { name, path: handler.path }, $target);
+        //   delete toTrigger.renders[renderId];
+        //   return;
+        // }
+
+        const lenPath = handler.path.find(path => path.endsWith(".length"));
+        if (lenPath) Msg.warn("notKeyed", { name, path: lenPath }, $target);
+
+        const activeRef = {
+          ref: document.activeElement.dataset.rbsRef,
+          pos: document.activeElement.selectionStart,
+        };
+
+        $target.style.display = html === "" ? "none" : "";
+        $target.innerHTML = html;
+
+        Utils.dom.restoreCursor($target, activeRef);
+        Msg.log("reRender", { name, path: handler.path }, $target);
+      });
   },
 };
 
@@ -372,16 +448,9 @@ const restricted = ["component", "ref", "debug", "isComponent", "method", "bound
 
 function register(
   { id: appId, Handlebars, trace, helpers: globalHelpers, components: globalComponents },
-  { name, template, data, helpers = {}, hooks = {}, methods = {}, watchers = {}, components = [] }
+  { name, template, data = () => ({}), helpers = {}, hooks = {}, methods = {}, watchers = {}, components = [] }
 ) {
-  data =
-    data ||
-    function() {
-      return {};
-    };
-
   // should prob init Msg with the trace per app
-
   if (!name) Msg.fail("noName", null, arguments[1]);
   if (typeof data !== "function") Msg.fail("dataFn", { name });
   if (typeof template !== "string") Msg.fail("tmplStr", { name });
@@ -403,39 +472,45 @@ function register(
     if (restricted.concat(Object.keys(helpers)).includes(key)) Msg.fail("restrictedKey", { name, key });
   });
 
-  Core.register({ instance, helpers: { ...helpers, ...globalHelpers }, components: regComps, template });
-  Events.register(instance, methods);
-  Watch.register(app, instance, template);
+  Helpers.register({
+    app,
+    methods,
+    instance,
+    helpers: { ...helpers, ...globalHelpers },
+    components: regComps,
+    template,
+  });
 
   return {
     instance($props = {}) {
       const id = Utils.randomId();
       const instData = data();
+      const renders = {};
       // validate the props, add the passed methods after you bind them or you will loose scope
       Object.entries($props).forEach(([key, value]) => {
         if (value === undefined) Msg.warn("propUndef", { name, key });
       });
 
-      const scope = ProxyTrap.create({
-        ...instData,
-        ...{
-          $props,
-          $methods: methods,
-          // $hooks: hooks,
-          $name: name,
-          // $watchers: watchers,
-          $_appId: appId,
-          $_componentId: id,
-          $el: () => Utils.dom.findComponet(id),
-          $refs: () => Utils.dom.findRefs(id),
+      const scope = ProxyTrap.create(
+        {
+          ...instData,
+          ...{
+            $props,
+            $methods: methods,
+            // $hooks: hooks,
+            $name: name,
+            // $watchers: watchers,
+            $_appId: appId,
+            $_componentId: id,
+            $el: () => Utils.dom.findComponet(id),
+            $refs: () => Utils.dom.findRefs(id),
+          },
         },
-      });
-
-      function init() {
-        Utils.dom.findComponent(id);
-        // do other init stuff here
-        if (hooks.attached) hooks.attached.call(scope);
-      }
+        paths => {
+          Msg.log("triggered", { name, paths });
+          ReRender.renderPaths({ paths, renders, name });
+        }
+      );
 
       if (hooks.created) hooks.created.call(scope);
 
@@ -443,19 +518,21 @@ function register(
         id,
         scope,
         hooks,
-        renders: {},
-        init,
+        renders,
+        bound(event) {
+          const [id, path] = JSON.parse(event.target.dataset.rbsBound);
+          Utils.setKey(scope, path, event.target.value);
+        },
+        handler(event) {
+          const [id, type, method, ...args] = JSON.parse(event.target.dataset.rbsMethod);
+          scope.$methods[method](event, ...args);
+        },
+        detached() {},
+        attached() {
+          if (hooks.attached) hooks.attached.call(scope);
+        },
         render() {
-          const html = Utils.dom.tagComponent(id, templateFn(scope), name);
-          // dont begin watching until after first render
-
-          // watch();
-          // if (hooks.attached) {
-          //   setTimeout(() => {
-          //     hooks.attached.call(scope);
-          //   }, 0);
-          // }
-          return html;
+          return Utils.dom.tagComponent(id, templateFn(scope), name);
         },
       };
 
@@ -471,24 +548,6 @@ var Component = {
 
 var index = {
   app({ $el, root, Handlebars = window.Handlebars, helpers = {}, components = {}, trace = false }) {
-    // window.rbs = window.ReBars = window.ReBars || {};
-    // window.ReBars.apps = window.ReBars.apps || {};
-    // window.ReBars.trace = trace;
-    // window.ReBars.handlers = window.ReBars.handlers || {
-    //   trigger(...args) {
-    //     const [appId, cId, methodName, ...params] = args;
-    //     const scope = Utils.getStorage(appId, cId).scope;
-    //     const method = scope.$methods[methodName];
-    //     if (!method) Msg.fail("noMethod", { name: scope.$name, methodName });
-    //     method(...params);
-    //   },
-    //
-    //   bound(appId, cId, event, path) {
-    //     const { scope } = Utils.getStorage(appId, cId);
-    //     Utils.setKey(scope, path, event.target.value);
-    //   },
-    // };
-
     if (!Handlebars) Msg.fail("noHbs");
     if (!document.body.contains($el)) Msg.fail("noEl");
 
@@ -504,35 +563,13 @@ var index = {
       },
     };
 
-    const observer = new MutationObserver(mutationList => {
-      mutationList.forEach(({ addedNodes, removedNodes }) => {
-        addedNodes.forEach($node => {
-          if ("querySelectorAll" in $node) {
-            $node.querySelectorAll("[data-rbs-comp]").forEach($comp => {
-              app.components.instances[$comp.dataset.rbsComp].init();
-            });
-
-            $node.querySelectorAll("[data-rbs-method]").forEach($method => {
-              const [method, type, inst, ...args] = JSON.parse($method.dataset.rbsMethod);
-              const scope = app.components.instances[inst].scope;
-              $method.addEventListener(type, event => {
-                scope.$methods[method].call(scope, event, ...args);
-              });
-            });
-          }
-        });
-      });
-    });
-
-    observer.observe($el, {
-      childList: true,
-      attributes: true,
-      subtree: true,
+    Utils.dom.observeEl($el, (added, removed) => {
+      added.forEach($node => Utils.dom.handleNewNode($node, app));
     });
 
     const rootInst = Component.register(app, root).instance();
     $el.innerHTML = rootInst.render();
-    rootInst.init();
+    rootInst.attached();
     return app;
   },
 };
