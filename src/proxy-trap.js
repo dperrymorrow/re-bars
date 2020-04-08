@@ -1,8 +1,19 @@
-import ReRender from "./re-render.js";
+// import ReRender from "./re-render.js";
+import Utils from "./utils/index.js";
 
 export default {
-  create(data) {
-    let que;
+  create(data, callback) {
+    let que = [];
+
+    const _debounced = Utils.debounce(() => {
+      callback(que);
+      que = [];
+    });
+
+    const _addToQue = path => {
+      que.push(path);
+      _debounced(que);
+    };
 
     function _buildProxy(raw, tree = []) {
       return new Proxy(raw, {
@@ -20,7 +31,7 @@ export default {
           const ret = Reflect.set(...arguments);
           const path = tree.concat(prop).join(".");
 
-          if (que) que(path);
+          _addToQue(path);
           return ret;
         },
 
@@ -28,18 +39,13 @@ export default {
           const ret = Reflect.deleteProperty(...arguments);
           const path = tree.concat(prop).join(".");
 
-          if (que) que(path);
+          _addToQue(path);
           return ret;
         },
       });
     }
 
     const proxyData = _buildProxy(data);
-    return {
-      watch() {
-        que = ReRender.init(proxyData.$_appId, proxyData.$_componentId).que;
-      },
-      data: proxyData,
-    };
+    return proxyData;
   },
 };

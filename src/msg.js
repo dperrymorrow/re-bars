@@ -22,7 +22,7 @@ const _msg = (type, key, obj = {}, ...payloads) => {
 
   if (["warn", "log"].includes(type)) {
     str = "%c " + str + " ";
-    if (!window.ReBars.trace) return;
+    // if (!window.ReBars.trace) return;
     if (payloads) {
       console.groupCollapsed(str, styles[type]);
       payloads.forEach(p => console.log(p));

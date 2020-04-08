@@ -158,6 +158,7 @@ import ReBars from &quot;re-bars&quot;;</code></pre>
 <ul>
 <li><code>$el</code> the Element that your app will be rendered into</li>
 <li><code>root</code> the top level <a href="component.html">component</a> in your app.</li>
+<li><code>trace</code> default false, if true will console.log all data changes and re-renders</li>
 </ul>
 <pre><code class="language-html">&lt;div id=&quot;demo-app&quot;&gt;&lt;/div&gt;
 
@@ -168,6 +169,7 @@ import ReBars from &quot;re-bars&quot;;</code></pre>
   ReBars.app({
     $el: document.getElementById(&quot;demo-app&quot;),
     root: RootComponent,
+    trace: true // default false
   });
 &lt;/script&gt;</code></pre>
 <h2 id="global-helpers">Global Helpers</h2>
@@ -505,6 +507,8 @@ methods: {
       &lt;/label&gt;
     &lt;/div&gt;
 
+    {{ debug . }}
+
     &lt;ul class=&quot;simple&quot;&gt;
       {{#watch &quot;todos.*&quot; }}
         {{#each todos }}
@@ -568,6 +572,16 @@ methods: {
 
   helpers: {
     isChecked: val =&gt; (val ? &quot;checked&quot; : &quot;&quot;),
+  },
+
+  hooks: {
+    attached() {
+      console.log(this, &quot;attached&quot;);
+    },
+
+    created() {
+      console.log(this, &quot;created&quot;);
+    },
   },
 
   methods: {
@@ -821,6 +835,7 @@ export default {
 
   methods: {
     filterBy(event, state) {
+      debugger;
       this.$props.filters.state = state;
     },
   },

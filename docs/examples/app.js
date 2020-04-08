@@ -20,6 +20,8 @@ export default {
       </label>
     </div>
 
+    {{ debug . }}
+
     <ul class="simple">
       {{#watch "todos.*" }}
         {{#each todos }}
@@ -83,6 +85,16 @@ export default {
 
   helpers: {
     isChecked: val => (val ? "checked" : ""),
+  },
+
+  hooks: {
+    attached() {
+      console.log(this, "attached");
+    },
+
+    created() {
+      console.log(this, "created");
+    },
   },
 
   methods: {

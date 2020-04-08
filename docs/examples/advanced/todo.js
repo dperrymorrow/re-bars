@@ -50,6 +50,7 @@ export default {
 
   methods: {
     save() {
+      debugger;
       this.$props.todo.name = this.$refs().nameInput.value;
       this.$props.todo.updated = new Date().toLocaleString();
       this.editing = false;

@@ -22,7 +22,7 @@ export default {
     });
   },
 
-  debounce(callback, wait, immediate = false) {
+  debounce(callback, wait = 0, immediate = false) {
     let timeout = null;
 
     return function() {
