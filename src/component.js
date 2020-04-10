@@ -68,7 +68,7 @@ function register(
         },
         paths => {
           Msg.log("triggered", { name, paths });
-          ReRender.renderPaths({ paths, renders, name });
+          ReRender.paths({ paths, renders, name });
         }
       );
 
@@ -79,15 +79,19 @@ function register(
         scope,
         hooks,
         renders,
-        bound(event) {
-          const [id, path] = JSON.parse(event.target.dataset.rbsBound);
-          Utils.setKey(scope, path, event.target.value);
+        handlers: {
+          bound(event) {
+            const [id, path] = JSON.parse(event.target.dataset.rbsBound);
+            Utils.setKey(scope, path, event.target.value);
+          },
+          method(event) {
+            const [id, type, method, ...args] = JSON.parse(event.target.dataset.rbsMethod);
+            scope.$methods[method](event, ...args);
+          },
         },
-        handler(event) {
-          const [id, type, method, ...args] = JSON.parse(event.target.dataset.rbsMethod);
-          scope.$methods[method](event, ...args);
+        detached() {
+          if (hooks.detached) hooks.detached.call(scope);
         },
-        detached() {},
         attached() {
           if (hooks.attached) hooks.attached.call(scope);
         },

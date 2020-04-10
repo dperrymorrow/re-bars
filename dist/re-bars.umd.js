@@ -46,18 +46,18 @@
     noEl: () => "$el must be present in the document",
     noHbs: () => "ReBars need Handlebars in order to run!",
     noName: () => "Each ReBars component should have a name",
-    dataFn: ({ name }) => `component:${name} must be a function`,
-    tplStr: ({ name }) => `component:${name} needs a template string`,
-    propStomp: ({ name, key }) => `component:${name} "data.${key}" was overrode by a prop`,
-    propUndef: ({ name, key }) => `component:${name} was passed undefined for prop "${key}"`,
+    dataFn: ({ name }) => `${name}: must be a function`,
+    tplStr: ({ name }) => `${name}: needs a template string`,
+    propStomp: ({ name, key }) => `${name}: "data.${key}" was overrode by a prop`,
+    propUndef: ({ name, key }) => `${name}: was passed undefined for prop "${key}"`,
     oneRoot: ({ name }) =>
-      `component:${name} must have one root node, and cannot be a {{#watch}} block. \nThis error can also be caused by malformed html.`,
-    noMethod: ({ name, methodName }) => `component:${name} does not have a method named "${methodName}"`,
+      `${name}: must have one root node, and cannot be a {{#watch}} block. \nThis error can also be caused by malformed html.`,
+    noMethod: ({ name, methodName }) => `${name}: does not have a method named "${methodName}"`,
     badPath: ({ path }) => `${path} was not found in object`,
-    reRender: ({ name, path }) => `component:${name} re-rendering "${path}"`,
-    patching: ({ name, path }) => `component:${name} patching ref Array "${path}"`,
-    pathTrigger: ({ path, action, name }) => `component:${name} ${action} "${path}"`,
-    triggered: ({ name, paths }) => `component:${name} data change "${paths}"`,
+    reRender: ({ name, path }) => `${name}: re-rendering "${path}"`,
+    patching: ({ name, path }) => `${name}: patching ref Array "${path}"`,
+    pathTrigger: ({ path, action, name }) => `${name}: ${action} "${path}"`,
+    triggered: ({ name, paths }) => `${name}: data change "${paths}"`,
 
     paramUndef({ data, template, loc }) {
       return `component:${data.root.$name} passed undefined to a helper
@@ -65,21 +65,20 @@
     `;
     },
     badWatchParam({ data, template, loc, path }) {
-      return `component:${data.root.$name} could not find "${path}" to watch. If primitve wrap in quotes
+      return `${data.root.$name}: could not find "${path}" to watch. If primitve wrap in quotes
       ${_getTplString(template, { data, loc })}
     `;
     },
     noComp({ data, loc, template, cName }) {
-      return `component:${data.root.$name} child component "${cName}" is not registered
+      return `${data.root.$name}: child component "${cName}" is not registered
       ${_getTplString(template, { data, loc })}
     `;
     },
-    restrictedKey: ({ name, key }) =>
-      `component:${name} cannot use restricted key "${key}" in your data as it's a helper`,
+    restrictedKey: ({ name, key }) => `${name}: cannot use restricted key "${key}" in your data as it's a helper`,
     focusFail: ({ ref, name }) =>
-      `component:${name} ref "${ref}" is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each`,
+      `${name}: ref "${ref}" is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each`,
     notKeyed: ({ name, path }) =>
-      `component:${name} patching "${path}" add a {{ ref }} to avoid re-rendering the entire target`,
+      `${name}: patching "${path}" add a {{ref 'someUniqueKey' }} to avoid re-rendering the entire Array`,
   };
 
   var Msg = {
@@ -160,43 +159,6 @@
       const $tmp = document.createElement("div");
       $tmp.innerHTML = html;
       return $tmp;
-    },
-
-    handleNewNode($node, app) {
-      const _comp = $el => app.components.instances[$el.dataset.rbsComp].attached();
-      const _method = $method => {
-        const [cId, type] = JSON.parse($method.dataset.rbsMethod);
-        const { handler } = app.components.instances[cId];
-        $method.addEventListener(type, handler);
-      };
-      const _bound = $bound => {
-        const [cId, path] = JSON.parse($bound.dataset.rbsBound);
-        const { bound } = app.components.instances[cId];
-        $bound.addEventListener("input", bound);
-      };
-
-      if ($node.nodeType === Node.TEXT_NODE) return;
-      if ($node.dataset.rbsComp) _comp($node);
-      if ($node.dataset.rbsMethod) _method($node);
-      if ($node.dataset.rbsBound) _bound($node);
-
-      $node.querySelectorAll("[data-rbs-comp]").forEach(_comp);
-      $node.querySelectorAll("[data-rbs-method]").forEach(_method);
-      $node.querySelectorAll("[data-rbs-bound]").forEach(_bound);
-    },
-
-    observeEl($el, callback) {
-      const observer = new MutationObserver(mutationList =>
-        mutationList.forEach(({ addedNodes, removedNodes }) => callback(addedNodes, removedNodes))
-      );
-
-      observer.observe($el, {
-        childList: true,
-        attributes: true,
-        subtree: true,
-      });
-
-      return observer;
     },
   };
 
@@ -415,7 +377,7 @@
   };
 
   var ReRender = {
-    renderPaths({ paths, renders, name }) {
+    paths({ paths, renders, name }) {
       Object.entries(renders)
         .filter(([renderId, handler]) => {
           const matches = paths.some(path => Utils.shouldRender(path, handler.path));
@@ -514,7 +476,7 @@
           },
           paths => {
             Msg.log("triggered", { name, paths });
-            ReRender.renderPaths({ paths, renders, name });
+            ReRender.paths({ paths, renders, name });
           }
         );
 
@@ -525,15 +487,19 @@
           scope,
           hooks,
           renders,
-          bound(event) {
-            const [id, path] = JSON.parse(event.target.dataset.rbsBound);
-            Utils.setKey(scope, path, event.target.value);
+          handlers: {
+            bound(event) {
+              const [id, path] = JSON.parse(event.target.dataset.rbsBound);
+              Utils.setKey(scope, path, event.target.value);
+            },
+            method(event) {
+              const [id, type, method, ...args] = JSON.parse(event.target.dataset.rbsMethod);
+              scope.$methods[method](event, ...args);
+            },
           },
-          handler(event) {
-            const [id, type, method, ...args] = JSON.parse(event.target.dataset.rbsMethod);
-            scope.$methods[method](event, ...args);
+          detached() {
+            if (hooks.detached) hooks.detached.call(scope);
           },
-          detached() {},
           attached() {
             if (hooks.attached) hooks.attached.call(scope);
           },
@@ -569,13 +535,58 @@
         },
       };
 
-      Utils.dom.observeEl($el, (added, removed) => {
-        added.forEach($node => Utils.dom.handleNewNode($node, app));
+      const _comp = (action, $el) => {
+        const method = action === "add" ? "attached" : "detached";
+        app.components.instances[$el.dataset.rbsComp][method]();
+        if (action === "remove") delete app.components.instances[$el.dataset.rbsComp];
+      };
+      const _method = (action, $method) => {
+        const method = action === "add" ? "addEventListener" : "removeEventListener";
+        const [cId, type] = JSON.parse($method.dataset.rbsMethod);
+        $method[method](type, app.components.instances[cId].handlers.method);
+      };
+      const _bound = (action, $bound) => {
+        const method = action === "add" ? "addEventListener" : "removeEventListener";
+        const [cId, path] = JSON.parse($bound.dataset.rbsBound);
+        $bound[method]("input", app.components.instances[cId].handlers.bound);
+      };
+
+      const observer = new MutationObserver(mutationList => {
+        mutationList.forEach(({ addedNodes, removedNodes }) => {
+          addedNodes.forEach($node => {
+            if ($node.nodeType === Node.TEXT_NODE) return;
+
+            if ($node.dataset.rbsComp) _comp("add", $node);
+            if ($node.dataset.rbsMethod) _method("add", $node);
+            if ($node.dataset.rbsBound) _bound("add", $node);
+
+            $node.querySelectorAll("[data-rbs-comp]").forEach(_comp.bind(null, "add"));
+            $node.querySelectorAll("[data-rbs-method]").forEach(_method.bind(null, "add"));
+            $node.querySelectorAll("[data-rbs-bound]").forEach(_bound.bind(null, "add"));
+          });
+
+          removedNodes.forEach($node => {
+            if ($node.nodeType === Node.TEXT_NODE) return;
+
+            if ($node.dataset.rbsMethod) _method("remove", $node);
+            if ($node.dataset.rbsBound) _bound("remove", $node);
+            if ($node.dataset.rbsComp) _comp("remove", $node);
+
+            $node.querySelectorAll("[data-rbs-method]").forEach(_method.bind(null, "remove"));
+            $node.querySelectorAll("[data-rbs-bound]").forEach(_bound.bind(null, "remove"));
+            $node.querySelectorAll("[data-rbs-comp]").forEach(_comp.bind(null, "remove"));
+          });
+        });
+      });
+
+      observer.observe($el, {
+        childList: true,
+        attributes: true,
+        subtree: true,
       });
 
       const rootInst = Component.register(app, root).instance();
       $el.innerHTML = rootInst.render();
-      rootInst.attached();
       return app;
     },
   };

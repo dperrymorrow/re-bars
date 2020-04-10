@@ -40,18 +40,18 @@ const messages = {
   noEl: () => "$el must be present in the document",
   noHbs: () => "ReBars need Handlebars in order to run!",
   noName: () => "Each ReBars component should have a name",
-  dataFn: ({ name }) => `component:${name} must be a function`,
-  tplStr: ({ name }) => `component:${name} needs a template string`,
-  propStomp: ({ name, key }) => `component:${name} "data.${key}" was overrode by a prop`,
-  propUndef: ({ name, key }) => `component:${name} was passed undefined for prop "${key}"`,
+  dataFn: ({ name }) => `${name}: must be a function`,
+  tplStr: ({ name }) => `${name}: needs a template string`,
+  propStomp: ({ name, key }) => `${name}: "data.${key}" was overrode by a prop`,
+  propUndef: ({ name, key }) => `${name}: was passed undefined for prop "${key}"`,
   oneRoot: ({ name }) =>
-    `component:${name} must have one root node, and cannot be a {{#watch}} block. \nThis error can also be caused by malformed html.`,
-  noMethod: ({ name, methodName }) => `component:${name} does not have a method named "${methodName}"`,
+    `${name}: must have one root node, and cannot be a {{#watch}} block. \nThis error can also be caused by malformed html.`,
+  noMethod: ({ name, methodName }) => `${name}: does not have a method named "${methodName}"`,
   badPath: ({ path }) => `${path} was not found in object`,
-  reRender: ({ name, path }) => `component:${name} re-rendering "${path}"`,
-  patching: ({ name, path }) => `component:${name} patching ref Array "${path}"`,
-  pathTrigger: ({ path, action, name }) => `component:${name} ${action} "${path}"`,
-  triggered: ({ name, paths }) => `component:${name} data change "${paths}"`,
+  reRender: ({ name, path }) => `${name}: re-rendering "${path}"`,
+  patching: ({ name, path }) => `${name}: patching ref Array "${path}"`,
+  pathTrigger: ({ path, action, name }) => `${name}: ${action} "${path}"`,
+  triggered: ({ name, paths }) => `${name}: data change "${paths}"`,
 
   paramUndef({ data, template, loc }) {
     return `component:${data.root.$name} passed undefined to a helper
@@ -59,21 +59,20 @@ const messages = {
     `;
   },
   badWatchParam({ data, template, loc, path }) {
-    return `component:${data.root.$name} could not find "${path}" to watch. If primitve wrap in quotes
+    return `${data.root.$name}: could not find "${path}" to watch. If primitve wrap in quotes
       ${_getTplString(template, { data, loc })}
     `;
   },
   noComp({ data, loc, template, cName }) {
-    return `component:${data.root.$name} child component "${cName}" is not registered
+    return `${data.root.$name}: child component "${cName}" is not registered
       ${_getTplString(template, { data, loc })}
     `;
   },
-  restrictedKey: ({ name, key }) =>
-    `component:${name} cannot use restricted key "${key}" in your data as it's a helper`,
+  restrictedKey: ({ name, key }) => `${name}: cannot use restricted key "${key}" in your data as it's a helper`,
   focusFail: ({ ref, name }) =>
-    `component:${name} ref "${ref}" is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each`,
+    `${name}: ref "${ref}" is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each`,
   notKeyed: ({ name, path }) =>
-    `component:${name} patching "${path}" add a {{ ref }} to avoid re-rendering the entire target`,
+    `${name}: patching "${path}" add a {{ref 'someUniqueKey' }} to avoid re-rendering the entire Array`,
 };
 
 export default {

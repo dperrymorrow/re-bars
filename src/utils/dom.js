@@ -71,41 +71,4 @@ export default {
     $tmp.innerHTML = html;
     return $tmp;
   },
-
-  handleNewNode($node, app) {
-    const _comp = $el => app.components.instances[$el.dataset.rbsComp].attached();
-    const _method = $method => {
-      const [cId, type] = JSON.parse($method.dataset.rbsMethod);
-      const { handler } = app.components.instances[cId];
-      $method.addEventListener(type, handler);
-    };
-    const _bound = $bound => {
-      const [cId, path] = JSON.parse($bound.dataset.rbsBound);
-      const { bound } = app.components.instances[cId];
-      $bound.addEventListener("input", bound);
-    };
-
-    if ($node.nodeType === Node.TEXT_NODE) return;
-    if ($node.dataset.rbsComp) _comp($node);
-    if ($node.dataset.rbsMethod) _method($node);
-    if ($node.dataset.rbsBound) _bound($node);
-
-    $node.querySelectorAll("[data-rbs-comp]").forEach(_comp);
-    $node.querySelectorAll("[data-rbs-method]").forEach(_method);
-    $node.querySelectorAll("[data-rbs-bound]").forEach(_bound);
-  },
-
-  observeEl($el, callback) {
-    const observer = new MutationObserver(mutationList =>
-      mutationList.forEach(({ addedNodes, removedNodes }) => callback(addedNodes, removedNodes))
-    );
-
-    observer.observe($el, {
-      childList: true,
-      attributes: true,
-      subtree: true,
-    });
-
-    return observer;
-  },
 };

@@ -2,7 +2,7 @@ import Utils from "./utils/index.js";
 import Msg from "./msg.js";
 
 export default {
-  renderPaths({ paths, renders, name }) {
+  paths({ paths, renders, name }) {
     Object.entries(renders)
       .filter(([renderId, handler]) => {
         const matches = paths.some(path => Utils.shouldRender(path, handler.path));
