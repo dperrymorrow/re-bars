@@ -39,6 +39,7 @@ export default {
         .join(".")
         .split(",");
 
+      // TODO: this needs to reference the tmp instances instead of real
       const renders = app.components.instances[instId].renders;
 
       renders[eId] = {

@@ -103,11 +103,6 @@ export default {
 
   components: [Add, Todo, Filters],
 
-  hooks: {
-    attached() {
-      console.log(this.$name, "attached");
-    },
-  },
   methods: {
     addTodo(name) {
       this.todos.push({ name, id: new Date().getTime(), updated: new Date().toLocaleString() });

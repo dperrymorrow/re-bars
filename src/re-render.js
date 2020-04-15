@@ -1,5 +1,6 @@
 import Utils from "./utils/index.js";
 import Msg from "./msg.js";
+import Patch from "./utils/patch.js";
 
 export default {
   paths({ paths, renders, name }) {
@@ -11,15 +12,16 @@ export default {
       .forEach(([renderId, handler]) => {
         const $target = Utils.dom.findWatcher(renderId);
         const html = handler.render();
-        if (Utils.dom.isEqHtml($target.innerHTML, html)) return;
 
-        // if (Utils.dom.isKeyedNode($target)) {
-        //   _patchArr($target, html, handler);
-        //   Msg.log("patching", { name, path: handler.path }, $target);
-        //   delete toTrigger.renders[renderId];
-        //   return;
-        // }
+        if (!Patch.hasChanged($target, html)) return;
 
+        if (Patch.canPatch($target)) {
+          Patch.compare($target, html);
+          Msg.log("patching", { name, path: handler.path }, $target);
+          return;
+        }
+
+        // warn for not having a ref on array update
         const lenPath = handler.path.find(path => path.endsWith(".length"));
         if (lenPath) Msg.warn("notKeyed", { name, path: lenPath }, $target);
 

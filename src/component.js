@@ -99,7 +99,7 @@ function register(
           return Utils.dom.tagComponent(id, templateFn(scope), name);
         },
       };
-
+      // need a tmp one so that can pull over when added to the DOM
       app.components.instances[id] = compInst;
       return compInst;
     },

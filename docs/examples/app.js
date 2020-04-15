@@ -20,8 +20,6 @@ export default {
       </label>
     </div>
 
-    {{ debug . }}
-
     <ul class="simple">
       {{#watch "todos.*" }}
         {{#each todos }}
