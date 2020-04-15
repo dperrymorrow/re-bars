@@ -110,43 +110,23 @@ var Dom = {
   },
 
   findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
-  findRef: ($parent, ref) => $parent.querySelector(`[data-rbs-ref="${ref}"]`),
+  findRef: ($target, ref) => $target.querySelector(`[ref="${ref}"]`),
 
   findRefs(cId) {
     const $root = this.findComponent(cId);
-
-    return Array.from($root.querySelectorAll("[data-rbs-ref]")).reduce((obj, $el) => {
-      const [id, key] = $el.dataset.rbsRef.split(":");
-      if (id === cId) {
-        const target = obj[$el.dataset.rbsRef];
-        obj[key] = target ? [target].concat($el) : $el;
-      }
-      return obj;
-    }, {});
+    return Array.from($root.querySelectorAll("[ref]"));
   },
 
   findWatcher: id => document.querySelector(`[data-rbs-watch="${id}"]`),
 
   wrapWatcher: (id, html, hash) => {
-    const { tag, ...props } = { ...{ tag: "span", class: "rbs-watch" }, ...hash };
+    const { tag, ...props } = { ...{ tag: "span" }, ...hash };
     const propStr = Object.entries(props)
       .map(([key, val]) => `${key}="${val}"`)
       .join(" ");
 
     const style = !html.length ? "style='display:none;'" : "";
     return `<${tag} ${propStr} ${style} data-rbs-watch="${id}">${html}</${tag}>`;
-  },
-
-  isKeyedNode: $target => $target.children.length && Array.from($target.children).every($el => $el.dataset.rbsRef),
-  normalizeHtml: html => html.replace(new RegExp(/="rbs(.*?)"/g), ""),
-
-  isEqHtml(item1, item2) {
-    const $n1 = typeof item1 === "string" ? this.getShadow(item1) : this.getShadow(item1.innerHTML);
-    const $n2 = typeof item2 === "string" ? this.getShadow(item2) : this.getShadow(item2.innerHTML);
-    $n1.innerHTML = this.normalizeHtml($n1.innerHTML);
-    $n2.innerHTML = this.normalizeHtml($n2.innerHTML);
-
-    return $n1.isEqualNode($n2);
   },
 
   getShadow(html) {
@@ -303,10 +283,6 @@ var Helpers = {
   register({ app, instance, components, helpers, template }) {
     Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
     instance.registerHelper("isComponent", cName => Object.keys(components).includes(cName));
-    instance.registerHelper(
-      "ref",
-      (key, { data }) => new instance.SafeString(`data-rbs-ref="${data.root.$_componentId}:${key}"`)
-    );
 
     instance.registerHelper("component", function(...args) {
       const { hash: props, data, loc } = args.pop();
@@ -363,15 +339,44 @@ var Helpers = {
       const params = [$_componentId, path];
 
       return new instance.SafeString(
-        `value="${Utils.findByPath(data.root, path)}" data-rbs-ref="${hash.ref ||
-          path}" data-rbs-bound='${JSON.stringify(params)}'`
+        `value="${Utils.findByPath(data.root, path)}" ref="${hash.ref || path}" data-rbs-bound='${JSON.stringify(
+          params
+        )}'`
       );
     });
   },
 };
 
+const _isEqHtml = (html1, html2) => {
+  const reg = new RegExp(/data-rbs(.*?)="(.*?)"/g);
+  return html1.replace(reg, "") === html2.replace(reg, "");
+};
+
+var Patch = {
+  canPatch: $target => $target.children.length && Array.from($target.children).every($el => $el.dataset.rbsRef),
+  hasChanged: ($target, html) => !_isEqHtml($target.innerHTML, html),
+
+  compare($target, html) {
+    const $shadow = Dom.getShadow(html);
+    const $vChilds = Array.from($shadow.children);
+
+    // deletes and updates
+    Array.from($target.children).forEach($r => {
+      const $v = Dom.findRef($shadow, $r.dataset.rbsRef);
+      if (!$v) $r.remove();
+      else if (!_isEqHtml($v.innerHTML, $r.innerHTML)) $r.replaceWith($v.cloneNode(true));
+    });
+
+    // sorting
+    $vChilds.forEach($v => {
+      const $r = Dom.findRef($target, $v.dataset.rbsRef) || $v.cloneNode(true);
+      $target.appendChild($r);
+    });
+  },
+};
+
 var ReRender = {
-  paths({ paths, renders, name }) {
+  paths({ app, paths, renders, name }) {
     Object.entries(renders)
       .filter(([renderId, handler]) => {
         const matches = paths.some(path => Utils.shouldRender(path, handler.path));
@@ -380,20 +385,21 @@ var ReRender = {
       .forEach(([renderId, handler]) => {
         const $target = Utils.dom.findWatcher(renderId);
         const html = handler.render();
-        if (Utils.dom.isEqHtml($target.innerHTML, html)) return;
 
-        // if (Utils.dom.isKeyedNode($target)) {
-        //   _patchArr($target, html, handler);
-        //   Msg.log("patching", { name, path: handler.path }, $target);
-        //   delete toTrigger.renders[renderId];
-        //   return;
-        // }
+        if (!Patch.hasChanged($target, html)) return;
 
+        if (Patch.canPatch($target)) {
+          Patch.compare($target, html);
+          Msg.log("patching", { name, path: handler.path }, $target);
+          return;
+        }
+
+        // warn for not having a ref on array update
         const lenPath = handler.path.find(path => path.endsWith(".length"));
         if (lenPath) Msg.warn("notKeyed", { name, path: lenPath }, $target);
 
         const activeRef = {
-          ref: document.activeElement.dataset.rbsRef,
+          ref: document.activeElement.getAttribute("ref"),
           pos: document.activeElement.selectionStart,
         };
 
@@ -459,10 +465,7 @@ function register(
           ...{
             $props,
             $methods: methods,
-            // $hooks: hooks,
             $name: name,
-            // $watchers: watchers,
-            $_appId: appId,
             $_componentId: id,
             $el: () => Utils.dom.findComponet(id),
             $refs: () => Utils.dom.findRefs(id),
@@ -470,7 +473,7 @@ function register(
         },
         paths => {
           Msg.log("triggered", { name, paths });
-          ReRender.paths({ paths, renders, name });
+          ReRender.paths({ app, paths, renders, name });
         }
       );
 
@@ -501,7 +504,8 @@ function register(
           return Utils.dom.tagComponent(id, templateFn(scope), name);
         },
       };
-
+      // need a tmp one so that can pull over when added to the DOM
+      console.log(name, "rendered");
       app.components.instances[id] = compInst;
       return compInst;
     },
@@ -523,6 +527,7 @@ var index = {
       trace,
       helpers,
       $el,
+
       components: {
         registered: {},
         instances: {},
@@ -531,8 +536,11 @@ var index = {
 
     const _comp = (action, $el) => {
       const method = action === "add" ? "attached" : "detached";
-      app.components.instances[$el.dataset.rbsComp][method]();
-      if (action === "remove") delete app.components.instances[$el.dataset.rbsComp];
+      const cId = $el.dataset.rbsComp;
+      // call the hook
+      console.log($el);
+      app.components.instances[cId][method]();
+      if (action === "remove") delete app.components.instances[cId];
     };
     const _method = (action, $method) => {
       const method = action === "add" ? "addEventListener" : "removeEventListener";

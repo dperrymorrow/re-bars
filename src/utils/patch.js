@@ -1,4 +1,4 @@
-import Dom from "./dom.js";
+import Utils from "./index.js";
 
 const _isEqHtml = (html1, html2) => {
   const reg = new RegExp(/data-rbs(.*?)="(.*?)"/g);
@@ -6,25 +6,24 @@ const _isEqHtml = (html1, html2) => {
 };
 
 export default {
-  canPatch: $target => $target.children.length && Array.from($target.children).every($el => $el.dataset.rbsRef),
+  canPatch: $target => $target.children.length && Array.from($target.children).every($el => $el.getAttribute("ref")),
   hasChanged: ($target, html) => !_isEqHtml($target.innerHTML, html),
 
-  compare($target, html) {
-    const $shadow = Dom.getShadow(html);
+  compare({ app, $target, html }) {
+    const $shadow = Utils.dom.getShadow(html);
     const $vChilds = Array.from($shadow.children);
 
     // deletes and updates
     Array.from($target.children).forEach($r => {
-      const $v = Dom.findRef($shadow, $r.dataset.rbsRef);
+      const $v = Utils.dom.findRef($shadow, $r.getAttribute("ref"));
       if (!$v) $r.remove();
       else if (!_isEqHtml($v.innerHTML, $r.innerHTML)) $r.replaceWith($v.cloneNode(true));
     });
 
-    // additions and order;
-    $vChilds.forEach(($v, vIndex) => {
-      const $r = $target.children[vIndex];
-      if (!$r) $target.append($v.cloneNode(true));
-      else if (!_isEqHtml($v.innerHTML, $r.innerHTML)) $r.replaceWith($v.cloneNode(true));
+    // sorting & new ones
+    $vChilds.forEach($v => {
+      const $r = Utils.dom.findRef($target, $v.getAttribute("ref")) || $v.cloneNode(true);
+      if (!$r) $target.appendChild($v.cloneNode(true));
     });
   },
 };

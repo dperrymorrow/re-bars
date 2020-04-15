@@ -11,8 +11,16 @@ export default {
       id: Utils.randomId(),
       Handlebars,
       trace,
+      listening: true,
       helpers,
       $el,
+
+      deleteOrphans: Utils.debounce(() => {
+        Object.keys(app.components.instances).forEach(id => {
+          if (!Utils.dom.findComponent(id)) delete app.components.instances[id];
+        });
+      }),
+
       components: {
         registered: {},
         instances: {},
@@ -21,8 +29,8 @@ export default {
 
     const _comp = (action, $el) => {
       const method = action === "add" ? "attached" : "detached";
-      app.components.instances[$el.dataset.rbsComp][method]();
-      if (action === "remove") delete app.components.instances[$el.dataset.rbsComp];
+      const cId = $el.dataset.rbsComp;
+      app.components.instances[cId][method]();
     };
     const _method = (action, $method) => {
       const method = action === "add" ? "addEventListener" : "removeEventListener";

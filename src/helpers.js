@@ -5,10 +5,6 @@ export default {
   register({ app, instance, components, helpers, template }) {
     Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
     instance.registerHelper("isComponent", cName => Object.keys(components).includes(cName));
-    instance.registerHelper(
-      "ref",
-      (key, { data }) => new instance.SafeString(`data-rbs-ref="${data.root.$_componentId}:${key}"`)
-    );
 
     instance.registerHelper("component", function(...args) {
       const { hash: props, data, loc } = args.pop();
@@ -39,7 +35,6 @@ export default {
         .join(".")
         .split(",");
 
-      // TODO: this needs to reference the tmp instances instead of real
       const renders = app.components.instances[instId].renders;
 
       renders[eId] = {
@@ -66,8 +61,9 @@ export default {
       const params = [$_componentId, path];
 
       return new instance.SafeString(
-        `value="${Utils.findByPath(data.root, path)}" data-rbs-ref="${hash.ref ||
-          path}" data-rbs-bound='${JSON.stringify(params)}'`
+        `value="${Utils.findByPath(data.root, path)}" ref="${hash.ref || path}" data-rbs-bound='${JSON.stringify(
+          params
+        )}'`
       );
     });
   },

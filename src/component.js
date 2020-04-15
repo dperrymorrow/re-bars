@@ -57,10 +57,7 @@ function register(
           ...{
             $props,
             $methods: methods,
-            // $hooks: hooks,
             $name: name,
-            // $watchers: watchers,
-            $_appId: appId,
             $_componentId: id,
             $el: () => Utils.dom.findComponet(id),
             $refs: () => Utils.dom.findRefs(id),
@@ -68,7 +65,7 @@ function register(
         },
         paths => {
           Msg.log("triggered", { name, paths });
-          ReRender.paths({ paths, renders, name });
+          ReRender.paths({ app, paths, renders, name });
         }
       );
 
@@ -90,6 +87,7 @@ function register(
           },
         },
         detached() {
+          console.log("detached");
           if (hooks.detached) hooks.detached.call(scope);
         },
         attached() {
@@ -99,7 +97,7 @@ function register(
           return Utils.dom.tagComponent(id, templateFn(scope), name);
         },
       };
-      // need a tmp one so that can pull over when added to the DOM
+
       app.components.instances[id] = compInst;
       return compInst;
     },

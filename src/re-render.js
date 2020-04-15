@@ -3,7 +3,7 @@ import Msg from "./msg.js";
 import Patch from "./utils/patch.js";
 
 export default {
-  paths({ paths, renders, name }) {
+  paths({ app, paths, renders, name }) {
     Object.entries(renders)
       .filter(([renderId, handler]) => {
         const matches = paths.some(path => Utils.shouldRender(path, handler.path));
@@ -16,7 +16,7 @@ export default {
         if (!Patch.hasChanged($target, html)) return;
 
         if (Patch.canPatch($target)) {
-          Patch.compare($target, html);
+          Patch.compare({ app, $target, html });
           Msg.log("patching", { name, path: handler.path }, $target);
           return;
         }
@@ -26,7 +26,7 @@ export default {
         if (lenPath) Msg.warn("notKeyed", { name, path: lenPath }, $target);
 
         const activeRef = {
-          ref: document.activeElement.dataset.rbsRef,
+          ref: document.activeElement.getAttribute("ref"),
           pos: document.activeElement.selectionStart,
         };
 
@@ -36,5 +36,7 @@ export default {
         Utils.dom.restoreCursor($target, activeRef);
         Msg.log("reRender", { name, path: handler.path }, $target);
       });
+
+    app.deleteOrphans();
   },
 };

@@ -23,7 +23,7 @@ export default {
     <ul class="simple">
       {{#watch "todos.*" }}
         {{#each todos }}
-          <li {{ ref id }}>
+          <li ref="{{ id }}">
             <div class="todo">
               <label>
                 <input type="checkbox" {{ isChecked done }} {{ method "toggleDone" id }} />
@@ -46,7 +46,7 @@ export default {
     {{#watch "adding" }}
       {{#if adding }}
         <form>
-          <input type="text" name="name" {{ ref "newName" }} placeholder="the new todo" />
+          <input type="text" name="name" ref="newName" placeholder="the new todo" />
           <button class="push" {{ method "addItem" }}>Add todo</button>
           <button class="cancel" {{ method "toggleCreate" }}>Cancel</button>
         </form>

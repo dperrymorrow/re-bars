@@ -3,7 +3,7 @@ export default {
     <div>
       {{#watch "editing" tag="div" class="todo" }}
         {{#if editing}}
-          <input type="text" value="{{ $props.todo.name }}" {{ ref "nameInput" }}/>
+          <input type="text" value="{{ $props.todo.name }}" ref="nameInput"/>
           <button {{ method "save" }}>save</button>
         {{ else }}
 
@@ -38,6 +38,15 @@ export default {
     isChecked: val => (val ? "checked" : ""),
     timeAgo: val => {
       return window.moment(val).fromNow();
+    },
+  },
+
+  hooks: {
+    attached() {
+      console.log(this.$props.todo.name, "attached");
+    },
+    detached() {
+      console.log(this.$props.todo.name, "detached");
     },
   },
 

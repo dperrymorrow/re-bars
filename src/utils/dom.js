@@ -27,17 +27,14 @@ export default {
   },
 
   findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
-  findRef: ($target, ref) => $target.querySelector(`[data-rbs-ref="${ref}"]`),
+  findRef: ($target, ref) => $target.querySelector(`[ref="${ref}"]`),
 
   findRefs(cId) {
     const $root = this.findComponent(cId);
-
-    return Array.from($root.querySelectorAll("[data-rbs-ref]")).reduce((obj, $el) => {
-      const [id, key] = $el.dataset.rbsRef.split(":");
-      if (id === cId) {
-        const target = obj[$el.dataset.rbsRef];
-        obj[key] = target ? [target].concat($el) : $el;
-      }
+    return Array.from($root.querySelectorAll("[ref]")).reduce((obj, $el) => {
+      const key = $el.getAttribute("ref");
+      const target = obj[key];
+      obj[key] = target ? [target].concat($el) : $el;
       return obj;
     }, {});
   },

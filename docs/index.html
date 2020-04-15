@@ -507,12 +507,10 @@ methods: {
       &lt;/label&gt;
     &lt;/div&gt;
 
-    {{ debug . }}
-
     &lt;ul class=&quot;simple&quot;&gt;
       {{#watch &quot;todos.*&quot; }}
         {{#each todos }}
-          &lt;li {{ ref id }}&gt;
+          &lt;li ref=&quot;{{ id }}&quot;&gt;
             &lt;div class=&quot;todo&quot;&gt;
               &lt;label&gt;
                 &lt;input type=&quot;checkbox&quot; {{ isChecked done }} {{ method &quot;toggleDone&quot; id }} /&gt;
@@ -535,7 +533,7 @@ methods: {
     {{#watch &quot;adding&quot; }}
       {{#if adding }}
         &lt;form&gt;
-          &lt;input type=&quot;text&quot; name=&quot;name&quot; {{ ref &quot;newName&quot; }} placeholder=&quot;the new todo&quot; /&gt;
+          &lt;input type=&quot;text&quot; name=&quot;name&quot; ref=&quot;newName&quot; placeholder=&quot;the new todo&quot; /&gt;
           &lt;button class=&quot;push&quot; {{ method &quot;addItem&quot; }}&gt;Add todo&lt;/button&gt;
           &lt;button class=&quot;cancel&quot; {{ method &quot;toggleCreate&quot; }}&gt;Cancel&lt;/button&gt;
         &lt;/form&gt;
@@ -661,7 +659,7 @@ export default {
 
     {{#watch &quot;filters.*,todos.length,todos.*.done&quot; tag=&quot;ul&quot;}}
       {{#each filteredTodos as | todo | }}
-        &lt;li {{ ref todo.id }}&gt;
+        &lt;li ref=&quot;{{ todo.id }}&quot;&gt;
           {{
             component &quot;Todo&quot;
             todo=todo
@@ -738,11 +736,6 @@ export default {
 
   components: [Add, Todo, Filters],
 
-  hooks: {
-    attached() {
-      console.log(this.$name, &quot;attached&quot;);
-    },
-  },
   methods: {
     addTodo(name) {
       this.todos.push({ name, id: new Date().getTime(), updated: new Date().toLocaleString() });
@@ -850,9 +843,8 @@ export default {
   template: /*html*/ `
     &lt;div&gt;
       {{#watch &quot;editing&quot; tag=&quot;div&quot; class=&quot;todo&quot; }}
-        {{ $_componentId }}
         {{#if editing}}
-          &lt;input type=&quot;text&quot; value=&quot;{{ $props.todo.name }}&quot; {{ ref &quot;nameInput&quot; }}/&gt;
+          &lt;input type=&quot;text&quot; value=&quot;{{ $props.todo.name }}&quot; ref=&quot;nameInput&quot;/&gt;
           &lt;button {{ method &quot;save&quot; }}&gt;save&lt;/button&gt;
         {{ else }}
 
@@ -890,11 +882,11 @@ export default {
     },
   },
 
-  hooks: {
-    detached() {
-      console.log(this.$_componentId, this.$props.todo.name);
-    },
-  },
+  // hooks: {
+  //   attached() {
+  //     console.log(this.$props.todo.name, &quot;attached&quot;);
+  //   },
+  // },
 
   methods: {
     save() {
