@@ -1,9 +1,14 @@
 import Utils from "./index.js";
 
-const _isEqHtml = (html1, html2) => {
+function _isEqHtml(html1, html2) {
   const reg = new RegExp(/data-rbs(.*?)="(.*?)"/g);
   return html1.replace(reg, "") === html2.replace(reg, "");
-};
+}
+
+function _insertAt($target, $child, index = 0) {
+  if (index >= $target.children.length) $target.appendChild($child);
+  else $target.insertBefore($child, $target.children[index]);
+}
 
 export default {
   canPatch: $target => $target.children.length && Array.from($target.children).every($el => $el.getAttribute("ref")),
@@ -20,10 +25,13 @@ export default {
       else if (!_isEqHtml($v.innerHTML, $r.innerHTML)) $r.replaceWith($v.cloneNode(true));
     });
 
-    // sorting & new ones
-    $vChilds.forEach($v => {
-      const $r = Utils.dom.findRef($target, $v.getAttribute("ref")) || $v.cloneNode(true);
-      if (!$r) $target.appendChild($v.cloneNode(true));
+    // additions and sorting
+    $vChilds.forEach(($v, index) => {
+      const $r = Utils.dom.findRef($target, $v.getAttribute("ref"));
+      if (!$r) _insertAt($target, $v.cloneNode(true), index);
+
+      const $rIndex = $target.children[index];
+      if ($rIndex.getAttribute("ref") !== $v.getAttribute("ref")) $rIndex.replaceWith($v.cloneNode(true));
     });
   },
 };

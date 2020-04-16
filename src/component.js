@@ -64,7 +64,7 @@ function register(
           },
         },
         paths => {
-          Msg.log("triggered", { name, paths });
+          Msg.log("triggered", { name, paths }, renders);
           ReRender.paths({ app, paths, renders, name });
         }
       );
@@ -87,7 +87,6 @@ function register(
           },
         },
         detached() {
-          console.log("detached");
           if (hooks.detached) hooks.detached.call(scope);
         },
         attached() {

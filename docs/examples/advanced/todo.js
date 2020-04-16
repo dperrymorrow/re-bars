@@ -7,7 +7,7 @@ export default {
           <button {{ method "save" }}>save</button>
         {{ else }}
 
-          {{#watch $props.todo }}
+
             <label>
               <input type="checkbox" {{ isChecked $props.todo.done }} {{ method "toggleDone" }} />
               {{#if $props.todo.done }}
@@ -16,7 +16,7 @@ export default {
                 <strong>{{ $props.todo.name }}</strong>
               {{/if}}
             </label>
-          {{/watch}}
+        
 
           <div class="actions">
             <span class="date">{{ timeAgo todo.updated }}</span>

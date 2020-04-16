@@ -14,7 +14,7 @@ export default {
       listening: true,
       helpers,
       $el,
-
+      // needs debounced to make sure we are all done
       deleteOrphans: Utils.debounce(() => {
         Object.keys(app.components.instances).forEach(id => {
           if (!Utils.dom.findComponent(id)) delete app.components.instances[id];
@@ -27,21 +27,21 @@ export default {
       },
     };
 
-    const _comp = (action, $el) => {
+    function _comp(action, $el) {
       const method = action === "add" ? "attached" : "detached";
       const cId = $el.dataset.rbsComp;
       app.components.instances[cId][method]();
-    };
-    const _method = (action, $method) => {
+    }
+    function _method(action, $method) {
       const method = action === "add" ? "addEventListener" : "removeEventListener";
       const [cId, type] = JSON.parse($method.dataset.rbsMethod);
       $method[method](type, app.components.instances[cId].handlers.method);
-    };
-    const _bound = (action, $bound) => {
+    }
+    function _bound(action, $bound) {
       const method = action === "add" ? "addEventListener" : "removeEventListener";
       const [cId, path] = JSON.parse($bound.dataset.rbsBound);
       $bound[method]("input", app.components.instances[cId].handlers.bound);
-    };
+    }
 
     const observer = new MutationObserver(mutationList => {
       mutationList.forEach(({ addedNodes, removedNodes }) => {
