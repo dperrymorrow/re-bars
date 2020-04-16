@@ -6,17 +6,14 @@ export default {
           <input type="text" value="{{ $props.todo.name }}" ref="nameInput"/>
           <button {{ method "save" }}>save</button>
         {{ else }}
-
-
-            <label>
-              <input type="checkbox" {{ isChecked $props.todo.done }} {{ method "toggleDone" }} />
-              {{#if $props.todo.done }}
-                <s>{{ $props.todo.name }}</s>
-              {{else}}
-                <strong>{{ $props.todo.name }}</strong>
-              {{/if}}
-            </label>
-        
+          <label>
+            <input type="checkbox" {{ isChecked $props.todo.done }} {{ method "toggleDone" }} />
+            {{#if $props.todo.done }}
+              <s>{{ $props.todo.name }}</s>
+            {{else}}
+              <strong>{{ $props.todo.name }}</strong>
+            {{/if}}
+          </label>
 
           <div class="actions">
             <span class="date">{{ timeAgo todo.updated }}</span>
