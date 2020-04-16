@@ -43,6 +43,10 @@
           "path": "#methods"
         },
         {
+          "label": "Refs",
+          "path": "#refs"
+        },
+        {
           "label": "Watchers",
           "path": "#watchers"
         },
@@ -63,10 +67,6 @@
         {
           "label": "watch",
           "path": "#the-watch-helper"
-        },
-        {
-          "label": "ref",
-          "path": "#the-ref-helper"
         },
         {
           "label": "bound",

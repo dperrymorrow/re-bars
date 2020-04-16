@@ -87,6 +87,19 @@ methods: {
 }
 ```
 
+## Refs
+
+ReBars keeps track of any element with a `ref=""` tag on it. This gives you the ability to save a reference to an element. This also gives a key for Array loop items so that the Array can be patched instead of re-rendered entirely.
+
+> The ref helper is also needed on any input or other elements that need focused restored after a re-render. See [bound helper](#bound)
+
+```html
+<div>
+  <h1 ref="header">Header</h1>
+</div>
+```
+
+
 ## Watchers
 
 Watchers give you the ability to call a function when a property in your data has change. You can watch any items in  your data or `$props`

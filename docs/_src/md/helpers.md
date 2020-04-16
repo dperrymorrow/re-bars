@@ -90,19 +90,6 @@ If you are watching inside a loop, you can target the specific object and key by
 </ul>
 ```
 
-## The {{ref}} helper
-ReBars comes with a `{{ref}}` helper built in. This gives you the ability to save a reference to an element. This also gives a key for Array loop items so that the Array can be patched instead of re-rendered entirely.
-
-- takes one parameter, the `String` for the reference
-
-> The ref helper is also needed on any input or other elements that need focused restored after a re-render. See [bound helper](#bound)
-
-```html
-<div>
-  <h1 {{ ref "header" }}>Header</h1>
-</div>
-```
-
 inside of a method, you can reference any ref by using the `$refs()` function from a method in your component.
 
 ```javascript
