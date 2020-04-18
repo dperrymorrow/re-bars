@@ -57,6 +57,7 @@ Each time the value passed to watch is changed, *just* that Handlebars block wil
   - [Name](#name)
   - [Data](#data)
   - [Methods](#methods)
+  - [Refs](#refs)
   - [Watchers](#watchers)
   - [Hooks](#hooks)
   - [Helpers](#helpers)
@@ -418,7 +419,7 @@ methods: {
 }
 ```
 
-> The ref helper is also needed on any input or other elements that need focused restored after a re-render. See [bound helper](#bound)
+> The [ref](#refs) helper is also needed on any input or other elements that need focused restored after a re-render. See [bound helper](#bound)
 
 ```html
 <ul>

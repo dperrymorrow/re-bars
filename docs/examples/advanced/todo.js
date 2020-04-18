@@ -2,7 +2,6 @@ export default {
   template: /*html*/ `
     <div>
       {{#watch "editing" tag="div" class="todo" }}
-        {{ $_componentId }}
         {{#if editing}}
           <input type="text" value="{{ $props.todo.name }}" ref="nameInput"/>
           <button {{ method "save" }}>save</button>

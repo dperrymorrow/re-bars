@@ -43,6 +43,10 @@
           "path": "#methods"
         },
         {
+          "label": "Refs",
+          "path": "#refs"
+        },
+        {
           "label": "Watchers",
           "path": "#watchers"
         },

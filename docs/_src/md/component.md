@@ -91,7 +91,7 @@ methods: {
 
 ReBars keeps track of any element with a `ref=""` tag on it. This gives you the ability to save a reference to an element. This also gives a key for Array loop items so that the Array can be patched instead of re-rendered entirely.
 
-> The ref helper is also needed on any input or other elements that need focused restored after a re-render. See [bound helper](#bound)
+> The ref tag is also needed on any input or other elements that need focused restored after a re-render. It is also needed to prevent a full re-render of an Array if watching an Array. See [the bound helper](#the-bound-helper) and [the watch helper](#the-watch-helper)
 
 ```html
 <div>
@@ -99,6 +99,34 @@ ReBars keeps track of any element with a `ref=""` tag on it. This gives you the 
 </div>
 ```
 
+inside of a method, you can reference any ref by using the `$refs()` function from a method in your component.
+
+```javascript
+methods: {
+  save() {
+    this.$refs().header;
+    // returns the <h1> element
+  }
+}
+```
+
+If there are more than one element with the same ref, they will be returned as an Array.
+
+```html
+<ul>
+  <li {{ ref "listItem" }}>item one</li>
+  <li {{ ref "listItem" }}>item one</li>
+</ul>
+```
+
+```javascript
+methods: {
+  save() {
+    this.$refs().listItem
+    // return [li, li]
+  }
+}
+```
 
 ## Watchers
 
