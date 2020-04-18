@@ -39,6 +39,14 @@
           "path": "#data"
         },
         {
+          "label": "Methods",
+          "path": "#methods"
+        },
+        {
+          "label": "Refs",
+          "path": "#refs"
+        },
+        {
           "label": "Watchers",
           "path": "#watchers"
         },
@@ -47,8 +55,8 @@
           "path": "#hooks"
         },
         {
-          "label": "Methods",
-          "path": "#methods"
+          "label": "Helpers",
+          "path": "#helpers"
         }
       ]
     },
@@ -59,10 +67,6 @@
         {
           "label": "watch",
           "path": "#the-watch-helper"
-        },
-        {
-          "label": "ref",
-          "path": "#the-ref-helper"
         },
         {
           "label": "bound",

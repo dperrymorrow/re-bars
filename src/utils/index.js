@@ -11,14 +11,18 @@ export default {
     const appStore = this.getStorage(appId);
 
     Object.keys(appStore.inst).forEach(cId => {
-      if (!this.dom.findComponent(cId)) delete appStore.inst[cId];
+      if (!this.dom.findComponent(cId)) {
+        const inst = appStore.inst[cId];
+        if (inst.scope.$hooks.detached) inst.scope.$hooks.detached();
+        delete appStore.inst[cId];
+      }
     });
     Object.keys(cStore.renders).forEach(key => {
       if (!this.dom.findWatcher(key)) delete cStore.renders[key];
     });
   },
 
-  debounce(callback, wait, immediate = false) {
+  debounce(callback, wait = 0, immediate = false) {
     let timeout = null;
 
     return function() {

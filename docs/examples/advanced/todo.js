@@ -3,20 +3,17 @@ export default {
     <div>
       {{#watch "editing" tag="div" class="todo" }}
         {{#if editing}}
-          <input type="text" value="{{ $props.todo.name }}" {{ ref "nameInput" }}/>
+          <input type="text" value="{{ $props.todo.name }}" ref="nameInput"/>
           <button {{ method "save" }}>save</button>
         {{ else }}
-
-          {{#watch $props.todo }}
-            <label>
-              <input type="checkbox" {{ isChecked $props.todo.done }} {{ method "toggleDone" }} />
-              {{#if $props.todo.done }}
-                <s>{{ $props.todo.name }}</s>
-              {{else}}
-                <strong>{{ $props.todo.name }}</strong>
-              {{/if}}
-            </label>
-          {{/watch}}
+          <label>
+            <input type="checkbox" {{ isChecked $props.todo.done }} {{ method "toggleDone" }} />
+            {{#if $props.todo.done }}
+              <s>{{ $props.todo.name }}</s>
+            {{else}}
+              <strong>{{ $props.todo.name }}</strong>
+            {{/if}}
+          </label>
 
           <div class="actions">
             <span class="date">{{ timeAgo todo.updated }}</span>
@@ -38,6 +35,15 @@ export default {
     isChecked: val => (val ? "checked" : ""),
     timeAgo: val => {
       return window.moment(val).fromNow();
+    },
+  },
+
+  hooks: {
+    attached() {
+      console.log(this.$props.todo.name, "attached");
+    },
+    detached() {
+      console.log(this.$props.todo.name, "detached");
     },
   },
 

@@ -3,38 +3,82 @@ import Component from "./component.js";
 import Msg from "./msg.js";
 
 export default {
-  app({ $el, root, Handlebars = window.Handlebars, helpers = {}, trace = false }) {
-    window.rbs = window.ReBars = window.ReBars || {};
-    window.ReBars.apps = window.ReBars.apps || {};
-    window.ReBars.trace = trace;
-    window.ReBars.handlers = window.ReBars.handlers || {
-      trigger(...args) {
-        const [appId, cId, methodName, ...params] = args;
-        const scope = Utils.getStorage(appId, cId).scope;
-        const method = scope.$methods[methodName];
-        if (!method) Msg.fail("noMethod", { name: scope.$name, methodName });
-        method(...params);
-      },
-
-      bound(appId, cId, event, path) {
-        const { scope } = Utils.getStorage(appId, cId);
-        Utils.setKey(scope, path, event.target.value);
-      },
-    };
-
+  app({ $el, root, Handlebars = window.Handlebars, helpers = {}, components = {}, trace = false }) {
     if (!Handlebars) Msg.fail("noHbs");
     if (!document.body.contains($el)) Msg.fail("noEl");
 
-    const id = Utils.randomId();
-    const storage = (window.ReBars.apps[id] = { helpers, cDefs: {}, inst: {} });
+    const app = {
+      id: Utils.randomId(),
+      Handlebars,
+      trace,
+      listening: true,
+      helpers,
+      $el,
+      // needs debounced to make sure we are all done
+      deleteOrphans: Utils.debounce(() => {
+        Object.keys(app.components.instances).forEach(id => {
+          if (!Utils.dom.findComponent(id)) delete app.components.instances[id];
+        });
+      }),
 
-    $el.innerHTML = Component.register(id, Handlebars, root)
-      .instance()
-      .render();
-
-    return {
-      id,
-      storage,
+      components: {
+        registered: {},
+        instances: {},
+      },
     };
+
+    function _comp(action, $el) {
+      const method = action === "add" ? "attached" : "detached";
+      const cId = $el.dataset.rbsComp;
+      app.components.instances[cId][method]();
+    }
+    function _method(action, $method) {
+      const method = action === "add" ? "addEventListener" : "removeEventListener";
+      const [cId, type] = JSON.parse($method.dataset.rbsMethod);
+      $method[method](type, app.components.instances[cId].handlers.method);
+    }
+    function _bound(action, $bound) {
+      const method = action === "add" ? "addEventListener" : "removeEventListener";
+      const [cId, path] = JSON.parse($bound.dataset.rbsBound);
+      $bound[method]("input", app.components.instances[cId].handlers.bound);
+    }
+
+    const observer = new MutationObserver(mutationList => {
+      mutationList.forEach(({ addedNodes, removedNodes }) => {
+        addedNodes.forEach($node => {
+          if ($node.nodeType === Node.TEXT_NODE) return;
+
+          if ($node.dataset.rbsComp) _comp("add", $node);
+          if ($node.dataset.rbsMethod) _method("add", $node);
+          if ($node.dataset.rbsBound) _bound("add", $node);
+
+          $node.querySelectorAll("[data-rbs-comp]").forEach(_comp.bind(null, "add"));
+          $node.querySelectorAll("[data-rbs-method]").forEach(_method.bind(null, "add"));
+          $node.querySelectorAll("[data-rbs-bound]").forEach(_bound.bind(null, "add"));
+        });
+
+        removedNodes.forEach($node => {
+          if ($node.nodeType === Node.TEXT_NODE) return;
+
+          if ($node.dataset.rbsMethod) _method("remove", $node);
+          if ($node.dataset.rbsBound) _bound("remove", $node);
+          if ($node.dataset.rbsComp) _comp("remove", $node);
+
+          $node.querySelectorAll("[data-rbs-method]").forEach(_method.bind(null, "remove"));
+          $node.querySelectorAll("[data-rbs-bound]").forEach(_bound.bind(null, "remove"));
+          $node.querySelectorAll("[data-rbs-comp]").forEach(_comp.bind(null, "remove"));
+        });
+      });
+    });
+
+    observer.observe($el, {
+      childList: true,
+      attributes: true,
+      subtree: true,
+    });
+
+    const rootInst = Component.register(app, root).instance();
+    $el.innerHTML = rootInst.render();
+    return app;
   },
 };

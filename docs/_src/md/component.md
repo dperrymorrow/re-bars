@@ -87,9 +87,22 @@ methods: {
 }
 ```
 
+## Refs
+
+ReBars keeps track of any element with a `ref=""` tag on it. This gives you the ability to save a reference to an element. This also gives a key for Array loop items so that the Array can be patched instead of re-rendered entirely.
+
+> The ref helper is also needed on any input or other elements that need focused restored after a re-render. See [bound helper](#bound)
+
+```html
+<div>
+  <h1 ref="header">Header</h1>
+</div>
+```
+
+
 ## Watchers
 
-Watchers give you the ability to fire _"hooks"_ when a property in your data has change. You can watch any items in  your data or `$props`
+Watchers give you the ability to call a function when a property in your data has change. You can watch any items in  your data or `$props`
 
 > You cannot, however watch a method in your data. Methods defined in your data are only for convenience for your template rendering.
 
@@ -120,7 +133,7 @@ Hooks are triggered at different points in the component instance's life.
 
 - `created` triggered when the component is instantiated and prior to rendering
 - `attached` the component has been rendered and added to the DOM
-- `teardown` the component is about to be deleted, but at this point is still on the DOM
+- `detached` the component is no longer on the DOM and is being garbage collected
 
 > `this.$refs()` cannot be used in the created hook. The component is not yet on the DOM. If you need to do something with the component's `$refs` or DOM. Use the attached hook instead.
 

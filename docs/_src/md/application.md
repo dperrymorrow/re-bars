@@ -29,6 +29,7 @@ To start an app, there is minimal code on the page. You create a new ReBars app 
 
 - `$el` the Element that your app will be rendered into
 - `root` the top level [component](component.html) in your app.
+- `trace` default false, if true will console.log all data changes and re-renders
 
 ``` html
 <div id="demo-app"></div>
@@ -40,6 +41,7 @@ To start an app, there is minimal code on the page. You create a new ReBars app 
   ReBars.app({
     $el: document.getElementById("demo-app"),
     root: RootComponent,
+    trace: true // default false
   });
 </script>
 ```

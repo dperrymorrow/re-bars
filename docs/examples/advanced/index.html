@@ -11,7 +11,7 @@
       <nav id="nav-container"></nav>
       <section>
         <div class="content">
-          <div id="demo-app" class="demo-app"></div>
+          <div id="demo-app" class="demo-app debug"></div>
         </div>
       </section>
     </main>
@@ -23,9 +23,10 @@
       import ReBars from "../../../src/index.js";
       import DemoApp from "./app.js";
 
-      ReBars.app({
+      window.DemoApp = ReBars.app({
         $el: document.getElementById("demo-app"),
         root: DemoApp,
+        trace: true
       });
     </script>
   </body>
