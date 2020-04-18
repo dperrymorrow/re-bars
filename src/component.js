@@ -1,90 +1,104 @@
 import Utils from "./utils/index.js";
 import ProxyTrap from "./proxy-trap.js";
-import Core from "./helpers/core.js";
-import Events from "./helpers/events.js";
-import Watch from "./helpers/watch.js";
+import Helpers from "./helpers.js";
+import ReRender from "./re-render.js";
 import Msg from "./msg.js";
 
 const restricted = ["component", "ref", "debug", "isComponent", "method", "bound", "watch", "isComponent"];
 
 function register(
-  appId,
-  Handlebars,
-  { name, template, data, helpers = {}, hooks = {}, methods = {}, watchers = {}, components = [] }
+  { id: appId, Handlebars, trace, helpers: globalHelpers, components: globalComponents },
+  { name, template, data = () => ({}), helpers = {}, hooks = {}, methods = {}, watchers = {}, components = [] }
 ) {
-  const appStore = Utils.getStorage(appId);
-
-  data =
-    data ||
-    function() {
-      return {};
-    };
-
-  if (!name) Msg.fail("noName", null, arguments[2]);
+  // should prob init Msg with the trace per app
+  if (!name) Msg.fail("noName", null, arguments[1]);
   if (typeof data !== "function") Msg.fail("dataFn", { name });
   if (typeof template !== "string") Msg.fail("tmplStr", { name });
 
+  const app = arguments[0];
   const instance = Handlebars.create();
   const templateFn = instance.compile(template);
 
-  components.forEach(def => {
-    if (!def.name) Msg.fail("noName", null, def);
-    if (!appStore.cDefs[def.name]) appStore.cDefs[def.name] = register(appId, Handlebars, def);
-  });
+  const regComps = components.reduce(
+    (regs, def) => {
+      const reg = register(app, def);
+      regs[def.name] = reg;
+      return regs;
+    },
+    { ...globalComponents.registered }
+  );
 
   Object.keys(data()).forEach(key => {
     if (restricted.concat(Object.keys(helpers)).includes(key)) Msg.fail("restrictedKey", { name, key });
   });
 
-  Core.register(instance, { ...helpers, ...appStore.helpers }, template);
-  Events.register(instance, methods);
-  Watch.register(instance, template);
+  Helpers.register({
+    app,
+    methods,
+    instance,
+    helpers: { ...helpers, ...globalHelpers },
+    components: regComps,
+    template,
+  });
 
   return {
     instance($props = {}) {
-      const compId = Utils.randomId();
+      const id = Utils.randomId();
       const instData = data();
+      const renders = {};
       // validate the props, add the passed methods after you bind them or you will loose scope
       Object.entries($props).forEach(([key, value]) => {
         if (value === undefined) Msg.warn("propUndef", { name, key });
       });
 
-      const { data: scope, watch } = ProxyTrap.create({
-        ...instData,
-        ...{
-          $props,
-          $methods: methods,
-          $hooks: hooks,
-          $name: name,
-          $watchers: watchers,
-          $_appId: appId,
-          $_componentId: compId,
-          $refs: () => Utils.dom.findRefs(compId),
+      const scope = ProxyTrap.create(
+        {
+          ...instData,
+          ...{
+            $props,
+            $methods: methods,
+            $name: name,
+            $_componentId: id,
+            $el: () => Utils.dom.findComponet(id),
+            $refs: () => Utils.dom.findRefs(id),
+          },
         },
-      });
-
-      appStore.inst[compId] = {
-        scope,
-        renders: {},
-      };
+        paths => {
+          Msg.log("triggered", { name, paths }, renders);
+          ReRender.paths({ app, paths, renders, name });
+        }
+      );
 
       if (hooks.created) hooks.created.call(scope);
 
-      return {
+      const compInst = {
+        id,
         scope,
+        hooks,
+        renders,
+        handlers: {
+          bound(event) {
+            const [id, path] = JSON.parse(event.target.dataset.rbsBound);
+            Utils.setKey(scope, path, event.target.value);
+          },
+          method(event) {
+            const [id, type, method, ...args] = JSON.parse(event.target.dataset.rbsMethod);
+            scope.$methods[method](event, ...args);
+          },
+        },
+        detached() {
+          if (hooks.detached) hooks.detached.call(scope);
+        },
+        attached() {
+          if (hooks.attached) hooks.attached.call(scope);
+        },
         render() {
-          const html = Utils.dom.tagComponent(compId, templateFn(scope), name);
-          // dont begin watching until after first render
-
-          watch();
-          if (hooks.attached) {
-            setTimeout(() => {
-              hooks.attached.call(scope);
-            }, 0);
-          }
-          return html;
+          return Utils.dom.tagComponent(id, templateFn(scope), name);
         },
       };
+
+      app.components.instances[id] = compInst;
+      return compInst;
     },
   };
 }

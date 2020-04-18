@@ -27,14 +27,13 @@ export default {
   },
 
   findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
-  findRef: ($parent, ref) => $parent.querySelector(`[data-rbs-ref="${ref}"]`),
+  findRef: ($target, ref) => $target.querySelector(`[ref="${ref}"]`),
 
-  findRefs(parent) {
-    const $el = typeof parent === "object" ? parent : this.findComponent(parent);
-
-    return Array.from($el.querySelectorAll("[data-rbs-ref]")).reduce((obj, $el) => {
-      const key = $el.dataset.rbsRef;
-      const target = obj[$el.dataset.rbsRef];
+  findRefs(cId) {
+    const $root = this.findComponent(cId);
+    return Array.from($root.querySelectorAll("[ref]")).reduce((obj, $el) => {
+      const key = $el.getAttribute("ref");
+      const target = obj[key];
       obj[key] = target ? [target].concat($el) : $el;
       return obj;
     }, {});
@@ -43,25 +42,13 @@ export default {
   findWatcher: id => document.querySelector(`[data-rbs-watch="${id}"]`),
 
   wrapWatcher: (id, html, hash) => {
-    const { tag, ...props } = { ...{ tag: "span", class: "rbs-watch" }, ...hash };
+    const { tag, ...props } = { ...{ tag: "span" }, ...hash };
     const propStr = Object.entries(props)
       .map(([key, val]) => `${key}="${val}"`)
       .join(" ");
 
     const style = !html.length ? "style='display:none;'" : "";
     return `<${tag} ${propStr} ${style} data-rbs-watch="${id}">${html}</${tag}>`;
-  },
-
-  isKeyedNode: $target => $target.children.length && Array.from($target.children).every($el => $el.dataset.rbsRef),
-  normalizeHtml: html => html.replace(new RegExp(/="rbs(.*?)"/g), ""),
-
-  isEqHtml(item1, item2) {
-    const $n1 = typeof item1 === "string" ? this.getShadow(item1) : this.getShadow(item1.innerHTML);
-    const $n2 = typeof item2 === "string" ? this.getShadow(item2) : this.getShadow(item2.innerHTML);
-    $n1.innerHTML = this.normalizeHtml($n1.innerHTML);
-    $n2.innerHTML = this.normalizeHtml($n2.innerHTML);
-
-    return $n1.isEqualNode($n2);
   },
 
   getShadow(html) {

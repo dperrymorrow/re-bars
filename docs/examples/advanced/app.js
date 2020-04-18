@@ -24,9 +24,9 @@ export default {
 
     {{ component "filters" filters=filters }}
 
-    {{#watch "filters.*,todos.length,todos.*.done" tag="ul"}}
+    {{#watch "filters.*,todos.*" tag="ul"}}
       {{#each filteredTodos as | todo | }}
-        <li {{ ref todo.id }}>
+        <li ref="{{ todo.id }}">
           {{
             component "Todo"
             todo=todo
@@ -109,7 +109,7 @@ export default {
       this.filters.state = null;
     },
 
-    deleteTodo(event, id) {
+    deleteTodo(id) {
       const index = this.todos.findIndex(t => t.id === id);
       this.todos.splice(index, 1);
     },

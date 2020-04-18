@@ -65,10 +65,6 @@
           "path": "#the-watch-helper"
         },
         {
-          "label": "ref",
-          "path": "#the-ref-helper"
-        },
-        {
           "label": "bound",
           "path": "#the-bound-helper"
         },
