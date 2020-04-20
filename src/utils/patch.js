@@ -25,13 +25,16 @@ export default {
       else if (!_isEqHtml($v.innerHTML, $r.innerHTML)) $r.replaceWith($v.cloneNode(true));
     });
 
-    // additions and sorting
+    // additions
     $vChilds.forEach(($v, index) => {
       const $r = Utils.dom.findRef($target, $v.getAttribute("ref"));
       if (!$r) _insertAt($target, $v.cloneNode(true), index);
+    });
 
-      const $rIndex = $target.children[index];
-      if ($rIndex.getAttribute("ref") !== $v.getAttribute("ref")) $rIndex.replaceWith($v.cloneNode(true));
+    // sorting
+    $vChilds.forEach(($v, index) => {
+      const $r = $target.children[index];
+      if ($r.getAttribute("ref") !== $v.getAttribute("ref")) $r.replaceWith($v.cloneNode(true));
     });
   },
 };
