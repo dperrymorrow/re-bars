@@ -237,7 +237,7 @@ methods: {
 
 ReBars keeps track of any element with a `ref=""` tag on it. This gives you the ability to save a reference to an element. This also gives a key for Array loop items so that the Array can be patched instead of re-rendered entirely.
 
-> The ref helper is also needed on any input or other elements that need focused restored after a re-render. See [bound helper](#bound)
+> The ref tag is also needed on any input or other elements that need focused restored after a re-render. It is also needed to prevent a full re-render of an Array if watching an Array. See [the bound helper](#the-bound-helper) and [the watch helper](#the-watch-helper)
 
 ```html
 <div>
@@ -245,6 +245,34 @@ ReBars keeps track of any element with a `ref=""` tag on it. This gives you the 
 </div>
 ```
 
+inside of a method, you can reference any ref by using the `$refs()` function from a method in your component.
+
+```javascript
+methods: {
+  save() {
+    this.$refs().header;
+    // returns the <h1> element
+  }
+}
+```
+
+If there are more than one element with the same ref, they will be returned as an Array.
+
+```html
+<ul>
+  <li {{ ref "listItem" }}>item one</li>
+  <li {{ ref "listItem" }}>item one</li>
+</ul>
+```
+
+```javascript
+methods: {
+  save() {
+    this.$refs().listItem
+    // return [li, li]
+  }
+}
+```
 
 ## Watchers
 
@@ -380,13 +408,13 @@ As a solution you can add a tag, class id, any attribute you want to the watch b
 ### Watching Arrays
 `{{#watch}}` can be used on an `Array` as well.
 
-> Be sure to add a `{{ ref }}` to each item enabling ReBars to only re-render changed items. _Each ref must be unique_
+> Be sure to add a `ref="somethingUnique"` to each item enabling ReBars to only re-render changed items. _Each ref must be unique_
 
 ```html
 <ul>
   {{#watch friends }}
     {{#each friends as | friend | }}
-      <li {{ ref friend.name }}>
+      <li ref="{{ friend.name }}">
         {{ friend.name }} likes to {{ friend.hobby }}
       </li>
     {{/each}}
@@ -406,36 +434,6 @@ If you are watching inside a loop, you can target the specific object and key by
     </li>
   {{/each}}
 </ul>
-```
-
-inside of a method, you can reference any ref by using the `$refs()` function from a method in your component.
-
-```javascript
-methods: {
-  save() {
-    this.$refs().header;
-    // returns the <h1> element
-  }
-}
-```
-
-> The [ref](#refs) helper is also needed on any input or other elements that need focused restored after a re-render. See [bound helper](#bound)
-
-```html
-<ul>
-  <li {{ ref "listItem" }}>item one</li>
-  <li {{ ref "listItem" }}>item one</li>
-</ul>
-```
-
-```javascript
-
-methods: {
-  save() {
-    this.$refs().listItem
-    // return [li, li]
-  }
-}
 ```
 
 
