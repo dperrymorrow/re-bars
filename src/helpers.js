@@ -13,10 +13,12 @@ export default {
       return new instance.SafeString(components[cName].instance(props).render());
     });
 
-    instance.registerHelper("debug", (obj, { data, loc }) => {
+    instance.registerHelper("debug", (obj, { hash, data, loc }) => {
       if (obj === undefined) Msg.fail("paramUndef", { template, data, loc });
       const parser = (key, val) => (typeof val === "function" ? val + "" : val);
-      return new instance.SafeString(`<pre class="debug">${JSON.stringify(obj, parser, 2)}</pre>`);
+      return new instance.SafeString(
+        `<pre class="debug" ${Utils.dom.propStr(hash)}>${JSON.stringify(obj, parser, 2)}</pre>`
+      );
     });
 
     instance.registerHelper("watch", function(...args) {
@@ -60,11 +62,13 @@ export default {
       const { $_componentId } = data.root;
       const params = [$_componentId, path];
 
-      return new instance.SafeString(
-        `value="${Utils.findByPath(data.root, path)}" ref="${hash.ref || path}" data-rbs-bound='${JSON.stringify(
-          params
-        )}'`
-      );
+      const props = {
+        value: Utils.findByPath(data.root, path),
+        ref: hash.ref || path,
+        "data-rbs-bound": JSON.stringify(params),
+      };
+
+      return new instance.SafeString(Utils.dom.propStr(props));
     });
   },
 };

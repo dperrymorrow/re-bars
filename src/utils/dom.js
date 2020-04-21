@@ -41,12 +41,14 @@ export default {
 
   findWatcher: id => document.querySelector(`[data-rbs-watch="${id}"]`),
 
-  wrapWatcher: (id, html, hash) => {
-    const { tag, ...props } = { ...{ tag: "span" }, ...hash };
-    const propStr = Object.entries(props)
+  propStr: props =>
+    Object.entries(props)
       .map(([key, val]) => `${key}="${val}"`)
-      .join(" ");
+      .join(" "),
 
+  wrapWatcher(id, html, hash) {
+    const { tag, ...props } = { ...{ tag: "span" }, ...hash };
+    const propStr = this.propStr(props);
     const style = !html.length ? "style='display:none;'" : "";
     return `<${tag} ${propStr} ${style} data-rbs-watch="${id}">${html}</${tag}>`;
   },
