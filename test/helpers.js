@@ -24,7 +24,13 @@ export default {
     return _query(t.context.$el, selector);
   },
 
+  trigger(t, val, eventType = "click", search = "ref") {
+    const $el = search === "query" ? this.find(t, val) : this.ref(t, val);
+    $el.dispatchEvent(new MouseEvent(eventType, { bubbles: true }));
+  },
+
   buildContext(t, root) {
+    if (t.context.$el) t.context.$el.remove();
     const $el = document.createElement("div");
     document.body.append($el);
 
@@ -35,5 +41,7 @@ export default {
     t.context.id = id;
     t.context.inst = inst;
     t.context.scope = inst.scope;
+
+    return this.wait();
   },
 };

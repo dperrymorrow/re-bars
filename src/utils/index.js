@@ -22,6 +22,11 @@ export default {
     });
   },
 
+  stringify(obj, indent = 2) {
+    const parser = (key, val) => (typeof val === "function" ? val + "" : val);
+    return JSON.stringify(obj, parser, indent);
+  },
+
   debounce(callback, wait = 0, immediate = false) {
     let timeout = null;
 

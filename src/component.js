@@ -36,6 +36,7 @@ function register(
     app,
     methods,
     instance,
+    name,
     helpers: { ...helpers, ...globalHelpers },
     components: regComps,
     template,

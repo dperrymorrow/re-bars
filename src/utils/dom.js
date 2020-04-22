@@ -27,11 +27,18 @@ export default {
   },
 
   findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
-  findRef: ($target, ref) => $target.querySelector(`[ref="${ref}"]`),
+
+  findRef: ($target, ref) => {
+    if ($target.getAttribute("ref") === ref) return $target;
+    return $target.querySelector(`[ref="${ref}"]`);
+  },
 
   findRefs(cId) {
     const $root = this.findComponent(cId);
-    return Array.from($root.querySelectorAll("[ref]")).reduce((obj, $el) => {
+    const $refs = Array.from($root.querySelectorAll("[ref]"));
+    if ($root.getAttribute("ref")) $refs.push($root);
+
+    return $refs.reduce((obj, $el) => {
       const key = $el.getAttribute("ref");
       const target = obj[key];
       obj[key] = target ? [target].concat($el) : $el;

@@ -46,7 +46,7 @@
       "./test/setup.js"
     ],
     "files": [
-      "./test/**/*.spec.js"
+      "./test/specs/**/*.spec.js"
     ],
     "concurrency": 20,
     "failFast": true,

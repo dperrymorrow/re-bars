@@ -46,12 +46,15 @@ const messages = {
   propUndef: ({ name, key }) => `${name}: was passed undefined for prop "${key}"`,
   oneRoot: ({ name }) =>
     `${name}: must have one root node, and cannot be a {{#watch}} block. \nThis error can also be caused by malformed html.`,
-  noMethod: ({ name, methodName }) => `${name}: does not have a method named "${methodName}"`,
   badPath: ({ path }) => `${path} was not found in object`,
   reRender: ({ name, path }) => `${name}: re-rendering "${path}"`,
   patching: ({ name, path }) => `${name}: patching ref Array "${path}"`,
   pathTrigger: ({ path, action, name }) => `${name}: ${action} "${path}"`,
   triggered: ({ name, paths }) => `${name}: data change "${paths}"`,
+
+  noMethod({ name, methodName, template, loc, data }) {
+    return `${name}: does not have a method named "${methodName}" ${_getTplString(template, { data, loc })}`;
+  },
 
   paramUndef({ data, template, loc }) {
     return `component:${data.root.$name} passed undefined to a helper

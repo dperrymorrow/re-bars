@@ -2,7 +2,7 @@ import Msg from "./msg.js";
 import Utils from "./utils/index.js";
 
 export default {
-  register({ app, instance, components, helpers, template }) {
+  register({ app, instance, components, helpers, template, methods, name }) {
     Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
     instance.registerHelper("isComponent", cName => Object.keys(components).includes(cName));
 
@@ -15,10 +15,7 @@ export default {
 
     instance.registerHelper("debug", (obj, { hash, data, loc }) => {
       if (obj === undefined) Msg.fail("paramUndef", { template, data, loc });
-      const parser = (key, val) => (typeof val === "function" ? val + "" : val);
-      return new instance.SafeString(
-        `<pre class="debug" ${Utils.dom.propStr(hash)}>${JSON.stringify(obj, parser, 2)}</pre>`
-      );
+      return new instance.SafeString(`<pre class="debug" ${Utils.dom.propStr(hash)}>${Utils.stringify(obj)}</pre>`);
     });
 
     instance.registerHelper("watch", function(...args) {
@@ -49,11 +46,13 @@ export default {
 
     instance.registerHelper("method", function() {
       const [str, ...args] = arguments;
-      const [method, type = "click"] = str.split(":");
+      const [methodName, type = "click"] = str.split(":");
+      const { data, loc } = args.pop();
 
-      const { data } = args.pop();
+      if (!(methodName in methods)) Msg.fail("noMethod", { name, methodName, template, data, loc });
+
       const { $_componentId } = data.root;
-      let params = [$_componentId, type, method];
+      let params = [$_componentId, type, methodName];
       if (args && args.length) params = params.concat(args);
       return new instance.SafeString(`data-rbs-method='${JSON.stringify(params)}'`);
     });
