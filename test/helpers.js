@@ -44,4 +44,8 @@ export default {
 
     return this.wait();
   },
+
+  getCompByName(t, name) {
+    return Object.values(t.context.app.components.instances).find(inst => inst.scope.$name === name);
+  },
 };

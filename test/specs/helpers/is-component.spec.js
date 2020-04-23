@@ -7,7 +7,7 @@ test.afterEach.always(t => {
   Sinon.restore();
 });
 
-test("isComponent false if not registered", async t => {
+test("false if not registered", async t => {
   await Helpers.buildContext(t, {
     root: {
       template: "<div>{{ isComponent 'nope' }}</div>",
@@ -18,7 +18,7 @@ test("isComponent false if not registered", async t => {
   t.is(t.context.scope.$el().innerHTML, "false");
 });
 
-test("isComponent true if registered", async t => {
+test("true if registered", async t => {
   await Helpers.buildContext(t, {
     root: {
       template: "<div>{{ isComponent 'child' }}</div>",
