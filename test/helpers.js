@@ -29,13 +29,13 @@ export default {
     $el.dispatchEvent(new MouseEvent(eventType, { bubbles: true }));
   },
 
-  buildContext(t, root) {
+  buildContext(t, app) {
     if (t.context.$el) t.context.$el.remove();
     const $el = document.createElement("div");
     document.body.append($el);
 
     t.context.$el = $el;
-    t.context.app = ReBars.app({ root, $el, Handlebars, trace: false });
+    t.context.app = ReBars.app({ ...app, $el, Handlebars, trace: false });
 
     const [id, inst] = Object.entries(t.context.app.components.instances)[0];
     t.context.id = id;

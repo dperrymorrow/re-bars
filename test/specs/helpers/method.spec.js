@@ -13,12 +13,14 @@ test("captures the event", async t => {
   let methodScope;
 
   await Helpers.buildContext(t, {
-    name: "test",
-    template: "<button ref='clicker' {{ method 'clickHandler' }}></button>",
-    methods: {
-      clickHandler() {
-        args = arguments;
-        methodScope = this;
+    root: {
+      name: "test",
+      template: "<button ref='clicker' {{ method 'clickHandler' }}></button>",
+      methods: {
+        clickHandler() {
+          args = arguments;
+          methodScope = this;
+        },
       },
     },
   });
@@ -36,11 +38,13 @@ test("captures the event", async t => {
 test("takes an argument for event type", async t => {
   let args;
   await Helpers.buildContext(t, {
-    name: "test",
-    template: "<button ref='clicker' {{ method 'handler:keyup' 'kechow!' }}></button>",
-    methods: {
-      handler() {
-        args = arguments;
+    root: {
+      name: "test",
+      template: "<button ref='clicker' {{ method 'handler:keyup' 'kechow!' }}></button>",
+      methods: {
+        handler() {
+          args = arguments;
+        },
       },
     },
   });
@@ -57,24 +61,29 @@ test.serial("throws if method not defined", async t => {
   Sinon.stub(Msg.messages, "noMethod").returns("Kaboom!");
   const { message } = t.throws(() => {
     Helpers.buildContext(t, {
-      name: "test",
-      template: "<button ref='clicker' {{ method 'noper' }}></button>",
+      root: {
+        name: "test",
+        template: "<button ref='clicker' {{ method 'noper' }}></button>",
+      },
     });
   });
+
   t.is(message, "Kaboom!");
 });
 
 test("takes data as args", async t => {
   let args;
   await Helpers.buildContext(t, {
-    name: "test",
-    template: "<button ref='clicker' {{ method 'handler' name.first }}></button>",
-    data() {
-      return { name: { first: "David" } };
-    },
-    methods: {
-      handler() {
-        args = arguments;
+    root: {
+      name: "test",
+      template: "<button ref='clicker' {{ method 'handler' name.first }}></button>",
+      data() {
+        return { name: { first: "David" } };
+      },
+      methods: {
+        handler() {
+          args = arguments;
+        },
       },
     },
   });

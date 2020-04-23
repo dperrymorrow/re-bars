@@ -19,7 +19,7 @@ const Comp = {
 };
 
 test.beforeEach(t => {
-  Helpers.buildContext(t, Comp);
+  Helpers.buildContext(t, { root: Comp });
 });
 
 test.afterEach.always(t => {
@@ -44,14 +44,14 @@ test("debugs 'name.first'", t => {
 
 test.serial("throws if path not found", t => {
   Sinon.stub(Msg.messages, "paramUndef").returns("Kaboom");
-  const Bad = { template: "{{ debug doesNotExist }}", name: "Bad" };
-  const error = t.throws(() => Helpers.buildContext(t, Bad));
+  const root = { template: "{{ debug doesNotExist }}", name: "Bad" };
+  const error = t.throws(() => Helpers.buildContext(t, { root }));
   t.is(error.message, "Kaboom");
 });
 
 test.serial("throws if path not found on nested obj", t => {
   Sinon.stub(Msg.messages, "paramUndef").returns("Kaboom");
-  const Bad = { template: "{{ debug name.last }}", name: "Bad" };
-  const error = t.throws(() => Helpers.buildContext(t, Bad));
+  const root = { template: "{{ debug name.last }}", name: "Bad" };
+  const error = t.throws(() => Helpers.buildContext(t, { root }));
   t.is(error.message, "Kaboom");
 });

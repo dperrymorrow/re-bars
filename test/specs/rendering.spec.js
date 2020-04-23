@@ -29,7 +29,7 @@ const DemoComponent = {
 };
 
 test.beforeEach(t => {
-  Helpers.buildContext(t, DemoComponent);
+  Helpers.buildContext(t, { root: DemoComponent });
 });
 
 test.afterEach.always(t => {

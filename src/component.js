@@ -60,7 +60,7 @@ function register(
             $methods: methods,
             $name: name,
             $_componentId: id,
-            $el: () => Utils.dom.findComponet(id),
+            $el: () => Utils.dom.findComponent(id),
             $refs: () => Utils.dom.findRefs(id),
           },
         },
