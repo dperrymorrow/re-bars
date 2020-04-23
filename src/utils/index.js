@@ -27,15 +27,6 @@ export default {
     };
   },
 
-  findByPath: (data, path) => {
-    try {
-      if (!path.includes(".")) return data[path];
-      return path.split(".").reduce((pointer, seg) => pointer[seg], data);
-    } catch (err) {
-      Msg.fail("badPath", { path }, data);
-    }
-  },
-
   shouldRender(path, watch) {
     const watchPaths = Array.isArray(watch) ? watch : [watch];
     return watchPaths.some(watchPath => {

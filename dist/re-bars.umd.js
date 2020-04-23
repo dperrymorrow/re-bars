@@ -28,7 +28,7 @@
 
     if (["warn", "log"].includes(type)) {
       str = "%c " + str + " ";
-      // if (!window.ReBars.trace) return;
+      if (!window.ReBars || !window.ReBars.trace) return;
       if (payloads) {
         console.groupCollapsed(str, styles[type]);
         payloads.forEach(p => console.log(p));
@@ -52,20 +52,23 @@
     propUndef: ({ name, key }) => `${name}: was passed undefined for prop "${key}"`,
     oneRoot: ({ name }) =>
       `${name}: must have one root node, and cannot be a {{#watch}} block. \nThis error can also be caused by malformed html.`,
-    noMethod: ({ name, methodName }) => `${name}: does not have a method named "${methodName}"`,
     badPath: ({ path }) => `${path} was not found in object`,
     reRender: ({ name, path }) => `${name}: re-rendering "${path}"`,
     patching: ({ name, path }) => `${name}: patching ref Array "${path}"`,
     pathTrigger: ({ path, action, name }) => `${name}: ${action} "${path}"`,
     triggered: ({ name, paths }) => `${name}: data change "${paths}"`,
 
+    noMethod({ name, methodName, template, loc, data }) {
+      return `${name}: does not have a method named "${methodName}" ${_getTplString(template, { data, loc })}`;
+    },
+
     paramUndef({ data, template, loc }) {
       return `component:${data.root.$name} passed undefined to a helper
       ${_getTplString(template, { data, loc })}
     `;
     },
-    badWatchParam({ data, template, loc, path }) {
-      return `${data.root.$name}: could not find "${path}" to watch. If primitve wrap in quotes
+    badHelperPath({ data, template, loc, path }) {
+      return `${data.root.$name}: could not find "${path}". If primitve wrap in quotes
       ${_getTplString(template, { data, loc })}
     `;
     },
@@ -116,11 +119,18 @@
     },
 
     findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
-    findRef: ($target, ref) => $target.querySelector(`[ref="${ref}"]`),
+
+    findRef: ($target, ref) => {
+      if ($target.getAttribute("ref") === ref) return $target;
+      return $target.querySelector(`[ref="${ref}"]`);
+    },
 
     findRefs(cId) {
       const $root = this.findComponent(cId);
-      return Array.from($root.querySelectorAll("[ref]")).reduce((obj, $el) => {
+      const $refs = Array.from($root.querySelectorAll("[ref]"));
+      if ($root.getAttribute("ref")) $refs.push($root);
+
+      return $refs.reduce((obj, $el) => {
         const key = $el.getAttribute("ref");
         const target = obj[key];
         obj[key] = target ? [target].concat($el) : $el;
@@ -130,12 +140,14 @@
 
     findWatcher: id => document.querySelector(`[data-rbs-watch="${id}"]`),
 
-    wrapWatcher: (id, html, hash) => {
-      const { tag, ...props } = { ...{ tag: "span" }, ...hash };
-      const propStr = Object.entries(props)
+    propStr: props =>
+      Object.entries(props)
         .map(([key, val]) => `${key}="${val}"`)
-        .join(" ");
+        .join(" "),
 
+    wrapWatcher(id, html, hash) {
+      const { tag, ...props } = { ...{ tag: "span" }, ...hash };
+      const propStr = this.propStr(props);
       const style = !html.length ? "style='display:none;'" : "";
       return `<${tag} ${propStr} ${style} data-rbs-watch="${id}">${html}</${tag}>`;
     },
@@ -152,20 +164,9 @@
   var Utils = {
     dom: Dom,
 
-    deleteOrphans(appId, compId) {
-      const cStore = this.getStorage(appId, compId);
-      const appStore = this.getStorage(appId);
-
-      Object.keys(appStore.inst).forEach(cId => {
-        if (!this.dom.findComponent(cId)) {
-          const inst = appStore.inst[cId];
-          if (inst.scope.$hooks.detached) inst.scope.$hooks.detached();
-          delete appStore.inst[cId];
-        }
-      });
-      Object.keys(cStore.renders).forEach(key => {
-        if (!this.dom.findWatcher(key)) delete cStore.renders[key];
-      });
+    stringify(obj, indent = 2) {
+      const parser = (key, val) => (typeof val === "function" ? val + "" : val);
+      return JSON.stringify(obj, parser, indent);
     },
 
     debounce(callback, wait = 0, immediate = false) {
@@ -182,34 +183,6 @@
           next();
         }
       };
-    },
-
-    makeParams(args) {
-      return args.map(param => {
-        if (["[event]"].includes(param)) return param.replace("[", "").replace("]", "");
-        if (param !== null && typeof param === "object")
-          throw new Error(
-            `component:${name} must only pass primitives as argument to a handler. \n${JSON.stringify(param, null, 2)}`
-          );
-        if (typeof param === "string") return `'${param}'`;
-        if (param === null) return `${param}`;
-        return param;
-      });
-    },
-
-    getStorage(appId, cId) {
-      return cId
-        ? this.findByPath(window.ReBars, `apps.${appId}.inst.${cId}`)
-        : this.findByPath(window.ReBars, `apps.${appId}`);
-    },
-
-    findByPath: (data, path) => {
-      try {
-        if (!path.includes(".")) return data[path];
-        return path.split(".").reduce((pointer, seg) => pointer[seg], data);
-      } catch (err) {
-        Msg.fail("badPath", { path }, data);
-      }
     },
 
     shouldRender(path, watch) {
@@ -291,7 +264,7 @@
   };
 
   var Helpers = {
-    register({ app, instance, components, helpers, template }) {
+    register({ app, instance, components, helpers, template, methods, name }) {
       Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
       instance.registerHelper("isComponent", cName => Object.keys(components).includes(cName));
 
@@ -302,10 +275,9 @@
         return new instance.SafeString(components[cName].instance(props).render());
       });
 
-      instance.registerHelper("debug", (obj, { data, loc }) => {
+      instance.registerHelper("debug", (obj, { hash, data, loc }) => {
         if (obj === undefined) Msg.fail("paramUndef", { template, data, loc });
-        const parser = (key, val) => (typeof val === "function" ? val + "" : val);
-        return new instance.SafeString(`<pre class="debug">${JSON.stringify(obj, parser, 2)}</pre>`);
+        return new instance.SafeString(`<pre class="debug" ${Utils.dom.propStr(hash)}>${Utils.stringify(obj)}</pre>`);
       });
 
       instance.registerHelper("watch", function(...args) {
@@ -336,24 +308,35 @@
 
       instance.registerHelper("method", function() {
         const [str, ...args] = arguments;
-        const [method, type = "click"] = str.split(":");
+        const [methodName, type = "click"] = str.split(":");
+        const { data, loc } = args.pop();
 
-        const { data } = args.pop();
-        const { $_componentId } = data.root;
-        let params = [$_componentId, type, method];
-        if (args && args.length) params = params.concat(args);
-        return new instance.SafeString(`data-rbs-method='${JSON.stringify(params)}'`);
+        if (!(methodName in methods)) Msg.fail("noMethod", { name, methodName, template, data, loc });
+
+        const props = { "data-rbs-method": [data.root.$_componentId, type, methodName] };
+        if (args && args.length) props["data-rbs-method"] = props["data-rbs-method"].concat(args);
+        return new instance.SafeString(Utils.dom.propStr(props));
       });
 
-      instance.registerHelper("bound", (path, { hash = {}, data }) => {
+      instance.registerHelper("bound", (path, { hash = {}, data, loc }) => {
         const { $_componentId } = data.root;
         const params = [$_componentId, path];
+        let value;
 
-        return new instance.SafeString(
-          `value="${Utils.findByPath(data.root, path)}" ref="${hash.ref || path}" data-rbs-bound='${JSON.stringify(
-          params
-        )}'`
-        );
+        if (typeof path === "object") Msg.fail("boundObj", arguments[1]);
+        try {
+          value = !path.includes(".") ? data[path] : path.split(".").reduce((pointer, seg) => pointer[seg], data);
+        } catch (err) {
+          Msg.fail("badPath", { path });
+        }
+
+        const props = {
+          value,
+          ref: hash.ref || path,
+          "data-rbs-bound": params,
+        };
+
+        return new instance.SafeString(Utils.dom.propStr(props));
       });
     },
   };
@@ -383,13 +366,16 @@
         else if (!_isEqHtml($v.innerHTML, $r.innerHTML)) $r.replaceWith($v.cloneNode(true));
       });
 
-      // additions and sorting
+      // additions
       $vChilds.forEach(($v, index) => {
         const $r = Utils.dom.findRef($target, $v.getAttribute("ref"));
         if (!$r) _insertAt($target, $v.cloneNode(true), index);
+      });
 
-        const $rIndex = $target.children[index];
-        if ($rIndex.getAttribute("ref") !== $v.getAttribute("ref")) $rIndex.replaceWith($v.cloneNode(true));
+      // sorting
+      $vChilds.forEach(($v, index) => {
+        const $r = $target.children[index];
+        if ($r.getAttribute("ref") !== $v.getAttribute("ref")) $r.replaceWith($v.cloneNode(true));
       });
     },
   };
@@ -465,6 +451,7 @@
       app,
       methods,
       instance,
+      name,
       helpers: { ...helpers, ...globalHelpers },
       components: regComps,
       template,
@@ -488,7 +475,7 @@
               $methods: methods,
               $name: name,
               $_componentId: id,
-              $el: () => Utils.dom.findComponet(id),
+              $el: () => Utils.dom.findComponent(id),
               $refs: () => Utils.dom.findRefs(id),
             },
           },
@@ -507,11 +494,11 @@
           renders,
           handlers: {
             bound(event) {
-              const [id, path] = JSON.parse(event.target.dataset.rbsBound);
+              const [id, path] = event.target.dataset.rbsBound.split(",");
               Utils.setKey(scope, path, event.target.value);
             },
             method(event) {
-              const [id, type, method, ...args] = JSON.parse(event.target.dataset.rbsMethod);
+              const [id, type, method, ...args] = event.target.dataset.rbsMethod.split(",");
               scope.$methods[method](event, ...args);
             },
           },
@@ -537,7 +524,7 @@
   };
 
   var index = {
-    app({ $el, root, Handlebars = window.Handlebars, helpers = {}, components = {}, trace = false }) {
+    app({ $el, root, Handlebars = window.Handlebars, helpers = {}, components = [], trace = false }) {
       if (!Handlebars) Msg.fail("noHbs");
       if (!document.body.contains($el)) Msg.fail("noEl");
 
@@ -561,6 +548,11 @@
         },
       };
 
+      app.components.registered = components.reduce((regs, def) => {
+        regs[def.name] = Component.register(app, def);
+        return regs;
+      }, {});
+
       function _comp(action, $el) {
         const method = action === "add" ? "attached" : "detached";
         const cId = $el.dataset.rbsComp;
@@ -568,12 +560,12 @@
       }
       function _method(action, $method) {
         const method = action === "add" ? "addEventListener" : "removeEventListener";
-        const [cId, type] = JSON.parse($method.dataset.rbsMethod);
+        const [cId, type] = $method.dataset.rbsMethod.split(",");
         $method[method](type, app.components.instances[cId].handlers.method);
       }
       function _bound(action, $bound) {
         const method = action === "add" ? "addEventListener" : "removeEventListener";
-        const [cId, path] = JSON.parse($bound.dataset.rbsBound);
+        const [cId, path] = $bound.dataset.rbsBound.split(",");
         $bound[method]("input", app.components.instances[cId].handlers.bound);
       }
 
@@ -611,8 +603,9 @@
         subtree: true,
       });
 
-      const rootInst = Component.register(app, root).instance();
-      $el.innerHTML = rootInst.render();
+      $el.innerHTML = Component.register(app, root)
+        .instance()
+        .render();
       return app;
     },
   };

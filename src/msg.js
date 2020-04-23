@@ -61,11 +61,7 @@ const messages = {
       ${_getTplString(template, { data, loc })}
     `;
   },
-  badWatchParam({ data, template, loc, path }) {
-    return `${data.root.$name}: could not find "${path}" to watch. If primitve wrap in quotes
-      ${_getTplString(template, { data, loc })}
-    `;
-  },
+
   noComp({ data, loc, template, cName }) {
     return `${data.root.$name}: child component "${cName}" is not registered
       ${_getTplString(template, { data, loc })}

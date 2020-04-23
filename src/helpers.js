@@ -56,15 +56,25 @@ export default {
       return new instance.SafeString(Utils.dom.propStr(props));
     });
 
-    instance.registerHelper("bound", (path, { hash = {}, data }) => {
+    instance.registerHelper("bound", (path, { hash = {}, data, loc }) => {
       const { $_componentId } = data.root;
       const params = [$_componentId, path];
+      let value;
+
+      try {
+        value = !path.includes(".")
+          ? data.root[path]
+          : path.split(".").reduce((pointer, seg) => pointer[seg], data.root);
+      } catch (err) {
+        Msg.fail("badPath", { path });
+      }
 
       const props = {
-        value: Utils.findByPath(data.root, path),
+        value,
         ref: hash.ref || path,
         "data-rbs-bound": params,
       };
+
       return new instance.SafeString(Utils.dom.propStr(props));
     });
   },
