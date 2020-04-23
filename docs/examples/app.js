@@ -85,16 +85,6 @@ export default {
     isChecked: val => (val ? "checked" : ""),
   },
 
-  hooks: {
-    attached() {
-      console.log(this, "attached");
-    },
-
-    created() {
-      console.log(this, "created");
-    },
-  },
-
   methods: {
     addItem(event) {
       event.preventDefault();

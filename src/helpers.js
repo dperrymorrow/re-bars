@@ -51,10 +51,9 @@ export default {
 
       if (!(methodName in methods)) Msg.fail("noMethod", { name, methodName, template, data, loc });
 
-      const { $_componentId } = data.root;
-      let params = [$_componentId, type, methodName];
-      if (args && args.length) params = params.concat(args);
-      return new instance.SafeString(`data-rbs-method='${JSON.stringify(params)}'`);
+      const props = { "data-rbs-method": [data.root.$_componentId, type, methodName] };
+      if (args && args.length) props["data-rbs-method"] = props["data-rbs-method"].concat(args);
+      return new instance.SafeString(Utils.dom.propStr(props));
     });
 
     instance.registerHelper("bound", (path, { hash = {}, data }) => {
@@ -64,9 +63,8 @@ export default {
       const props = {
         value: Utils.findByPath(data.root, path),
         ref: hash.ref || path,
-        "data-rbs-bound": JSON.stringify(params),
+        "data-rbs-bound": params,
       };
-
       return new instance.SafeString(Utils.dom.propStr(props));
     });
   },
