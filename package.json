@@ -1,6 +1,6 @@
 {
   "name": "re-bars",
-  "version": "0.0.1-beta.3",
+  "version": "0.0.1-beta.3.0.1",
   "description": "Handlebars templates with re-render / watch blocks",
   "repository": "https://github.com/dperrymorrow/re-bars",
   "main": "dist/re-bars.umd.min.js",
@@ -22,7 +22,7 @@
   "license": "MIT",
   "dependencies": {},
   "devDependencies": {
-    "ava": "^3.5.0",
+    "ava": "3.7.1",
     "browser-env": "^3.3.0",
     "c8": "7.1.0",
     "eslint": "^6.7.2",

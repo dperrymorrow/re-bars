@@ -65,3 +65,15 @@ test("updates the bound value on change", async t => {
   await Helpers.wait();
   t.is(t.context.scope.name, "Mike");
 });
+
+test("can take ref as an arg", async t => {
+  await Helpers.buildContext(t, {
+    root: {
+      name: "test",
+      template: "<div><input {{ bound 'name' ref='customRef' }}></div>",
+      data: () => ({ name: "david" }),
+    },
+  });
+
+  t.is(Helpers.ref(t, "customRef").value, "david");
+});

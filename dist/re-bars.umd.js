@@ -67,11 +67,7 @@
       ${_getTplString(template, { data, loc })}
     `;
     },
-    badHelperPath({ data, template, loc, path }) {
-      return `${data.root.$name}: could not find "${path}". If primitve wrap in quotes
-      ${_getTplString(template, { data, loc })}
-    `;
-    },
+
     noComp({ data, loc, template, cName }) {
       return `${data.root.$name}: child component "${cName}" is not registered
       ${_getTplString(template, { data, loc })}
@@ -323,9 +319,10 @@
         const params = [$_componentId, path];
         let value;
 
-        if (typeof path === "object") Msg.fail("boundObj", arguments[1]);
         try {
-          value = !path.includes(".") ? data[path] : path.split(".").reduce((pointer, seg) => pointer[seg], data);
+          value = !path.includes(".")
+            ? data.root[path]
+            : path.split(".").reduce((pointer, seg) => pointer[seg], data.root);
         } catch (err) {
           Msg.fail("badPath", { path });
         }
