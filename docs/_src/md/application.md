@@ -60,6 +60,20 @@ ReBars.app({
 });
 ```
 
+## Global Components
+
+If you would like to register components for all components within this application you can pass a components Array to the `ReBars.app` function. This is the same as passing your components to a component definition.
+
+```javascript
+import MyComponent from "my-component.js";
+
+ReBars.app({
+  $el: document.getElementById("demo-app"),
+  root: RootComponent,
+  components: [ MyComponent ]
+});
+```
+
 ## Handlebars
 
 If you would like use Handlebars from a source other than on `window` _such as loading from a CDN_, you can pass your instance of Handlebars to the `ReBars.app` function.

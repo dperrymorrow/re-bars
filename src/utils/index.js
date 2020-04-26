@@ -6,20 +6,9 @@ import Msg from "../msg.js";
 export default {
   dom: Dom,
 
-  deleteOrphans(appId, compId) {
-    const cStore = this.getStorage(appId, compId);
-    const appStore = this.getStorage(appId);
-
-    Object.keys(appStore.inst).forEach(cId => {
-      if (!this.dom.findComponent(cId)) {
-        const inst = appStore.inst[cId];
-        if (inst.scope.$hooks.detached) inst.scope.$hooks.detached();
-        delete appStore.inst[cId];
-      }
-    });
-    Object.keys(cStore.renders).forEach(key => {
-      if (!this.dom.findWatcher(key)) delete cStore.renders[key];
-    });
+  stringify(obj, indent = 2) {
+    const parser = (key, val) => (typeof val === "function" ? val + "" : val);
+    return JSON.stringify(obj, parser, indent);
   },
 
   debounce(callback, wait = 0, immediate = false) {
@@ -36,34 +25,6 @@ export default {
         next();
       }
     };
-  },
-
-  makeParams(args) {
-    return args.map(param => {
-      if (["[event]"].includes(param)) return param.replace("[", "").replace("]", "");
-      if (param !== null && typeof param === "object")
-        throw new Error(
-          `component:${name} must only pass primitives as argument to a handler. \n${JSON.stringify(param, null, 2)}`
-        );
-      if (typeof param === "string") return `'${param}'`;
-      if (param === null) return `${param}`;
-      return param;
-    });
-  },
-
-  getStorage(appId, cId) {
-    return cId
-      ? this.findByPath(window.ReBars, `apps.${appId}.inst.${cId}`)
-      : this.findByPath(window.ReBars, `apps.${appId}`);
-  },
-
-  findByPath: (data, path) => {
-    try {
-      if (!path.includes(".")) return data[path];
-      return path.split(".").reduce((pointer, seg) => pointer[seg], data);
-    } catch (err) {
-      Msg.fail("badPath", { path }, data);
-    }
   },
 
   shouldRender(path, watch) {

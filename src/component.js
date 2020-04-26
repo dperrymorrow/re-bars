@@ -36,6 +36,7 @@ function register(
     app,
     methods,
     instance,
+    name,
     helpers: { ...helpers, ...globalHelpers },
     components: regComps,
     template,
@@ -59,7 +60,7 @@ function register(
             $methods: methods,
             $name: name,
             $_componentId: id,
-            $el: () => Utils.dom.findComponet(id),
+            $el: () => Utils.dom.findComponent(id),
             $refs: () => Utils.dom.findRefs(id),
           },
         },
@@ -78,11 +79,11 @@ function register(
         renders,
         handlers: {
           bound(event) {
-            const [id, path] = JSON.parse(event.target.dataset.rbsBound);
+            const [id, path] = event.target.dataset.rbsBound.split(",");
             Utils.setKey(scope, path, event.target.value);
           },
           method(event) {
-            const [id, type, method, ...args] = JSON.parse(event.target.dataset.rbsMethod);
+            const [id, type, method, ...args] = event.target.dataset.rbsMethod.split(",");
             scope.$methods[method](event, ...args);
           },
         },

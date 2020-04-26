@@ -181,6 +181,15 @@ import ReBars from &quot;re-bars&quot;;</code></pre>
     isChecked: val =&gt; (val ? &quot;checked&quot; : &quot;&quot;),
   }
 });</code></pre>
+<h2 id="global-components">Global Components</h2>
+<p>If you would like to register components for all components within this application you can pass a components Array to the <code>ReBars.app</code> function. This is the same as passing your components to a component definition.</p>
+<pre><code class="language-javascript">import MyComponent from &quot;my-component.js&quot;;
+
+ReBars.app({
+  $el: document.getElementById(&quot;demo-app&quot;),
+  root: RootComponent,
+  components: [ MyComponent ]
+});</code></pre>
 <h2 id="handlebars">Handlebars</h2>
 <p>If you would like use Handlebars from a source other than on <code>window</code> <em>such as loading from a CDN</em>, you can pass your instance of Handlebars to the <code>ReBars.app</code> function.</p>
 <pre><code class="language-javascript">import Handlebars from &quot;somewhere&quot;;
@@ -564,16 +573,6 @@ Watch takes an argument of what property to watch. The argument can be a string 
 
   helpers: {
     isChecked: val =&gt; (val ? &quot;checked&quot; : &quot;&quot;),
-  },
-
-  hooks: {
-    attached() {
-      console.log(this, &quot;attached&quot;);
-    },
-
-    created() {
-      console.log(this, &quot;created&quot;);
-    },
   },
 
   methods: {

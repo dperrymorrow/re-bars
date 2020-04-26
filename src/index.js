@@ -3,7 +3,7 @@ import Component from "./component.js";
 import Msg from "./msg.js";
 
 export default {
-  app({ $el, root, Handlebars = window.Handlebars, helpers = {}, components = {}, trace = false }) {
+  app({ $el, root, Handlebars = window.Handlebars, helpers = {}, components = [], trace = false }) {
     if (!Handlebars) Msg.fail("noHbs");
     if (!document.body.contains($el)) Msg.fail("noEl");
 
@@ -27,6 +27,11 @@ export default {
       },
     };
 
+    app.components.registered = components.reduce((regs, def) => {
+      regs[def.name] = Component.register(app, def);
+      return regs;
+    }, {});
+
     function _comp(action, $el) {
       const method = action === "add" ? "attached" : "detached";
       const cId = $el.dataset.rbsComp;
@@ -34,12 +39,12 @@ export default {
     }
     function _method(action, $method) {
       const method = action === "add" ? "addEventListener" : "removeEventListener";
-      const [cId, type] = JSON.parse($method.dataset.rbsMethod);
+      const [cId, type] = $method.dataset.rbsMethod.split(",");
       $method[method](type, app.components.instances[cId].handlers.method);
     }
     function _bound(action, $bound) {
       const method = action === "add" ? "addEventListener" : "removeEventListener";
-      const [cId, path] = JSON.parse($bound.dataset.rbsBound);
+      const [cId, path] = $bound.dataset.rbsBound.split(",");
       $bound[method]("input", app.components.instances[cId].handlers.bound);
     }
 
@@ -77,8 +82,9 @@ export default {
       subtree: true,
     });
 
-    const rootInst = Component.register(app, root).instance();
-    $el.innerHTML = rootInst.render();
+    $el.innerHTML = Component.register(app, root)
+      .instance()
+      .render();
     return app;
   },
 };
