@@ -1,12 +1,7 @@
 import test from "ava";
 import Helpers from "../../helpers.js";
-import Sinon from "sinon";
-import Msg from "../../../src/msg.js";
 
-test.afterEach.always(t => {
-  if (t.context.$el) t.context.$el.remove();
-  Sinon.restore();
-});
+test.afterEach.always(Helpers.cleanup);
 
 test("captures the event", async t => {
   let args;
@@ -26,7 +21,7 @@ test("captures the event", async t => {
   });
 
   Helpers.trigger(t, "clicker", "click");
-  const [event, ...rest] = args;
+  const event = args[0];
 
   t.is(event instanceof MouseEvent, true);
   t.is(event.target, Helpers.ref(t, "clicker"));
@@ -57,8 +52,7 @@ test("takes an argument for event type", async t => {
   t.is(event.type, "keyup");
 });
 
-test.serial("throws if method not defined", async t => {
-  Sinon.stub(Msg.messages, "noMethod").returns("Kaboom!");
+test("throws if method not defined", async t => {
   const { message } = t.throws(() => {
     Helpers.buildContext(t, {
       root: {
@@ -68,7 +62,8 @@ test.serial("throws if method not defined", async t => {
     });
   });
 
-  t.is(message, "Kaboom!");
+  t.true(message.includes("test:"));
+  t.true(message.includes("{{ method 'noper' }}"));
 });
 
 test("takes data as args", async t => {

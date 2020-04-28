@@ -5,7 +5,8 @@ import Msg from "./msg.js";
 export default {
   app({ $el, root, Handlebars = window.Handlebars, helpers = {}, components = [], trace = false }) {
     if (!Handlebars) Msg.fail("noHbs");
-    if (!document.body.contains($el)) Msg.fail("noEl");
+    if (!document.body.contains($el))
+      Msg.fail("$el passed to ReBars app is either undefined or not present in the document.");
 
     const app = {
       id: Utils.randomId(),

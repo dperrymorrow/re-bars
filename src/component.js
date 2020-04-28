@@ -6,14 +6,16 @@ import Msg from "./msg.js";
 
 const restricted = ["component", "ref", "debug", "isComponent", "method", "bound", "watch", "isComponent"];
 
+// too much destructuring making it confusting with colliding names
 function register(
   { id: appId, Handlebars, trace, helpers: globalHelpers, components: globalComponents },
   { name, template, data = () => ({}), helpers = {}, hooks = {}, methods = {}, watchers = {}, components = [] }
 ) {
-  // should prob init Msg with the trace per app
-  if (!name) Msg.fail("noName", null, arguments[1]);
-  if (typeof data !== "function") Msg.fail("dataFn", { name });
-  if (typeof template !== "string") Msg.fail("tmplStr", { name });
+  const compDef = arguments[0];
+
+  if (!name) Msg.fail("Every ReBars component should have a name!", compDef);
+  if (typeof data !== "function") Msg.fail(`${name}: component data must be a function`, compDef);
+  if (typeof template !== "string") Msg.fail("`${name}: needs a template string`", compDef);
 
   const app = arguments[0];
   const instance = Handlebars.create();
@@ -29,7 +31,8 @@ function register(
   );
 
   Object.keys(data()).forEach(key => {
-    if (restricted.concat(Object.keys(helpers)).includes(key)) Msg.fail("restrictedKey", { name, key });
+    if (restricted.concat(Object.keys(helpers)).includes(key))
+      Msg.fail(`${name}: cannot use "${key}" in your data as it's defined as a helper`, compDef);
   });
 
   Helpers.register({
@@ -49,7 +52,8 @@ function register(
       const renders = {};
       // validate the props, add the passed methods after you bind them or you will loose scope
       Object.entries($props).forEach(([key, value]) => {
-        if (value === undefined) Msg.warn("propUndef", { name, key });
+        if (value === undefined)
+          Msg.warn(`${name} was passed $prop "${key}" as undefined. If you really meant to, pass null instead.`);
       });
 
       const scope = ProxyTrap.create(
@@ -65,7 +69,7 @@ function register(
           },
         },
         paths => {
-          Msg.log("triggered", { name, paths }, renders);
+          Msg.log(`${name}: data changed "${paths}"`, renders);
           ReRender.paths({ app, paths, renders, name });
         }
       );
@@ -94,7 +98,11 @@ function register(
           if (hooks.attached) hooks.attached.call(scope);
         },
         render() {
-          return Utils.dom.tagComponent(id, templateFn(scope), name);
+          try {
+            return Utils.dom.tagComponent(id, templateFn(scope), name);
+          } catch ({ message }) {
+            Msg.fail(`${name}: ${message}\n${template}`);
+          }
         },
       };
 

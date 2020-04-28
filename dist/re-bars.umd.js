@@ -9,22 +9,21 @@
     log: "background: #324645; color:#c9faff; padding: .1em; font-weight: normal;",
   };
 
-  const _getTplString = (template, { loc, data }) => {
+  const _getTplString = ({ template, loc }) => {
     const lines = template.split("\n").slice(loc.start.line - 1, loc.end.line);
     const leadingSpaces = Array(lines[0].length - lines[0].trim().length).join(" ");
     lines[0] = lines[0].substr(loc.start.column);
     lines[lines.length - 1] = lines[lines.length - 1].substr(0, loc.end.column);
-    return [
-      "",
-      `component: ${data.root.$name}, template line: ${loc.start.line}`,
-      "============================================",
-    ]
+    return ["", `template line: ${loc.start.line}`, "============================================"]
       .concat(lines.map(line => line.replace(leadingSpaces, "")))
       .join("\n");
   };
 
-  const _msg = (type, key, obj = {}, ...payloads) => {
-    let str = messages[key](obj);
+  const _msg = (type, msg, ...payloads) => {
+    let str = msg;
+
+    if (typeof payloads[0] === "object" && "template" in payloads[0] && "loc" in payloads[0])
+      payloads[0] = _getTplString(payloads[0]);
 
     if (["warn", "log"].includes(type)) {
       str = "%c " + str + " ";
@@ -42,47 +41,7 @@
     }
   };
 
-  const messages = {
-    noEl: () => "$el must be present in the document",
-    noHbs: () => "ReBars need Handlebars in order to run!",
-    noName: () => "Each ReBars component should have a name",
-    dataFn: ({ name }) => `${name}: must be a function`,
-    tplStr: ({ name }) => `${name}: needs a template string`,
-    propStomp: ({ name, key }) => `${name}: "data.${key}" was overrode by a prop`,
-    propUndef: ({ name, key }) => `${name}: was passed undefined for prop "${key}"`,
-    oneRoot: ({ name }) =>
-      `${name}: must have one root node, and cannot be a {{#watch}} block. \nThis error can also be caused by malformed html.`,
-    badPath: ({ path }) => `${path} was not found in object`,
-    reRender: ({ name, path }) => `${name}: re-rendering "${path}"`,
-    patching: ({ name, path }) => `${name}: patching ref Array "${path}"`,
-    pathTrigger: ({ path, action, name }) => `${name}: ${action} "${path}"`,
-    triggered: ({ name, paths }) => `${name}: data change "${paths}"`,
-
-    noMethod({ name, methodName, template, loc, data }) {
-      return `${name}: does not have a method named "${methodName}" ${_getTplString(template, { data, loc })}`;
-    },
-
-    paramUndef({ data, template, loc }) {
-      return `component:${data.root.$name} passed undefined to a helper
-      ${_getTplString(template, { data, loc })}
-    `;
-    },
-
-    noComp({ data, loc, template, cName }) {
-      return `${data.root.$name}: child component "${cName}" is not registered
-      ${_getTplString(template, { data, loc })}
-    `;
-    },
-    restrictedKey: ({ name, key }) => `${name}: cannot use restricted key "${key}" in your data as it's a helper`,
-    focusFail: ({ ref, name }) =>
-      `${name}: ref "${ref}" is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each`,
-    notKeyed: ({ name, path }) =>
-      `${name}: patching "${path}" add a {{ref 'someUniqueKey' }} to avoid re-rendering the entire Array`,
-  };
-
   var Msg = {
-    messages,
-    getStr: (key, obj) => messages[key](obj),
     warn: _msg.bind(null, "warn"),
     fail: _msg.bind(null, "throw"),
     log: _msg.bind(null, "log"),
@@ -107,7 +66,10 @@
 
       if (!$input) return;
       if (Array.isArray($input)) {
-        Msg.warn("focusFail", { ref: activeRef.ref, name }, $input);
+        Msg.warn(
+          `ref="${activeRef.ref}" is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each usage`,
+          $input
+        );
       } else {
         $input.focus();
         if (activeRef.pos) $input.setSelectionRange(activeRef.pos + 1, activeRef.pos + 1);
@@ -201,14 +163,12 @@
     setKey(obj, path, val) {
       const arr = path.split(".");
       arr.reduce((pointer, key, index) => {
-        if (!(key in pointer)) Msg.fail("badPath", { path }, obj);
+        if (!(key in pointer)) Msg.fail(`${path} was not found in object!`, obj);
         if (index + 1 === arr.length) pointer[key] = val;
         return pointer[key];
       }, obj);
     },
   };
-
-  // import ReRender from "./re-render.js";
 
   var ProxyTrap = {
     create(data, callback) {
@@ -265,14 +225,14 @@
       instance.registerHelper("isComponent", cName => Object.keys(components).includes(cName));
 
       instance.registerHelper("component", function(...args) {
-        const { hash: props, data, loc } = args.pop();
+        const { hash: props, loc } = args.pop();
         const cName = args[0];
-        if (!components[cName]) Msg.fail("noComp", { data, loc, template, cName });
+        if (!components[cName]) Msg.fail(`${name}: child component "${cName}" is not registered`, { template, loc });
         return new instance.SafeString(components[cName].instance(props).render());
       });
 
       instance.registerHelper("debug", (obj, { hash, data, loc }) => {
-        if (obj === undefined) Msg.fail("paramUndef", { template, data, loc });
+        if (obj === undefined) Msg.fail(`${name}: undefined passed to debug`, { template, loc });
         return new instance.SafeString(`<pre class="debug" ${Utils.dom.propStr(hash)}>${Utils.stringify(obj)}</pre>`);
       });
 
@@ -283,7 +243,7 @@
         const eId = Utils.randomId();
 
         const _getPath = (target, wildcard = true) => {
-          if (target === undefined) Msg.fail("paramUndef", { template, loc, data });
+          if (target === undefined) Msg.fail(`${name}: undefined cannot be watched`, { template, loc });
           return typeof target === "object" ? `${target.ReBarsPath}${wildcard ? ".*" : ""}` : target;
         };
 
@@ -307,7 +267,8 @@
         const [methodName, type = "click"] = str.split(":");
         const { data, loc } = args.pop();
 
-        if (!(methodName in methods)) Msg.fail("noMethod", { name, methodName, template, data, loc });
+        if (!(methodName in methods))
+          Msg.fail(`${name}: "${methodName}" is not a method in component`, { template, loc });
 
         const props = { "data-rbs-method": [data.root.$_componentId, type, methodName] };
         if (args && args.length) props["data-rbs-method"] = props["data-rbs-method"].concat(args);
@@ -392,13 +353,17 @@
 
           if (Patch.canPatch($target)) {
             Patch.compare({ app, $target, html });
-            Msg.log("patching", { name, path: handler.path }, $target);
+            Msg.log(`${name}: patching ${handler.path}`, $target);
             return;
           }
 
           // warn for not having a ref on array update
           const lenPath = handler.path.find(path => path.endsWith(".length"));
-          if (lenPath) Msg.warn("notKeyed", { name, path: lenPath }, $target);
+          if (lenPath)
+            Msg.warn(
+              `${name}: patching "${handler.path}" add a ref="someUniqueKey" to each to avoid re-rendering the entire Array of elements`,
+              $target
+            );
 
           const activeRef = {
             ref: document.activeElement.getAttribute("ref"),
@@ -409,7 +374,7 @@
           $target.innerHTML = html;
 
           Utils.dom.restoreCursor($target, activeRef);
-          Msg.log("reRender", { name, path: handler.path }, $target);
+          Msg.log(`${name}: re-rendering watch block for ${handler.path}`, $target);
         });
 
       app.deleteOrphans();
@@ -418,14 +383,16 @@
 
   const restricted = ["component", "ref", "debug", "isComponent", "method", "bound", "watch", "isComponent"];
 
+  // too much destructuring making it confusting with colliding names
   function register(
     { id: appId, Handlebars, trace, helpers: globalHelpers, components: globalComponents },
     { name, template, data = () => ({}), helpers = {}, hooks = {}, methods = {}, watchers = {}, components = [] }
   ) {
-    // should prob init Msg with the trace per app
-    if (!name) Msg.fail("noName", null, arguments[1]);
-    if (typeof data !== "function") Msg.fail("dataFn", { name });
-    if (typeof template !== "string") Msg.fail("tmplStr", { name });
+    const compDef = arguments[0];
+
+    if (!name) Msg.fail("Every ReBars component should have a name!", compDef);
+    if (typeof data !== "function") Msg.fail(`${name}: component data must be a function`, compDef);
+    if (typeof template !== "string") Msg.fail("`${name}: needs a template string`", compDef);
 
     const app = arguments[0];
     const instance = Handlebars.create();
@@ -441,7 +408,8 @@
     );
 
     Object.keys(data()).forEach(key => {
-      if (restricted.concat(Object.keys(helpers)).includes(key)) Msg.fail("restrictedKey", { name, key });
+      if (restricted.concat(Object.keys(helpers)).includes(key))
+        Msg.fail(`${name}: cannot use "${key}" in your data as it's defined as a helper`, compDef);
     });
 
     Helpers.register({
@@ -461,7 +429,8 @@
         const renders = {};
         // validate the props, add the passed methods after you bind them or you will loose scope
         Object.entries($props).forEach(([key, value]) => {
-          if (value === undefined) Msg.warn("propUndef", { name, key });
+          if (value === undefined)
+            Msg.warn(`${name} was passed $prop "${key}" as undefined. If you really meant to, pass null instead.`);
         });
 
         const scope = ProxyTrap.create(
@@ -477,7 +446,7 @@
             },
           },
           paths => {
-            Msg.log("triggered", { name, paths }, renders);
+            Msg.log(`${name}: data changed "${paths}"`, renders);
             ReRender.paths({ app, paths, renders, name });
           }
         );
@@ -523,7 +492,8 @@
   var index = {
     app({ $el, root, Handlebars = window.Handlebars, helpers = {}, components = [], trace = false }) {
       if (!Handlebars) Msg.fail("noHbs");
-      if (!document.body.contains($el)) Msg.fail("noEl");
+      if (!document.body.contains($el))
+        Msg.fail("$el passed to ReBars app is either undefined or not present in the document.");
 
       const app = {
         id: Utils.randomId(),

@@ -17,13 +17,17 @@ export default {
 
         if (Patch.canPatch($target)) {
           Patch.compare({ app, $target, html });
-          Msg.log("patching", { name, path: handler.path }, $target);
+          Msg.log(`${name}: patching ${handler.path}`, $target);
           return;
         }
 
         // warn for not having a ref on array update
         const lenPath = handler.path.find(path => path.endsWith(".length"));
-        if (lenPath) Msg.warn("notKeyed", { name, path: lenPath }, $target);
+        if (lenPath)
+          Msg.warn(
+            `${name}: patching "${handler.path}" add a ref="someUniqueKey" to each to avoid re-rendering the entire Array of elements`,
+            $target
+          );
 
         const activeRef = {
           ref: document.activeElement.getAttribute("ref"),
@@ -34,7 +38,7 @@ export default {
         $target.innerHTML = html;
 
         Utils.dom.restoreCursor($target, activeRef);
-        Msg.log("reRender", { name, path: handler.path }, $target);
+        Msg.log(`${name}: re-rendering watch block for ${handler.path}`, $target);
       });
 
     app.deleteOrphans();

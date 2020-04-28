@@ -17,6 +17,10 @@
           "path": "#global-helpers"
         },
         {
+          "label": "Global Components",
+          "path": "#global-components"
+        },
+        {
           "label": "Handlebars",
           "path": "#handlebars"
         }

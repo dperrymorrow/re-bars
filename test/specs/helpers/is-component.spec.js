@@ -1,11 +1,7 @@
 import test from "ava";
-import Sinon from "sinon";
 import Helpers from "../../helpers.js";
 
-test.afterEach.always(t => {
-  t.context.$el.remove();
-  Sinon.restore();
-});
+test.afterEach.always(Helpers.cleanup);
 
 test("false if not registered", async t => {
   await Helpers.buildContext(t, {

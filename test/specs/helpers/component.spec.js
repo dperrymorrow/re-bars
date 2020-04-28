@@ -1,16 +1,9 @@
 import test from "ava";
-import Sinon from "sinon";
 import Helpers from "../../helpers.js";
-import Msg from "../../../src/msg.js";
 
-test.afterEach.always(t => {
-  t.context.$el.remove();
-  Sinon.restore();
-});
+test.afterEach.always(Helpers.cleanup);
 
-test("false if not registered", t => {
-  Sinon.stub(Msg.messages, "noComp").returns("Kaboom");
-
+test("throws if not registered", t => {
   const { message } = t.throws(() => {
     Helpers.buildContext(t, {
       root: {
@@ -20,7 +13,54 @@ test("false if not registered", t => {
     });
   });
 
-  t.is(message, "Kaboom");
+  t.true(message.includes("test:"));
+  t.true(message.includes("{{ component 'nope' }}"));
+});
+
+test("ensures there is only one root element", t => {
+  const root = {
+    template: "<div></div><div></div>",
+    name: "test",
+  };
+
+  const { message } = t.throws(() => {
+    Helpers.buildContext(t, { root });
+  });
+
+  t.true(message.includes("test:"));
+  t.true(message.includes("multiple root"));
+  t.true(message.includes(root.template));
+});
+
+test("cannot have <p> as root", t => {
+  const root = {
+    template: "<p></p>",
+    name: "test",
+  };
+
+  const { message } = t.throws(() => {
+    Helpers.buildContext(t, { root });
+  });
+
+  t.true(message.includes("test:"));
+  t.true(message.includes("<p> cannot be"));
+  t.true(message.includes(root.template));
+});
+
+test("cannot have watch as root", t => {
+  const root = {
+    template: "{{#watch name }}{{/watch}}",
+    name: "test",
+    data: () => ({ name: "d" }),
+  };
+
+  const { message } = t.throws(() => {
+    Helpers.buildContext(t, { root });
+  });
+
+  t.true(message.includes("test:"));
+  t.true(message.includes("watch"));
+  t.true(message.includes(root.template));
 });
 
 test("can render global components", async t => {

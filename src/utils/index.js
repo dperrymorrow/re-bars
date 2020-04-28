@@ -47,7 +47,7 @@ export default {
   setKey(obj, path, val) {
     const arr = path.split(".");
     arr.reduce((pointer, key, index) => {
-      if (!(key in pointer)) Msg.fail("badPath", { path }, obj);
+      if (!(key in pointer)) Msg.fail(`${path} was not found in object!`, obj);
       if (index + 1 === arr.length) pointer[key] = val;
       return pointer[key];
     }, obj);

@@ -1,5 +1,6 @@
 import ReBars from "../src/index.js";
 import Handlebars from "handlebars";
+import Sinon from "sinon";
 
 const _query = ($container, selector) => {
   const $matches = $container.querySelectorAll(selector);
@@ -27,6 +28,11 @@ export default {
   trigger(t, val, eventType = "click", search = "ref") {
     const $el = search === "query" ? this.find(t, val) : this.ref(t, val);
     $el.dispatchEvent(new MouseEvent(eventType, { bubbles: true }));
+  },
+
+  cleanup(t) {
+    if (t.context.$el) t.context.$el.remove();
+    Sinon.restore();
   },
 
   buildContext(t, app) {

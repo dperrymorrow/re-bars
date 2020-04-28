@@ -51,6 +51,7 @@ Each time the value passed to watch is changed, *just* that Handlebars block wil
 - [A ReBars Application](#a-rebars-application)
   - [Getting Started](#getting-started)
   - [Global Helpers](#global-helpers)
+  - [Global Components](#global-components)
   - [Handlebars](#handlebars)
 - [A ReBars Component](#rebars-components)
   - [Template](#template)

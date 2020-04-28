@@ -7,14 +7,14 @@ export default {
     instance.registerHelper("isComponent", cName => Object.keys(components).includes(cName));
 
     instance.registerHelper("component", function(...args) {
-      const { hash: props, data, loc } = args.pop();
+      const { hash: props, loc } = args.pop();
       const cName = args[0];
-      if (!components[cName]) Msg.fail("noComp", { data, loc, template, cName });
+      if (!components[cName]) Msg.fail(`${name}: child component "${cName}" is not registered`, { template, loc });
       return new instance.SafeString(components[cName].instance(props).render());
     });
 
     instance.registerHelper("debug", (obj, { hash, data, loc }) => {
-      if (obj === undefined) Msg.fail("paramUndef", { template, data, loc });
+      if (obj === undefined) Msg.fail(`${name}: undefined passed to debug`, { template, loc });
       return new instance.SafeString(`<pre class="debug" ${Utils.dom.propStr(hash)}>${Utils.stringify(obj)}</pre>`);
     });
 
@@ -25,12 +25,12 @@ export default {
       const eId = Utils.randomId();
 
       const _getPath = (target, wildcard = true) => {
-        if (target === undefined) Msg.fail("paramUndef", { template, loc, data });
-        return typeof target === "object" ? `${target.ReBarsPath}${wildcard ? ".*" : ""}` : target;
+        if (target === undefined) Msg.fail(`${name}: undefined cannot be watched`, { template, loc });
+        return typeof target === "object" ? `${target.ReBarsPath}.*` : target;
       };
 
       const path = args
-        .map(arg => _getPath(arg, false))
+        .map(_getPath)
         .join(".")
         .split(",");
 
@@ -49,7 +49,8 @@ export default {
       const [methodName, type = "click"] = str.split(":");
       const { data, loc } = args.pop();
 
-      if (!(methodName in methods)) Msg.fail("noMethod", { name, methodName, template, data, loc });
+      if (!(methodName in methods))
+        Msg.fail(`${name}: "${methodName}" is not a method in component`, { template, loc });
 
       const props = { "data-rbs-method": [data.root.$_componentId, type, methodName] };
       if (args && args.length) props["data-rbs-method"] = props["data-rbs-method"].concat(args);
@@ -66,7 +67,7 @@ export default {
           ? data.root[path]
           : path.split(".").reduce((pointer, seg) => pointer[seg], data.root);
       } catch (err) {
-        Msg.fail("badPath", { path });
+        Msg.fail(`${name}: bound helper was passed a bad path`, { template, loc });
       }
 
       const props = {

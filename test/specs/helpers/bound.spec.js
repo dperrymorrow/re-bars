@@ -1,12 +1,7 @@
 import test from "ava";
 import Helpers from "../../helpers.js";
-import Sinon from "sinon";
-import Msg from "../../../src/msg.js";
 
-test.afterEach.always(t => {
-  if (t.context.$el) t.context.$el.remove();
-  Sinon.restore();
-});
+test.afterEach.always(Helpers.cleanup);
 
 test("binds the input", async t => {
   await Helpers.buildContext(t, {
@@ -23,7 +18,6 @@ test("binds the input", async t => {
 });
 
 test.serial("throws if pass object", async t => {
-  Sinon.stub(Msg.messages, "badPath").returns("kaboom");
   const { message } = t.throws(() => {
     Helpers.buildContext(t, {
       root: {
@@ -34,11 +28,12 @@ test.serial("throws if pass object", async t => {
     });
   });
 
-  t.is(message, "kaboom");
+  t.true(message.includes("bound"));
+  t.true(message.includes("test:"));
+  t.true(message.includes("{{ bound name }}"));
 });
 
 test.serial("throws if path is not found", async t => {
-  Sinon.stub(Msg.messages, "badPath").returns("kaboom");
   const { message } = t.throws(() => {
     Helpers.buildContext(t, {
       root: {
@@ -48,7 +43,8 @@ test.serial("throws if path is not found", async t => {
     });
   });
 
-  t.is(message, "kaboom");
+  t.true(message.includes("test:"));
+  t.true(message.includes("{{ bound 'no.exist' }}"));
 });
 
 test("updates the bound value on change", async t => {

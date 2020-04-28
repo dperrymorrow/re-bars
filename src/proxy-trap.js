@@ -1,4 +1,3 @@
-// import ReRender from "./re-render.js";
 import Utils from "./utils/index.js";
 
 export default {

@@ -5,12 +5,14 @@ export default {
     const $tmp = this.getShadow(html);
     const $root = $tmp.firstElementChild;
 
-    if (!$root || !$tmp.children || $tmp.children.length > 1 || $root.dataset.rbsWatch)
-      Msg.fail("oneRoot", { name }, $tmp);
+    if (!$root) throw new Error("there was no root node. Components need a root element.");
+    if (["P"].includes($root.nodeName))
+      throw new Error(`<${$root.nodeName.toLowerCase()}> cannot be a root element of for a component, try a <div>`);
+    if ($tmp.children.length > 1) throw new Error("multiple root nodes are not allowed for a component.");
+    if ($root.dataset.rbsWatch) throw new Error("cannot have a watch as the root node of a component");
 
     $root.dataset.rbsComp = id;
     const content = $tmp.innerHTML;
-    $tmp.remove();
     return content;
   },
 
@@ -19,7 +21,10 @@ export default {
 
     if (!$input) return;
     if (Array.isArray($input)) {
-      Msg.warn("focusFail", { ref: activeRef.ref, name }, $input);
+      Msg.warn(
+        `ref="${activeRef.ref}" is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each usage`,
+        $input
+      );
     } else {
       $input.focus();
       if (activeRef.pos) $input.setSelectionRange(activeRef.pos + 1, activeRef.pos + 1);
