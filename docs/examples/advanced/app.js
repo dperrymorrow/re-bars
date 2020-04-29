@@ -22,9 +22,11 @@ export default {
       </label>
     </div>
 
-    {{ component "filters" filters=filters }}
+    {{#watch filters }}
+      {{ component "filters" filters=filters }}
+    {{/watch}}
 
-    {{#watch "filters.*,todos.*" tag="ul"}}
+    {{#watch "filters.*" "todos.*" tag="ul"}}
       {{#each filteredTodos as | todo | }}
         <li ref="{{ todo.id }}">
           {{

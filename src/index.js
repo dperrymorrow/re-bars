@@ -8,11 +8,13 @@ export default {
     if (!document.body.contains($el))
       Msg.fail("$el passed to ReBars app is either undefined or not present in the document.");
 
+    window.ReBars = window.ReBars || {};
+    window.ReBars.trace = trace;
+
     const app = {
       id: Utils.randomId(),
       Handlebars,
       trace,
-      listening: true,
       helpers,
       $el,
       // needs debounced to make sure we are all done

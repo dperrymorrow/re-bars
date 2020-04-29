@@ -7,10 +7,11 @@ export default {
     instance.registerHelper("isComponent", cName => Object.keys(components).includes(cName));
 
     instance.registerHelper("component", function(...args) {
-      const { hash: props, loc } = args.pop();
+      const { hash, loc } = args.pop();
       const cName = args[0];
       if (!components[cName]) Msg.fail(`${name}: child component "${cName}" is not registered`, { template, loc });
-      return new instance.SafeString(components[cName].instance(props).render());
+
+      return new instance.SafeString(components[cName].instance(hash).render());
     });
 
     instance.registerHelper("debug", (obj, { hash, data, loc }) => {
@@ -23,21 +24,22 @@ export default {
       const instId = data.root.$_componentId;
 
       const eId = Utils.randomId();
-
-      const _getPath = (target, wildcard = true) => {
+      const _getPath = target => {
         if (target === undefined) Msg.fail(`${name}: undefined cannot be watched`, { template, loc });
+
+        if (Utils.isProp(target))
+          Msg.warn(
+            `${name}: Do not watch $props. Instead watch the item in the parent, and re-render the child component`,
+            { template, loc }
+          );
+
         return typeof target === "object" ? `${target.ReBarsPath}.*` : target;
       };
-
-      const path = args
-        .map(_getPath)
-        .join(".")
-        .split(",");
 
       const renders = app.components.instances[instId].renders;
 
       renders[eId] = {
-        path,
+        path: args.map(_getPath),
         render: () => fn(this),
       };
 
@@ -58,8 +60,7 @@ export default {
     });
 
     instance.registerHelper("bound", (path, { hash = {}, data, loc }) => {
-      const { $_componentId } = data.root;
-      const params = [$_componentId, path];
+      const params = [data.root.$_componentId, path];
       let value;
 
       try {

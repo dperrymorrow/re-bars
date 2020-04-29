@@ -27,6 +27,12 @@ export default {
     };
   },
 
+  isProp(target) {
+    if (typeof target === "string" && target.startsWith("$props")) return true;
+    else if (typeof target === "object" && target.ReBarsPath.startsWith("$props")) return true;
+    return false;
+  },
+
   shouldRender(path, watch) {
     const watchPaths = Array.isArray(watch) ? watch : [watch];
     return watchPaths.some(watchPath => {
