@@ -179,6 +179,10 @@
     },
   };
 
+  var Constants = {
+    protectedKeys: ["$_componentId", "$props", "$methods", "$name"],
+  };
+
   var ProxyTrap = {
     create(data, callback) {
       let que = [];
@@ -199,6 +203,8 @@
             if (prop === "ReBarsPath") return tree.join(".");
             const value = Reflect.get(...arguments);
             if (typeof value === "function" && target.hasOwnProperty(prop)) return value.bind(proxyData);
+            // we dont watch any of the protected items
+            if (Constants.protectedKeys.includes(tree[0])) return value;
             if (value !== null && typeof value === "object" && prop !== "methods")
               return _buildProxy(value, tree.concat(prop));
             else return value;
@@ -207,15 +213,15 @@
           set: function(target, prop) {
             const ret = Reflect.set(...arguments);
             const path = tree.concat(prop).join(".");
-
-            _addToQue(path);
+            // we dont trigger on protected keys
+            if (!Constants.protectedKeys.includes(tree[0])) _addToQue(path);
             return ret;
           },
 
           deleteProperty: function(target, prop) {
             const ret = Reflect.deleteProperty(...arguments);
             const path = tree.concat(prop).join(".");
-
+            if (!Constants.protectedKeys.includes(tree[0])) Msg.fail(`cannot delete protected key ${path}`);
             _addToQue(path);
             return ret;
           },
@@ -439,7 +445,7 @@
         // validate the props, add the passed methods after you bind them or you will loose scope
         Object.entries($props).forEach(([key, value]) => {
           if (value === undefined)
-            Msg.warn(`${name} was passed $prop "${key}" as undefined. If you really meant to, pass null instead.`);
+            Msg.warn(`${name} was passed $props.${key} as undefined. If you really meant to, pass null instead.`);
         });
 
         const scope = ProxyTrap.create(

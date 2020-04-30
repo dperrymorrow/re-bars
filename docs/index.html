@@ -116,28 +116,31 @@
 <blockquote>
 <p>If you have used Handlebars, you already know ReBars</p>
 </blockquote>
-<pre><code class="language-javascript">template: /*html*/ `
-  &lt;h3&gt;
-    Button have been clicked
-      {{#watch &quot;clicked&quot; }}
-        {{ clicked }}
-      {{/watch}}
-    times
-    &lt;button {{ method &quot;step&quot; }}&gt;Click Me&lt;/button&gt;
-  &lt;/h3&gt;
-`,
-
-name: &quot;counter&quot;,
-
-data() {
-  return { clicked: 0 };
-},
-
-methods: {
-  step() {
-    this.clicked ++;
+<div id="counter-demo" class="demo-app"></div>
+<div class="markdown-content"><pre><code class="language-javascript">export default {
+  template: /*html*/ `
+    &lt;h3&gt;
+      Button have been clicked
+        {{#watch &quot;clicked&quot; }}
+          &lt;span&gt;{{ clicked }}&lt;/span&gt;
+          Clicked {{ clicked }} times
+        {{/watch}}
+      &lt;button {{ method &quot;step&quot; }}&gt;Click Me&lt;/button&gt;
+    &lt;/h3&gt;
+  `,
+  name: &quot;counter&quot;,
+  data() {
+    return { clicked: 0 };
   },
-}</code></pre>
+  methods: {
+    step() {
+      this.clicked++;
+    },
+  },
+};
+</code></pre>
+</div>
+
 <p>Each time the value passed to watch is changed, <em>just</em> that Handlebars block will re-render. No Virtial DOM patching, no re-render of entire template. The block function from the helper is stored at first render, and simply invoked again each time a value changes.</p>
 </div>
             <div id="counter-demo" class="demo-app"></div>
@@ -375,7 +378,7 @@ Watch takes an argument of what property to watch. The argument can be a string 
 <li><code>{{#watch name }}</code> this will watch all keys on Object <code>name</code></li>
 <li><code>{{#watch &quot;name.*&quot; }}</code> this is the string equivalent of the above</li>
 <li><code>{{#watch &quot;name.first&quot; }}</code> will only watch for changes to <code>name.first</code></li>
-<li><code>{{#watch &quot;name.*,hobby&quot; }}</code> will watch for any change to name or hobby</li>
+<li><code>{{#watch &quot;name.*&quot; &quot;friends.*.hobby&quot; }}</code> will watch for any change to name or hobby</li>
 <li><code>{{#watch &quot;friends.*.hobby&quot; }}</code> will watch for any friend index hobby change</li>
 </ul>
 <h3 id="watch-element-wrappers">Watch Element wrappers</h3>
@@ -419,6 +422,25 @@ Watch takes an argument of what property to watch. The argument can be a string 
 <p>an item that is bound will automatically get a ref added as the path of the property. this is used for resetting focus and cursor position after a re-render. If you have more than one item with the same bound property, you may need to add another reference</p>
 <p>You can pass in a ref as a prop to this helper should you need something more specific.</p>
 <pre><code class="language-html">&lt;input type=&quot;text&quot; {{ bound &quot;name.first&quot; ref=&quot;firstName&quot; }} /&gt;</code></pre>
+<div id="bound-demo" class="demo-app"></div>
+<div class="markdown-content"><pre><code class="language-javascript">export default {
+  template: /*html*/ `
+    &lt;div&gt;
+      {{#watch &quot;title&quot; }}
+        &lt;h2&gt;{{ title }}&lt;/h2&gt;
+        &lt;input type=&quot;text&quot; {{ bound &quot;title&quot; ref=&quot;title1&quot; }}&gt;
+        &lt;input type=&quot;text&quot; {{ bound &quot;title&quot; ref=&quot;title2&quot; }}&gt;
+      {{/watch}}
+    &lt;/div&gt;
+  `,
+  name: &quot;bound&quot;,
+  data() {
+    return { title: &quot;Hi, I am bound&quot; };
+  },
+};
+</code></pre>
+</div>
+
 <h2 id="the-method-helper">The {{method}} helper</h2>
 <p>This allows you to bind your component&#39;s methods to events in your template.</p>
 <pre><code class="language-html">&lt;button {{ method &quot;save:click&quot; &quot;param1&quot; &quot;param2&quot; }}&gt;Save&lt;/button&gt;</code></pre>
@@ -470,7 +492,7 @@ Watch takes an argument of what property to watch. The argument can be a string 
 <p><strong>Child component:</strong></p>
 <pre><code class="language-html">&lt;button {{ method &quot;remove&quot; }}&gt;Delete Joe&lt;/button&gt;</code></pre>
 <pre><code class="language-javascript">methods: {
-  remove(event, name) {
+  remove(event) {
     this.$props.deleteFriend(this.$props.index)
   }
 }</code></pre>

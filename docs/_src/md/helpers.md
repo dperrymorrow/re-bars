@@ -40,7 +40,7 @@ Anytime `name` is changed the block would be re-rendered with the updated data.
 - `{{#watch name }}` this will watch all keys on Object `name`
 - `{{#watch "name.*" }}` this is the string equivalent of the above
 - `{{#watch "name.first" }}` will only watch for changes to `name.first`
-- `{{#watch "name.*,hobby" }}` will watch for any change to name or hobby
+- `{{#watch "name.*" "friends.*.hobby" }}` will watch for any change to name or hobby
 - `{{#watch "friends.*.hobby" }}` will watch for any friend index hobby change
 
 ### Watch Element wrappers
@@ -105,6 +105,8 @@ You can pass in a ref as a prop to this helper should you need something more sp
 ```html
 <input type="text" {{ bound "name.first" ref="firstName" }} />
 ```
+
+>> example bound
 
 ## The {{method}} helper
 This allows you to bind your component's methods to events in your template.
@@ -182,7 +184,7 @@ methods: {
 
 ```javascript
 methods: {
-  remove(event, name) {
+  remove(event) {
     this.$props.deleteFriend(this.$props.index)
   }
 }

@@ -39,13 +39,13 @@
         <div class="content">
 
           <div class="page" data-anchor="rebars">
-            {{ render "md" "_src/md/introduction.md" }}
+            {{ render "md" "_src/md/introduction.md" true }}
             <div id="counter-demo" class="demo-app"></div>
           </div>
 
-          <div class="page" data-anchor="a-rebars-application">{{ render "md" "_src/md/application.md" }}</div>
-          <div class="page" data-anchor="rebars-components">{{ render "md" "_src/md/component.md" }}</div>
-          <div class="page" data-anchor="rebars-built-in-helpers">{{ render "md" "_src/md/helpers.md" }}</div>
+          <div class="page" data-anchor="a-rebars-application">{{ render "md" "_src/md/application.md" true }}</div>
+          <div class="page" data-anchor="rebars-components">{{ render "md" "_src/md/component.md" true }}</div>
+          <div class="page" data-anchor="rebars-built-in-helpers">{{ render "md" "_src/md/helpers.md" true }}</div>
 
           <div class="page" id="examples">
             <div id="example-simple">
@@ -54,7 +54,7 @@
                 A simple, one component application that tracks todos.
               </p>
               <div id="demo-app-simple" class="demo-app"></div>
-              {{ render "md:js" "examples/app.js" }}
+              {{ render "md:js" "examples/app.js" true }}
             </div>
 
             <div id="example-advanced">
@@ -73,10 +73,10 @@
                 </nav>
 
                 <div class="tab-content">
-                  <div id="app" class="active">{{ render "md:js" "examples/advanced/app.js" }}</div>
-                  <div id="add">{{ render "md:js" "examples/advanced/add.js" }}</div>
-                  <div id="filters">{{ render "md:js" "examples/advanced/filters.js" }}</div>
-                  <div id="todo">{{ render "md:js" "examples/advanced/todo.js" }}</div>
+                  <div id="app" class="active">{{ render "md:js" "examples/advanced/app.js" true }}</div>
+                  <div id="add">{{ render "md:js" "examples/advanced/add.js" true }}</div>
+                  <div id="filters">{{ render "md:js" "examples/advanced/filters.js" true }}</div>
+                  <div id="todo">{{ render "md:js" "examples/advanced/todo.js" true }}</div>
                 </div>
               </div>
             </div>

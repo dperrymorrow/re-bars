@@ -2,6 +2,7 @@ import ReBars from "../../src/index.js";
 import Simple from "../examples/app.js";
 import Advanced from "../examples/advanced/app.js";
 import Counter from "../examples/counter.js";
+import Bound from "../examples/bound.js";
 
 window.Prism = window.Prism || {};
 window.Prism.manual = true;
@@ -20,6 +21,11 @@ window.Prism.manual = true;
   ReBars.app({
     $el: document.getElementById("counter-demo"),
     root: Counter,
+  });
+
+  ReBars.app({
+    $el: document.getElementById("bound-demo"),
+    root: Bound,
   });
 
   _highlight();

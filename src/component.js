@@ -53,7 +53,7 @@ function register(
       // validate the props, add the passed methods after you bind them or you will loose scope
       Object.entries($props).forEach(([key, value]) => {
         if (value === undefined)
-          Msg.warn(`${name} was passed $prop "${key}" as undefined. If you really meant to, pass null instead.`);
+          Msg.warn(`${name} was passed $props.${key} as undefined. If you really meant to, pass null instead.`);
       });
 
       const scope = ProxyTrap.create(

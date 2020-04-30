@@ -19,30 +19,29 @@ ReBars is really just Handlebars with some built in helpers and the notion of [c
 
 > If you have used Handlebars, you already know ReBars
 
-```javascript
-template: /*html*/ `
-  <h3>
-    Button have been clicked
-      {{#watch "clicked" }}
-        {{ clicked }}
-      {{/watch}}
-    times
-    <button {{ method "step" }}>Click Me</button>
-  </h3>
-`,
-
-name: "counter",
-
-data() {
-  return { clicked: 0 };
-},
-
-methods: {
-  step() {
-    this.clicked ++;
+<div class="markdown-content"><pre><code class="language-javascript">export default {
+  template: /*html*/ `
+    &lt;h3&gt;
+      Button have been clicked
+        {{#watch &quot;clicked&quot; }}
+          &lt;span&gt;{{ clicked }}&lt;/span&gt;
+          Clicked {{ clicked }} times
+        {{/watch}}
+      &lt;button {{ method &quot;step&quot; }}&gt;Click Me&lt;/button&gt;
+    &lt;/h3&gt;
+  `,
+  name: &quot;counter&quot;,
+  data() {
+    return { clicked: 0 };
   },
-}
-```
+  methods: {
+    step() {
+      this.clicked++;
+    },
+  },
+};
+</code></pre>
+</div>
 
 Each time the value passed to watch is changed, *just* that Handlebars block will re-render. No Virtial DOM patching, no re-render of entire template. The block function from the helper is stored at first render, and simply invoked again each time a value changes.
 
@@ -401,7 +400,7 @@ Anytime `name` is changed the block would be re-rendered with the updated data.
 - `{{#watch name }}` this will watch all keys on Object `name`
 - `{{#watch "name.*" }}` this is the string equivalent of the above
 - `{{#watch "name.first" }}` will only watch for changes to `name.first`
-- `{{#watch "name.*,hobby" }}` will watch for any change to name or hobby
+- `{{#watch "name.*" "friends.*.hobby" }}` will watch for any change to name or hobby
 - `{{#watch "friends.*.hobby" }}` will watch for any friend index hobby change
 
 ### Watch Element wrappers
@@ -466,6 +465,24 @@ You can pass in a ref as a prop to this helper should you need something more sp
 ```html
 <input type="text" {{ bound "name.first" ref="firstName" }} />
 ```
+
+<div class="markdown-content"><pre><code class="language-javascript">export default {
+  template: /*html*/ `
+    &lt;div&gt;
+      {{#watch &quot;title&quot; }}
+        &lt;h2&gt;{{ title }}&lt;/h2&gt;
+        &lt;input type=&quot;text&quot; {{ bound &quot;title&quot; ref=&quot;title1&quot; }}&gt;
+        &lt;input type=&quot;text&quot; {{ bound &quot;title&quot; ref=&quot;title2&quot; }}&gt;
+      {{/watch}}
+    &lt;/div&gt;
+  `,
+  name: &quot;bound&quot;,
+  data() {
+    return { title: &quot;Hi, I am bound&quot; };
+  },
+};
+</code></pre>
+</div>
 
 ## The {{method}} helper
 This allows you to bind your component's methods to events in your template.
@@ -543,7 +560,7 @@ methods: {
 
 ```javascript
 methods: {
-  remove(event, name) {
+  remove(event) {
     this.$props.deleteFriend(this.$props.index)
   }
 }
