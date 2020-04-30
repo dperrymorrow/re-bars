@@ -651,9 +651,11 @@ export default {
       &lt;/label&gt;
     &lt;/div&gt;
 
-    {{ component &quot;filters&quot; filters=filters }}
+    {{#watch filters }}
+      {{ component &quot;filters&quot; filters=filters }}
+    {{/watch}}
 
-    {{#watch &quot;filters.*,todos.*&quot; tag=&quot;ul&quot;}}
+    {{#watch &quot;filters.*&quot; &quot;todos.*&quot; tag=&quot;ul&quot;}}
       {{#each filteredTodos as | todo | }}
         &lt;li ref=&quot;{{ todo.id }}&quot;&gt;
           {{
@@ -800,13 +802,13 @@ export default {
                   <div id="filters"><div class="markdown-content"><pre><code class="language-javascript">export default {
   template: /*html*/ `
     &lt;div class=&quot;filters&quot;&gt;
-      {{#watch &quot;$props.filters.state&quot; tag=&quot;div&quot; }}
+      &lt;div&gt;
         &lt;button {{ disabledIf &quot;completed&quot; }} {{ method &quot;filterBy&quot; &quot;completed&quot; }}&gt;Show Completed&lt;/button&gt;
         &lt;button {{ disabledIf &quot;incomplete&quot; }} {{ method &quot;filterBy&quot; &quot;incomplete&quot; }}&gt;Show Incompleted&lt;/button&gt;
         &lt;button {{ disabledIf null }} {{ method &quot;filterBy&quot; null }}&gt;Show All&lt;/button&gt;
-      {{/watch}}
+      &lt;/div&gt;
 
-      {{#watch &quot;$props.filters.sortBy,$props.filters.sortDir&quot; tag=&quot;div&quot; }}
+      &lt;div&gt;
         &lt;select {{ bound &quot;$props.filters.sortBy&quot; }}&gt;
           &lt;option {{ selectedIf $props.filters.sortBy &quot;name&quot; }} value=&quot;name&quot;&gt;Sort by Name&lt;/option&gt;
           &lt;option {{ selectedIf $props.filters.sortBy &quot;updated&quot; }} value=&quot;updated&quot;&gt;Sort by Updated at&lt;/option&gt;
@@ -816,7 +818,7 @@ export default {
           &lt;option {{ selectedIf $props.filters.sortDir &quot;asc&quot; }} value=&quot;asc&quot;&gt;Ascending&lt;/option&gt;
           &lt;option {{ selectedIf $props.filters.sortDir &quot;desc&quot; }} value=&quot;desc&quot;&gt;Descending&lt;/option&gt;
         &lt;/select&gt;
-      {{/watch}}
+      &lt;/div&gt;
     &lt;/div&gt;
   `,
 

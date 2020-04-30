@@ -3,7 +3,7 @@ const styles = {
   log: "background: #324645; color:#c9faff; padding: .1em; font-weight: normal;",
 };
 
-const _getTplString = ({ template, loc }) => {
+const _showTpl = ({ template, loc }) => {
   const lines = template.split("\n").slice(loc.start.line - 1, loc.end.line);
   const leadingSpaces = Array(lines[0].length - lines[0].trim().length).join(" ");
   lines[0] = lines[0].substr(loc.start.column);
@@ -15,22 +15,23 @@ const _getTplString = ({ template, loc }) => {
 
 const _msg = (type, msg, ...payloads) => {
   let str = msg;
-
-  if (typeof payloads[0] === "object" && "template" in payloads[0] && "loc" in payloads[0])
-    payloads[0] = _getTplString(payloads[0]);
+  if (typeof payloads[0] === "object" && "template" in payloads[0] && "loc" in payloads[0]) {
+    str += _showTpl(payloads[0]);
+    payloads.splice(0, 1);
+  }
 
   if (["warn", "log"].includes(type)) {
     str = "%c " + str + " ";
     if (!window.ReBars || !window.ReBars.trace) return;
     if (payloads) {
       console.groupCollapsed(str, styles[type]);
-      payloads.forEach(p => console.log(p));
+      payloads.forEach(console.log);
       console.groupEnd();
     } else {
       console.log(str, styles[type]);
     }
   } else {
-    payloads.forEach(p => console.error(p));
+    payloads.forEach(console.error);
     throw new Error(str);
   }
 };
@@ -46,12 +47,14 @@ var Dom = {
     const $tmp = this.getShadow(html);
     const $root = $tmp.firstElementChild;
 
-    if (!$root || !$tmp.children || $tmp.children.length > 1 || $root.dataset.rbsWatch)
-      Msg.fail("oneRoot", { name }, $tmp);
+    if (!$root) throw new Error("there was no root node. Components need a root element.");
+    if (["P"].includes($root.nodeName))
+      throw new Error(`<${$root.nodeName.toLowerCase()}> cannot be a root element of for a component, try a <div>`);
+    if ($tmp.children.length > 1) throw new Error("multiple root nodes are not allowed for a component.");
+    if ($root.dataset.rbsWatch) throw new Error("cannot have a watch as the root node of a component");
 
     $root.dataset.rbsComp = id;
     const content = $tmp.innerHTML;
-    $tmp.remove();
     return content;
   },
 
@@ -137,6 +140,12 @@ var Utils = {
     };
   },
 
+  isProp(target) {
+    if (typeof target === "string" && target.startsWith("$props")) return true;
+    else if (typeof target === "object" && target.ReBarsPath.startsWith("$props")) return true;
+    return false;
+  },
+
   shouldRender(path, watch) {
     const watchPaths = Array.isArray(watch) ? watch : [watch];
     return watchPaths.some(watchPath => {
@@ -183,7 +192,6 @@ var ProxyTrap = {
         get: function(target, prop) {
           if (prop === "ReBarsPath") return tree.join(".");
           const value = Reflect.get(...arguments);
-          // not sure we need this anymore should only proxy the data...
           if (typeof value === "function" && target.hasOwnProperty(prop)) return value.bind(proxyData);
           if (value !== null && typeof value === "object" && prop !== "methods")
             return _buildProxy(value, tree.concat(prop));
@@ -219,10 +227,11 @@ var Helpers = {
     instance.registerHelper("isComponent", cName => Object.keys(components).includes(cName));
 
     instance.registerHelper("component", function(...args) {
-      const { hash: props, loc } = args.pop();
+      const { hash, loc } = args.pop();
       const cName = args[0];
       if (!components[cName]) Msg.fail(`${name}: child component "${cName}" is not registered`, { template, loc });
-      return new instance.SafeString(components[cName].instance(props).render());
+
+      return new instance.SafeString(components[cName].instance(hash).render());
     });
 
     instance.registerHelper("debug", (obj, { hash, data, loc }) => {
@@ -235,21 +244,22 @@ var Helpers = {
       const instId = data.root.$_componentId;
 
       const eId = Utils.randomId();
-
-      const _getPath = (target, wildcard = true) => {
+      const _getPath = target => {
         if (target === undefined) Msg.fail(`${name}: undefined cannot be watched`, { template, loc });
-        return typeof target === "object" ? `${target.ReBarsPath}${wildcard ? ".*" : ""}` : target;
-      };
 
-      const path = args
-        .map(arg => _getPath(arg, false))
-        .join(".")
-        .split(",");
+        if (Utils.isProp(target))
+          Msg.warn(
+            `${name}: Do not watch $props. Each component has its own Proxy so the child will not get the update. Instead watch the item in the parent, and re-render the child component`,
+            { template, loc }
+          );
+
+        return typeof target === "object" ? `${target.ReBarsPath}.*` : target;
+      };
 
       const renders = app.components.instances[instId].renders;
 
       renders[eId] = {
-        path,
+        path: args.map(_getPath),
         render: () => fn(this),
       };
 
@@ -270,8 +280,7 @@ var Helpers = {
     });
 
     instance.registerHelper("bound", (path, { hash = {}, data, loc }) => {
-      const { $_componentId } = data.root;
-      const params = [$_componentId, path];
+      const params = [data.root.$_componentId, path];
       let value;
 
       try {
@@ -279,7 +288,7 @@ var Helpers = {
           ? data.root[path]
           : path.split(".").reduce((pointer, seg) => pointer[seg], data.root);
       } catch (err) {
-        Msg.fail("badPath", { path });
+        Msg.fail(`${name}: bound helper was passed a bad path`, { template, loc });
       }
 
       const props = {
@@ -469,7 +478,11 @@ function register(
           if (hooks.attached) hooks.attached.call(scope);
         },
         render() {
-          return Utils.dom.tagComponent(id, templateFn(scope), name);
+          try {
+            return Utils.dom.tagComponent(id, templateFn(scope), name);
+          } catch ({ message }) {
+            Msg.fail(`${name}: ${message}\n${template}`);
+          }
         },
       };
 
@@ -489,11 +502,13 @@ var index = {
     if (!document.body.contains($el))
       Msg.fail("$el passed to ReBars app is either undefined or not present in the document.");
 
+    window.ReBars = window.ReBars || {};
+    window.ReBars.trace = trace;
+
     const app = {
       id: Utils.randomId(),
       Handlebars,
       trace,
-      listening: true,
       helpers,
       $el,
       // needs debounced to make sure we are all done
