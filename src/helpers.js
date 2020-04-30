@@ -29,7 +29,7 @@ export default {
 
         if (Utils.isProp(target))
           Msg.warn(
-            `${name}: Do not watch $props. Instead watch the item in the parent, and re-render the child component`,
+            `${name}: Do not watch $props. Each component has its own Proxy so the child will not get the update. Instead watch the item in the parent, and re-render the child component`,
             { template, loc }
           );
 

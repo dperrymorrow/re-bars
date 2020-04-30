@@ -1,8 +1,10 @@
 import test from "ava";
 import Helpers from "../../helpers.js";
+import Sinon from "sinon";
+import Msg from "../../../src/msg.js";
 
 test.afterEach.always(t => {
-  if (t.context.$el) t.context.$el.remove();
+  Helpers.cleanup(t);
 });
 
 test("throws if value undefined", async t => {
@@ -66,7 +68,7 @@ test("can watch multiple items", async t => {
   Helpers.buildContext(t, {
     root: {
       name: "test",
-      template: "<div>{{#watch 'name,hobby' }}{{/watch}}</div>",
+      template: "<div>{{#watch 'name' 'hobby' }}{{/watch}}</div>",
       data: () => ({ name: "Dave", hobby: "bonsai" }),
     },
   });
@@ -99,4 +101,38 @@ test("uses wildcard on Index of Array", async t => {
 
   const { path } = Object.values(t.context.inst.renders)[0];
   t.deepEqual(path, ["friends.*.name"]);
+});
+
+test.serial("throws if watch $prop", async t => {
+  Sinon.stub(Msg, "warn");
+  Helpers.buildContext(t, {
+    trace: true,
+    root: {
+      name: "test",
+      template: "<div>{{ component 'child' name='dave' }}</div>",
+      components: [{ name: "child", template: "<div>{{#watch $props }}{{/watch}}</div>" }],
+    },
+  });
+
+  const [msg, trace] = Msg.warn.lastCall.args;
+
+  t.true(msg.toLowerCase().includes("do not watch $props"));
+  t.true(trace.template.includes("{{#watch $props }}"));
+});
+
+test.serial("throws if watch $props and ref is String", async t => {
+  Sinon.stub(Msg, "warn");
+  Helpers.buildContext(t, {
+    trace: true,
+    root: {
+      name: "test",
+      template: "<div>{{ component 'child' name='dave' }}</div>",
+      components: [{ name: "child", template: "<div>{{#watch '$props.name' }}{{/watch}}</div>" }],
+    },
+  });
+
+  const [msg, trace] = Msg.warn.lastCall.args;
+
+  t.true(msg.toLowerCase().includes("do not watch $props"));
+  t.true(trace.template.includes("{{#watch '$props.name' }}"));
 });
