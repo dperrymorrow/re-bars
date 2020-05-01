@@ -47,6 +47,7 @@ export default {
     t.context.id = id;
     t.context.inst = inst;
     t.context.scope = inst.scope;
+    t.context.$refs = inst.scope.$refs();
 
     return this.wait();
   },

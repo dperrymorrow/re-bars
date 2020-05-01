@@ -7,7 +7,7 @@ const Comp = {
     <div>
       {{ debug . ref="fullDebug" }}
       {{ debug name ref="nameDebug" }}
-      {{ debug name.first ref="nameFirst" }}
+      {{ debug name.first ref="nameFirst" class="foobar" }}
     </div>
   `,
   name: "test",
@@ -33,8 +33,8 @@ test("debugs 'name'", t => {
 });
 
 test("debugs 'name.first'", t => {
-  const content = Helpers.ref(t, "nameFirst").innerHTML;
-  t.is(content, Utils.stringify(t.context.scope.name.first));
+  t.is(t.context.$refs.nameFirst.getAttribute("class"), "foobar");
+  t.is(t.context.$refs.nameFirst.innerHTML, Utils.stringify(t.context.scope.name.first));
 });
 
 test.serial("throws if path not found", t => {

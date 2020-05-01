@@ -1,13 +1,11 @@
 import test from "ava";
 import Helpers from "../../helpers.js";
-import Sinon from "sinon";
-import Msg from "../../../src/msg.js";
 
 test.afterEach.always(t => {
   Helpers.cleanup(t);
 });
 
-test("throws if value undefined", async t => {
+test("throws if value undefined", t => {
   const root = {
     name: "test",
     template: "<div>{{#watch name }}{{/watch}}</div>",
@@ -21,7 +19,22 @@ test("throws if value undefined", async t => {
   t.true(message.includes(root.template));
 });
 
-test("does not throw if passed a string", async t => {
+test.only("throws any arg undefined", t => {
+  const { message } = t.throws(() => {
+    Helpers.buildContext(t, {
+      root: {
+        name: "test",
+        data: () => ({ name: "dave" }),
+        template: "<div>{{#watch 'name' fred }}{{/watch}}</div>",
+      },
+    });
+  });
+
+  t.true(message.includes("test:"));
+  t.true(message.includes("{{#watch 'name'"));
+});
+
+test("does not throw if passed a string", t => {
   Helpers.buildContext(t, {
     root: {
       name: "test",
@@ -33,7 +46,7 @@ test("does not throw if passed a string", async t => {
   t.deepEqual(path, ["some.*.crazy.*.path"]);
 });
 
-test("builds the dom $el", async t => {
+test("builds the dom $el", t => {
   Helpers.buildContext(t, {
     root: {
       name: "test",
@@ -49,7 +62,7 @@ test("builds the dom $el", async t => {
   t.true($watch.dataset.rbsWatch.startsWith("rbs"));
 });
 
-test("takes a tag, and or optional attrs ", async t => {
+test("takes a tag, and or optional attrs ", t => {
   Helpers.buildContext(t, {
     root: {
       name: "test",
@@ -64,7 +77,7 @@ test("takes a tag, and or optional attrs ", async t => {
   t.is($watch.getAttribute("foo"), "bar");
 });
 
-test("can watch multiple items", async t => {
+test("can watch multiple items", t => {
   Helpers.buildContext(t, {
     root: {
       name: "test",
@@ -77,7 +90,21 @@ test("can watch multiple items", async t => {
   t.deepEqual(path, ["name", "hobby"]);
 });
 
-test("uses wildcard if an Object", async t => {
+test("adds the id to renders", t => {
+  Helpers.buildContext(t, {
+    root: {
+      name: "test",
+      template: "<div>{{#watch 'name' 'hobby' ref='watch' }}{{/watch}}</div>",
+      data: () => ({ name: "Dave", hobby: "bonsai" }),
+    },
+  });
+  const id = t.context.$refs.watch.dataset.rbsWatch;
+  const { path, render } = Object.values(t.context.inst.renders)[id];
+  t.is(typeof render, "function");
+  t.deepEqual(path, ["name", "hobby"]);
+});
+
+test("uses wildcard if an Object", t => {
   Helpers.buildContext(t, {
     root: {
       name: "test",
@@ -90,7 +117,7 @@ test("uses wildcard if an Object", async t => {
   t.deepEqual(path, ["name.*"]);
 });
 
-test("uses wildcard on Index of Array", async t => {
+test("uses wildcard on Index of Array", t => {
   Helpers.buildContext(t, {
     root: {
       name: "test",
@@ -103,36 +130,34 @@ test("uses wildcard on Index of Array", async t => {
   t.deepEqual(path, ["friends.*.name"]);
 });
 
-test.serial("throws if watch $prop", async t => {
-  Sinon.stub(Msg, "warn");
-  Helpers.buildContext(t, {
-    trace: true,
-    root: {
-      name: "test",
-      template: "<div>{{ component 'child' name='dave' }}</div>",
-      components: [{ name: "child", template: "<div>{{#watch $props }}{{/watch}}</div>" }],
-    },
+test("throws if watch $prop", t => {
+  const { message } = t.throws(() => {
+    Helpers.buildContext(t, {
+      trace: true,
+      root: {
+        name: "test",
+        template: "<div>{{ component 'child' name='dave' }}</div>",
+        components: [{ name: "child", template: "<div>{{#watch $props }}{{/watch}}</div>" }],
+      },
+    });
   });
 
-  const [msg, trace] = Msg.warn.lastCall.args;
-
-  t.true(msg.toLowerCase().includes("do not watch $props"));
-  t.true(trace.template.includes("{{#watch $props }}"));
+  t.true(message.toLowerCase().includes("do not watch $props"));
+  t.true(message.includes("{{#watch $props }}"));
 });
 
-test.serial("throws if watch $props and ref is String", async t => {
-  Sinon.stub(Msg, "warn");
-  Helpers.buildContext(t, {
-    trace: true,
-    root: {
-      name: "test",
-      template: "<div>{{ component 'child' name='dave' }}</div>",
-      components: [{ name: "child", template: "<div>{{#watch '$props.name' }}{{/watch}}</div>" }],
-    },
+test("throws if watch $props even if arg is String", t => {
+  const { message } = t.throws(() => {
+    Helpers.buildContext(t, {
+      trace: true,
+      root: {
+        name: "test",
+        template: "<div>{{ component 'child' name='dave' }}</div>",
+        components: [{ name: "child", template: "<div>{{#watch '$props.name' }}{{/watch}}</div>" }],
+      },
+    });
   });
 
-  const [msg, trace] = Msg.warn.lastCall.args;
-
-  t.true(msg.toLowerCase().includes("do not watch $props"));
-  t.true(trace.template.includes("{{#watch '$props.name' }}"));
+  t.true(message.toLowerCase().includes("do not watch $props"));
+  t.true(message.includes("{{#watch '$props.name' }}"));
 });

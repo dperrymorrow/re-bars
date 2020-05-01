@@ -16,7 +16,8 @@ export default {
 
     instance.registerHelper("debug", (obj, { hash, data, loc }) => {
       if (obj === undefined) Msg.fail(`${name}: undefined passed to debug`, { template, loc });
-      return new instance.SafeString(`<pre class="debug" ${Utils.dom.propStr(hash)}>${Utils.stringify(obj)}</pre>`);
+      const props = { class: "debug", ...hash };
+      return new instance.SafeString(`<pre ${Utils.dom.propStr(props)}>${Utils.stringify(obj)}</pre>`);
     });
 
     instance.registerHelper("watch", function(...args) {
@@ -28,7 +29,7 @@ export default {
         if (target === undefined) Msg.fail(`${name}: undefined cannot be watched`, { template, loc });
 
         if (Utils.isProp(target))
-          Msg.warn(
+          Msg.fail(
             `${name}: Do not watch $props. Each component has its own Proxy so the child will not get the update. Instead watch the item in the parent, and re-render the child component`,
             { template, loc }
           );
