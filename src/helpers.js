@@ -11,6 +11,16 @@ export default {
       const cName = args[0];
       if (!components[cName]) Msg.fail(`${name}: child component "${cName}" is not registered`, { template, loc });
 
+      // validate the props, add the passed methods after you bind them or you will loose scope
+      Object.entries(hash).forEach(([key, value]) => {
+        if (value === undefined) {
+          Msg.fail(`${name}: passed "${key}" as undefined. If you really meant to, pass null instead.`, {
+            template,
+            loc,
+          });
+        }
+      });
+
       return new instance.SafeString(components[cName].instance(hash).render());
     });
 
@@ -23,8 +33,8 @@ export default {
     instance.registerHelper("watch", function(...args) {
       const { fn, hash, data, loc } = args.pop();
       const instId = data.root.$_componentId;
-
       const eId = Utils.randomId();
+
       const _getPath = target => {
         if (target === undefined) Msg.fail(`${name}: undefined cannot be watched`, { template, loc });
 
@@ -37,10 +47,15 @@ export default {
         return typeof target === "object" ? `${target.ReBarsPath}.*` : target;
       };
 
+      const path = args.map(_getPath);
       const renders = app.components.instances[instId].renders;
 
+      path.forEach(item => {
+        if (!Utils.hasKey(data.root, item)) Msg.fail(`${name}: cannot find path "${item}" to watch`, { template, loc });
+      });
+
       renders[eId] = {
-        path: args.map(_getPath),
+        path,
         render: () => fn(this),
       };
 
@@ -52,8 +67,8 @@ export default {
       const [methodName, type = "click"] = str.split(":");
       const { data, loc } = args.pop();
 
-      if (!(methodName in methods))
-        Msg.fail(`${name}: "${methodName}" is not a method in component`, { template, loc });
+      if (!(methodName in methods) && methodName !== "$emit")
+        Msg.fail(`${name}: "${methodName}" is not a method`, { template, loc });
 
       const props = { "data-rbs-method": [data.root.$_componentId, type, methodName] };
       if (args && args.length) props["data-rbs-method"] = props["data-rbs-method"].concat(args);
@@ -62,18 +77,10 @@ export default {
 
     instance.registerHelper("bound", (path, { hash = {}, data, loc }) => {
       const params = [data.root.$_componentId, path];
-      let value;
-
-      try {
-        value = !path.includes(".")
-          ? data.root[path]
-          : path.split(".").reduce((pointer, seg) => pointer[seg], data.root);
-      } catch (err) {
-        Msg.fail(`${name}: bound helper was passed a bad path`, { template, loc });
-      }
+      if (!Utils.hasKey(data.root, path)) Msg.fail(`${name}: does not have path "${path}"`, { template, loc });
 
       const props = {
-        value,
+        value: Utils.getKey(data.root, path),
         ref: hash.ref || path,
         "data-rbs-bound": params,
       };

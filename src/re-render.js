@@ -13,11 +13,17 @@ export default {
         const $target = Utils.dom.findWatcher(renderId);
         const html = handler.render();
 
+        const activeRef = {
+          ref: document.activeElement.getAttribute("ref"),
+          pos: document.activeElement.selectionStart,
+        };
+
         if (!Patch.hasChanged($target, html)) return;
 
         if (Patch.canPatch($target)) {
           Patch.compare({ app, $target, html });
           Msg.log(`${name}: patching ${handler.path}`, $target);
+          if (activeRef.ref) Utils.dom.restoreCursor($target, activeRef);
           return;
         }
 
@@ -29,15 +35,10 @@ export default {
             $target
           );
 
-        const activeRef = {
-          ref: document.activeElement.getAttribute("ref"),
-          pos: document.activeElement.selectionStart,
-        };
-
         $target.style.display = html === "" ? "none" : "";
         $target.innerHTML = html;
 
-        Utils.dom.restoreCursor($target, activeRef);
+        if (activeRef.ref) Utils.dom.restoreCursor($target, activeRef);
         Msg.log(`${name}: re-rendering watch block for ${handler.path}`, $target);
       });
 

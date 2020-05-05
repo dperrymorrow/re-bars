@@ -2,6 +2,7 @@ import Utils from "./utils/index.js";
 import ProxyTrap from "./proxy-trap.js";
 import Helpers from "./helpers.js";
 import ReRender from "./re-render.js";
+import Constants from "./constants.js";
 import Msg from "./msg.js";
 
 const restricted = ["component", "ref", "debug", "isComponent", "method", "bound", "watch", "isComponent"];
@@ -50,11 +51,14 @@ function register(
       const id = Utils.randomId();
       const instData = data();
       const renders = {};
-      // validate the props, add the passed methods after you bind them or you will loose scope
-      Object.entries($props).forEach(([key, value]) => {
-        if (value === undefined)
-          Msg.warn(`${name} was passed $props.${key} as undefined. If you really meant to, pass null instead.`);
-      });
+
+      const $listeners = Object.entries($props).reduce((listeners, [key, handler]) => {
+        if (key.startsWith(Constants.listenerPrefix)) {
+          listeners[key.replace(Constants.listenerPrefix, "")] = handler;
+          $props[key].delete;
+        }
+        return listeners;
+      }, {});
 
       const scope = ProxyTrap.create(
         {
@@ -62,6 +66,10 @@ function register(
           ...{
             $props,
             $methods: methods,
+            $listeners,
+            $emit: (key, data = {}) => {
+              if ($listeners[key]) $listeners[key](data);
+            },
             $name: name,
             $_componentId: id,
             $el: () => Utils.dom.findComponent(id),
@@ -70,6 +78,14 @@ function register(
         },
         paths => {
           Msg.log(`${name}: data changed "${paths}"`, renders);
+          // watchers...
+          Object.entries(watchers)
+            .reduce((capture, [key, handler]) => {
+              if (paths.some(path => Utils.shouldRender(path, key.split(",")))) capture.push(handler);
+              return capture;
+            }, [])
+            .forEach(handler => handler.call(scope));
+
           ReRender.paths({ app, paths, renders, name });
         }
       );
@@ -83,12 +99,13 @@ function register(
         renders,
         handlers: {
           bound(event) {
-            const [id, path] = event.target.dataset.rbsBound.split(",");
+            const [id, path] = event.currentTarget.dataset.rbsBound.split(",");
             Utils.setKey(scope, path, event.target.value);
           },
           method(event) {
-            const [id, type, method, ...args] = event.target.dataset.rbsMethod.split(",");
-            scope.$methods[method](event, ...args);
+            const [id, type, method, ...args] = event.currentTarget.dataset.rbsMethod.split(",");
+            if (method === "$emit") scope.$emit(args[0], args[1]);
+            else scope.$methods[method](event, ...args);
           },
         },
         detached() {
@@ -98,11 +115,7 @@ function register(
           if (hooks.attached) hooks.attached.call(scope);
         },
         render() {
-          try {
-            return Utils.dom.tagComponent(id, templateFn(scope), name);
-          } catch ({ message }) {
-            Msg.fail(`${name}: ${message}\n${template}`);
-          }
+          return Utils.dom.tagComponent(id, templateFn(scope), name);
         },
       };
 

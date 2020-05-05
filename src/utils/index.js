@@ -50,6 +50,24 @@ export default {
 
   randomId: () => `rbs${counter++}`,
 
+  getKey(obj, path) {
+    return path.split(".").reduce((pointer, key) => {
+      if (!(key in pointer)) Msg.fail(`${path} was not found in object`, obj);
+      return pointer[key];
+    }, obj);
+  },
+
+  hasKey(obj, path) {
+    // cannot traverse it if wildcards are used
+    if (path.includes("*")) return true;
+    try {
+      this.getKey(obj, path);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  },
+
   setKey(obj, path, val) {
     const arr = path.split(".");
     arr.reduce((pointer, key, index) => {

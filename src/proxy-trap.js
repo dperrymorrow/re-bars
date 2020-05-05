@@ -33,14 +33,17 @@ export default {
           const ret = Reflect.set(...arguments);
           const path = tree.concat(prop).join(".");
           // we dont trigger on protected keys
-          if (!Constants.protectedKeys.includes(tree[0])) _addToQue(path);
+          if (Constants.protectedKeys.includes(tree[0]))
+            Msg.warn(`attempted to set a protected key "${path}". readOnly properties are ${Constants.protectedKeys}`);
+          else _addToQue(path);
           return ret;
         },
 
         deleteProperty: function(target, prop) {
           const ret = Reflect.deleteProperty(...arguments);
           const path = tree.concat(prop).join(".");
-          if (!Constants.protectedKeys.includes(tree[0])) Msg.fail(`cannot delete protected key ${path}`);
+          if (!Constants.protectedKeys.includes(tree[0]))
+            Msg.fail(`cannot delete protected key ${path}. readOnly properties are ${Constants.protectedKeys}`);
           _addToQue(path);
           return ret;
         },

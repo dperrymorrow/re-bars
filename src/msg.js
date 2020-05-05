@@ -6,11 +6,14 @@ const styles = {
 const _showTpl = ({ template, loc }) => {
   const lines = template.split("\n").slice(loc.start.line - 1, loc.end.line);
   const leadingSpaces = Array(lines[0].length - lines[0].trim().length).join(" ");
-  lines[0] = lines[0].substr(loc.start.column);
-  lines[lines.length - 1] = lines[lines.length - 1].substr(0, loc.end.column);
-  return ["", `template line: ${loc.start.line}`, "============================================"]
-    .concat(lines.map(line => line.replace(leadingSpaces, "")))
-    .join("\n");
+  const trimmed = lines.map(line => line.replace(leadingSpaces, "     "));
+  trimmed[0] = `>>>> ${trimmed[0].trim()}`;
+
+  return `
+  template line: ${loc.start.line}
+  ============================================
+  ${trimmed.join("\n")}
+  `;
 };
 
 const _msg = (type, msg, ...payloads) => {
@@ -31,7 +34,7 @@ const _msg = (type, msg, ...payloads) => {
       console.log(str, styles[type]);
     }
   } else {
-    payloads.forEach(console.error);
+    // payloads.forEach(console.error);
     throw new Error(str);
   }
 };

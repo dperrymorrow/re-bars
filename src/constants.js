@@ -1,3 +1,4 @@
 export default {
-  protectedKeys: ["$_componentId", "$props", "$methods", "$name"],
+  protectedKeys: ["$_componentId", "$props", "$methods", "$name", "$parent"],
+  listenerPrefix: "listen:",
 };
