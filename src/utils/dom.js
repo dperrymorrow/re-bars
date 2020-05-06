@@ -16,12 +16,24 @@ export default {
     return content;
   },
 
-  restoreCursor($target, activeRef) {
+  recordState($target) {
+    const $active = document.activeElement;
+    const ref = $active.getAttribute("ref");
+
+    if (!$target.contains($active) || !ref) return null;
+    return {
+      ref,
+      scrollTop: $active.scrollTop,
+      scrollLeft: $active.scrollLeft,
+      selectionStart: $active.selectionStart,
+    };
+  },
+
+  restoreState($target, activeRef) {
+    if (!activeRef) return;
+
     const $input = this.findRef($target, activeRef.ref);
-
     if (!$input) return;
-
-    console.log("the input is", $input);
 
     if (Array.isArray($input)) {
       Msg.warn(
@@ -29,8 +41,14 @@ export default {
         $input
       );
     } else {
-      $input.focus();
-      if (activeRef.pos) $input.setSelectionRange(activeRef.pos + 1, activeRef.pos + 1);
+      if (activeRef.selectionStart) {
+        $input.focus();
+        const pos = $input.tagName === "TEXTAREA" ? activeRef.selectionStart : activeRef.selectionStart + 1;
+        $input.setSelectionRange(pos, pos);
+      }
+
+      $input.scrollTop = activeRef.scrollTop;
+      $input.scrollLeft = activeRef.scrollLeft;
     }
   },
 

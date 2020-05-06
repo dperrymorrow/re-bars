@@ -11,7 +11,10 @@ function _insertAt($target, $child, index = 0) {
 }
 
 export default {
-  canPatch: $target => $target.children.length && Array.from($target.children).every($el => $el.getAttribute("ref")),
+  canPatch: $target =>
+    $target.children.length &&
+    $target.children.length > 1 &&
+    Array.from($target.children).every($el => $el.getAttribute("ref")),
   hasChanged: ($target, html) => !_isEqHtml($target.innerHTML, html),
 
   compare({ app, $target, html }) {

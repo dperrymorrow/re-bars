@@ -12,18 +12,14 @@ export default {
       .forEach(([renderId, handler]) => {
         const $target = Utils.dom.findWatcher(renderId);
         const html = handler.render();
-
-        const activeRef = {
-          ref: document.activeElement.getAttribute("ref"),
-          pos: document.activeElement.selectionStart,
-        };
+        const stash = Utils.dom.recordState($target);
 
         if (!Patch.hasChanged($target, html)) return;
 
         if (Patch.canPatch($target)) {
           Patch.compare({ app, $target, html });
           Msg.log(`${name}: patching ${handler.path}`, $target);
-          if (activeRef.ref) Utils.dom.restoreCursor($target, activeRef);
+          Utils.dom.restoreState($target, stash);
           return;
         }
 
@@ -38,7 +34,7 @@ export default {
         $target.style.display = html === "" ? "none" : "";
         $target.innerHTML = html;
 
-        if (activeRef.ref) Utils.dom.restoreCursor($target, activeRef);
+        Utils.dom.restoreState($target, stash);
         Msg.log(`${name}: re-rendering watch block for ${handler.path}`, $target);
       });
 
