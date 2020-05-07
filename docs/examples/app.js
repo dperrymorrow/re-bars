@@ -3,7 +3,7 @@ export default {
   <div>
     <div class="header-container">
       <h1>
-        {{#watch header }}
+        {{#watch}}
           <span>{{ header.title }}</span>
           <small>{{ header.description }}</small>
         {{/watch}}
@@ -54,6 +54,7 @@ export default {
         <button class="add" {{ method "toggleCreate" }}>Add another</button>
       {{/if}}
     {{/watch}}
+
   </div>
   `,
 
@@ -98,13 +99,18 @@ export default {
       $input.value = "";
     },
 
+    findTodo(id) {
+      return this.todos.findIndex(item => item.id === parseInt(id));
+    },
+
     deleteTodo(event, id) {
-      const index = this.todos.findIndex(todo => todo.id === id);
+      const index = this.$methods.findTodo(id);
       this.todos.splice(index, 1);
     },
 
     toggleDone(event, id) {
-      const todo = this.todos.find(todo => todo.id === id);
+      console.log(this.$methods.findTodo(id));
+      const todo = this.todos[this.$methods.findTodo(id)];
       todo.done = !todo.done;
     },
 

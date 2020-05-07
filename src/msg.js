@@ -6,7 +6,7 @@ const styles = {
 const _showTpl = ({ template, loc }) => {
   const lines = template.split("\n").slice(loc.start.line - 1, loc.end.line);
   const leadingSpaces = Array(lines[0].length - lines[0].trim().length).join(" ");
-  const trimmed = lines.map(line => line.replace(leadingSpaces, "     "));
+  const trimmed = lines.map(line => line.replace(leadingSpaces, "      "));
   trimmed[0] = `>>>> ${trimmed[0].trim()}`;
 
   return `
@@ -34,7 +34,7 @@ const _msg = (type, msg, ...payloads) => {
       console.log(str, styles[type]);
     }
   } else {
-    // payloads.forEach(console.error);
+    payloads.forEach(console.error);
     throw new Error(str);
   }
 };

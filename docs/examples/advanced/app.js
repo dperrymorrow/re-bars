@@ -6,7 +6,7 @@ export default {
   template: /*html*/ `
   <div>
     <div class="header-container">
-      {{#watch "header.*" tag="h1" }}
+      {{#watch tag="h1" }}
         <span>{{ header.title }}</span>
         <small>{{ header.description }}</small>
       {{/watch}}
@@ -22,7 +22,7 @@ export default {
       </label>
     </div>
 
-    {{#watch filters }}
+    {{#watch}}
       {{ component "filters" filters=filters }}
     {{/watch}}
 
@@ -31,9 +31,8 @@ export default {
         <li ref="{{ todo.id }}">
           {{
             component "Todo"
+            listen:remove="deleteTodo"
             todo=todo
-            index=@index
-            deleteTodo=@root.$methods.deleteTodo
           }}
         </li>
       {{/each}}
@@ -41,7 +40,7 @@ export default {
 
     {{
       component "AddTodo"
-      addTodo=$methods.addTodo
+      listen:addTodo="addTodo"
     }}
   <div>
   `,
@@ -106,13 +105,18 @@ export default {
   components: [Add, Todo, Filters],
 
   methods: {
-    addTodo(name) {
-      this.todos.push({ name, id: new Date().getTime(), updated: new Date().toLocaleString() });
+    addTodo(todo) {
+      this.todos.push(todo);
       this.filters.state = null;
     },
 
-    deleteTodo(id) {
-      const index = this.todos.findIndex(t => t.id === id);
+    saveTodo(todo) {
+      const index = this.todos.findIndex(t => t.id === todo.id);
+      this.todos[index] = todo;
+    },
+
+    deleteTodo(todo) {
+      const index = this.todos.findIndex(t => t.id === todo.id);
       this.todos.splice(index, 1);
     },
 

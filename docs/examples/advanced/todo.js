@@ -3,9 +3,10 @@ export default {
     <div>
       {{#watch "editing" tag="div" class="todo" }}
         {{#if editing}}
-          <input type="text" value="{{ $props.todo.name }}" ref="nameInput"/>
-          <button {{ method "save" }}>save</button>
+          <input type="text" {{ bound "$props.todo.name" }}/>
+          <button {{ method "save" }}>done</button>
         {{ else }}
+
           <label>
             <input type="checkbox" {{ isChecked $props.todo.done }} {{ method "toggleDone" }} />
             {{#if $props.todo.done }}
@@ -16,7 +17,7 @@ export default {
           </label>
 
           <div class="actions">
-            <span class="date">{{ timeAgo todo.updated }}</span>
+            <span class="date">{{ timeAgo $props.todo.updated }}</span>
             <button {{ method "remove" }}>delete</button>
             <button {{ method "toggleEditing" }}>edit</button>
           </div>
@@ -28,7 +29,7 @@ export default {
   name: "Todo",
 
   data() {
-    return { editing: false };
+    return { editing: false, todo: {} };
   },
 
   helpers: {
@@ -40,13 +41,12 @@ export default {
 
   methods: {
     save() {
-      this.$props.todo.name = this.$refs().nameInput.value;
       this.$props.todo.updated = new Date().toLocaleString();
       this.editing = false;
     },
 
     remove() {
-      this.$props.deleteTodo(this.$props.todo.id);
+      this.$emit("remove", this.$props.todo);
     },
 
     toggleEditing() {

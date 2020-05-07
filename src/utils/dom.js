@@ -41,8 +41,8 @@ export default {
         $input
       );
     } else {
+      $input.focus();
       if (activeRef.selectionStart) {
-        $input.focus();
         const pos = $input.tagName === "TEXTAREA" ? activeRef.selectionStart : activeRef.selectionStart + 1;
         $input.setSelectionRange(pos, pos);
       }
@@ -76,7 +76,10 @@ export default {
 
   propStr: props =>
     Object.entries(props)
-      .map(([key, val]) => `${key}="${val}"`)
+      .map(([key, val]) => {
+        if (typeof val === "number") return `${key}=${val}`;
+        else return `${key}="${val}"`;
+      })
       .join(" "),
 
   wrapWatcher(id, html, hash) {

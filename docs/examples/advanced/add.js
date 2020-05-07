@@ -4,7 +4,7 @@ export default {
     {{#watch "isAdding" }}
       {{#if isAdding }}
         <form>
-          {{#watch "newName" }}
+          {{#watch}}
             <h3>{{ newName }}</h3>
             <input type="text" {{ bound "newName" }} placeholder="the new todo" />
           {{/watch}}
@@ -24,7 +24,6 @@ export default {
   data() {
     return {
       isAdding: false,
-      hasError: false,
       newName: "",
     };
   },
@@ -37,7 +36,13 @@ export default {
 
     addItem(event) {
       event.preventDefault();
-      this.$props.addTodo(this.newName);
+
+      this.$emit("addTodo", {
+        name: this.newName,
+        id: new Date().getTime(),
+        updated: new Date().toLocaleString(),
+      });
+
       this.newName = "";
     },
   },

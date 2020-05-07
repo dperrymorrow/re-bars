@@ -2,7 +2,7 @@ export default {
   template: /*html*/ `
     <h3>
       Button have been clicked
-        {{#watch "clicked" }}
+        {{#watch}}
           <span>{{ clicked }}</span>
           Clicked {{ clicked }} times
         {{/watch}}

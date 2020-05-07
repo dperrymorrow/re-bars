@@ -3,7 +3,7 @@ import Constants from "./constants.js";
 import Msg from "./msg.js";
 
 export default {
-  create(data, callback) {
+  create(data, callback, trackGet = false) {
     let que = [];
 
     const _debounced = Utils.debounce(() => {
@@ -24,6 +24,7 @@ export default {
           if (typeof value === "function" && target.hasOwnProperty(prop)) return value.bind(proxyData);
           // we dont watch any of the protected items
           if (Constants.protectedKeys.includes(tree[0])) return value;
+          else if (trackGet) _addToQue(tree.concat(prop).join("."));
           if (value !== null && typeof value === "object" && prop !== "methods")
             return _buildProxy(value, tree.concat(prop));
           else return value;
@@ -42,9 +43,9 @@ export default {
         deleteProperty: function(target, prop) {
           const ret = Reflect.deleteProperty(...arguments);
           const path = tree.concat(prop).join(".");
-          if (!Constants.protectedKeys.includes(tree[0]))
+          if (Constants.protectedKeys.includes(tree[0]))
             Msg.fail(`cannot delete protected key ${path}. readOnly properties are ${Constants.protectedKeys}`);
-          _addToQue(path);
+          else _addToQue(path);
           return ret;
         },
       });

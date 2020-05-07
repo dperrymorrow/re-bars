@@ -469,7 +469,7 @@ You can pass in a ref as a prop to this helper should you need something more sp
 <div class="markdown-content"><pre><code class="language-javascript">export default {
   template: /*html*/ `
     &lt;div&gt;
-      {{#watch &quot;title&quot; }}
+      {{#watch}}
         &lt;h2&gt;{{ title }}&lt;/h2&gt;
         &lt;input type=&quot;text&quot; {{ bound &quot;title&quot; ref=&quot;title1&quot; }}&gt;
         &lt;input type=&quot;text&quot; {{ bound &quot;title&quot; ref=&quot;title2&quot; }}&gt;

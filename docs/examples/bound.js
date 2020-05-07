@@ -1,7 +1,7 @@
 export default {
   template: /*html*/ `
     <div>
-      {{#watch "title" }}
+      {{#watch}}
         <h2>{{ title }}</h2>
         <input type="text" {{ bound "title" ref="title1" }}>
         <input type="text" {{ bound "title" ref="title2" }}>

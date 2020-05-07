@@ -60,6 +60,8 @@ function register(
         return listeners;
       }, {});
 
+      let hasCreated = false;
+
       const scope = ProxyTrap.create(
         {
           ...instData,
@@ -77,6 +79,7 @@ function register(
           },
         },
         paths => {
+          if (!hasCreated) return;
           Msg.log(`${name}: data changed "${paths}"`, renders);
           // watchers...
           Object.entries(watchers)
@@ -91,6 +94,11 @@ function register(
       );
 
       if (hooks.created) hooks.created.call(scope);
+
+      // gotta delay this or it will fire immediately, before the que triggers
+      Utils.debounce(() => {
+        hasCreated = true;
+      })();
 
       const compInst = {
         id,

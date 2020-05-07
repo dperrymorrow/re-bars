@@ -1,5 +1,7 @@
 import Msg from "./msg.js";
 import Utils from "./utils/index.js";
+import ProxyTrap from "./proxy-trap.js";
+import Constants from "./constants.js";
 
 export default {
   register({ app, instance, components, helpers, template, methods, name }) {
@@ -7,19 +9,37 @@ export default {
     instance.registerHelper("isComponent", cName => Object.keys(components).includes(cName));
 
     instance.registerHelper("component", function(...args) {
-      const { hash, loc } = args.pop();
+      const { hash, loc, data } = args.pop();
+
       const cName = args[0];
       if (!components[cName]) Msg.fail(`${name}: child component "${cName}" is not registered`, { template, loc });
 
       // validate the props, add the passed methods after you bind them or you will loose scope
       Object.entries(hash).forEach(([key, value]) => {
         if (value === undefined) {
-          Msg.fail(`${name}: passed "${key}" as undefined. If you really meant to, pass null instead.`, {
-            template,
-            loc,
-          });
+          Msg.fail(
+            `${name}: passed "${key}" as undefined. If you really meant to, pass null instead.`,
+            {
+              template,
+              loc,
+            },
+            hash
+          );
         }
       });
+      // make sure all the listeners are good
+      Object.keys(hash)
+        .filter(key => key.startsWith(Constants.listenerPrefix))
+        .forEach(key => {
+          const methodName = hash[key];
+          if (!(methodName in data.root.$methods))
+            Msg.fail(
+              `${name}: listener "${methodName}" was not found in the ${name}'s methods.`,
+              { template, loc },
+              hash
+            );
+          else hash[key] = data.root.$methods[methodName];
+        });
 
       return new instance.SafeString(components[cName].instance(hash).render());
     });
@@ -49,6 +69,18 @@ export default {
 
       const path = args.map(_getPath);
       const renders = app.components.instances[instId].renders;
+
+      if (!path.length) {
+        const trap = ProxyTrap.create(
+          data.root,
+          paths => {
+            renders[eId].path = paths;
+          },
+          true
+        );
+
+        fn(trap);
+      }
 
       path.forEach(item => {
         if (!Utils.hasKey(data.root, item)) Msg.fail(`${name}: cannot find path "${item}" to watch`, { template, loc });
