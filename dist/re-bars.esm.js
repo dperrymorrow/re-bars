@@ -6,7 +6,7 @@ const styles = {
 const _showTpl = ({ template, loc }) => {
   const lines = template.split("\n").slice(loc.start.line - 1, loc.end.line);
   const leadingSpaces = Array(lines[0].length - lines[0].trim().length).join(" ");
-  const trimmed = lines.map(line => line.replace(leadingSpaces, "     "));
+  const trimmed = lines.map(line => line.replace(leadingSpaces, "      "));
   trimmed[0] = `>>>> ${trimmed[0].trim()}`;
 
   return `
@@ -34,7 +34,7 @@ const _msg = (type, msg, ...payloads) => {
       console.log(str, styles[type]);
     }
   } else {
-    // payloads.forEach(console.error);
+    payloads.forEach(console.error);
     throw new Error(str);
   }
 };
@@ -86,8 +86,8 @@ var Dom = {
         $input
       );
     } else {
+      $input.focus();
       if (activeRef.selectionStart) {
-        $input.focus();
         const pos = $input.tagName === "TEXTAREA" ? activeRef.selectionStart : activeRef.selectionStart + 1;
         $input.setSelectionRange(pos, pos);
       }
@@ -121,7 +121,10 @@ var Dom = {
 
   propStr: props =>
     Object.entries(props)
-      .map(([key, val]) => `${key}="${val}"`)
+      .map(([key, val]) => {
+        if (typeof val === "number") return `${key}=${val}`;
+        else return `${key}="${val}"`;
+      })
       .join(" "),
 
   wrapWatcher(id, html, hash) {
@@ -216,7 +219,7 @@ var Utils = {
 };
 
 var Constants = {
-  protectedKeys: ["$_componentId", "$props", "$methods", "$name", "$parent"],
+  protectedKeys: ["$_componentId", "$props", "$methods", "$name", "$parent", "$listeners"],
   listenerPrefix: "listen:",
 };
 
@@ -242,6 +245,7 @@ var ProxyTrap = {
           if (typeof value === "function" && target.hasOwnProperty(prop)) return value.bind(proxyData);
           // we dont watch any of the protected items
           if (Constants.protectedKeys.includes(tree[0])) return value;
+          else if (trackGet) _addToQue(tree.concat(prop).join("."));
           if (value !== null && typeof value === "object" && prop !== "methods")
             return _buildProxy(value, tree.concat(prop));
           else return value;
@@ -260,9 +264,9 @@ var ProxyTrap = {
         deleteProperty: function(target, prop) {
           const ret = Reflect.deleteProperty(...arguments);
           const path = tree.concat(prop).join(".");
-          if (!Constants.protectedKeys.includes(tree[0]))
+          if (Constants.protectedKeys.includes(tree[0]))
             Msg.fail(`cannot delete protected key ${path}. readOnly properties are ${Constants.protectedKeys}`);
-          _addToQue(path);
+          else _addToQue(path);
           return ret;
         },
       });
@@ -279,19 +283,37 @@ var Helpers = {
     instance.registerHelper("isComponent", cName => Object.keys(components).includes(cName));
 
     instance.registerHelper("component", function(...args) {
-      const { hash, loc } = args.pop();
+      const { hash, loc, data } = args.pop();
+
       const cName = args[0];
       if (!components[cName]) Msg.fail(`${name}: child component "${cName}" is not registered`, { template, loc });
 
       // validate the props, add the passed methods after you bind them or you will loose scope
       Object.entries(hash).forEach(([key, value]) => {
         if (value === undefined) {
-          Msg.fail(`${name}: passed "${key}" as undefined. If you really meant to, pass null instead.`, {
-            template,
-            loc,
-          });
+          Msg.fail(
+            `${name}: passed "${key}" as undefined. If you really meant to, pass null instead.`,
+            {
+              template,
+              loc,
+            },
+            hash
+          );
         }
       });
+      // make sure all the listeners are good
+      Object.keys(hash)
+        .filter(key => key.startsWith(Constants.listenerPrefix))
+        .forEach(key => {
+          const methodName = hash[key];
+          if (!(methodName in data.root.$methods))
+            Msg.fail(
+              `${name}: listener "${methodName}" was not found in the ${name}'s methods.`,
+              { template, loc },
+              hash
+            );
+          else hash[key] = data.root.$methods[methodName];
+        });
 
       return new instance.SafeString(components[cName].instance(hash).render());
     });
@@ -323,7 +345,14 @@ var Helpers = {
       const renders = app.components.instances[instId].renders;
 
       if (!path.length) {
-        const trap = ProxyTrap.create(instance.createFrame(data.root));
+        const trap = ProxyTrap.create(
+          data.root,
+          paths => {
+            renders[eId].path = paths;
+          },
+          true
+        );
+
         fn(trap);
       }
 
@@ -504,6 +533,8 @@ function register(
         return listeners;
       }, {});
 
+      let hasCreated = false;
+
       const scope = ProxyTrap.create(
         {
           ...instData,
@@ -521,6 +552,7 @@ function register(
           },
         },
         paths => {
+          if (!hasCreated) return;
           Msg.log(`${name}: data changed "${paths}"`, renders);
           // watchers...
           Object.entries(watchers)
@@ -535,6 +567,11 @@ function register(
       );
 
       if (hooks.created) hooks.created.call(scope);
+
+      // gotta delay this or it will fire immediately, before the que triggers
+      Utils.debounce(() => {
+        hasCreated = true;
+      })();
 
       const compInst = {
         id,

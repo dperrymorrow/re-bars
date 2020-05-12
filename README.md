@@ -23,7 +23,7 @@ ReBars is really just Handlebars with some built in helpers and the notion of [c
   template: /*html*/ `
     &lt;h3&gt;
       Button have been clicked
-        {{#watch &quot;clicked&quot; }}
+        {{#watch}}
           &lt;span&gt;{{ clicked }}&lt;/span&gt;
           Clicked {{ clicked }} times
         {{/watch}}

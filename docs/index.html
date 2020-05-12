@@ -121,7 +121,7 @@
   template: /*html*/ `
     &lt;h3&gt;
       Button have been clicked
-        {{#watch &quot;clicked&quot; }}
+        {{#watch}}
           &lt;span&gt;{{ clicked }}&lt;/span&gt;
           Clicked {{ clicked }} times
         {{/watch}}
@@ -518,7 +518,7 @@ Watch takes an argument of what property to watch. The argument can be a string 
   &lt;div&gt;
     &lt;div class=&quot;header-container&quot;&gt;
       &lt;h1&gt;
-        {{#watch header }}
+        {{#watch}}
           &lt;span&gt;{{ header.title }}&lt;/span&gt;
           &lt;small&gt;{{ header.description }}&lt;/small&gt;
         {{/watch}}
@@ -569,6 +569,7 @@ Watch takes an argument of what property to watch. The argument can be a string 
         &lt;button class=&quot;add&quot; {{ method &quot;toggleCreate&quot; }}&gt;Add another&lt;/button&gt;
       {{/if}}
     {{/watch}}
+
   &lt;/div&gt;
   `,
 
@@ -613,13 +614,18 @@ Watch takes an argument of what property to watch. The argument can be a string 
       $input.value = &quot;&quot;;
     },
 
+    findTodo(id) {
+      return this.todos.findIndex(item =&gt; item.id === parseInt(id));
+    },
+
     deleteTodo(event, id) {
-      const index = this.todos.findIndex(todo =&gt; todo.id === id);
+      const index = this.$methods.findTodo(id);
       this.todos.splice(index, 1);
     },
 
     toggleDone(event, id) {
-      const todo = this.todos.find(todo =&gt; todo.id === id);
+      console.log(this.$methods.findTodo(id));
+      const todo = this.todos[this.$methods.findTodo(id)];
       todo.done = !todo.done;
     },
 
@@ -657,7 +663,7 @@ export default {
   template: /*html*/ `
   &lt;div&gt;
     &lt;div class=&quot;header-container&quot;&gt;
-      {{#watch &quot;header.*&quot; tag=&quot;h1&quot; }}
+      {{#watch tag=&quot;h1&quot; }}
         &lt;span&gt;{{ header.title }}&lt;/span&gt;
         &lt;small&gt;{{ header.description }}&lt;/small&gt;
       {{/watch}}
@@ -673,7 +679,7 @@ export default {
       &lt;/label&gt;
     &lt;/div&gt;
 
-    {{#watch filters }}
+    {{#watch}}
       {{ component &quot;filters&quot; filters=filters }}
     {{/watch}}
 
@@ -682,9 +688,8 @@ export default {
         &lt;li ref=&quot;{{ todo.id }}&quot;&gt;
           {{
             component &quot;Todo&quot;
+            listen:remove=&quot;deleteTodo&quot;
             todo=todo
-            index=@index
-            deleteTodo=@root.$methods.deleteTodo
           }}
         &lt;/li&gt;
       {{/each}}
@@ -692,7 +697,7 @@ export default {
 
     {{
       component &quot;AddTodo&quot;
-      addTodo=$methods.addTodo
+      listen:addTodo=&quot;addTodo&quot;
     }}
   &lt;div&gt;
   `,
@@ -757,13 +762,18 @@ export default {
   components: [Add, Todo, Filters],
 
   methods: {
-    addTodo(name) {
-      this.todos.push({ name, id: new Date().getTime(), updated: new Date().toLocaleString() });
+    addTodo(todo) {
+      this.todos.push(todo);
       this.filters.state = null;
     },
 
-    deleteTodo(id) {
-      const index = this.todos.findIndex(t =&gt; t.id === id);
+    saveTodo(todo) {
+      const index = this.todos.findIndex(t =&gt; t.id === todo.id);
+      this.todos[index] = todo;
+    },
+
+    deleteTodo(todo) {
+      const index = this.todos.findIndex(t =&gt; t.id === todo.id);
       this.todos.splice(index, 1);
     },
 
@@ -781,7 +791,7 @@ export default {
     {{#watch &quot;isAdding&quot; }}
       {{#if isAdding }}
         &lt;form&gt;
-          {{#watch &quot;newName&quot; }}
+          {{#watch}}
             &lt;h3&gt;{{ newName }}&lt;/h3&gt;
             &lt;input type=&quot;text&quot; {{ bound &quot;newName&quot; }} placeholder=&quot;the new todo&quot; /&gt;
           {{/watch}}
@@ -801,7 +811,6 @@ export default {
   data() {
     return {
       isAdding: false,
-      hasError: false,
       newName: &quot;&quot;,
     };
   },
@@ -814,7 +823,13 @@ export default {
 
     addItem(event) {
       event.preventDefault();
-      this.$props.addTodo(this.newName);
+
+      this.$emit(&quot;addTodo&quot;, {
+        name: this.newName,
+        id: new Date().getTime(),
+        updated: new Date().toLocaleString(),
+      });
+
       this.newName = &quot;&quot;;
     },
   },
@@ -864,9 +879,10 @@ export default {
     &lt;div&gt;
       {{#watch &quot;editing&quot; tag=&quot;div&quot; class=&quot;todo&quot; }}
         {{#if editing}}
-          &lt;input type=&quot;text&quot; value=&quot;{{ $props.todo.name }}&quot; ref=&quot;nameInput&quot;/&gt;
-          &lt;button {{ method &quot;save&quot; }}&gt;save&lt;/button&gt;
+          &lt;input type=&quot;text&quot; {{ bound &quot;$props.todo.name&quot; }}/&gt;
+          &lt;button {{ method &quot;save&quot; }}&gt;done&lt;/button&gt;
         {{ else }}
+
           &lt;label&gt;
             &lt;input type=&quot;checkbox&quot; {{ isChecked $props.todo.done }} {{ method &quot;toggleDone&quot; }} /&gt;
             {{#if $props.todo.done }}
@@ -877,7 +893,7 @@ export default {
           &lt;/label&gt;
 
           &lt;div class=&quot;actions&quot;&gt;
-            &lt;span class=&quot;date&quot;&gt;{{ timeAgo todo.updated }}&lt;/span&gt;
+            &lt;span class=&quot;date&quot;&gt;{{ timeAgo $props.todo.updated }}&lt;/span&gt;
             &lt;button {{ method &quot;remove&quot; }}&gt;delete&lt;/button&gt;
             &lt;button {{ method &quot;toggleEditing&quot; }}&gt;edit&lt;/button&gt;
           &lt;/div&gt;
@@ -889,7 +905,7 @@ export default {
   name: &quot;Todo&quot;,
 
   data() {
-    return { editing: false };
+    return { editing: false, todo: {} };
   },
 
   helpers: {
@@ -901,13 +917,12 @@ export default {
 
   methods: {
     save() {
-      this.$props.todo.name = this.$refs().nameInput.value;
       this.$props.todo.updated = new Date().toLocaleString();
       this.editing = false;
     },
 
     remove() {
-      this.$props.deleteTodo(this.$props.todo.id);
+      this.$emit(&quot;remove&quot;, this.$props.todo);
     },
 
     toggleEditing() {
