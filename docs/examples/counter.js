@@ -4,7 +4,6 @@ export default {
       Button have been clicked
         {{#watch}}
           <span>{{ clicked }}</span>
-          Clicked {{ clicked }} times
         {{/watch}}
       <button {{ method "step" }}>Click Me</button>
     </h3>
