@@ -3,7 +3,7 @@ import Msg from "./msg.js";
 import Patch from "./utils/patch.js";
 
 export default {
-  paths({ app, paths, renders, name }) {
+  paths({ paths, renders }) {
     Object.entries(renders)
       .filter(([renderId, handler]) => {
         const matches = paths.some(path => Utils.shouldRender(path, handler.path));
@@ -16,12 +16,12 @@ export default {
 
         if (!Patch.hasChanged($target, html)) return;
 
-        if (Patch.canPatch($target)) {
-          Patch.compare({ app, $target, html });
-          Msg.log(`${name}: patching ${handler.path}`, $target);
-          Utils.dom.restoreState($target, stash);
-          return;
-        }
+        // if (Patch.canPatch($target)) {
+        //   Patch.compare({ app, $target, html });
+        //   Msg.log(`${name}: patching ${handler.path}`, $target);
+        //   Utils.dom.restoreState($target, stash);
+        //   return;
+        // }
 
         // warn for not having a ref on array update
         const lenPath = handler.path.find(path => path.endsWith(".length"));
@@ -37,7 +37,5 @@ export default {
         Utils.dom.restoreState($target, stash);
         Msg.log(`${name}: re-rendering watch block for ${handler.path}`, $target);
       });
-
-    app.deleteOrphans();
   },
 };

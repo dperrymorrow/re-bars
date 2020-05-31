@@ -5,16 +5,17 @@ export default {
         {{#watch}}
           <span>{{ clicked }}</span>
         {{/watch}}
-      <button {{ method "step" }}>Click Me</button>
+      <button ref="clicker">Click Me</button>
     </h3>
   `,
-  name: "counter",
-  data() {
-    return { clicked: 0 };
-  },
-  methods: {
-    step() {
-      this.clicked++;
+
+  data: { clicked: 0 },
+
+  refs: {
+    clicker({ $el, $app, $refs, data }) {
+      $el.addEventListener("click", () => {
+        data.clicked++;
+      });
     },
   },
 };

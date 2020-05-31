@@ -1,48 +1,10 @@
 import Msg from "./msg.js";
 import Utils from "./utils/index.js";
 import ProxyTrap from "./proxy-trap.js";
-import Constants from "./constants.js";
 
 export default {
-  register({ app, instance, components, helpers, template, methods, name }) {
+  register({ instance, helpers, template, store }) {
     Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
-    instance.registerHelper("isComponent", cName => Object.keys(components).includes(cName));
-
-    instance.registerHelper("component", function(...args) {
-      const { hash, loc, data } = args.pop();
-
-      const cName = args[0];
-      if (!components[cName]) Msg.fail(`${name}: child component "${cName}" is not registered`, { template, loc });
-
-      // validate the props, add the passed methods after you bind them or you will loose scope
-      Object.entries(hash).forEach(([key, value]) => {
-        if (value === undefined) {
-          Msg.fail(
-            `${name}: passed "${key}" as undefined. If you really meant to, pass null instead.`,
-            {
-              template,
-              loc,
-            },
-            hash
-          );
-        }
-      });
-      // make sure all the listeners are good
-      Object.keys(hash)
-        .filter(key => key.startsWith(Constants.listenerPrefix))
-        .forEach(key => {
-          const methodName = hash[key];
-          if (!(methodName in data.root.$methods))
-            Msg.fail(
-              `${name}: listener "${methodName}" was not found in the ${name}'s methods.`,
-              { template, loc },
-              hash
-            );
-          else hash[key] = data.root.$methods[methodName];
-        });
-
-      return new instance.SafeString(components[cName].instance(hash).render());
-    });
 
     instance.registerHelper("debug", (obj, { hash, data, loc }) => {
       if (obj === undefined) Msg.fail(`${name}: undefined passed to debug`, { template, loc });
@@ -52,7 +14,7 @@ export default {
 
     instance.registerHelper("watch", function(...args) {
       const { fn, hash, data, loc } = args.pop();
-      const instId = data.root.$_componentId;
+
       const eId = Utils.randomId();
 
       const _getPath = target => {
@@ -68,13 +30,12 @@ export default {
       };
 
       const path = args.map(_getPath);
-      const renders = app.components.instances[instId].renders;
 
       if (!path.length) {
         const trap = ProxyTrap.create(
           data.root,
           paths => {
-            renders[eId].path = paths;
+            store.renders[eId].path = paths;
           },
           true
         );
@@ -86,38 +47,12 @@ export default {
         if (!Utils.hasKey(data.root, item)) Msg.fail(`${name}: cannot find path "${item}" to watch`, { template, loc });
       });
 
-      renders[eId] = {
+      store.renders[eId] = {
         path,
         render: () => fn(this),
       };
 
       return Utils.dom.wrapWatcher(eId, fn(this), hash);
-    });
-
-    instance.registerHelper("method", function() {
-      const [str, ...args] = arguments;
-      const [methodName, type = "click"] = str.split(":");
-      const { data, loc } = args.pop();
-
-      if (!(methodName in methods) && methodName !== "$emit")
-        Msg.fail(`${name}: "${methodName}" is not a method`, { template, loc });
-
-      const props = { "data-rbs-method": [data.root.$_componentId, type, methodName] };
-      if (args && args.length) props["data-rbs-method"] = props["data-rbs-method"].concat(args);
-      return new instance.SafeString(Utils.dom.propStr(props));
-    });
-
-    instance.registerHelper("bound", (path, { hash = {}, data, loc }) => {
-      const params = [data.root.$_componentId, path];
-      if (!Utils.hasKey(data.root, path)) Msg.fail(`${name}: does not have path "${path}"`, { template, loc });
-
-      const props = {
-        value: Utils.getKey(data.root, path),
-        ref: hash.ref || path,
-        "data-rbs-bound": params,
-      };
-
-      return new instance.SafeString(Utils.dom.propStr(props));
     });
   },
 };
