@@ -11,11 +11,16 @@ export default {
 
   data: { clicked: 0 },
 
+  methods: {
+    incriment() {
+      this.data.clicked++;
+    },
+  },
+
   refs: {
-    clicker({ $el, $app, $refs, data }) {
-      $el.addEventListener("click", () => {
-        data.clicked++;
-      });
+    clicker($el, status) {
+      if (status === "attached") $el.addEventListener("click", this.methods.incriment);
+      else $el.removeEventListener("click", this.methods.incriment);
     },
   },
 };

@@ -4,7 +4,7 @@ import ReRender from "./re-render.js";
 import ProxyTrap from "./proxy-trap.js";
 
 export default {
-  app({ helpers = {}, template, data = {}, refs = {}, Handlebars = window.Handlebars }) {
+  app({ helpers = {}, template, data = {}, refs = {}, methods = {}, Handlebars = window.Handlebars }) {
     const instance = Handlebars.create();
     const templateFn = instance.compile(template);
     const store = { renders: {} };
@@ -20,9 +20,17 @@ export default {
       instance,
       store,
       render($app) {
-        function _checkForRef($el, state) {
+        const scope = {
+          data: proxy,
+          methods,
+          $app,
+        };
+
+        Object.keys(methods).forEach(key => (methods[key] = methods[key].bind(scope)));
+
+        function _checkForRef($el, status) {
           const ref = $el.getAttribute("ref");
-          if (ref && refs[ref]) refs[ref]({ $el, $app, state, data: proxy });
+          if (ref && refs[ref]) refs[ref].call(scope, $el, status);
         }
 
         const observer = new MutationObserver(mutationList => {
@@ -30,13 +38,13 @@ export default {
             addedNodes.forEach($node => {
               if ($node.nodeType === Node.TEXT_NODE) return;
               _checkForRef($node, "added");
-              $node.querySelectorAll("[ref]").forEach(_checkForRef, "added");
+              $node.querySelectorAll("[ref]").forEach($node => _checkForRef($node, "attached"));
             });
 
             removedNodes.forEach($node => {
               if ($node.nodeType === Node.TEXT_NODE) return;
               _checkForRef($node, "remove");
-              $node.querySelectorAll("[ref]").forEach(_checkForRef, "removed");
+              $node.querySelectorAll("[ref]").forEach($node => _checkForRef($node, "detached"));
             });
           });
         });
