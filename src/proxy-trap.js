@@ -25,7 +25,7 @@ export default {
           // we dont watch any of the protected items
           if (Constants.protectedKeys.includes(tree[0])) return value;
           else if (trackGet) _addToQue(tree.concat(prop).join("."));
-          if (value !== null && typeof value === "object" && prop !== "methods")
+          if (value !== null && typeof value === "object" && prop !== "methods" && value.constructor.name === "object")
             return _buildProxy(value, tree.concat(prop));
           else return value;
         },

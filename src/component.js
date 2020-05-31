@@ -113,7 +113,7 @@ function register(
           method(event) {
             const [id, type, method, ...args] = event.currentTarget.dataset.rbsMethod.split(",");
             if (method === "$emit") scope.$emit(args[0], scope[args[0]]);
-            else scope.$methods[method](event, ...args);
+            else scope.$methods[method].call(scope, event, ...args);
           },
         },
         detached() {

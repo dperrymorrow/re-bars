@@ -29,7 +29,7 @@ export default {
 
   isProp(target) {
     if (typeof target === "string" && target.startsWith("$props")) return true;
-    else if (typeof target === "object" && target.ReBarsPath.startsWith("$props")) return true;
+    else if (typeof target === "object" && target.ReBarsPath && target.ReBarsPath.startsWith("$props")) return true;
     return false;
   },
 
