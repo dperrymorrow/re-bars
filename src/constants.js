@@ -1,4 +1,7 @@
 export default {
-  protectedKeys: ["$_componentId", "$props", "$methods", "$name", "$parent", "$listeners"],
-  listenerPrefix: "listen:",
+  attrs: {
+    watch: "rbs-watch",
+    method: "rbs-method",
+    ref: "rbs-ref",
+  },
 };

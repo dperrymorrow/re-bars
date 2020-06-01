@@ -11,22 +11,35 @@ export default {
 
       <label>
         Title:
-        <input type="text" {{ bound "header.title" }}/>
+        <input
+          type="text"
+          value="{{ header.title }}"
+          rbs-method="input:updateTitle"
+        />
       </label>
 
       <label>
         Description:
-        <input type="text" {{ bound "header.description" }}/>
+        <input
+          type="text"
+          value="{{ header.description }}"
+          rbs-method="input:updateDescription"
+        />
       </label>
     </div>
 
     <ul class="simple">
       {{#watch "todos.*" }}
         {{#each todos }}
-          <li ref="{{ id }}">
+          <li rbs-ref="{{ id }}">
             <div class="todo">
               <label>
-                <input type="checkbox" {{ isChecked done }} {{ method "toggleDone" id }} />
+                <input
+                  type="checkbox"
+                  rbs-method="toggleDone"
+                  {{ isChecked done }}
+                  data-id="{{ id }}"
+                />
                 {{#if done }}
                   <s>{{ name }}</s>
                 {{else}}
@@ -35,7 +48,11 @@ export default {
               </label>
 
               <div class="actions">
-                <button {{ method "deleteTodo" id }}>delete</button>
+                <button
+                  rbs-method="deleteTodo"
+                  data-id="{{ id }}">
+                  delete
+                </button>
               </div>
             </div>
           </li>
@@ -43,80 +60,84 @@ export default {
       {{/watch}}
     </ul>
 
-    {{#watch "adding" }}
+    {{#watch}}
       {{#if adding }}
         <form>
-          <input type="text" name="name" ref="newName" placeholder="the new todo" />
-          <button class="push" {{ method "addItem" }}>Add todo</button>
-          <button class="cancel" {{ method "toggleCreate" }}>Cancel</button>
+          <input type="text" rbs-ref="newName" placeholder="the new todo" />
+          <button rbs-method="addItem">Add todo</button>
+          <button rbs-method="toggleCreate">Cancel</button>
         </form>
       {{else}}
-        <button class="add" {{ method "toggleCreate" }}>Add another</button>
+        <button rbs-method="toggleCreate">Add another</button>
       {{/if}}
     {{/watch}}
 
   </div>
   `,
 
-  data() {
-    return {
-      adding: false,
-      header: {
-        title: "Todos",
-        description: "some things that need done",
-      },
-      todos: [
-        {
-          done: false,
-          name: "Grocery Shopping",
-          id: 22,
-        },
-        {
-          done: true,
-          name: "Paint the House",
-          id: 44,
-        },
-      ],
-    };
-  },
+  trace: true,
 
-  name: "DemoApp",
+  data: {
+    adding: false,
+    header: {
+      title: "Todos",
+      description: "some things that need done",
+    },
+    todos: [
+      {
+        done: false,
+        name: "Grocery Shopping",
+        id: 22,
+      },
+      {
+        done: true,
+        name: "Paint the House",
+        id: 44,
+      },
+    ],
+  },
 
   helpers: {
     isChecked: val => (val ? "checked" : ""),
   },
 
   methods: {
+    updateTitle(event) {
+      this.data.header.title = event.target.value;
+    },
+
+    updateDescription(event) {
+      this.data.header.description = event.target.value;
+    },
+
     addItem(event) {
       event.preventDefault();
       const $input = this.$refs().newName;
 
-      this.todos.push({
+      this.data.todos.push({
         id: new Date().getTime(),
         name: $input.value,
       });
-
       $input.value = "";
     },
 
     findTodo(id) {
-      return this.todos.findIndex(item => item.id === parseInt(id));
+      return this.data.todos.findIndex(item => item.id === parseInt(id));
     },
 
-    deleteTodo(event, id) {
-      const index = this.$methods.findTodo(id);
-      this.todos.splice(index, 1);
+    deleteTodo(event) {
+      const index = this.methods.findTodo(event.target.dataset.id);
+      this.data.todos.splice(index, 1);
     },
 
-    toggleDone(event, id) {
-      console.log(this.$methods.findTodo(id));
-      const todo = this.todos[this.$methods.findTodo(id)];
+    toggleDone(event) {
+      const todo = this.data.todos[this.methods.findTodo(event.target.dataset.id)];
       todo.done = !todo.done;
     },
 
     toggleCreate(event) {
       event.preventDefault();
-      this.adding = !this.adding;
+      this.data.adding = !this.data.adding;
     },
   },
 };

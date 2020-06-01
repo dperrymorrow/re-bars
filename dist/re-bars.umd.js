@@ -52,20 +52,20 @@
   };
 
   var Dom = {
-    tagComponent(id, html, name) {
-      const $tmp = this.getShadow(html);
-      const $root = $tmp.firstElementChild;
-
-      if (!$root) throw new Error("there was no root node. Components need a root element.");
-      if (["P"].includes($root.nodeName))
-        Msg.fail(`${name}: <${$root.nodeName.toLowerCase()}> cannot be a root element of for a component, try a <div>`);
-      if ($tmp.children.length > 1) Msg.fail(`${name}: multiple root nodes are not allowed for a component.`);
-      if ($root.dataset.rbsWatch) Msg.fail(`${name}: cannot have a watch as the root node of a component`);
-
-      $root.dataset.rbsComp = id;
-      const content = $tmp.innerHTML;
-      return content;
-    },
+    // tagComponent(id, html, name) {
+    //   const $tmp = this.getShadow(html);
+    //   const $root = $tmp.firstElementChild;
+    //
+    //   if (!$root) throw new Error("there was no root node. Components need a root element.");
+    //   if (["P"].includes($root.nodeName))
+    //     Msg.fail(`${name}: <${$root.nodeName.toLowerCase()}> cannot be a root element of for a component, try a <div>`);
+    //   if ($tmp.children.length > 1) Msg.fail(`${name}: multiple root nodes are not allowed for a component.`);
+    //   if ($root.dataset.rbsWatch) Msg.fail(`${name}: cannot have a watch as the root node of a component`);
+    //
+    //   $root.dataset.rbsComp = id;
+    //   const content = $tmp.innerHTML;
+    //   return content;
+    // },
 
     recordState($target) {
       const $active = document.activeElement;
@@ -103,17 +103,15 @@
       }
     },
 
-    findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
+    // findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
 
-    findRef: ($target, ref) => {
-      if ($target.getAttribute("ref") === ref) return $target;
-      return $target.querySelector(`[ref="${ref}"]`);
-    },
-
-    findRefs(cId) {
-      const $root = this.findComponent(cId);
+    // findRef: ($target, ref) => {
+    //   if ($target.getAttribute("ref") === ref) return $target;
+    //   return $target.querySelector(`[ref="${ref}"]`);
+    // },
+    //
+    findRefs($root) {
       const $refs = Array.from($root.querySelectorAll("[ref]"));
-      if ($root.getAttribute("ref")) $refs.push($root);
 
       return $refs.reduce((obj, $el) => {
         const key = $el.getAttribute("ref");
@@ -173,11 +171,21 @@
       };
     },
 
-    isProp(target) {
-      if (typeof target === "string" && target.startsWith("$props")) return true;
-      else if (typeof target === "object" && target.ReBarsPath.startsWith("$props")) return true;
-      return false;
+    bind(obj, scope) {
+      return Object.keys(obj).reduce(
+        (bound, key) => {
+          bound[key] = bound[key].bind(scope);
+          return bound;
+        },
+        { ...obj }
+      );
     },
+
+    // isProp(target) {
+    //   if (typeof target === "string" && target.startsWith("$props")) return true;
+    //   else if (typeof target === "object" && target.ReBarsPath && target.ReBarsPath.startsWith("$props")) return true;
+    //   return false;
+    // },
 
     shouldRender(path, watch) {
       const watchPaths = Array.isArray(watch) ? watch : [watch];
@@ -213,20 +221,15 @@
         return false;
       }
     },
-
-    setKey(obj, path, val) {
-      const arr = path.split(".");
-      arr.reduce((pointer, key, index) => {
-        if (!(key in pointer)) Msg.fail(`${path} was not found in object!`, obj);
-        if (index + 1 === arr.length) pointer[key] = val;
-        return pointer[key];
-      }, obj);
-    },
-  };
-
-  var Constants = {
-    protectedKeys: ["$_componentId", "$props", "$methods", "$name", "$parent", "$listeners"],
-    listenerPrefix: "listen:",
+    //
+    // setKey(obj, path, val) {
+    //   const arr = path.split(".");
+    //   arr.reduce((pointer, key, index) => {
+    //     if (!(key in pointer)) Msg.fail(`${path} was not found in object!`, obj);
+    //     if (index + 1 === arr.length) pointer[key] = val;
+    //     return pointer[key];
+    //   }, obj);
+    // },
   };
 
   var ProxyTrap = {
@@ -249,10 +252,9 @@
             if (prop === "ReBarsPath") return tree.join(".");
             const value = Reflect.get(...arguments);
             if (typeof value === "function" && target.hasOwnProperty(prop)) return value.bind(proxyData);
-            // we dont watch any of the protected items
-            if (Constants.protectedKeys.includes(tree[0])) return value;
-            else if (trackGet) _addToQue(tree.concat(prop).join("."));
-            if (value !== null && typeof value === "object" && prop !== "methods")
+
+            if (trackGet) _addToQue(tree.concat(prop).join("."));
+            if (value !== null && typeof value === "object" && prop !== "methods" && value.constructor.name === "object")
               return _buildProxy(value, tree.concat(prop));
             else return value;
           },
@@ -260,19 +262,14 @@
           set: function(target, prop) {
             const ret = Reflect.set(...arguments);
             const path = tree.concat(prop).join(".");
-            // we dont trigger on protected keys
-            if (Constants.protectedKeys.includes(tree[0]))
-              Msg.warn(`attempted to set a protected key "${path}". readOnly properties are ${Constants.protectedKeys}`);
-            else _addToQue(path);
+            _addToQue(path);
             return ret;
           },
 
           deleteProperty: function(target, prop) {
             const ret = Reflect.deleteProperty(...arguments);
             const path = tree.concat(prop).join(".");
-            if (Constants.protectedKeys.includes(tree[0]))
-              Msg.fail(`cannot delete protected key ${path}. readOnly properties are ${Constants.protectedKeys}`);
-            else _addToQue(path);
+            _addToQue(path);
             return ret;
           },
         });
@@ -284,45 +281,8 @@
   };
 
   var Helpers = {
-    register({ app, instance, components, helpers, template, methods, name }) {
+    register({ instance, helpers, template, store }) {
       Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
-      instance.registerHelper("isComponent", cName => Object.keys(components).includes(cName));
-
-      instance.registerHelper("component", function(...args) {
-        const { hash, loc, data } = args.pop();
-
-        const cName = args[0];
-        if (!components[cName]) Msg.fail(`${name}: child component "${cName}" is not registered`, { template, loc });
-
-        // validate the props, add the passed methods after you bind them or you will loose scope
-        Object.entries(hash).forEach(([key, value]) => {
-          if (value === undefined) {
-            Msg.fail(
-              `${name}: passed "${key}" as undefined. If you really meant to, pass null instead.`,
-              {
-                template,
-                loc,
-              },
-              hash
-            );
-          }
-        });
-        // make sure all the listeners are good
-        Object.keys(hash)
-          .filter(key => key.startsWith(Constants.listenerPrefix))
-          .forEach(key => {
-            const methodName = hash[key];
-            if (!(methodName in data.root.$methods))
-              Msg.fail(
-                `${name}: listener "${methodName}" was not found in the ${name}'s methods.`,
-                { template, loc },
-                hash
-              );
-            else hash[key] = data.root.$methods[methodName];
-          });
-
-        return new instance.SafeString(components[cName].instance(hash).render());
-      });
 
       instance.registerHelper("debug", (obj, { hash, data, loc }) => {
         if (obj === undefined) Msg.fail(`${name}: undefined passed to debug`, { template, loc });
@@ -332,29 +292,21 @@
 
       instance.registerHelper("watch", function(...args) {
         const { fn, hash, data, loc } = args.pop();
-        const instId = data.root.$_componentId;
+
         const eId = Utils.randomId();
 
         const _getPath = target => {
           if (target === undefined) Msg.fail(`${name}: undefined cannot be watched`, { template, loc });
-
-          if (Utils.isProp(target))
-            Msg.fail(
-              `${name}: Do not watch $props. Each component has its own Proxy so the child will not get the update. Instead watch the item in the parent, and re-render the child component`,
-              { template, loc }
-            );
-
           return typeof target === "object" ? `${target.ReBarsPath}.*` : target;
         };
 
         const path = args.map(_getPath);
-        const renders = app.components.instances[instId].renders;
 
         if (!path.length) {
           const trap = ProxyTrap.create(
             data.root,
             paths => {
-              renders[eId].path = paths;
+              store.renders[eId].path = paths;
             },
             true
           );
@@ -366,38 +318,12 @@
           if (!Utils.hasKey(data.root, item)) Msg.fail(`${name}: cannot find path "${item}" to watch`, { template, loc });
         });
 
-        renders[eId] = {
+        store.renders[eId] = {
           path,
           render: () => fn(this),
         };
 
         return Utils.dom.wrapWatcher(eId, fn(this), hash);
-      });
-
-      instance.registerHelper("method", function() {
-        const [str, ...args] = arguments;
-        const [methodName, type = "click"] = str.split(":");
-        const { data, loc } = args.pop();
-
-        if (!(methodName in methods) && methodName !== "$emit")
-          Msg.fail(`${name}: "${methodName}" is not a method`, { template, loc });
-
-        const props = { "data-rbs-method": [data.root.$_componentId, type, methodName] };
-        if (args && args.length) props["data-rbs-method"] = props["data-rbs-method"].concat(args);
-        return new instance.SafeString(Utils.dom.propStr(props));
-      });
-
-      instance.registerHelper("bound", (path, { hash = {}, data, loc }) => {
-        const params = [data.root.$_componentId, path];
-        if (!Utils.hasKey(data.root, path)) Msg.fail(`${name}: does not have path "${path}"`, { template, loc });
-
-        const props = {
-          value: Utils.getKey(data.root, path),
-          ref: hash.ref || path,
-          "data-rbs-bound": params,
-        };
-
-        return new instance.SafeString(Utils.dom.propStr(props));
       });
     },
   };
@@ -445,7 +371,7 @@
   };
 
   var ReRender = {
-    paths({ app, paths, renders, name }) {
+    paths({ paths, renders }) {
       Object.entries(renders)
         .filter(([renderId, handler]) => {
           const matches = paths.some(path => Utils.shouldRender(path, handler.path));
@@ -458,12 +384,12 @@
 
           if (!Patch.hasChanged($target, html)) return;
 
-          if (Patch.canPatch($target)) {
-            Patch.compare({ app, $target, html });
-            Msg.log(`${name}: patching ${handler.path}`, $target);
-            Utils.dom.restoreState($target, stash);
-            return;
-          }
+          // if (Patch.canPatch($target)) {
+          //   Patch.compare({ app, $target, html });
+          //   Msg.log(`${name}: patching ${handler.path}`, $target);
+          //   Utils.dom.restoreState($target, stash);
+          //   return;
+          // }
 
           // warn for not having a ref on array update
           const lenPath = handler.path.find(path => path.endsWith(".length"));
@@ -479,233 +405,73 @@
           Utils.dom.restoreState($target, stash);
           Msg.log(`${name}: re-rendering watch block for ${handler.path}`, $target);
         });
-
-      app.deleteOrphans();
     },
   };
 
-  const restricted = ["component", "ref", "debug", "isComponent", "method", "bound", "watch", "isComponent"];
+  var app = {
+    app({ helpers = {}, template, data = {}, refs = {}, methods = {}, Handlebars = window.Handlebars }) {
+      const instance = Handlebars.create();
+      const templateFn = instance.compile(template);
+      const store = { renders: {} };
 
-  // too much destructuring making it confusting with colliding names
-  function register(
-    { id: appId, Handlebars, trace, helpers: globalHelpers, components: globalComponents },
-    { name, template, data = () => ({}), helpers = {}, hooks = {}, methods = {}, watchers = {}, components = [] }
-  ) {
-    const compDef = arguments[0];
+      const proxy = ProxyTrap.create(data, paths => {
+        Msg.log(`${name}: data changed "${paths}"`, store.renders);
+        ReRender.paths({ paths, renders: store.renders });
+      });
 
-    if (!name) Msg.fail("Every ReBars component should have a name!", compDef);
-    if (typeof data !== "function") Msg.fail(`${name}: component data must be a function`, compDef);
-    if (typeof template !== "string") Msg.fail("`${name}: needs a template string`", compDef);
+      Helpers.register({ instance, template, helpers, store });
 
-    const app = arguments[0];
-    const instance = Handlebars.create();
-    const templateFn = instance.compile(template);
+      return {
+        instance,
+        render($app) {
+          const scope = {
+            data: proxy,
+            methods,
+            refs,
+            $refs: () => Utils.dom.findRefs($app),
+            $app,
+          };
 
-    const regComps = components.reduce(
-      (regs, def) => {
-        const reg = register(app, def);
-        regs[def.name] = reg;
-        return regs;
-      },
-      { ...globalComponents.registered }
-    );
+          scope.methods = Utils.bind(scope.methods, scope);
+          scope.refs = Utils.bind(scope.refs, scope);
 
-    Object.keys(data()).forEach(key => {
-      if (restricted.concat(Object.keys(helpers)).includes(key))
-        Msg.fail(`${name}: cannot use "${key}" in your data as it's defined as a helper`, compDef);
-    });
-
-    Helpers.register({
-      app,
-      methods,
-      instance,
-      name,
-      helpers: { ...helpers, ...globalHelpers },
-      components: regComps,
-      template,
-    });
-
-    return {
-      instance($props = {}) {
-        const id = Utils.randomId();
-        const instData = data();
-        const renders = {};
-
-        const $listeners = Object.entries($props).reduce((listeners, [key, handler]) => {
-          if (key.startsWith(Constants.listenerPrefix)) {
-            listeners[key.replace(Constants.listenerPrefix, "")] = handler;
-            $props[key].delete;
+          function _checkForMethod($el, status) {
+            const method = $el.getAttribute("method");
+            if (method) {
+              const [eventType, methodName] = method.includes(":") ? method.split(":") : `click:${method}`.split(":");
+              if (status === "attached") $el.addEventListener(eventType, scope.methods[methodName]);
+              else $el.removeEventListener(eventType, scope.methods[methodName]);
+            }
           }
-          return listeners;
-        }, {});
 
-        let hasCreated = false;
+          const observer = new MutationObserver(mutationList => {
+            mutationList.forEach(({ addedNodes, removedNodes }) => {
+              addedNodes.forEach($node => {
+                if ($node.nodeType === Node.TEXT_NODE) return;
+                _checkForMethod($node, "attached");
+                $node.querySelectorAll("[method]").forEach($node => _checkForMethod($node, "attached"));
+              });
 
-        const scope = ProxyTrap.create(
-          {
-            ...instData,
-            ...{
-              $props,
-              $methods: methods,
-              $listeners,
-              $emit: (key, data = {}) => {
-                if ($listeners[key]) $listeners[key](data);
-              },
-              $name: name,
-              $_componentId: id,
-              $el: () => Utils.dom.findComponent(id),
-              $refs: () => Utils.dom.findRefs(id),
-            },
-          },
-          paths => {
-            if (!hasCreated) return;
-            Msg.log(`${name}: data changed "${paths}"`, renders);
-            // watchers...
-            Object.entries(watchers)
-              .reduce((capture, [key, handler]) => {
-                if (paths.some(path => Utils.shouldRender(path, key.split(",")))) capture.push(handler);
-                return capture;
-              }, [])
-              .forEach(handler => handler.call(scope));
-
-            ReRender.paths({ app, paths, renders, name });
-          }
-        );
-
-        if (hooks.created) hooks.created.call(scope);
-
-        // gotta delay this or it will fire immediately, before the que triggers
-        Utils.debounce(() => {
-          hasCreated = true;
-        })();
-
-        const compInst = {
-          id,
-          scope,
-          hooks,
-          renders,
-          handlers: {
-            bound(event) {
-              const [id, path] = event.currentTarget.dataset.rbsBound.split(",");
-              Utils.setKey(scope, path, event.target.value);
-            },
-            method(event) {
-              const [id, type, method, ...args] = event.currentTarget.dataset.rbsMethod.split(",");
-              if (method === "$emit") scope.$emit(args[0], scope[args[0]]);
-              else scope.$methods[method](event, ...args);
-            },
-          },
-          detached() {
-            if (hooks.detached) hooks.detached.call(scope);
-          },
-          attached() {
-            if (hooks.attached) hooks.attached.call(scope);
-          },
-          render() {
-            return Utils.dom.tagComponent(id, templateFn(scope), name);
-          },
-        };
-
-        app.components.instances[id] = compInst;
-        return compInst;
-      },
-    };
-  }
-
-  var Component = {
-    register,
-  };
-
-  var index = {
-    app({ $el, root, Handlebars = window.Handlebars, helpers = {}, components = [], trace = false }) {
-      if (!Handlebars) Msg.fail("noHbs");
-      if (!document.body.contains($el))
-        Msg.fail("$el passed to ReBars app is either undefined or not present in the document.");
-
-      window.ReBars = window.ReBars || {};
-      window.ReBars.trace = trace;
-
-      const app = {
-        id: Utils.randomId(),
-        Handlebars,
-        trace,
-        helpers,
-        $el,
-        // needs debounced to make sure we are all done
-        deleteOrphans: Utils.debounce(() => {
-          Object.keys(app.components.instances).forEach(id => {
-            if (!Utils.dom.findComponent(id)) delete app.components.instances[id];
+              removedNodes.forEach($node => {
+                if ($node.nodeType === Node.TEXT_NODE) return;
+                _checkForMethod($node, "detached");
+                $node.querySelectorAll("[method]").forEach($node => _checkForMethod($node, "detached"));
+              });
+            });
           });
-        }),
 
-        components: {
-          registered: {},
-          instances: {},
+          observer.observe($app, {
+            childList: true,
+            attributes: true,
+            subtree: true,
+          });
+
+          $app.innerHTML = templateFn(proxy);
         },
       };
-
-      app.components.registered = components.reduce((regs, def) => {
-        regs[def.name] = Component.register(app, def);
-        return regs;
-      }, {});
-
-      function _comp(action, $el) {
-        const method = action === "add" ? "attached" : "detached";
-        const cId = $el.dataset.rbsComp;
-        app.components.instances[cId][method]();
-      }
-      function _method(action, $method) {
-        const method = action === "add" ? "addEventListener" : "removeEventListener";
-        const [cId, type] = $method.dataset.rbsMethod.split(",");
-        $method[method](type, app.components.instances[cId].handlers.method);
-      }
-      function _bound(action, $bound) {
-        const method = action === "add" ? "addEventListener" : "removeEventListener";
-        const [cId, path] = $bound.dataset.rbsBound.split(",");
-        $bound[method]("input", app.components.instances[cId].handlers.bound);
-      }
-
-      const observer = new MutationObserver(mutationList => {
-        mutationList.forEach(({ addedNodes, removedNodes }) => {
-          addedNodes.forEach($node => {
-            if ($node.nodeType === Node.TEXT_NODE) return;
-
-            if ($node.dataset.rbsComp) _comp("add", $node);
-            if ($node.dataset.rbsMethod) _method("add", $node);
-            if ($node.dataset.rbsBound) _bound("add", $node);
-
-            $node.querySelectorAll("[data-rbs-comp]").forEach(_comp.bind(null, "add"));
-            $node.querySelectorAll("[data-rbs-method]").forEach(_method.bind(null, "add"));
-            $node.querySelectorAll("[data-rbs-bound]").forEach(_bound.bind(null, "add"));
-          });
-
-          removedNodes.forEach($node => {
-            if ($node.nodeType === Node.TEXT_NODE) return;
-
-            if ($node.dataset.rbsMethod) _method("remove", $node);
-            if ($node.dataset.rbsBound) _bound("remove", $node);
-            if ($node.dataset.rbsComp) _comp("remove", $node);
-
-            $node.querySelectorAll("[data-rbs-method]").forEach(_method.bind(null, "remove"));
-            $node.querySelectorAll("[data-rbs-bound]").forEach(_bound.bind(null, "remove"));
-            $node.querySelectorAll("[data-rbs-comp]").forEach(_comp.bind(null, "remove"));
-          });
-        });
-      });
-
-      observer.observe($el, {
-        childList: true,
-        attributes: true,
-        subtree: true,
-      });
-
-      $el.innerHTML = Component.register(app, root)
-        .instance()
-        .render();
-      return app;
     },
   };
 
-  return index;
+  return app;
 
 })));

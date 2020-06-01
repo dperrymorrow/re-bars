@@ -19,13 +19,6 @@ export default {
 
       const _getPath = target => {
         if (target === undefined) Msg.fail(`${name}: undefined cannot be watched`, { template, loc });
-
-        if (Utils.isProp(target))
-          Msg.fail(
-            `${name}: Do not watch $props. Each component has its own Proxy so the child will not get the update. Instead watch the item in the parent, and re-render the child component`,
-            { template, loc }
-          );
-
         return typeof target === "object" ? `${target.ReBarsPath}.*` : target;
       };
 

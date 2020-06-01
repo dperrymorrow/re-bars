@@ -1,24 +1,10 @@
 import Msg from "../msg.js";
+import Constants from "../constants.js";
 
 export default {
-  tagComponent(id, html, name) {
-    const $tmp = this.getShadow(html);
-    const $root = $tmp.firstElementChild;
-
-    if (!$root) throw new Error("there was no root node. Components need a root element.");
-    if (["P"].includes($root.nodeName))
-      Msg.fail(`${name}: <${$root.nodeName.toLowerCase()}> cannot be a root element of for a component, try a <div>`);
-    if ($tmp.children.length > 1) Msg.fail(`${name}: multiple root nodes are not allowed for a component.`);
-    if ($root.dataset.rbsWatch) Msg.fail(`${name}: cannot have a watch as the root node of a component`);
-
-    $root.dataset.rbsComp = id;
-    const content = $tmp.innerHTML;
-    return content;
-  },
-
   recordState($target) {
     const $active = document.activeElement;
-    const ref = $active.getAttribute("ref");
+    const ref = $active.getAttribute(Constants.attrs.ref);
 
     if (!$target.contains($active) || !ref) return null;
     return {
@@ -27,6 +13,22 @@ export default {
       scrollLeft: $active.scrollLeft,
       selectionStart: $active.selectionStart,
     };
+  },
+
+  listeners($el, methods, action, recursive = true) {
+    if ($el.nodeType === Node.TEXT_NODE) return;
+    let method;
+    const attr = $el.getAttribute(Constants.attrs.method);
+    if (attr) {
+      const [type, name] = attr.includes(":") ? attr.split(":") : `click:${attr}`.split(":");
+      method = { type, name };
+    }
+
+    if (method) $el[`${action}EventListener`](method.type, methods[method.name]);
+    if (recursive)
+      $el
+        .querySelectorAll(`[${Constants.attrs.method}]`)
+        .forEach($node => this.listeners($node, methods, action, false));
   },
 
   restoreState($target, activeRef) {
@@ -52,27 +54,24 @@ export default {
     }
   },
 
-  findComponent: id => document.querySelector(`[data-rbs-comp="${id}"]`),
-
   findRef: ($target, ref) => {
-    if ($target.getAttribute("ref") === ref) return $target;
-    return $target.querySelector(`[ref="${ref}"]`);
+    if ($target.getAttribute(Constants.attrs.ref) === ref) return $target;
+    return $target.querySelector(`[${Constants.attrs.ref}="${ref}"]`);
   },
 
-  findRefs(cId) {
-    const $root = this.findComponent(cId);
-    const $refs = Array.from($root.querySelectorAll("[ref]"));
-    if ($root.getAttribute("ref")) $refs.push($root);
+  findRefs($root) {
+    const attr = Constants.attrs.ref;
+    const $refs = Array.from($root.querySelectorAll(`[${attr}]`));
 
     return $refs.reduce((obj, $el) => {
-      const key = $el.getAttribute("ref");
+      const key = $el.getAttribute(attr);
       const target = obj[key];
       obj[key] = target ? [target].concat($el) : $el;
       return obj;
     }, {});
   },
 
-  findWatcher: id => document.querySelector(`[data-rbs-watch="${id}"]`),
+  findWatcher: id => document.querySelector(`[${Constants.attrs.watch}="${id}"]`),
 
   propStr: props =>
     Object.entries(props)
@@ -86,7 +85,7 @@ export default {
     const { tag, ...props } = { ...{ tag: "span" }, ...hash };
     const propStr = this.propStr(props);
     const style = !html.length ? "style='display:none;'" : "";
-    return `<${tag} ${propStr} ${style} data-rbs-watch="${id}">${html}</${tag}>`;
+    return `<${tag} ${propStr} ${style} ${Constants.attrs.watch}="${id}">${html}</${tag}>`;
   },
 
   getShadow(html) {

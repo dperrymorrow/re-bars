@@ -1,6 +1,4 @@
 import Utils from "./utils/index.js";
-import Constants from "./constants.js";
-import Msg from "./msg.js";
 
 export default {
   create(data, callback, trackGet = false) {
@@ -22,10 +20,9 @@ export default {
           if (prop === "ReBarsPath") return tree.join(".");
           const value = Reflect.get(...arguments);
           if (typeof value === "function" && target.hasOwnProperty(prop)) return value.bind(proxyData);
-          // we dont watch any of the protected items
-          if (Constants.protectedKeys.includes(tree[0])) return value;
-          else if (trackGet) _addToQue(tree.concat(prop).join("."));
-          if (value !== null && typeof value === "object" && prop !== "methods" && value.constructor.name === "object")
+
+          if (trackGet) _addToQue(tree.concat(prop).join("."));
+          if (value && typeof value === "object" && ["Array", "Object"].includes(value.constructor.name))
             return _buildProxy(value, tree.concat(prop));
           else return value;
         },
@@ -33,19 +30,14 @@ export default {
         set: function(target, prop) {
           const ret = Reflect.set(...arguments);
           const path = tree.concat(prop).join(".");
-          // we dont trigger on protected keys
-          if (Constants.protectedKeys.includes(tree[0]))
-            Msg.warn(`attempted to set a protected key "${path}". readOnly properties are ${Constants.protectedKeys}`);
-          else _addToQue(path);
+          _addToQue(path);
           return ret;
         },
 
         deleteProperty: function(target, prop) {
           const ret = Reflect.deleteProperty(...arguments);
           const path = tree.concat(prop).join(".");
-          if (Constants.protectedKeys.includes(tree[0]))
-            Msg.fail(`cannot delete protected key ${path}. readOnly properties are ${Constants.protectedKeys}`);
-          else _addToQue(path);
+          _addToQue(path);
           return ret;
         },
       });

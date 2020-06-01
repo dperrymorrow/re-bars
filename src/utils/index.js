@@ -27,11 +27,21 @@ export default {
     };
   },
 
-  isProp(target) {
-    if (typeof target === "string" && target.startsWith("$props")) return true;
-    else if (typeof target === "object" && target.ReBarsPath && target.ReBarsPath.startsWith("$props")) return true;
-    return false;
+  bind(obj, scope) {
+    return Object.keys(obj).reduce(
+      (bound, key) => {
+        bound[key] = bound[key].bind(scope);
+        return bound;
+      },
+      { ...obj }
+    );
   },
+
+  // isProp(target) {
+  //   if (typeof target === "string" && target.startsWith("$props")) return true;
+  //   else if (typeof target === "object" && target.ReBarsPath && target.ReBarsPath.startsWith("$props")) return true;
+  //   return false;
+  // },
 
   shouldRender(path, watch) {
     const watchPaths = Array.isArray(watch) ? watch : [watch];
@@ -67,13 +77,13 @@ export default {
       return false;
     }
   },
-
-  setKey(obj, path, val) {
-    const arr = path.split(".");
-    arr.reduce((pointer, key, index) => {
-      if (!(key in pointer)) Msg.fail(`${path} was not found in object!`, obj);
-      if (index + 1 === arr.length) pointer[key] = val;
-      return pointer[key];
-    }, obj);
-  },
+  //
+  // setKey(obj, path, val) {
+  //   const arr = path.split(".");
+  //   arr.reduce((pointer, key, index) => {
+  //     if (!(key in pointer)) Msg.fail(`${path} was not found in object!`, obj);
+  //     if (index + 1 === arr.length) pointer[key] = val;
+  //     return pointer[key];
+  //   }, obj);
+  // },
 };

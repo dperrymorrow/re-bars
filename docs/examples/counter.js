@@ -5,7 +5,7 @@ export default {
         {{#watch}}
           <span>{{ clicked }}</span>
         {{/watch}}
-      <button ref="clicker">Click Me</button>
+      <button method="click:incriment">Click Me</button>
     </h3>
   `,
 
@@ -14,13 +14,6 @@ export default {
   methods: {
     incriment() {
       this.data.clicked++;
-    },
-  },
-
-  refs: {
-    clicker($el, status) {
-      if (status === "attached") $el.addEventListener("click", this.methods.incriment);
-      else $el.removeEventListener("click", this.methods.incriment);
     },
   },
 };

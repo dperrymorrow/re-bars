@@ -5,7 +5,7 @@ import gzipPlugin from "rollup-plugin-gzip";
 
 export default [
   {
-    input: "src/index.js",
+    input: "src/app.js",
     output: [
       { file: "dist/re-bars.umd.js", format: "umd", name: "ReBars" },
       {
@@ -20,7 +20,7 @@ export default [
     // plugins: [strip()],
   },
   {
-    input: "src/index.js",
+    input: "src/app.js",
     output: [
       { file: "dist/re-bars.esm.js", format: "module", name: "ReBars" },
       {
