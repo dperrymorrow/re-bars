@@ -5,13 +5,15 @@ import ProxyTrap from "./proxy-trap.js";
 import Utils from "./utils/index.js";
 
 export default {
-  app({ helpers = {}, template, data = {}, refs = {}, methods = {}, Handlebars = window.Handlebars }) {
+  app({ helpers = {}, template, data = {}, refs = {}, methods = {}, Handlebars = window.Handlebars, trace = false }) {
     const instance = Handlebars.create();
     const templateFn = instance.compile(template);
     const store = { renders: {} };
 
+    Msg.setTrace(trace);
+
     const proxy = ProxyTrap.create(data, paths => {
-      Msg.log(`${name}: data changed "${paths}"`, store.renders);
+      Msg.log(`data changed "${paths}"`, store.renders);
       ReRender.paths({ paths, renders: store.renders });
     });
 

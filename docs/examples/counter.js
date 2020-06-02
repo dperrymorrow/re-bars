@@ -2,14 +2,19 @@ export default {
   template: /*html*/ `
     <h3>
       Button have been clicked
-        {{#watch}}
-          <span>{{ clicked }}</span>
-        {{/watch}}
-      <button method="click:incriment">Click Me</button>
+      {{#watch}}
+        {{ clicked }}
+      {{/watch}}
+
+      <button rbs-method="click:incriment">
+        Click Me
+      </button>
     </h3>
   `,
 
   data: { clicked: 0 },
+
+  trace: true,
 
   methods: {
     incriment() {

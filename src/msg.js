@@ -1,3 +1,5 @@
+let trace = true;
+
 const styles = {
   warn: "background: #484915; color: #ffffbe; padding: .1em; font-weight: normal;",
   log: "background: #324645; color:#c9faff; padding: .1em; font-weight: normal;",
@@ -17,7 +19,7 @@ const _showTpl = ({ template, loc }) => {
 };
 
 const _msg = (type, msg, ...payloads) => {
-  let str = msg;
+  let str = `ReBars: ${msg}`;
   if (typeof payloads[0] === "object" && "template" in payloads[0] && "loc" in payloads[0]) {
     str += _showTpl(payloads[0]);
     payloads.splice(0, 1);
@@ -25,7 +27,7 @@ const _msg = (type, msg, ...payloads) => {
 
   if (["warn", "log"].includes(type)) {
     str = "%c " + str + " ";
-    if (!window.ReBars || !window.ReBars.trace) return;
+    if (!trace) return;
     if (payloads) {
       console.groupCollapsed(str, styles[type]);
       payloads.forEach(console.log);
@@ -40,6 +42,7 @@ const _msg = (type, msg, ...payloads) => {
 };
 
 export default {
+  setTrace: val => (trace = val),
   warn: _msg.bind(null, "warn"),
   fail: _msg.bind(null, "throw"),
   log: _msg.bind(null, "log"),

@@ -1,7 +1,10 @@
 import Utils from "./index.js";
+import Constants from "../constants.js";
+
+const refAttr = Constants.attrs.ref;
 
 function _isEqHtml(html1, html2) {
-  const reg = new RegExp(/data-rbs(.*?)="(.*?)"/g);
+  const reg = new RegExp(/rbs-(.*?)="(.*?)"/g);
   return html1.replace(reg, "") === html2.replace(reg, "");
 }
 
@@ -14,7 +17,7 @@ export default {
   canPatch: $target =>
     $target.children.length &&
     $target.children.length > 1 &&
-    Array.from($target.children).every($el => $el.getAttribute("ref")),
+    Array.from($target.children).every($el => $el.getAttribute(refAttr)),
   hasChanged: ($target, html) => !_isEqHtml($target.innerHTML, html),
 
   compare({ app, $target, html }) {
@@ -23,21 +26,21 @@ export default {
 
     // deletes and updates
     Array.from($target.children).forEach($r => {
-      const $v = Utils.dom.findRef($shadow, $r.getAttribute("ref"));
+      const $v = Utils.dom.findRef($shadow, $r.getAttribute(refAttr));
       if (!$v) $r.remove();
       else if (!_isEqHtml($v.innerHTML, $r.innerHTML)) $r.replaceWith($v.cloneNode(true));
     });
 
     // additions
     $vChilds.forEach(($v, index) => {
-      const $r = Utils.dom.findRef($target, $v.getAttribute("ref"));
+      const $r = Utils.dom.findRef($target, $v.getAttribute(refAttr));
       if (!$r) _insertAt($target, $v.cloneNode(true), index);
     });
 
     // sorting
     $vChilds.forEach(($v, index) => {
       const $r = $target.children[index];
-      if ($r.getAttribute("ref") !== $v.getAttribute("ref")) $r.replaceWith($v.cloneNode(true));
+      if ($r.getAttribute("ref") !== $v.getAttribute(refAttr)) $r.replaceWith($v.cloneNode(true));
     });
   },
 };

@@ -27,7 +27,7 @@ export default {
         const lenPath = handler.path.find(path => path.endsWith(".length"));
         if (lenPath)
           Msg.warn(
-            `${name}: patching "${handler.path}" add a ref="someUniqueKey" to each to avoid re-rendering the entire Array of elements`,
+            `patching "${handler.path}" add a ref="someUniqueKey" to each to avoid re-rendering the entire Array of elements`,
             $target
           );
 
@@ -35,7 +35,7 @@ export default {
         $target.innerHTML = html;
 
         Utils.dom.restoreState($target, stash);
-        Msg.log(`${name}: re-rendering watch block for ${handler.path}`, $target);
+        Msg.log(`re-rendering watch block for ${handler.path}`, $target);
       });
   },
 };

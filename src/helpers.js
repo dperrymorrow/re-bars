@@ -7,7 +7,7 @@ export default {
     Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
 
     instance.registerHelper("debug", (obj, { hash, data, loc }) => {
-      if (obj === undefined) Msg.fail(`${name}: undefined passed to debug`, { template, loc });
+      if (obj === undefined) Msg.fail("undefined passed to debug", { template, loc });
       const props = { class: "debug", ...hash };
       return new instance.SafeString(`<pre ${Utils.dom.propStr(props)}>${Utils.stringify(obj)}</pre>`);
     });
@@ -18,7 +18,7 @@ export default {
       const eId = Utils.randomId();
 
       const _getPath = target => {
-        if (target === undefined) Msg.fail(`${name}: undefined cannot be watched`, { template, loc });
+        if (target === undefined) Msg.fail("undefined cannot be watched", { template, loc });
         return typeof target === "object" ? `${target.ReBarsPath}.*` : target;
       };
 
@@ -37,7 +37,7 @@ export default {
       }
 
       path.forEach(item => {
-        if (!Utils.hasKey(data.root, item)) Msg.fail(`${name}: cannot find path "${item}" to watch`, { template, loc });
+        if (!Utils.hasKey(data.root, item)) Msg.fail(`cannot find path "${item}" to watch`, { template, loc });
       });
 
       store.renders[eId] = {
