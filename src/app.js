@@ -17,7 +17,7 @@ export default {
       ReRender.paths({ paths, renders: store.renders });
     });
 
-    Helpers.register({ instance, template, helpers, store });
+    Helpers.register({ instance, template, helpers, store, methods });
 
     return {
       instance,
@@ -30,13 +30,20 @@ export default {
           $app,
         };
 
+        function handler(event) {
+          const [type, methodName, ...rest] = Utils.dom.getMethodArr(event.currentTarget);
+          scope.methods[methodName](event, ...rest);
+        }
+
         scope.methods = Utils.bind(scope.methods, scope);
         scope.refs = Utils.bind(scope.refs, scope);
 
         const observer = new MutationObserver(mutationList => {
           mutationList.forEach(({ addedNodes, removedNodes }) => {
-            addedNodes.forEach($node => Utils.dom.listeners($node, scope.methods, "add"));
-            removedNodes.forEach($node => Utils.dom.listeners($node, scope.methods, "remove"));
+            addedNodes.forEach($el => Utils.dom.listeners({ $el, methods: scope.methods, handler, action: "add" }));
+            removedNodes.forEach($el =>
+              Utils.dom.listeners({ $el, methods: scope.methods, handler, action: "remove" })
+            );
           });
         });
 

@@ -1,10 +1,11 @@
 import Msg from "../msg.js";
 import Constants from "../constants.js";
+const { attrs } = Constants;
 
 export default {
   recordState($target) {
     const $active = document.activeElement;
-    const ref = $active.getAttribute(Constants.attrs.ref);
+    const ref = $active.getAttribute(attrs.ref);
 
     if (!$target.contains($active) || !ref) return null;
     return {
@@ -15,20 +16,21 @@ export default {
     };
   },
 
-  listeners($el, methods, action, recursive = true) {
-    if ($el.nodeType === Node.TEXT_NODE) return;
-    let method;
-    const attr = $el.getAttribute(Constants.attrs.method);
-    if (attr) {
-      const [type, name] = attr.includes(":") ? attr.split(":") : `click:${attr}`.split(":");
-      method = { type, name };
-    }
+  getMethodArr($el) {
+    const attr = $el.getAttribute(attrs.method);
+    return attr ? JSON.parse(attr) : null;
+  },
 
-    if (method) $el[`${action}EventListener`](method.type, methods[method.name]);
+  listeners({ $el, methods, action, recursive = true, handler }) {
+    if ($el.nodeType === Node.TEXT_NODE) return;
+
+    const data = this.getMethodArr($el);
+    if (data) $el[`${action}EventListener`](data[0], handler);
+
     if (recursive)
       $el
-        .querySelectorAll(`[${Constants.attrs.method}]`)
-        .forEach($node => this.listeners($node, methods, action, false));
+        .querySelectorAll(`[${attrs.method}]`)
+        .forEach($node => this.listeners({ ...arguments[0], $el: $node, recursive: false }));
   },
 
   restoreState($target, activeRef) {
@@ -55,23 +57,23 @@ export default {
   },
 
   findRef: ($target, ref) => {
-    if ($target.getAttribute(Constants.attrs.ref) === ref) return $target;
-    return $target.querySelector(`[${Constants.attrs.ref}="${ref}"]`);
+    if ($target.getAttribute(attrs.ref) === ref) return $target;
+    return $target.querySelector(`[${attrs.ref}="${ref}"]`);
   },
 
   findRefs($root) {
-    const attr = Constants.attrs.ref;
-    const $refs = Array.from($root.querySelectorAll(`[${attr}]`));
+    const { ref } = attrs;
+    const $refs = Array.from($root.querySelectorAll(`[${ref}]`));
 
     return $refs.reduce((obj, $el) => {
-      const key = $el.getAttribute(attr);
+      const key = $el.getAttribute(ref);
       const target = obj[key];
       obj[key] = target ? [target].concat($el) : $el;
       return obj;
     }, {});
   },
 
-  findWatcher: id => document.querySelector(`[${Constants.attrs.watch}="${id}"]`),
+  findWatcher: id => document.querySelector(`[${attrs.watch}="${id}"]`),
 
   propStr: props =>
     Object.entries(props)
@@ -85,7 +87,7 @@ export default {
     const { tag, ...props } = { ...{ tag: "span" }, ...hash };
     const propStr = this.propStr(props);
     const style = !html.length ? "style='display:none;'" : "";
-    return `<${tag} ${propStr} ${style} ${Constants.attrs.watch}="${id}">${html}</${tag}>`;
+    return `<${tag} ${propStr} ${style} ${attrs.watch}="${id}">${html}</${tag}>`;
   },
 
   getShadow(html) {

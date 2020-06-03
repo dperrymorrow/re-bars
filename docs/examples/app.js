@@ -14,7 +14,7 @@ export default {
         <input
           type="text"
           value="{{ header.title }}"
-          rbs-method="input:updateTitle"
+          {{ on "input" "updateTitle" }}
         />
       </label>
 
@@ -23,7 +23,7 @@ export default {
         <input
           type="text"
           value="{{ header.description }}"
-          rbs-method="input:updateDescription"
+          {{ on "input" "updateDescription" }}
         />
       </label>
     </div>
@@ -31,14 +31,13 @@ export default {
     <ul class="simple">
       {{#watch "todos.*" }}
         {{#each todos }}
-          <li rbs-ref="{{ id }}">
+          <li {{ ref id }}>
             <div class="todo">
               <label>
                 <input
                   type="checkbox"
-                  rbs-method="toggleDone"
+                  {{ on "click" "toggleDone" id done }}
                   {{ isChecked done }}
-                  data-id="{{ id }}"
                 />
                 {{#if done }}
                   <s>{{ name }}</s>
@@ -48,9 +47,7 @@ export default {
               </label>
 
               <div class="actions">
-                <button
-                  rbs-method="deleteTodo"
-                  data-id="{{ id }}">
+                <button {{ on "click" "deleteTodo" id }}>
                   delete
                 </button>
               </div>
@@ -63,15 +60,14 @@ export default {
     {{#watch}}
       {{#if adding }}
         <form>
-          <input type="text" rbs-ref="newName" placeholder="the new todo" />
-          <button rbs-method="addItem">Add todo</button>
-          <button rbs-method="toggleCreate">Cancel</button>
+          <input type="text" {{ ref "newName" }} placeholder="the new todo" />
+          <button {{ on "click" "addItem" }}>Add todo</button>
+          <button {{ on "click" "toggleCreate" }}>Cancel</button>
         </form>
       {{else}}
-        <button rbs-method="toggleCreate">Add another</button>
+        <button {{ on "click" "toggleCreate" }}>Add another</button>
       {{/if}}
     {{/watch}}
-
   </div>
   `,
 
@@ -118,6 +114,7 @@ export default {
         id: new Date().getTime(),
         name: $input.value,
       });
+
       $input.value = "";
     },
 
@@ -125,14 +122,14 @@ export default {
       return this.data.todos.findIndex(item => item.id === parseInt(id));
     },
 
-    deleteTodo(event) {
-      const index = this.methods.findTodo(event.target.dataset.id);
+    deleteTodo(event, id) {
+      const index = this.methods.findTodo(id);
       this.data.todos.splice(index, 1);
     },
 
-    toggleDone(event) {
-      const todo = this.data.todos[this.methods.findTodo(event.target.dataset.id)];
-      todo.done = !todo.done;
+    toggleDone(event, id, done) {
+      const todo = this.data.todos[this.methods.findTodo(id)];
+      todo.done = !done;
     },
 
     toggleCreate(event) {

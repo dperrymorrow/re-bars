@@ -28,101 +28,88 @@ export default {
 
     {{#watch "filters.*" "todos.*" tag="ul"}}
       {{#each filteredTodos as | todo | }}
-        <li ref="{{ todo.id }}">
-          {{
-            component "Todo"
-            listen:remove="deleteTodo"
-            todo=todo
-          }}
+        <li rbs-ref="{{ todo.id }}">
+
         </li>
       {{/each}}
     {{/watch}}
 
-    {{
-      component "AddTodo"
-      listen:addTodo="addTodo"
-    }}
+
   <div>
   `,
 
-  name: "DemoApp",
+  data: {
+    filteredTodos() {
+      let list = this.data.todos.concat();
+      if (this.data.filters.state === "incomplete") list = this.data.todos.filter(t => !t.done);
+      else if (this.data.filters.state === "completed") list = this.data.todos.filter(t => t.done);
 
-  data() {
-    return {
-      filteredTodos() {
-        let list = this.todos.concat();
-        if (this.filters.state === "incomplete") list = this.todos.filter(t => !t.done);
-        else if (this.filters.state === "completed") list = this.todos.filter(t => t.done);
+      const sorted = list.sort((a, b) => {
+        if (this.filters.sortBy === "name") return a.name.localeCompare(b.name);
+        else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
+      });
 
-        const sorted = list.sort((a, b) => {
-          if (this.filters.sortBy === "name") return a.name.localeCompare(b.name);
-          else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
-        });
+      return this.filters.sortDir === "asc" ? sorted : sorted.reverse();
+    },
 
-        return this.filters.sortDir === "asc" ? sorted : sorted.reverse();
+    filters: {
+      state: null,
+      sortBy: "name",
+      sortDir: "asc",
+    },
+    header: {
+      title: "ReBars Todos",
+      description: "Some things that need done",
+    },
+    todos: [
+      {
+        done: false,
+        name: "Wash the car",
+        updated: "3/1/2020, 12:37:10 PM",
+        id: 21,
+      },
+      {
+        done: true,
+        name: "Shopping for groceries",
+        updated: "2/27/2020, 2:37:10 PM",
+        id: 22,
       },
 
-      filters: {
-        state: null,
-        sortBy: "name",
-        sortDir: "asc",
+      {
+        done: false,
+        name: "Code some Javascript",
+        updated: "1/27/2020, 9:37:10 AM",
+        id: 23,
       },
-      header: {
-        title: "ReBars Todos",
-        description: "Some things that need done",
+
+      {
+        done: true,
+        name: "Go for a run",
+        updated: "1/15/2020, 10:37:10 PM",
+        id: 24,
       },
-      todos: [
-        {
-          done: false,
-          name: "Wash the car",
-          updated: "3/1/2020, 12:37:10 PM",
-          id: 21,
-        },
-        {
-          done: true,
-          name: "Shopping for groceries",
-          updated: "2/27/2020, 2:37:10 PM",
-          id: 22,
-        },
-
-        {
-          done: false,
-          name: "Code some Javascript",
-          updated: "1/27/2020, 9:37:10 AM",
-          id: 23,
-        },
-
-        {
-          done: true,
-          name: "Go for a run",
-          updated: "1/15/2020, 10:37:10 PM",
-          id: 24,
-        },
-      ],
-    };
+    ],
   },
-
-  components: [Add, Todo, Filters],
 
   methods: {
     addTodo(todo) {
-      this.todos.push(todo);
-      this.filters.state = null;
+      this.data.todos.push(todo);
+      this.data.filters.state = null;
     },
 
     saveTodo(todo) {
-      const index = this.todos.findIndex(t => t.id === todo.id);
-      this.todos[index] = todo;
+      const index = this.data.todos.findIndex(t => t.id === todo.id);
+      this.data.todos[index] = todo;
     },
 
     deleteTodo(todo) {
-      const index = this.todos.findIndex(t => t.id === todo.id);
-      this.todos.splice(index, 1);
+      const index = this.data.todos.findIndex(t => t.id === todo.id);
+      this.data.todos.splice(index, 1);
     },
 
     showAdd(event) {
       event.preventDefault();
-      this.uiState.adding = true;
+      this.data.uiState.adding = true;
     },
   },
 };

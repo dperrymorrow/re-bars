@@ -1,4 +1,5 @@
 let trace = true;
+const offset = 5;
 
 const styles = {
   warn: "background: #484915; color: #ffffbe; padding: .1em; font-weight: normal;",
@@ -6,16 +7,14 @@ const styles = {
 };
 
 const _showTpl = ({ template, loc }) => {
-  const lines = template.split("\n").slice(loc.start.line - 1, loc.end.line);
-  const leadingSpaces = Array(lines[0].length - lines[0].trim().length).join(" ");
-  const trimmed = lines.map(line => line.replace(leadingSpaces, "      "));
-  trimmed[0] = `>>>> ${trimmed[0].trim()}`;
+  const errIndex = loc.start.line - 1;
+  const lines = template.split("\n");
+  lines[errIndex] += `\n${Array(loc.start.column + 1).join("-")}^`;
+  const trace = lines.slice(loc.start.line - offset, loc.end.line + offset);
 
-  return `
-  template line: ${loc.start.line}
-  ============================================
-  ${trimmed.join("\n")}
-  `;
+  return ["", `template line ${loc.start.line}`, "============================================"]
+    .concat(trace)
+    .join("\n");
 };
 
 const _msg = (type, msg, ...payloads) => {
