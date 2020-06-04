@@ -20,10 +20,12 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
 
     <script type="module">
-      import ReBars from "../../../src/index.js";
+      import ReBars from "../../../src/app.js";
       import DemoApp from "./app.js";
 
-      ReBars.app(DemoApp).render(document.getElementById("demo-app"));
+      ReBars.app(DemoApp)
+        .render(document.getElementById("demo-app"));
+
     </script>
   </body>
 </html>

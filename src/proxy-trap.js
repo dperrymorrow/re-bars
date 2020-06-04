@@ -19,7 +19,7 @@ export default {
         get: function(target, prop) {
           if (prop === "ReBarsPath") return tree.join(".");
           const value = Reflect.get(...arguments);
-          if (typeof value === "function" && target.hasOwnProperty(prop)) return value.bind(proxyData);
+          // if (typeof value === "function" && target.hasOwnProperty(prop)) return value.bind(scope);
 
           if (trackGet) _addToQue(tree.concat(prop).join("."));
           if (value && typeof value === "object" && ["Array", "Object"].includes(value.constructor.name))

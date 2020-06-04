@@ -12,31 +12,33 @@ export default {
 
     Msg.setTrace(trace);
 
-    const proxy = ProxyTrap.create(data, paths => {
-      Msg.log(`data changed "${paths}"`, store.renders);
-      ReRender.paths({ paths, renders: store.renders });
-    });
-
     Helpers.register({ instance, template, helpers, store, methods });
 
     return {
       instance,
       render($app) {
         const scope = {
-          data: proxy,
-          methods,
-          refs,
           $refs: () => Utils.dom.findRefs($app),
           $app,
+          data,
         };
+
+        scope.methods = Utils.bind(methods, scope);
+
+        scope.data = Object.entries(scope.data).reduce((scoped, [key, value]) => {
+          if (typeof value === "function" && scoped.hasOwnProperty(key)) scoped[key] = value.bind(scope);
+          return scoped;
+        }, data);
+
+        scope.data = ProxyTrap.create(data, paths => {
+          Msg.log(`data changed "${paths}"`, store.renders);
+          ReRender.paths({ paths, renders: store.renders });
+        });
 
         function handler(event) {
           const [type, methodName, ...rest] = Utils.dom.getMethodArr(event.currentTarget);
           scope.methods[methodName](event, ...rest);
         }
-
-        scope.methods = Utils.bind(scope.methods, scope);
-        scope.refs = Utils.bind(scope.refs, scope);
 
         const observer = new MutationObserver(mutationList => {
           mutationList.forEach(({ addedNodes, removedNodes }) => {
@@ -53,7 +55,7 @@ export default {
           subtree: true,
         });
 
-        $app.innerHTML = templateFn(proxy);
+        $app.innerHTML = templateFn(scope.data);
       },
     };
   },

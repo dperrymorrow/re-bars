@@ -13,17 +13,17 @@ export default {
 
       <label>
         Title:
-        <input type="text" {{ bound "header.title" }}/>
+        <input type="text" />
       </label>
 
       <label>
         Description:
-        <input type="text" {{ bound "header.description" }}/>
+        <input type="text" />
       </label>
     </div>
 
     {{#watch}}
-      {{ component "filters" filters=filters }}
+
     {{/watch}}
 
     {{#watch "filters.*" "todos.*" tag="ul"}}
@@ -45,11 +45,11 @@ export default {
       else if (this.data.filters.state === "completed") list = this.data.todos.filter(t => t.done);
 
       const sorted = list.sort((a, b) => {
-        if (this.filters.sortBy === "name") return a.name.localeCompare(b.name);
+        if (this.data.filters.sortBy === "name") return a.name.localeCompare(b.name);
         else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
       });
 
-      return this.filters.sortDir === "asc" ? sorted : sorted.reverse();
+      return this.data.filters.sortDir === "asc" ? sorted : sorted.reverse();
     },
 
     filters: {
