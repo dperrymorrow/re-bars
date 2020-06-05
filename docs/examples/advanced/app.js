@@ -13,54 +13,35 @@ export default {
 
       <label>
         Title:
-        <input type="text" />
+        <input type="text" value="{{ header.title }}" {{ on "input" "updateTitle" }} />
       </label>
 
       <label>
         Description:
-        <input type="text" />
+        <input type="text" value="{{ header.description }}" {{ on "input" "updateDescription" }} />
       </label>
     </div>
 
-    {{#watch}}
+    {{> Filters }}
 
-    {{/watch}}
-
-    {{#watch "filters.*" "todos.*" tag="ul"}}
+    {{#watch "filters.*" "todos.length" tag="ul"}}
       {{#each filteredTodos as | todo | }}
-        <li rbs-ref="{{ todo.id }}">
-
-        </li>
+        {{> Todo todo=todo }}
       {{/each}}
     {{/watch}}
 
-
+    {{> Add }}
   <div>
   `,
 
+  trace: true,
+
   data: {
-    filteredTodos() {
-      let list = this.data.todos.concat();
-      if (this.data.filters.state === "incomplete") list = this.data.todos.filter(t => !t.done);
-      else if (this.data.filters.state === "completed") list = this.data.todos.filter(t => t.done);
-
-      const sorted = list.sort((a, b) => {
-        if (this.data.filters.sortBy === "name") return a.name.localeCompare(b.name);
-        else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
-      });
-
-      return this.data.filters.sortDir === "asc" ? sorted : sorted.reverse();
-    },
-
-    filters: {
-      state: null,
-      sortBy: "name",
-      sortDir: "asc",
-    },
     header: {
       title: "ReBars Todos",
       description: "Some things that need done",
     },
+    editingId: null,
     todos: [
       {
         done: false,
@@ -91,25 +72,19 @@ export default {
     ],
   },
 
+  partials: {
+    Todo,
+    Filters,
+    Add,
+  },
+
   methods: {
-    addTodo(todo) {
-      this.data.todos.push(todo);
-      this.data.filters.state = null;
+    updateTitle(event) {
+      this.data.header.title = event.target.value;
     },
 
-    saveTodo(todo) {
-      const index = this.data.todos.findIndex(t => t.id === todo.id);
-      this.data.todos[index] = todo;
-    },
-
-    deleteTodo(todo) {
-      const index = this.data.todos.findIndex(t => t.id === todo.id);
-      this.data.todos.splice(index, 1);
-    },
-
-    showAdd(event) {
-      event.preventDefault();
-      this.data.uiState.adding = true;
+    updateDescription(event) {
+      this.data.header.description = event.target.value;
     },
   },
 };

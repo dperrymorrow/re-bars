@@ -2,35 +2,63 @@ export default {
   template: /*html*/ `
     <div class="filters">
       <div>
-        <button {{ disabledIf "completed" }} {{ method "filterBy" "completed" }}>Show Completed</button>
-        <button {{ disabledIf "incomplete" }} {{ method "filterBy" "incomplete" }}>Show Incompleted</button>
-        <button {{ disabledIf null }} {{ method "filterBy" null }}>Show All</button>
+        {{#watch "filters.filterBy" }}
+          <button {{ disabledIf "completed" }} {{ on "click" "filterBy" "completed" }}>Show Completed</button>
+          <button {{ disabledIf "incomplete" }} {{ on "click" "filterBy" "incomplete" }}>Show Incompleted</button>
+          <button {{ disabledIf null }} {{ on "click" "filterBy" null }}>Show All</button>
+        {{/watch}}
       </div>
 
       <div>
-        <select {{ bound "$props.filters.sortBy" }}>
-          <option {{ selectedIf $props.filters.sortBy "name" }} value="name">Sort by Name</option>
-          <option {{ selectedIf $props.filters.sortBy "updated" }} value="updated">Sort by Updated at</option>
+        <select {{ on "change" "sortBy" }}>
+          <option value="name">Sort by Name</option>
+          <option value="updated">Sort by Updated at</option>
         </select>
 
-        <select {{ bound "$props.filters.sortDir" }}>
-          <option {{ selectedIf $props.filters.sortDir "asc" }} value="asc">Ascending</option>
-          <option {{ selectedIf $props.filters.sortDir "desc" }} value="desc">Descending</option>
+        <select {{ on "change" "sortDir" }}>
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
         </select>
       </div>
     </div>
   `,
 
-  name: "filters",
-
   helpers: {
-    selectedIf: (current, option) => (current === option ? "selected" : ""),
-    disabledIf: (state, { data }) => (data.root.$props.filters.state === state ? "disabled" : ""),
+    disabledIf: (val, { data }) => (data.root.filters.filterBy === val ? "disabled" : ""),
+  },
+
+  data: {
+    filteredTodos() {
+      let list = this.data.todos.concat();
+      if (this.data.filters.filterBy === "incomplete") list = this.data.todos.filter(t => !t.done);
+      else if (this.data.filters.filterBy === "completed") list = this.data.todos.filter(t => t.done);
+
+      const sorted = list.sort((a, b) => {
+        if (this.data.filters.sortBy === "name") return a.name.localeCompare(b.name);
+        else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
+      });
+
+      return this.data.filters.sortDir === "asc" ? sorted : sorted.reverse();
+    },
+
+    filters: {
+      filterBy: null,
+      sortBy: "name",
+      sortDir: "asc",
+    },
   },
 
   methods: {
+    sortBy(event, val) {
+      this.data.filters.sortBy = val;
+    },
+
+    sortDir(event) {
+      this.data.filters.sortDir = event.currentTarget.value;
+    },
+
     filterBy(event, state) {
-      this.$props.filters.state = state;
+      this.data.filters.filterBy = state;
     },
   },
 };

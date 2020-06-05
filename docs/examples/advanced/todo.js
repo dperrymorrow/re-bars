@@ -1,60 +1,69 @@
 export default {
   template: /*html*/ `
-    <div>
-      {{#watch "editing" tag="div" class="todo" }}
-        {{#if editing}}
-          <input type="text" {{ bound "$props.todo.name" }}/>
-          <button {{ method "save" }}>done</button>
+    <li {{ ref todo.id }}>
+      {{#watch "editingId" tag="div" class="todo" }}
+        {{#isEditing todo.id }}
+          <input type="text" {{ on "input" "updateText" todo.id }} />
+          <button {{ on "click" "closeEdit" }}>done</button>
         {{ else }}
-
           <label>
-            <input type="checkbox" {{ isChecked $props.todo.done }} {{ method "toggleDone" }} />
-            {{#if $props.todo.done }}
-              <s>{{ $props.todo.name }}</s>
+            <input type="checkbox" {{ isChecked todo.done }} {{ on "click" "toggleDone" todo.id }} />
+            {{#if todo.done }}
+              <s>{{ todo.name }}</s>
             {{else}}
-              <strong>{{ $props.todo.name }}</strong>
+              <strong>{{ todo.name }}</strong>
             {{/if}}
           </label>
 
           <div class="actions">
-            <span class="date">{{ timeAgo $props.todo.updated }}</span>
-            <button {{ method "remove" }}>delete</button>
-            <button {{ method "toggleEditing" }}>edit</button>
+            <span class="date">{{ timeAgo todo.updated }}</span>
+            <button {{ on "click" "remove" todo.id }}>delete</button>
+            <button {{ on "click" "edit" todo.id }}>edit</button>
           </div>
-        {{/if}}
+        {{/isEditing}}
       {{/watch}}
-    </div>
+    </li>
   `,
 
-  name: "Todo",
-
-  data() {
-    return { editing: false, todo: {} };
-  },
-
   helpers: {
-    isChecked: val => (val ? "checked" : ""),
-    timeAgo: val => {
-      return window.moment(val).fromNow();
+    isEditing(val, { data, fn, inverse }) {
+      return val === data.root.editingId ? fn(this) : inverse(this);
     },
+    isChecked: val => (val ? "checked" : ""),
+    timeAgo: val => window.moment(val).fromNow(),
   },
 
   methods: {
-    save() {
-      this.$props.todo.updated = new Date().toLocaleString();
-      this.editing = false;
+    findIndex(id) {
+      return this.data.todos.findIndex(todo => todo.id === id);
     },
 
-    remove() {
-      this.$emit("remove", this.$props.todo);
+    findTodo(id) {
+      return this.data.todos[this.methods.findIndex(id)];
     },
 
-    toggleEditing() {
-      this.editing = !this.editing;
+    remove(event, id) {
+      const index = this.methods.findIndex(id);
+      this.data.todos.splice(index, 1);
     },
 
-    toggleDone() {
-      this.$props.todo.done = !this.$props.todo.done;
+    updateText(event, id) {
+      const todo = this.methods.findTodo(id);
+      todo.name = event.target.value;
+      todo.updatedAt = new Date().toLocaleString();
+    },
+
+    closeEdit(event) {
+      this.data.editingId = null;
+    },
+
+    edit(event, id) {
+      this.data.editingId = id;
+    },
+
+    toggleDone(event, id) {
+      const todo = this.methods.findTodo(id);
+      todo.done = !todo.done;
     },
   },
 };

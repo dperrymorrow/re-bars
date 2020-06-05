@@ -10,7 +10,7 @@ export default {
     });
 
     const _addToQue = path => {
-      que.push(path);
+      if (!que.includes(path)) que.push(path);
       _debounced(que);
     };
 
@@ -19,12 +19,13 @@ export default {
         get: function(target, prop) {
           if (prop === "ReBarsPath") return tree.join(".");
           const value = Reflect.get(...arguments);
-          // if (typeof value === "function" && target.hasOwnProperty(prop)) return value.bind(scope);
 
-          if (trackGet) _addToQue(tree.concat(prop).join("."));
-          if (value && typeof value === "object" && ["Array", "Object"].includes(value.constructor.name))
+          if (value && typeof value === "object" && ["Array", "Object"].includes(value.constructor.name)) {
             return _buildProxy(value, tree.concat(prop));
-          else return value;
+          } else {
+            if (trackGet) _addToQue(tree.concat(prop).join("."));
+            return value;
+          }
         },
 
         set: function(target, prop) {

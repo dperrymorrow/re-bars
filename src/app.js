@@ -5,24 +5,36 @@ import ProxyTrap from "./proxy-trap.js";
 import Utils from "./utils/index.js";
 
 export default {
-  app({ helpers = {}, template, data = {}, refs = {}, methods = {}, Handlebars = window.Handlebars, trace = false }) {
+  app({
+    helpers = {},
+    template,
+    data = {},
+    refs = {},
+    methods = {},
+    partials = {},
+    Handlebars = window.Handlebars,
+    trace = false,
+  }) {
     const instance = Handlebars.create();
     const templateFn = instance.compile(template);
     const store = { renders: {} };
 
     Msg.setTrace(trace);
-
-    Helpers.register({ instance, template, helpers, store, methods });
+    Utils.registerHelpers(instance, helpers);
+    Helpers.register({ instance, template, store, methods });
 
     return {
+      store,
       instance,
       render($app) {
         const scope = {
           $refs: () => Utils.dom.findRefs($app),
           $app,
+          methods,
           data,
         };
 
+        Utils.registerPartials(instance, scope, partials);
         scope.methods = Utils.bind(methods, scope);
 
         scope.data = Object.entries(scope.data).reduce((scoped, [key, value]) => {

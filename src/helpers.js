@@ -6,16 +6,8 @@ import Constants from "./constants.js";
 const { attrs } = Constants;
 
 export default {
-  register({ instance, helpers, template, store, methods }) {
-    Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
-
+  register({ instance, template, store, methods }) {
     instance.registerHelper("ref", name => new instance.SafeString(`${attrs.ref}="${name}"`));
-
-    instance.registerHelper("debug", (obj, { hash, data, loc }) => {
-      if (obj === undefined) Msg.fail("undefined passed to debug", { template, loc });
-      const props = { class: "debug", ...hash };
-      return new instance.SafeString(`<pre ${Utils.dom.propStr(props)}>${Utils.stringify(obj)}</pre>`);
-    });
 
     instance.registerHelper("on", function(...args) {
       const { loc } = args.pop();
@@ -24,7 +16,8 @@ export default {
     });
 
     instance.registerHelper("watch", function(...args) {
-      const { fn, hash, data, loc } = args.pop();
+      const last = args.pop();
+      const { fn, hash, data, loc } = last;
 
       const eId = Utils.randomId();
 
@@ -47,9 +40,12 @@ export default {
         fn(trap);
       }
 
-      path.forEach(item => {
-        if (!Utils.hasKey(data.root, item)) Msg.fail(`cannot find path "${item}" to watch`, { template, loc });
-      });
+      // path.forEach(item => {
+      //   if (!Utils.hasKey(data.root, item)) {
+      //     debugger;
+      //     Msg.fail(`cannot find path "${item}" to watch`, { template, loc });
+      //   }
+      // });
 
       store.renders[eId] = {
         path,

@@ -7,7 +7,7 @@
   background-color: white
 
   &.debug
-    *[data-rbs-comp]
+    *[rbs-watch]
       position: relative
       overflow: visible
       box-sizing: border-box
@@ -15,16 +15,17 @@
       box-shadow: none
 
       &:hover
-        box-shadow: 0px 0px 10px 10000px rgba(black, .3)
+        box-shadow: 0px 0px 10px 10000px rgba(black, .2)
 
         &:before
           position: absolute
           padding: .3em .6em
-          font-family: $font-header
-          font-size: 1em
+          font-family: Monaco, monospace
+          letter-spacing: .02rem;
+          font-size: 1rem
           background-color: tomato
           color: white
-          content: attr(data-rbs-comp)
+          content: attr(rbs-watch)
           left: -70px
 
   &:empty

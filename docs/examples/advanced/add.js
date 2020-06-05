@@ -6,44 +6,40 @@ export default {
         <form>
           {{#watch}}
             <h3>{{ newName }}</h3>
-            <input type="text" {{ bound "newName" }} placeholder="the new todo" />
+            <input type="text" {{ ref "newName" }} placeholder="the new todo" />
           {{/watch}}
 
-          <button class="push" {{ method "addItem" }}>Add todo</button>
-          <button class="cancel" {{ method "toggleAdd" }}>Cancel</button>
+          <button {{ on "click" "addItem" }}>Add todo</button>
+          <button {{ on "click" "toggleAdd" }}>Cancel</button>
         </form>
       {{ else }}
-        <button class="add" {{ method "toggleAdd" }}>Add another</button>
+        <button {{ on "click" "toggleAdd" }}>Add another</button>
       {{/if}}
     {{/watch}}
-  </div>
-  `,
+  </div>`,
 
-  name: "AddTodo",
-
-  data() {
-    return {
-      isAdding: false,
-      newName: "",
-    };
+  data: {
+    isAdding: false,
   },
 
   methods: {
     toggleAdd(event) {
       event.preventDefault();
-      this.isAdding = !this.isAdding;
+      this.data.isAdding = !this.data.isAdding;
     },
 
     addItem(event) {
       event.preventDefault();
-
-      this.$emit("addTodo", {
-        name: this.newName,
+      const $input = this.$refs().newName;
+      this.data.todos.push({
+        name: $input.value,
         id: new Date().getTime(),
         updated: new Date().toLocaleString(),
       });
 
-      this.newName = "";
+      this.data.filters.filterBy = null;
+      $input.value = "";
+      $input.focus();
     },
   },
 };
