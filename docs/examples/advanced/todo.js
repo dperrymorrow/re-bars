@@ -25,6 +25,10 @@ export default {
     </li>
   `,
 
+  data: {
+    editingId: null,
+  },
+
   helpers: {
     isEditing(val, { data, fn, inverse }) {
       return val === data.root.editingId ? fn(this) : inverse(this);

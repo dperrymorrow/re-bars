@@ -41,7 +41,20 @@ export default {
       title: "ReBars Todos",
       description: "Some things that need done",
     },
-    editingId: null,
+
+    filteredTodos() {
+      let list = this.data.todos.concat();
+      if (this.data.filters.filterBy === "incomplete") list = this.data.todos.filter(t => !t.done);
+      else if (this.data.filters.filterBy === "completed") list = this.data.todos.filter(t => t.done);
+
+      const sorted = list.sort((a, b) => {
+        if (this.data.filters.sortBy === "name") return a.name.localeCompare(b.name);
+        else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
+      });
+
+      return this.data.filters.sortDir === "asc" ? sorted : sorted.reverse();
+    },
+
     todos: [
       {
         done: false,
