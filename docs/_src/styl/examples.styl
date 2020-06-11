@@ -79,7 +79,6 @@
     background-color: $bg-light
     font-family: $font-body
     flex: 1
-    margin-right: $padding-xs
 
   select
     height: 100%
@@ -92,6 +91,7 @@
     text-transform: uppercase
     font-weight: bold
     cursor: pointer
+    margin-left: $padding-xs
 
     &:disabled
       color: $txt-light
@@ -125,6 +125,12 @@
         justify-content: space-between
         display: flex
 
+        .actions
+          display: flex
+          flex-wrap: nowrap
+          align-items: center
+
         .date
           font-size: 0.9em
           margin-right: 10px
+          white-space: nowrap

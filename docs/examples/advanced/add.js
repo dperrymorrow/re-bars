@@ -27,6 +27,7 @@ export default {
       this.todos.push({
         name: $input.value,
         id: new Date().getTime(),
+        done: false,
         updated: new Date().toLocaleString(),
       });
 

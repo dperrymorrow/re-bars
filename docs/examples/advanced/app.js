@@ -45,6 +45,7 @@ export default {
       const filter = data.root.filters.filterBy;
       if (!filter) return fn(this);
       else if (filter === "incomplete") return this.done ? inverse(this) : fn(this);
+      else if (filter == "completed") return this.done ? fn(this) : inverse(this);
     },
   },
 
@@ -58,7 +59,7 @@ export default {
 
     filters: {
       filterBy: null,
-      sortBy: "name",
+      sortBy: "completed",
       sortDir: "asc",
     },
 

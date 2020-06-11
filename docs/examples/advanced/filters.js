@@ -3,8 +3,8 @@ export default {
     <div class="filters">
       <div>
         {{#watch "filters.filterBy" }}
-          <button {{ disabledIf "completed" }} {{ on "click" "filterBy" "completed" }}>Show Completed</button>
-          <button {{ disabledIf "incomplete" }} {{ on "click" "filterBy" "incomplete" }}>Show Incompleted</button>
+          <button {{ disabledIf "completed" }} {{ on "click" "filterBy" "completed" }}>Show Only Completed</button>
+          <button {{ disabledIf "incomplete" }} {{ on "click" "filterBy" "incomplete" }}>Show Only Incompleted</button>
           <button {{ disabledIf null }} {{ on "click" "filterBy" null }}>Show All</button>
         {{/watch}}
       </div>
@@ -13,6 +13,7 @@ export default {
         <select {{ on "change" "sortBy" }}>
           <option {{ selectedSort "name" }} value="name">Sort by Name</option>
           <option {{ selectedSort "updated" }} value="updated">Sort by Updated at</option>
+          <option {{ selectedSort "completed" }} value="completed">Sort by Completed</option>
         </select>
 
         <select {{ on "change" "sortDir" }}>
@@ -46,6 +47,7 @@ export default {
     sort({ methods }) {
       this.todos.sort((a, b) => {
         if (this.filters.sortBy === "name") return a.name.localeCompare(b.name);
+        else if (this.filters.sortBy === "completed") return a.done - b.done;
         else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
       });
 
