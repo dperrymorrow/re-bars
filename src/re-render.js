@@ -1,9 +1,9 @@
 import Utils from "./utils/index.js";
-import Msg from "./msg.js";
 import Patch from "./utils/patch.js";
+import Config from "./config.js";
 
 export default {
-  paths({ paths, renders }) {
+  paths({ paths, renders, instance }) {
     Object.entries(renders)
       .filter(([renderId, handler]) => {
         const matches = paths.some(path => Utils.shouldRender(path, handler.path));
@@ -11,6 +11,11 @@ export default {
       })
       .forEach(([renderId, handler]) => {
         const $target = Utils.dom.findWatcher(renderId);
+        // if we cant find the target, we should not attempt to re-renders
+        // this can probally be cleaned up with clearing orphans on the app
+
+        if (!$target) return;
+
         const html = handler.render();
         const stash = Utils.dom.recordState($target);
 
@@ -26,7 +31,8 @@ export default {
         // warn for not having a ref on array update
         const lenPath = handler.path.find(path => path.endsWith(".length"));
         if (lenPath)
-          Msg.warn(
+          instance.log(
+            2,
             `patching "${handler.path}" add a ref="someUniqueKey" to each to avoid re-rendering the entire Array of elements`,
             $target
           );
@@ -35,7 +41,7 @@ export default {
         $target.innerHTML = html;
 
         Utils.dom.restoreState($target, stash);
-        Msg.log(`re-rendering watch block for ${handler.path}`, $target);
+        instance.log(Config.logLevel(), "ReBars: render", handler.path, $target);
       });
   },
 };

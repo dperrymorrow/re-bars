@@ -1,8 +1,9 @@
-import Msg from "./msg.js";
+// import Msg from "./msg.js";
 import Helpers from "./helpers.js";
 import ReRender from "./re-render.js";
 import ProxyTrap from "./proxy-trap.js";
 import Utils from "./utils/index.js";
+import Config from "./config.js";
 
 export default {
   app({
@@ -19,45 +20,42 @@ export default {
     const templateFn = instance.compile(template);
     const store = { renders: {} };
 
-    Msg.setTrace(trace);
+    Config.setTrace(trace);
     Utils.registerHelpers(instance, helpers);
-    Helpers.register({ instance, template, store, methods });
 
     return {
       store,
       instance,
       render($app) {
         const scope = {
-          $refs: () => Utils.dom.findRefs($app),
           $app,
           methods,
           data,
         };
 
-        Utils.registerPartials(instance, scope, partials);
-        scope.methods = Utils.bind(methods, scope);
+        // TODO: should be able to await nextRender()
 
+        Helpers.register({ instance, template, store, scope });
+        Utils.registerPartials(instance, scope, partials);
+
+        // for the methods
         scope.data = Object.entries(scope.data).reduce((scoped, [key, value]) => {
           if (typeof value === "function" && scoped.hasOwnProperty(key)) scoped[key] = value.bind(scope);
           return scoped;
         }, data);
 
         scope.data = ProxyTrap.create(data, paths => {
-          Msg.log(`data changed "${paths}"`, store.renders);
-          ReRender.paths({ paths, renders: store.renders });
+          instance.log(Config.logLevel(), "ReBars: change", paths);
+          ReRender.paths({ paths, renders: store.renders, instance });
         });
-
-        function handler(event) {
-          const [type, methodName, ...rest] = Utils.dom.getMethodArr(event.currentTarget);
-          scope.methods[methodName](event, ...rest);
-        }
 
         const observer = new MutationObserver(mutationList => {
           mutationList.forEach(({ addedNodes, removedNodes }) => {
-            addedNodes.forEach($el => Utils.dom.listeners({ $el, methods: scope.methods, handler, action: "add" }));
-            removedNodes.forEach($el =>
-              Utils.dom.listeners({ $el, methods: scope.methods, handler, action: "remove" })
-            );
+            removedNodes.forEach($el => {
+              if ($el.nodeType === Node.TEXT_NODE) return;
+              const watch = $el.getAttribute(Config.attrs.watch);
+              if (watch) delete store.renders[watch];
+            });
           });
         });
 

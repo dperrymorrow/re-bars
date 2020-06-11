@@ -1,6 +1,5 @@
-import Msg from "../msg.js";
-import Constants from "../constants.js";
-const { attrs } = Constants;
+import Config from "../config.js";
+const { attrs } = Config;
 
 export default {
   recordState($target) {
@@ -16,22 +15,10 @@ export default {
     };
   },
 
-  getMethodArr($el) {
-    const attr = $el.getAttribute(attrs.method);
-    return attr ? JSON.parse(attr) : null;
-  },
-
-  listeners({ $el, methods, action, recursive = true, handler }) {
-    if ($el.nodeType === Node.TEXT_NODE) return;
-
-    const data = this.getMethodArr($el);
-    if (data) $el[`${action}EventListener`](data[0], handler);
-
-    if (recursive)
-      $el
-        .querySelectorAll(`[${attrs.method}]`)
-        .forEach($node => this.listeners({ ...arguments[0], $el: $node, recursive: false }));
-  },
+  // getMethodArr($el) {
+  //   const attr = $el.getAttribute(attrs.method);
+  //   return attr ? JSON.parse(attr) : null;
+  // },
 
   restoreState($target, activeRef) {
     if (!activeRef) return;
@@ -39,21 +26,14 @@ export default {
     const $input = this.findRef($target, activeRef.ref);
     if (!$input) return;
 
-    if (Array.isArray($input)) {
-      Msg.warn(
-        `ref="${activeRef.ref}" is used more than once. Focus cannot be restored. If using bind, add a ref="uniqeName" to each usage`,
-        $input
-      );
-    } else {
-      $input.focus();
-      if (activeRef.selectionStart) {
-        const pos = $input.tagName === "TEXTAREA" ? activeRef.selectionStart : activeRef.selectionStart + 1;
-        $input.setSelectionRange(pos, pos);
-      }
-
-      $input.scrollTop = activeRef.scrollTop;
-      $input.scrollLeft = activeRef.scrollLeft;
+    $input.focus();
+    if (activeRef.selectionStart) {
+      const pos = $input.tagName === "TEXTAREA" ? activeRef.selectionStart : activeRef.selectionStart + 1;
+      $input.setSelectionRange(pos, pos);
     }
+
+    $input.scrollTop = activeRef.scrollTop;
+    $input.scrollLeft = activeRef.scrollLeft;
   },
 
   findRef: ($target, ref) => {
@@ -73,6 +53,7 @@ export default {
     }, {});
   },
 
+  findMethod: id => document.querySelector(`[${attrs.method}="${id}"]`),
   findWatcher: id => document.querySelector(`[${attrs.watch}="${id}"]`),
 
   propStr: props =>

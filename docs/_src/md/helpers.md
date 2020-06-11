@@ -90,24 +90,6 @@ If you are watching inside a loop, you can target the specific object and key by
 </ul>
 ```
 
-
-## The {{bound}} helper
-The `{{bound}` helper is used on input elements such as `<input>` or `<textarea>` elements. The parameter passed will sync the value attribute to the value, and on `input` event update the value.
-
-```html
-<input type="text" {{ bound "name.first" }} />
-```
-
-an item that is bound will automatically get a ref added as the path of the property. this is used for resetting focus and cursor position after a re-render. If you have more than one item with the same bound property, you may need to add another reference
-
-You can pass in a ref as a prop to this helper should you need something more specific.
-
-```html
-<input type="text" {{ bound "name.first" ref="firstName" }} />
-```
-
->> example bound
-
 ## The {{method}} helper
 This allows you to bind your component's methods to events in your template.
 

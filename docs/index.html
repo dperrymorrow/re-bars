@@ -121,24 +121,23 @@
   template: /*html*/ `
     &lt;h3&gt;
       Button have been clicked
-        {{#watch}}
-          &lt;span&gt;{{ clicked }}&lt;/span&gt;
-          Clicked {{ clicked }} times
-        {{/watch}}
-      &lt;button {{ method &quot;step&quot; }}&gt;Click Me&lt;/button&gt;
-    &lt;/h3&gt;
-  `,
-  name: &quot;counter&quot;,
-  data() {
-    return { clicked: 0 };
-  },
-  methods: {
-    step() {
-      this.clicked++;
+      {{#watch}}
+        {{ clicked }}
+      {{/watch}}
+
+<pre><code>  &amp;lt;button rbs-method=&amp;quot;click:incriment&amp;quot;&amp;gt;
+    Click Me
+  &amp;lt;/button&amp;gt;
+&amp;lt;/h3&amp;gt;</code></pre><p>  `,</p>
+<p>  data: { clicked: 0 },</p>
+<p>  trace: true,</p>
+<p>  methods: {
+    incriment() {
+      this.data.clicked++;
     },
   },
 };
-</code></pre>
+</code></pre></p>
 </div>
 
 <p>Each time the value passed to watch is changed, <em>just</em> that Handlebars block will re-render. No Virtial DOM patching, no re-render of entire template. The block function from the helper is stored at first render, and simply invoked again each time a value changes.</p>
@@ -416,31 +415,6 @@ Watch takes an argument of what property to watch. The argument can be a string 
     &lt;/li&gt;
   {{/each}}
 &lt;/ul&gt;</code></pre>
-<h2 id="the-bound-helper">The {{bound}} helper</h2>
-<p>The <code>{{bound}</code> helper is used on input elements such as <code>&lt;input&gt;</code> or <code>&lt;textarea&gt;</code> elements. The parameter passed will sync the value attribute to the value, and on <code>input</code> event update the value.</p>
-<pre><code class="language-html">&lt;input type=&quot;text&quot; {{ bound &quot;name.first&quot; }} /&gt;</code></pre>
-<p>an item that is bound will automatically get a ref added as the path of the property. this is used for resetting focus and cursor position after a re-render. If you have more than one item with the same bound property, you may need to add another reference</p>
-<p>You can pass in a ref as a prop to this helper should you need something more specific.</p>
-<pre><code class="language-html">&lt;input type=&quot;text&quot; {{ bound &quot;name.first&quot; ref=&quot;firstName&quot; }} /&gt;</code></pre>
-<div id="bound-demo" class="demo-app"></div>
-<div class="markdown-content"><pre><code class="language-javascript">export default {
-  template: /*html*/ `
-    &lt;div&gt;
-      {{#watch}}
-        &lt;h2&gt;{{ title }}&lt;/h2&gt;
-        &lt;input type=&quot;text&quot; {{ bound &quot;title&quot; ref=&quot;title1&quot; }}&gt;
-        &lt;input type=&quot;text&quot; {{ bound &quot;title&quot; ref=&quot;title2&quot; }}&gt;
-      {{/watch}}
-    &lt;/div&gt;
-  `,
-  name: &quot;bound&quot;,
-  data() {
-    return { title: &quot;Hi, I am bound&quot; };
-  },
-};
-</code></pre>
-</div>
-
 <h2 id="the-method-helper">The {{method}} helper</h2>
 <p>This allows you to bind your component&#39;s methods to events in your template.</p>
 <pre><code class="language-html">&lt;button {{ method &quot;save:click&quot; &quot;param1&quot; &quot;param2&quot; }}&gt;Save&lt;/button&gt;</code></pre>
@@ -526,22 +500,34 @@ Watch takes an argument of what property to watch. The argument can be a string 
 
       &lt;label&gt;
         Title:
-        &lt;input type=&quot;text&quot; {{ bound &quot;header.title&quot; }}/&gt;
+        &lt;input
+          type=&quot;text&quot;
+          value=&quot;{{ header.title }}&quot;
+          {{ on &quot;input&quot; &quot;updateTitle&quot; }}
+        /&gt;
       &lt;/label&gt;
 
       &lt;label&gt;
         Description:
-        &lt;input type=&quot;text&quot; {{ bound &quot;header.description&quot; }}/&gt;
+        &lt;input
+          type=&quot;text&quot;
+          value=&quot;{{ header.description }}&quot;
+          {{ on &quot;input&quot; &quot;updateDescription&quot; }}
+        /&gt;
       &lt;/label&gt;
     &lt;/div&gt;
 
     &lt;ul class=&quot;simple&quot;&gt;
       {{#watch &quot;todos.*&quot; }}
         {{#each todos }}
-          &lt;li ref=&quot;{{ id }}&quot;&gt;
+          &lt;li {{ ref id }}&gt;
             &lt;div class=&quot;todo&quot;&gt;
               &lt;label&gt;
-                &lt;input type=&quot;checkbox&quot; {{ isChecked done }} {{ method &quot;toggleDone&quot; id }} /&gt;
+                &lt;input
+                  type=&quot;checkbox&quot;
+                  {{ on &quot;click&quot; &quot;toggleDone&quot; id done }}
+                  {{ isChecked done }}
+                /&gt;
                 {{#if done }}
                   &lt;s&gt;{{ name }}&lt;/s&gt;
                 {{else}}
@@ -550,7 +536,9 @@ Watch takes an argument of what property to watch. The argument can be a string 
               &lt;/label&gt;
 
               &lt;div class=&quot;actions&quot;&gt;
-                &lt;button {{ method &quot;deleteTodo&quot; id }}&gt;delete&lt;/button&gt;
+                &lt;button {{ on &quot;click&quot; &quot;deleteTodo&quot; id }}&gt;
+                  delete
+                &lt;/button&gt;
               &lt;/div&gt;
             &lt;/div&gt;
           &lt;/li&gt;
@@ -558,55 +546,60 @@ Watch takes an argument of what property to watch. The argument can be a string 
       {{/watch}}
     &lt;/ul&gt;
 
-    {{#watch &quot;adding&quot; }}
+    {{#watch}}
       {{#if adding }}
         &lt;form&gt;
-          &lt;input type=&quot;text&quot; name=&quot;name&quot; ref=&quot;newName&quot; placeholder=&quot;the new todo&quot; /&gt;
-          &lt;button class=&quot;push&quot; {{ method &quot;addItem&quot; }}&gt;Add todo&lt;/button&gt;
-          &lt;button class=&quot;cancel&quot; {{ method &quot;toggleCreate&quot; }}&gt;Cancel&lt;/button&gt;
+          &lt;input type=&quot;text&quot; {{ ref &quot;newName&quot; }} placeholder=&quot;the new todo&quot; /&gt;
+          &lt;button {{ on &quot;click&quot; &quot;addItem&quot; }}&gt;Add todo&lt;/button&gt;
+          &lt;button {{ on &quot;click&quot; &quot;toggleCreate&quot; }}&gt;Cancel&lt;/button&gt;
         &lt;/form&gt;
       {{else}}
-        &lt;button class=&quot;add&quot; {{ method &quot;toggleCreate&quot; }}&gt;Add another&lt;/button&gt;
+        &lt;button {{ on &quot;click&quot; &quot;toggleCreate&quot; }}&gt;Add another&lt;/button&gt;
       {{/if}}
     {{/watch}}
-
   &lt;/div&gt;
   `,
 
-  data() {
-    return {
-      adding: false,
-      header: {
-        title: &quot;Todos&quot;,
-        description: &quot;some things that need done&quot;,
-      },
-      todos: [
-        {
-          done: false,
-          name: &quot;Grocery Shopping&quot;,
-          id: 22,
-        },
-        {
-          done: true,
-          name: &quot;Paint the House&quot;,
-          id: 44,
-        },
-      ],
-    };
-  },
+  trace: true,
 
-  name: &quot;DemoApp&quot;,
+  data: {
+    adding: false,
+    header: {
+      title: &quot;Todos&quot;,
+      description: &quot;some things that need done&quot;,
+    },
+    todos: [
+      {
+        done: false,
+        name: &quot;Grocery Shopping&quot;,
+        id: 22,
+      },
+      {
+        done: true,
+        name: &quot;Paint the House&quot;,
+        id: 44,
+      },
+    ],
+  },
 
   helpers: {
     isChecked: val =&gt; (val ? &quot;checked&quot; : &quot;&quot;),
   },
 
   methods: {
+    updateTitle(event) {
+      this.data.header.title = event.target.value;
+    },
+
+    updateDescription(event) {
+      this.data.header.description = event.target.value;
+    },
+
     addItem(event) {
       event.preventDefault();
       const $input = this.$refs().newName;
 
-      this.todos.push({
+      this.data.todos.push({
         id: new Date().getTime(),
         name: $input.value,
       });
@@ -615,23 +608,22 @@ Watch takes an argument of what property to watch. The argument can be a string 
     },
 
     findTodo(id) {
-      return this.todos.findIndex(item =&gt; item.id === parseInt(id));
+      return this.data.todos.findIndex(item =&gt; item.id === parseInt(id));
     },
 
     deleteTodo(event, id) {
-      const index = this.$methods.findTodo(id);
-      this.todos.splice(index, 1);
+      const index = this.methods.findTodo(id);
+      this.data.todos.splice(index, 1);
     },
 
-    toggleDone(event, id) {
-      console.log(this.$methods.findTodo(id));
-      const todo = this.todos[this.$methods.findTodo(id)];
-      todo.done = !todo.done;
+    toggleDone(event, id, done) {
+      const todo = this.data.todos[this.methods.findTodo(id)];
+      todo.done = !done;
     },
 
     toggleCreate(event) {
       event.preventDefault();
-      this.adding = !this.adding;
+      this.data.adding = !this.data.adding;
     },
   },
 };
@@ -659,9 +651,12 @@ Watch takes an argument of what property to watch. The argument can be a string 
 import Todo from &quot;./todo.js&quot;;
 import Filters from &quot;./filters.js&quot;;
 
+const storageKey = &quot;rebars-todo&quot;;
+const store = window.localStorage.getItem(storageKey);
+const existingData = store ? JSON.parse(store) : null;
+
 export default {
   template: /*html*/ `
-  &lt;div&gt;
     &lt;div class=&quot;header-container&quot;&gt;
       {{#watch tag=&quot;h1&quot; }}
         &lt;span&gt;{{ header.title }}&lt;/span&gt;
@@ -670,116 +665,101 @@ export default {
 
       &lt;label&gt;
         Title:
-        &lt;input type=&quot;text&quot; {{ bound &quot;header.title&quot; }}/&gt;
+        &lt;input type=&quot;text&quot; value=&quot;{{ header.title }}&quot; {{ on &quot;input&quot; &quot;updateTitle&quot; }} /&gt;
       &lt;/label&gt;
 
       &lt;label&gt;
         Description:
-        &lt;input type=&quot;text&quot; {{ bound &quot;header.description&quot; }}/&gt;
+        &lt;input type=&quot;text&quot; value=&quot;{{ header.description }}&quot; {{ on &quot;input&quot; &quot;updateDescription&quot; }} /&gt;
       &lt;/label&gt;
     &lt;/div&gt;
 
-    {{#watch}}
-      {{ component &quot;filters&quot; filters=filters }}
-    {{/watch}}
+    {{&gt; Filters }}
 
-    {{#watch &quot;filters.*&quot; &quot;todos.*&quot; tag=&quot;ul&quot;}}
-      {{#each filteredTodos as | todo | }}
-        &lt;li ref=&quot;{{ todo.id }}&quot;&gt;
-          {{
-            component &quot;Todo&quot;
-            listen:remove=&quot;deleteTodo&quot;
-            todo=todo
-          }}
-        &lt;/li&gt;
+    {{#watch &quot;filters.*&quot; &quot;todos.length&quot; &quot;todos.*.done&quot; tag=&quot;ul&quot;}}
+      {{#each todos as | todo | }}
+        {{#notFilteredOut }}
+          {{&gt; Todo todo=todo }}
+        {{/notFilteredOut}}
       {{/each}}
     {{/watch}}
 
-    {{
-      component &quot;AddTodo&quot;
-      listen:addTodo=&quot;addTodo&quot;
-    }}
-  &lt;div&gt;
+    {{&gt; Add }}
   `,
 
-  name: &quot;DemoApp&quot;,
+  trace: true,
 
-  data() {
-    return {
-      filteredTodos() {
-        let list = this.todos.concat();
-        if (this.filters.state === &quot;incomplete&quot;) list = this.todos.filter(t =&gt; !t.done);
-        else if (this.filters.state === &quot;completed&quot;) list = this.todos.filter(t =&gt; t.done);
-
-        const sorted = list.sort((a, b) =&gt; {
-          if (this.filters.sortBy === &quot;name&quot;) return a.name.localeCompare(b.name);
-          else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
-        });
-
-        return this.filters.sortDir === &quot;asc&quot; ? sorted : sorted.reverse();
-      },
-
-      filters: {
-        state: null,
-        sortBy: &quot;name&quot;,
-        sortDir: &quot;asc&quot;,
-      },
-      header: {
-        title: &quot;ReBars Todos&quot;,
-        description: &quot;Some things that need done&quot;,
-      },
-      todos: [
-        {
-          done: false,
-          name: &quot;Wash the car&quot;,
-          updated: &quot;3/1/2020, 12:37:10 PM&quot;,
-          id: 21,
-        },
-        {
-          done: true,
-          name: &quot;Shopping for groceries&quot;,
-          updated: &quot;2/27/2020, 2:37:10 PM&quot;,
-          id: 22,
-        },
-
-        {
-          done: false,
-          name: &quot;Code some Javascript&quot;,
-          updated: &quot;1/27/2020, 9:37:10 AM&quot;,
-          id: 23,
-        },
-
-        {
-          done: true,
-          name: &quot;Go for a run&quot;,
-          updated: &quot;1/15/2020, 10:37:10 PM&quot;,
-          id: 24,
-        },
-      ],
-    };
+  helpers: {
+    notFilteredOut({ data, fn, inverse }) {
+      const filter = data.root.filters.filterBy;
+      if (!filter) return fn(this);
+      else if (filter === &quot;incomplete&quot;) return this.done ? inverse(this) : fn(this);
+    },
   },
 
-  components: [Add, Todo, Filters],
+  data: existingData || {
+    header: {
+      title: &quot;ReBars Todos&quot;,
+      description: &quot;Some things that need done&quot;,
+    },
+
+    isAdding: false,
+
+    filters: {
+      filterBy: null,
+      sortBy: &quot;name&quot;,
+      sortDir: &quot;asc&quot;,
+    },
+
+    todos: [
+      {
+        done: false,
+        name: &quot;Wash the car&quot;,
+        updated: &quot;3/1/2020, 12:37:10 PM&quot;,
+        id: 21,
+      },
+      {
+        done: true,
+        name: &quot;Shopping for groceries&quot;,
+        updated: &quot;2/27/2020, 2:37:10 PM&quot;,
+        id: 22,
+      },
+
+      {
+        done: false,
+        name: &quot;Code some Javascript&quot;,
+        updated: &quot;1/27/2020, 9:37:10 AM&quot;,
+        id: 23,
+      },
+
+      {
+        done: true,
+        name: &quot;Go for a run&quot;,
+        updated: &quot;1/15/2020, 10:37:10 PM&quot;,
+        id: 24,
+      },
+    ],
+  },
+
+  partials: {
+    Todo,
+    Filters,
+    Add,
+  },
 
   methods: {
-    addTodo(todo) {
-      this.todos.push(todo);
-      this.filters.state = null;
+    saveLocal({ rootData }) {
+      window.localStorage.setItem(storageKey, JSON.stringify(rootData));
     },
 
-    saveTodo(todo) {
-      const index = this.todos.findIndex(t =&gt; t.id === todo.id);
-      this.todos[index] = todo;
+    updateTitle({ event, methods }) {
+      this.header.title = event.target.value;
+      methods.saveLocal();
     },
 
-    deleteTodo(todo) {
-      const index = this.todos.findIndex(t =&gt; t.id === todo.id);
-      this.todos.splice(index, 1);
-    },
-
-    showAdd(event) {
-      event.preventDefault();
-      this.uiState.adding = true;
+    updateDescription({ event, methods }) {
+      this.header.description = event.target.value;
+      methods.saveLocal();
     },
   },
 };
@@ -788,49 +768,40 @@ export default {
                   <div id="add"><div class="markdown-content"><pre><code class="language-javascript">export default {
   template: /*html*/ `
   &lt;div&gt;
-    {{#watch &quot;isAdding&quot; }}
+    {{#watch}}
       {{#if isAdding }}
         &lt;form&gt;
-          {{#watch}}
-            &lt;h3&gt;{{ newName }}&lt;/h3&gt;
-            &lt;input type=&quot;text&quot; {{ bound &quot;newName&quot; }} placeholder=&quot;the new todo&quot; /&gt;
-          {{/watch}}
-
-          &lt;button class=&quot;push&quot; {{ method &quot;addItem&quot; }}&gt;Add todo&lt;/button&gt;
-          &lt;button class=&quot;cancel&quot; {{ method &quot;toggleAdd&quot; }}&gt;Cancel&lt;/button&gt;
+          &lt;input type=&quot;text&quot; {{ ref &quot;newName&quot; }} placeholder=&quot;the new todo&quot; /&gt;
+          &lt;button {{ on &quot;click&quot; &quot;addItem&quot; }}&gt;Add todo&lt;/button&gt;
+          &lt;button {{ on &quot;click&quot; &quot;toggleAdd&quot; }}&gt;Cancel&lt;/button&gt;
         &lt;/form&gt;
       {{ else }}
-        &lt;button class=&quot;add&quot; {{ method &quot;toggleAdd&quot; }}&gt;Add another&lt;/button&gt;
+        &lt;button {{ on &quot;click&quot; &quot;toggleAdd&quot; }}&gt;Add another&lt;/button&gt;
       {{/if}}
     {{/watch}}
-  &lt;/div&gt;
-  `,
-
-  name: &quot;AddTodo&quot;,
-
-  data() {
-    return {
-      isAdding: false,
-      newName: &quot;&quot;,
-    };
-  },
+  &lt;/div&gt;`,
 
   methods: {
-    toggleAdd(event) {
+    toggleAdd({ event, methods }) {
       event.preventDefault();
       this.isAdding = !this.isAdding;
     },
 
-    addItem(event) {
+    addItem({ event, methods, $refs }) {
       event.preventDefault();
+      const $input = $refs().newName;
 
-      this.$emit(&quot;addTodo&quot;, {
-        name: this.newName,
+      this.todos.push({
+        name: $input.value,
         id: new Date().getTime(),
         updated: new Date().toLocaleString(),
       });
 
-      this.newName = &quot;&quot;;
+      this.filters.filterBy = null;
+      $input.value = &quot;&quot;;
+      $input.focus();
+
+      methods.saveLocal();
     },
   },
 };
@@ -840,35 +811,65 @@ export default {
   template: /*html*/ `
     &lt;div class=&quot;filters&quot;&gt;
       &lt;div&gt;
-        &lt;button {{ disabledIf &quot;completed&quot; }} {{ method &quot;filterBy&quot; &quot;completed&quot; }}&gt;Show Completed&lt;/button&gt;
-        &lt;button {{ disabledIf &quot;incomplete&quot; }} {{ method &quot;filterBy&quot; &quot;incomplete&quot; }}&gt;Show Incompleted&lt;/button&gt;
-        &lt;button {{ disabledIf null }} {{ method &quot;filterBy&quot; null }}&gt;Show All&lt;/button&gt;
+        {{#watch &quot;filters.filterBy&quot; }}
+          &lt;button {{ disabledIf &quot;completed&quot; }} {{ on &quot;click&quot; &quot;filterBy&quot; &quot;completed&quot; }}&gt;Show Completed&lt;/button&gt;
+          &lt;button {{ disabledIf &quot;incomplete&quot; }} {{ on &quot;click&quot; &quot;filterBy&quot; &quot;incomplete&quot; }}&gt;Show Incompleted&lt;/button&gt;
+          &lt;button {{ disabledIf null }} {{ on &quot;click&quot; &quot;filterBy&quot; null }}&gt;Show All&lt;/button&gt;
+        {{/watch}}
       &lt;/div&gt;
 
       &lt;div&gt;
-        &lt;select {{ bound &quot;$props.filters.sortBy&quot; }}&gt;
-          &lt;option {{ selectedIf $props.filters.sortBy &quot;name&quot; }} value=&quot;name&quot;&gt;Sort by Name&lt;/option&gt;
-          &lt;option {{ selectedIf $props.filters.sortBy &quot;updated&quot; }} value=&quot;updated&quot;&gt;Sort by Updated at&lt;/option&gt;
+        &lt;select {{ on &quot;change&quot; &quot;sortBy&quot; }}&gt;
+          &lt;option {{ selectedSort &quot;name&quot; }} value=&quot;name&quot;&gt;Sort by Name&lt;/option&gt;
+          &lt;option {{ selectedSort &quot;updated&quot; }} value=&quot;updated&quot;&gt;Sort by Updated at&lt;/option&gt;
         &lt;/select&gt;
 
-        &lt;select {{ bound &quot;$props.filters.sortDir&quot; }}&gt;
-          &lt;option {{ selectedIf $props.filters.sortDir &quot;asc&quot; }} value=&quot;asc&quot;&gt;Ascending&lt;/option&gt;
-          &lt;option {{ selectedIf $props.filters.sortDir &quot;desc&quot; }} value=&quot;desc&quot;&gt;Descending&lt;/option&gt;
+        &lt;select {{ on &quot;change&quot; &quot;sortDir&quot; }}&gt;
+          &lt;option {{ selectedDir &quot;asc&quot; }} value=&quot;asc&quot;&gt;Ascending&lt;/option&gt;
+          &lt;option {{ selectedDir &quot;desc&quot; }} value=&quot;desc&quot;&gt;Descending&lt;/option&gt;
         &lt;/select&gt;
       &lt;/div&gt;
     &lt;/div&gt;
   `,
 
-  name: &quot;filters&quot;,
-
   helpers: {
-    selectedIf: (current, option) =&gt; (current === option ? &quot;selected&quot; : &quot;&quot;),
-    disabledIf: (state, { data }) =&gt; (data.root.$props.filters.state === state ? &quot;disabled&quot; : &quot;&quot;),
+    selectedSort(val) {
+      return this.filters.sortBy === val ? &quot;selected&quot; : &quot;&quot;;
+    },
+
+    selectedDir(val) {
+      return this.filters.sortDir === val ? &quot;selected&quot; : &quot;&quot;;
+    },
+
+    disabledIf(val) {
+      return this.filters.filterBy === val ? &quot;disabled&quot; : &quot;&quot;;
+    },
   },
 
   methods: {
-    filterBy(event, state) {
-      this.$props.filters.state = state;
+    sortBy({ methods, event }) {
+      this.filters.sortBy = event.target.value;
+      methods.sort();
+    },
+
+    sort({ methods }) {
+      this.todos.sort((a, b) =&gt; {
+        if (this.filters.sortBy === &quot;name&quot;) return a.name.localeCompare(b.name);
+        else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
+      });
+
+      if (this.filters.sortDir === &quot;desc&quot;) this.todos.reverse();
+      methods.saveLocal();
+    },
+
+    sortDir({ event, methods }) {
+      this.filters.sortDir = event.currentTarget.value;
+      methods.sort();
+    },
+
+    filterBy({ methods }, filterBy) {
+      this.filters.filterBy = filterBy;
+      methods.saveLocal();
     },
   },
 };
@@ -876,61 +877,74 @@ export default {
 </div></div>
                   <div id="todo"><div class="markdown-content"><pre><code class="language-javascript">export default {
   template: /*html*/ `
-    &lt;div&gt;
-      {{#watch &quot;editing&quot; tag=&quot;div&quot; class=&quot;todo&quot; }}
-        {{#if editing}}
-          &lt;input type=&quot;text&quot; {{ bound &quot;$props.todo.name&quot; }}/&gt;
-          &lt;button {{ method &quot;save&quot; }}&gt;done&lt;/button&gt;
+    &lt;li {{ ref todo.id }} {{ on &quot;keyup&quot; &quot;saveIfEnter&quot; }}&gt;
+      {{#watch (buildPath &quot;todos&quot; @index &quot;*&quot;) tag=&quot;div&quot; class=&quot;todo&quot; }}
+
+        {{#if todo.isEditing }}
+          &lt;input type=&quot;text&quot;
+            value=&quot;{{ todo.name }}&quot;
+            {{ ref &quot;editInput&quot; }}
+            {{ on &quot;input&quot; &quot;updateText&quot; }}
+          /&gt;
+          &lt;button {{ on &quot;click&quot; &quot;closeEdit&quot; }}&gt;done&lt;/button&gt;
         {{ else }}
 
           &lt;label&gt;
-            &lt;input type=&quot;checkbox&quot; {{ isChecked $props.todo.done }} {{ method &quot;toggleDone&quot; }} /&gt;
-            {{#if $props.todo.done }}
-              &lt;s&gt;{{ $props.todo.name }}&lt;/s&gt;
+            &lt;input type=&quot;checkbox&quot; {{ isChecked }} {{ on &quot;click&quot; &quot;toggleDone&quot; }} /&gt;
+            {{#if todo.done }}
+              &lt;s&gt;{{ todo.name }}&lt;/s&gt;
             {{else}}
-              &lt;strong&gt;{{ $props.todo.name }}&lt;/strong&gt;
+              &lt;strong&gt;{{ todo.name }}&lt;/strong&gt;
             {{/if}}
           &lt;/label&gt;
 
           &lt;div class=&quot;actions&quot;&gt;
-            &lt;span class=&quot;date&quot;&gt;{{ timeAgo $props.todo.updated }}&lt;/span&gt;
-            &lt;button {{ method &quot;remove&quot; }}&gt;delete&lt;/button&gt;
-            &lt;button {{ method &quot;toggleEditing&quot; }}&gt;edit&lt;/button&gt;
+            &lt;span class=&quot;date&quot;&gt;{{ timeAgo }}&lt;/span&gt;
+            &lt;button {{ on &quot;click&quot; &quot;remove&quot; }}&gt;delete&lt;/button&gt;
+            &lt;button {{ on &quot;click&quot; &quot;edit&quot; }}&gt;edit&lt;/button&gt;
           &lt;/div&gt;
         {{/if}}
       {{/watch}}
-    &lt;/div&gt;
+    &lt;/li&gt;
   `,
 
-  name: &quot;Todo&quot;,
-
-  data() {
-    return { editing: false, todo: {} };
-  },
-
   helpers: {
-    isChecked: val =&gt; (val ? &quot;checked&quot; : &quot;&quot;),
-    timeAgo: val =&gt; {
-      return window.moment(val).fromNow();
+    isChecked() {
+      return this.todo.done ? &quot;checked&quot; : &quot;&quot;;
+    },
+    timeAgo() {
+      return window.moment(this.todo.updated).fromNow();
     },
   },
 
   methods: {
-    save() {
-      this.$props.todo.updated = new Date().toLocaleString();
-      this.editing = false;
+    remove({ methods, rootData }) {
+      const index = rootData.todos.findIndex(todo =&gt; todo.id === this.id);
+      rootData.todos.splice(index, 1);
+      methods.saveLocal();
     },
 
-    remove() {
-      this.$emit(&quot;remove&quot;, this.$props.todo);
+    saveIfEnter({ event, methods }) {
+      if (event.code === &quot;Enter&quot;) methods.closeEdit();
     },
 
-    toggleEditing() {
-      this.editing = !this.editing;
+    updateText({ event, methods }) {
+      this.todo.name = event.target.value;
+      this.updatedAt = new Date().toLocaleString();
+      methods.saveLocal();
     },
 
-    toggleDone() {
-      this.$props.todo.done = !this.$props.todo.done;
+    closeEdit() {
+      delete this.todo.isEditing;
+    },
+
+    edit({ rootData }) {
+      this.todo.isEditing = true;
+    },
+
+    toggleDone({ methods }) {
+      this.todo.done = !this.todo.done;
+      methods.saveLocal();
     },
   },
 };

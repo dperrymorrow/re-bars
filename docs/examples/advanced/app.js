@@ -2,9 +2,12 @@ import Add from "./add.js";
 import Todo from "./todo.js";
 import Filters from "./filters.js";
 
+const storageKey = "rebars-todo";
+const store = window.localStorage.getItem(storageKey);
+const existingData = store ? JSON.parse(store) : null;
+
 export default {
   template: /*html*/ `
-  <div>
     <div class="header-container">
       {{#watch tag="h1" }}
         <span>{{ header.title }}</span>
@@ -24,35 +27,39 @@ export default {
 
     {{> Filters }}
 
-    {{#watch "filters.*" "todos.length" tag="ul"}}
-      {{#each filteredTodos as | todo | }}
-        {{> Todo todo=todo }}
+    {{#watch "filters.*" "todos.length" "todos.*.done" tag="ul"}}
+      {{#each todos as | todo | }}
+        {{#notFilteredOut }}
+          {{> Todo todo=todo }}
+        {{/notFilteredOut}}
       {{/each}}
     {{/watch}}
 
     {{> Add }}
-  <div>
   `,
 
   trace: true,
 
-  data: {
+  helpers: {
+    notFilteredOut({ data, fn, inverse }) {
+      const filter = data.root.filters.filterBy;
+      if (!filter) return fn(this);
+      else if (filter === "incomplete") return this.done ? inverse(this) : fn(this);
+    },
+  },
+
+  data: existingData || {
     header: {
       title: "ReBars Todos",
       description: "Some things that need done",
     },
 
-    filteredTodos() {
-      let list = this.data.todos.concat();
-      if (this.data.filters.filterBy === "incomplete") list = this.data.todos.filter(t => !t.done);
-      else if (this.data.filters.filterBy === "completed") list = this.data.todos.filter(t => t.done);
+    isAdding: false,
 
-      const sorted = list.sort((a, b) => {
-        if (this.data.filters.sortBy === "name") return a.name.localeCompare(b.name);
-        else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
-      });
-
-      return this.data.filters.sortDir === "asc" ? sorted : sorted.reverse();
+    filters: {
+      filterBy: null,
+      sortBy: "name",
+      sortDir: "asc",
     },
 
     todos: [
@@ -92,12 +99,18 @@ export default {
   },
 
   methods: {
-    updateTitle(event) {
-      this.data.header.title = event.target.value;
+    saveLocal({ rootData }) {
+      window.localStorage.setItem(storageKey, JSON.stringify(rootData));
     },
 
-    updateDescription(event) {
-      this.data.header.description = event.target.value;
+    updateTitle({ event, methods }) {
+      this.header.title = event.target.value;
+      methods.saveLocal();
+    },
+
+    updateDescription({ event, methods }) {
+      this.header.description = event.target.value;
+      methods.saveLocal();
     },
   },
 };

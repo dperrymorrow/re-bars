@@ -1,14 +1,10 @@
 export default {
   template: /*html*/ `
   <div>
-    {{#watch "isAdding" }}
+    {{#watch}}
       {{#if isAdding }}
         <form>
-          {{#watch}}
-            <h3>{{ newName }}</h3>
-            <input type="text" {{ ref "newName" }} placeholder="the new todo" />
-          {{/watch}}
-
+          <input type="text" {{ ref "newName" }} placeholder="the new todo" />
           <button {{ on "click" "addItem" }}>Add todo</button>
           <button {{ on "click" "toggleAdd" }}>Cancel</button>
         </form>
@@ -18,28 +14,27 @@ export default {
     {{/watch}}
   </div>`,
 
-  data: {
-    isAdding: false,
-  },
-
   methods: {
-    toggleAdd(event) {
+    toggleAdd({ event, methods }) {
       event.preventDefault();
-      this.data.isAdding = !this.data.isAdding;
+      this.isAdding = !this.isAdding;
     },
 
-    addItem(event) {
+    addItem({ event, methods, $refs }) {
       event.preventDefault();
-      const $input = this.$refs().newName;
-      this.data.todos.push({
+      const $input = $refs().newName;
+
+      this.todos.push({
         name: $input.value,
         id: new Date().getTime(),
         updated: new Date().toLocaleString(),
       });
 
-      this.data.filters.filterBy = null;
+      this.filters.filterBy = null;
       $input.value = "";
       $input.focus();
+
+      methods.saveLocal();
     },
   },
 };

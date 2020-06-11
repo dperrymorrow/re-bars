@@ -23,20 +23,23 @@ ReBars is really just Handlebars with some built in helpers and the notion of [c
   template: /*html*/ `
     &lt;h3&gt;
       Button have been clicked
-        {{#watch}}
-          &lt;span&gt;{{ clicked }}&lt;/span&gt;
-          Clicked {{ clicked }} times
-        {{/watch}}
-      &lt;button {{ method &quot;step&quot; }}&gt;Click Me&lt;/button&gt;
+      {{#watch}}
+        {{ clicked }}
+      {{/watch}}
+
+      &lt;button rbs-method=&quot;click:incriment&quot;&gt;
+        Click Me
+      &lt;/button&gt;
     &lt;/h3&gt;
   `,
-  name: &quot;counter&quot;,
-  data() {
-    return { clicked: 0 };
-  },
+
+  data: { clicked: 0 },
+
+  trace: true,
+
   methods: {
-    step() {
-      this.clicked++;
+    incriment() {
+      this.data.clicked++;
     },
   },
 };
@@ -449,40 +452,6 @@ If you are watching inside a loop, you can target the specific object and key by
   {{/each}}
 </ul>
 ```
-
-
-## The {{bound}} helper
-The `{{bound}` helper is used on input elements such as `<input>` or `<textarea>` elements. The parameter passed will sync the value attribute to the value, and on `input` event update the value.
-
-```html
-<input type="text" {{ bound "name.first" }} />
-```
-
-an item that is bound will automatically get a ref added as the path of the property. this is used for resetting focus and cursor position after a re-render. If you have more than one item with the same bound property, you may need to add another reference
-
-You can pass in a ref as a prop to this helper should you need something more specific.
-
-```html
-<input type="text" {{ bound "name.first" ref="firstName" }} />
-```
-
-<div class="markdown-content"><pre><code class="language-javascript">export default {
-  template: /*html*/ `
-    &lt;div&gt;
-      {{#watch}}
-        &lt;h2&gt;{{ title }}&lt;/h2&gt;
-        &lt;input type=&quot;text&quot; {{ bound &quot;title&quot; ref=&quot;title1&quot; }}&gt;
-        &lt;input type=&quot;text&quot; {{ bound &quot;title&quot; ref=&quot;title2&quot; }}&gt;
-      {{/watch}}
-    &lt;/div&gt;
-  `,
-  name: &quot;bound&quot;,
-  data() {
-    return { title: &quot;Hi, I am bound&quot; };
-  },
-};
-</code></pre>
-</div>
 
 ## The {{method}} helper
 This allows you to bind your component's methods to events in your template.

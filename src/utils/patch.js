@@ -1,7 +1,7 @@
 import Utils from "./index.js";
-import Constants from "../constants.js";
+import Config from "../config.js";
 
-const refAttr = Constants.attrs.ref;
+const refAttr = Config.attrs.ref;
 
 function _isEqHtml(html1, html2) {
   const reg = new RegExp(/rbs-(.*?)="(.*?)"/g);

@@ -1,18 +1,44 @@
-import Msg from "./msg.js";
+// import Msg from "./msg.js";
 import Utils from "./utils/index.js";
 import ProxyTrap from "./proxy-trap.js";
-import Constants from "./constants.js";
+import Config from "./config.js";
 
-const { attrs } = Constants;
+const { attrs } = Config;
 
 export default {
-  register({ instance, template, store, methods }) {
+  register({ instance, template, store, scope }) {
     instance.registerHelper("ref", name => new instance.SafeString(`${attrs.ref}="${name}"`));
+    instance.registerHelper("buildPath", function(...args) {
+      args.pop();
+      return Array.from(args).join(".");
+    });
 
     instance.registerHelper("on", function(...args) {
       const { loc } = args.pop();
-      if (!(args[1] in methods)) Msg.fail(`"${args[1]}" is not a method`, { template, loc });
-      return new instance.SafeString(`${attrs.method}='${Utils.stringify(args, 0)}'`);
+      const id = Utils.randomId();
+      const [eventType, methodName, ...rest] = args;
+      const tplScope = this;
+      // check for method existance
+      if (!(args[1] in scope.methods)) instance.log(3, `ReBars: "${args[1]}" is not a method. line: ${loc.start.line}`);
+
+      Utils.debounce(() => {
+        const $el = Utils.dom.findMethod(id);
+        if (!$el) return;
+
+        $el.addEventListener(eventType, event => {
+          const context = {
+            event,
+            $app: scope.$app,
+            $refs: Utils.dom.findRefs.bind(null, scope.$app),
+            rootData: scope.data,
+          };
+
+          context.methods = Utils.bind(scope.methods, tplScope, context);
+          context.methods[methodName](...rest);
+        });
+      })();
+
+      return new instance.SafeString(`${attrs.method}="${id}"`);
     });
 
     instance.registerHelper("watch", function(...args) {
@@ -22,7 +48,7 @@ export default {
       const eId = Utils.randomId();
 
       const _getPath = target => {
-        if (target === undefined) Msg.fail("undefined cannot be watched", { template, loc });
+        if (target === undefined) instance.log(3, "undefined cannot be watched", { template, loc });
         return typeof target === "object" ? `${target.ReBarsPath}.*` : target;
       };
 
