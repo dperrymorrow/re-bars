@@ -23,9 +23,7 @@
       import ReBars from "../../../src/app.js";
       import DemoApp from "./app.js";
 
-      window.demoApp = ReBars.app(DemoApp)
-      window.demoApp.render(document.getElementById("demo-app"));
-
+      ReBars.app(DemoApp).render("#demo-app");
     </script>
   </body>
 </html>

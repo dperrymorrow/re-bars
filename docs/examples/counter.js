@@ -6,7 +6,7 @@ export default {
         {{ clicked }}
       {{/watch}}
 
-      <button rbs-method="click:incriment">
+      <button {{ on "click" "incriment" }}>
         Click Me
       </button>
     </h3>
@@ -18,7 +18,7 @@ export default {
 
   methods: {
     incriment() {
-      this.data.clicked++;
+      this.clicked++;
     },
   },
 };

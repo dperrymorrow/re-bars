@@ -26,7 +26,8 @@ export default {
     return {
       store,
       instance,
-      render($app) {
+      render(selector) {
+        const $app = document.querySelector(selector);
         const scope = {
           $app,
           methods,

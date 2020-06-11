@@ -35,6 +35,7 @@ export default {
       $input.value = "";
       $input.focus();
 
+      methods.sort();
       methods.saveLocal();
     },
   },

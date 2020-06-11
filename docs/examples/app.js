@@ -36,8 +36,8 @@ export default {
               <label>
                 <input
                   type="checkbox"
-                  {{ on "click" "toggleDone" id done }}
-                  {{ isChecked done }}
+                  {{ on "click" "toggleDone" }}
+                  {{ isChecked }}
                 />
                 {{#if done }}
                   <s>{{ name }}</s>
@@ -47,7 +47,7 @@ export default {
               </label>
 
               <div class="actions">
-                <button {{ on "click" "deleteTodo" id }}>
+                <button {{ on "click" "deleteTodo" }}>
                   delete
                 </button>
               </div>
@@ -94,47 +94,50 @@ export default {
   },
 
   helpers: {
-    isChecked: val => (val ? "checked" : ""),
+    isChecked() {
+      return this.done ? "checked" : "";
+    },
   },
 
   methods: {
-    updateTitle(event) {
-      this.data.header.title = event.target.value;
+    updateTitle({ event }) {
+      this.header.title = event.target.value;
     },
 
-    updateDescription(event) {
-      this.data.header.description = event.target.value;
+    updateDescription({ event }) {
+      this.header.description = event.target.value;
     },
 
-    addItem(event) {
+    addItem({ $refs, event }) {
       event.preventDefault();
-      const $input = this.$refs().newName;
+      const $input = $refs().newName;
 
-      this.data.todos.push({
+      this.todos.push({
         id: new Date().getTime(),
+        done: false,
         name: $input.value,
       });
 
       $input.value = "";
     },
 
-    findTodo(id) {
-      return this.data.todos.findIndex(item => item.id === parseInt(id));
+    findTodo({ rootData }, id) {
+      return rootData.todos.find(item => item.id === parseInt(id));
     },
 
-    deleteTodo(event, id) {
-      const index = this.methods.findTodo(id);
-      this.data.todos.splice(index, 1);
+    deleteTodo({ rootData }) {
+      const index = rootData.todos.findIndex(t => t.id === this.id);
+      rootData.todos.splice(index, 1);
     },
 
-    toggleDone(event, id, done) {
-      const todo = this.data.todos[this.methods.findTodo(id)];
-      todo.done = !done;
+    toggleDone({ event, methods }) {
+      const todo = methods.findTodo(this.id);
+      todo.done = !this.done;
     },
 
-    toggleCreate(event) {
+    toggleCreate({ event }) {
       event.preventDefault();
-      this.data.adding = !this.data.adding;
+      this.adding = !this.adding;
     },
   },
 };
