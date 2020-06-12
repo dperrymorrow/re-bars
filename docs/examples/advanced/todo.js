@@ -67,6 +67,7 @@ export default {
 
     toggleDone({ methods }) {
       this.todo.done = !this.todo.done;
+      methods.sort();
       methods.saveLocal();
     },
   },

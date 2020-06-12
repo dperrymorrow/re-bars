@@ -17,7 +17,6 @@ export default {
     function _buildProxy(raw, tree = []) {
       return new Proxy(raw, {
         get: function(target, prop) {
-          if (prop === "ReBarsPath") return tree.join(".");
           const value = Reflect.get(...arguments);
 
           if (value && typeof value === "object" && ["Array", "Object"].includes(value.constructor.name)) {

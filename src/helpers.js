@@ -42,21 +42,12 @@ export default {
     });
 
     instance.registerHelper("watch", function(...args) {
-      const last = args.pop();
-      const { fn, hash, data, loc } = last;
-
+      const { fn, hash } = args.pop();
       const eId = Utils.randomId();
 
-      const _getPath = target => {
-        if (target === undefined) instance.log(3, "undefined cannot be watched", { template, loc });
-        return typeof target === "object" ? `${target.ReBarsPath}.*` : target;
-      };
-
-      const path = args.map(_getPath);
-
-      if (!path.length) {
+      if (!args.length) {
         const trap = ProxyTrap.create(
-          data.root,
+          this,
           paths => {
             store.renders[eId].path = paths;
           },
@@ -66,17 +57,20 @@ export default {
         fn(trap);
       }
 
-      // path.forEach(item => {
-      //   if (!Utils.hasKey(data.root, item)) {
-      //     debugger;
-      //     Msg.fail(`cannot find path "${item}" to watch`, { template, loc });
-      //   }
-      // });
-
       store.renders[eId] = {
-        path,
+        path: args.filter(arg => typeof arg === "string"),
         render: () => fn(this),
       };
+
+      Utils.debounce(() => {
+        const $el = Utils.dom.findWatcher(eId);
+        if (!$el) return;
+
+        args.forEach(path => {
+          if (typeof path !== "string") instance.log(3, "ReBars: can only watch Strings", args, $el);
+        });
+        instance.log(Config.logLevel(), "ReBars: watching", args, $el);
+      })();
 
       return Utils.dom.wrapWatcher(eId, fn(this), hash);
     });

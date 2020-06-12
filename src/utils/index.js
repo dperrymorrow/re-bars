@@ -59,11 +59,9 @@ export default {
     );
   },
 
-  shouldRender(path, watch) {
-    const watchPaths = Array.isArray(watch) ? watch : [watch];
+  shouldRender(path, watchPaths) {
     return watchPaths.some(watchPath => {
       if (path === watchPath || watchPath === ".*") return true;
-
       const pathSegs = path.split(".");
       const watchSegs = watchPath.split(".");
 

@@ -65,7 +65,7 @@ export default {
       .join(" "),
 
   wrapWatcher(id, html, hash) {
-    const { tag, ...props } = { ...{ tag: "span" }, ...hash };
+    const { tag, ...props } = { tag: "span", ...hash };
     const propStr = this.propStr(props);
     const style = !html.length ? "style='display:none;'" : "";
     return `<${tag} ${propStr} ${style} ${attrs.watch}="${id}">${html}</${tag}>`;
