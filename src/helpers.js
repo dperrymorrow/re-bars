@@ -21,7 +21,7 @@ export default {
       // check for method existance
       if (!(args[1] in scope.methods)) instance.log(3, `ReBars: "${args[1]}" is not a method. line: ${loc.start.line}`);
 
-      Utils.debounce(() => {
+      Utils.nextTick().then(function() {
         const $el = Utils.dom.findMethod(id);
         if (!$el) return;
 
@@ -30,13 +30,14 @@ export default {
             event,
             $app: scope.$app,
             $refs: Utils.dom.findRefs.bind(null, scope.$app),
+            $nextTick: Utils.nextTick,
             rootData: scope.data,
           };
 
           context.methods = Utils.bind(scope.methods, tplScope, context);
           context.methods[methodName](...rest);
         });
-      })();
+      });
 
       return new instance.SafeString(`${attrs.method}="${id}"`);
     });
@@ -62,15 +63,15 @@ export default {
         render: () => fn(this),
       };
 
-      Utils.debounce(() => {
+      Utils.nextTick().then(() => {
         const $el = Utils.dom.findWatcher(eId);
         if (!$el) return;
 
         args.forEach(path => {
           if (typeof path !== "string") instance.log(3, "ReBars: can only watch Strings", args, $el);
         });
-        instance.log(Config.logLevel(), "ReBars: watching", args, $el);
-      })();
+        instance.log(Config.logLevel(), "ReBars: watching", store.renders[eId].path, $el);
+      });
 
       return Utils.dom.wrapWatcher(eId, fn(this), hash);
     });

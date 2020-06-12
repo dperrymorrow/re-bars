@@ -9,16 +9,12 @@ export default {
     if (!$target.contains($active) || !ref) return null;
     return {
       ref,
+      style: $active.getAttribute("style"),
       scrollTop: $active.scrollTop,
       scrollLeft: $active.scrollLeft,
       selectionStart: $active.selectionStart,
     };
   },
-
-  // getMethodArr($el) {
-  //   const attr = $el.getAttribute(attrs.method);
-  //   return attr ? JSON.parse(attr) : null;
-  // },
 
   restoreState($target, activeRef) {
     if (!activeRef) return;
@@ -34,6 +30,7 @@ export default {
 
     $input.scrollTop = activeRef.scrollTop;
     $input.scrollLeft = activeRef.scrollLeft;
+    if (activeRef.style) $input.setAttribute("style", activeRef.style);
   },
 
   findRef: ($target, ref) => {

@@ -1,3 +1,4 @@
+
 .demo-app
   color: $text-color
   margin: $padding-md 0
@@ -7,12 +8,11 @@
   background-color: white
 
   &.debug
+
     *[rbs-watch]
       position: relative
       overflow: visible
       box-sizing: border-box
-      transition: box-shadow .1s ease-out
-      box-shadow: none
 
       &:hover
         box-shadow: 0px 0px 10px 10000px rgba(black, .2)
@@ -27,16 +27,6 @@
           color: white
           content: attr(rbs-watch)
           left: -70px
-
-  &:empty
-    display: none
-
-  pre.debug
-    background-color: $bg
-    border: 1px solid $border
-    color: $txt-dark
-    font-family: Monaco, monospace
-    padding: 1rem
 
   h1
     margin-top: 0
@@ -63,21 +53,24 @@
     display: flex
     justify-content: space-between
 
-  input[type='text'], button, select
+  input[type='text'], button, select, textarea
     background-color: $bg
     padding: $padding-xs $padding-sm
     box-sizing: border-box
     border-radius: $border-radius
     border: 1px solid $border
-    font-size: 12px
     color: $txt-dark
     font-family: $font-header
     outline: none
 
-  input[type='text']
+  button
+    font-size: 12px
+
+  input[type='text'], textarea
     min-width: 200px
     background-color: $bg-light
     font-family: $font-body
+    font-size: 1rem
     flex: 1
 
   select
@@ -85,6 +78,7 @@
 
   form
     display: flex
+    width: 100%
 
   button
     color: $txt
@@ -125,10 +119,16 @@
         justify-content: space-between
         display: flex
 
+        label strong
+          white-space: pre-wrap
+
         .actions
           display: flex
           flex-wrap: nowrap
           align-items: center
+
+          button
+            height: 100%
 
         .date
           font-size: 0.9em

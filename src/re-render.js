@@ -21,19 +21,20 @@ export default {
 
         if (!Patch.hasChanged($target, html)) return;
 
-        // if (Patch.canPatch($target)) {
-        //   Patch.compare({ app, $target, html });
-        //   Msg.log(`${name}: patching ${handler.path}`, $target);
-        //   Utils.dom.restoreState($target, stash);
-        //   return;
-        // }
+        if (Patch.canPatch($target)) {
+          instance.log(Config.logLevel(), "ReBars: patching", handler.path, $target);
+          Patch.compare({ $target, html, instance });
+          Utils.dom.restoreState($target, stash);
+          return;
+        }
 
         // warn for not having a ref on array update
         const lenPath = handler.path.find(path => path.endsWith(".length"));
         if (lenPath)
           instance.log(
             2,
-            `patching "${handler.path}" add a ref="someUniqueKey" to each to avoid re-rendering the entire Array of elements`,
+            "ReBars: add a {{ ref someUniqueKey }} to each to avoid re-rendering the entire Array",
+            handler.path,
             $target
           );
 

@@ -1,17 +1,11 @@
 export default {
   template: /*html*/ `
-    <li {{ ref todo.id }} {{ on "keyup" "saveIfEnter" }}>
-      {{#watch (buildPath "todos" @index "*") tag="div" class="todo" }}
-
+    <li {{ ref todo.id }}>
+      <div class="todo">
         {{#if todo.isEditing }}
-          <input type="text"
-            value="{{ todo.name }}"
-            {{ ref "editInput" }}
-            {{ on "input" "updateText" }}
-          />
-          <button {{ on "click" "closeEdit" }}>done</button>
+          <input type="text" {{ ref "editInput" }} value="{{ todo.name }}">
+          <button {{ on "click" "save" }}>done</button>
         {{ else }}
-
           <label>
             <input type="checkbox" {{ isChecked }} {{ on "click" "toggleDone" }} />
             {{#if todo.done }}
@@ -27,7 +21,7 @@ export default {
             <button {{ on "click" "edit" }}>edit</button>
           </div>
         {{/if}}
-      {{/watch}}
+      </div>
     </li>
   `,
 
@@ -36,7 +30,8 @@ export default {
       return this.todo.done ? "checked" : "";
     },
     timeAgo() {
-      return window.moment(this.todo.updated).fromNow();
+      return this.updated;
+      // window.moment(this.todo.updated).fromNow();
     },
   },
 
@@ -47,27 +42,18 @@ export default {
       methods.saveLocal();
     },
 
-    saveIfEnter({ event, methods }) {
-      if (event.code === "Enter") methods.closeEdit();
+    save({ event, $refs }) {
+      event.preventDefault();
+      this.todo.name = $refs().editInput.value;
+      this.todo.isEditing = false;
     },
 
-    updateText({ event, methods }) {
-      this.todo.name = event.target.value;
-      this.updatedAt = new Date().toLocaleString();
-      methods.saveLocal();
-    },
-
-    closeEdit() {
-      delete this.todo.isEditing;
-    },
-
-    edit({ rootData }) {
+    edit() {
       this.todo.isEditing = true;
     },
 
     toggleDone({ methods }) {
       this.todo.done = !this.todo.done;
-      methods.sort();
       methods.saveLocal();
     },
   },

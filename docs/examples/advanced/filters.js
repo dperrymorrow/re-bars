@@ -38,31 +38,45 @@ export default {
     },
   },
 
-  methods: {
-    sortBy({ methods, event }) {
-      this.filters.sortBy = event.target.value;
-      methods.sort();
-    },
+  data: {
+    filteredTodos() {
+      const { filterBy, sortBy, sortDir } = this.data.filters;
 
-    sort({ methods }) {
-      this.todos.sort((a, b) => {
-        if (this.filters.sortBy === "name") return a.name.localeCompare(b.name);
-        else if (this.filters.sortBy === "completed") return a.done - b.done;
+      const filtered = this.data.todos.filter(todo => {
+        if (filterBy === "incomplete") return !todo.done;
+        if (filterBy === "completed") return todo.done;
+        return true;
+      });
+
+      filtered.sort((a, b) => {
+        if (sortBy === "name") return a.name.localeCompare(b.name);
+        else if (sortBy === "completed") return a.done - b.done;
         else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
       });
 
-      if (this.filters.sortDir === "desc") this.todos.reverse();
-      methods.saveLocal();
+      if (sortDir === "desc") filtered.reverse();
+
+      return filtered;
+    },
+
+    filters: {
+      filterBy: null,
+      sortBy: "completed",
+      sortDir: "asc",
+    },
+  },
+
+  methods: {
+    sortBy({ methods, event }) {
+      this.filters.sortBy = event.target.value;
     },
 
     sortDir({ event, methods }) {
       this.filters.sortDir = event.currentTarget.value;
-      methods.sort();
     },
 
     filterBy({ methods }, filterBy) {
       this.filters.filterBy = filterBy;
-      methods.saveLocal();
     },
   },
 };

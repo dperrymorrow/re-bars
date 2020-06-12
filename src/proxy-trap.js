@@ -27,7 +27,7 @@ export default {
           }
         },
 
-        set: function(target, prop) {
+        set: function(target, prop, value) {
           const ret = Reflect.set(...arguments);
           const path = tree.concat(prop).join(".");
           _addToQue(path);

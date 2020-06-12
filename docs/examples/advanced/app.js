@@ -3,8 +3,10 @@ import Todo from "./todo.js";
 import Filters from "./filters.js";
 
 const storageKey = "rebars-todo";
-const store = window.localStorage.getItem(storageKey);
-const existingData = store ? JSON.parse(store) : null;
+const store = window.localStorage.getItem(storageKey) || "{}";
+const { todos, header } = JSON.parse(store);
+
+console.log(JSON.parse(store));
 
 export default {
   template: /*html*/ `
@@ -27,11 +29,9 @@ export default {
 
     {{> Filters }}
 
-    {{#watch "filters.*" "todos.length" "todos.*.done" tag="ul"}}
-      {{#each todos as | todo | }}
-        {{#notFilteredOut }}
-          {{> Todo todo=todo }}
-        {{/notFilteredOut}}
+    {{#watch "filters.*" "todos.*" tag="ul"}}
+      {{#each filteredTodos as | todo | }}
+        {{> Todo todo=todo }}
       {{/each}}
     {{/watch}}
 
@@ -41,29 +41,18 @@ export default {
   trace: true,
 
   helpers: {
-    notFilteredOut({ data, fn, inverse }) {
-      const filter = data.root.filters.filterBy;
-      if (!filter) return fn(this);
-      else if (filter === "incomplete") return this.done ? inverse(this) : fn(this);
-      else if (filter == "completed") return this.done ? fn(this) : inverse(this);
+    asJSON(val) {
+      return JSON.stringify(val, null, 2);
     },
   },
 
-  data: existingData || {
-    header: {
+  data: {
+    header: header || {
       title: "ReBars Todos",
       description: "Some things that need done",
     },
 
-    isAdding: false,
-
-    filters: {
-      filterBy: null,
-      sortBy: "completed",
-      sortDir: "asc",
-    },
-
-    todos: [
+    todos: todos || [
       {
         done: false,
         name: "Wash the car",
