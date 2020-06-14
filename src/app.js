@@ -13,6 +13,7 @@ export default {
     refs = {},
     methods = {},
     partials = {},
+    watch = {},
     Handlebars = window.Handlebars,
     trace = false,
   }) {
@@ -34,8 +35,6 @@ export default {
           data,
         };
 
-        // TODO: should be able to await nextRender()
-
         Helpers.register({ instance, template, store, scope });
         Utils.registerPartials(instance, scope, partials);
 
@@ -48,6 +47,9 @@ export default {
         scope.data = ProxyTrap.create(data, paths => {
           instance.log(Config.logLevel(), "ReBars: change", paths);
           ReRender.paths({ paths, renders: store.renders, instance });
+          Object.entries(watch).forEach(([path, fn]) => {
+            if (paths.some(path => Utils.shouldRender(path, paths))) fn.call(scope);
+          });
         });
 
         const observer = new MutationObserver(mutationList => {

@@ -6,7 +6,7 @@ export default {
         {{ clicked }}
       {{/watch}}
 
-      <button {{ on "click" "incriment" }}>
+      <button {{ on click="incriment" }}>
         Click Me
       </button>
     </h3>

@@ -14,7 +14,7 @@ export default {
         <input
           type="text"
           value="{{ header.title }}"
-          {{ on "input" "updateTitle" }}
+          {{ on input="updateTitle" }}
         />
       </label>
 
@@ -23,7 +23,7 @@ export default {
         <input
           type="text"
           value="{{ header.description }}"
-          {{ on "input" "updateDescription" }}
+          {{ on input="updateDescription" }}
         />
       </label>
     </div>
@@ -36,7 +36,7 @@ export default {
               <label>
                 <input
                   type="checkbox"
-                  {{ on "click" "toggleDone" }}
+                  {{ on click="toggleDone" }}
                   {{ isChecked }}
                 />
                 {{#if done }}
@@ -47,7 +47,7 @@ export default {
               </label>
 
               <div class="actions">
-                <button {{ on "click" "deleteTodo" }}>
+                <button {{ on click="deleteTodo" }}>
                   delete
                 </button>
               </div>
@@ -61,11 +61,11 @@ export default {
       {{#if adding }}
         <form>
           <input type="text" {{ ref "newName" }} placeholder="the new todo" />
-          <button {{ on "click" "addItem" }}>Add todo</button>
-          <button {{ on "click" "toggleCreate" }}>Cancel</button>
+          <button {{ on click="addItem" }}>Add todo</button>
+          <button {{ on click="toggleCreate" }}>Cancel</button>
         </form>
       {{else}}
-        <button {{ on "click" "toggleCreate" }}>Add another</button>
+        <button {{ on click="toggleCreate" }}>Add another</button>
       {{/if}}
     {{/watch}}
   </div>

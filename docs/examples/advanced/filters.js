@@ -3,20 +3,20 @@ export default {
     <div class="filters">
       <div>
         {{#watch "filters.filterBy" }}
-          <button {{ disabledIf "completed" }} {{ on "click" "filterBy" "completed" }}>Show Only Completed</button>
-          <button {{ disabledIf "incomplete" }} {{ on "click" "filterBy" "incomplete" }}>Show Only Incompleted</button>
-          <button {{ disabledIf null }} {{ on "click" "filterBy" null }}>Show All</button>
+          <button {{ disabledIf "completed" }} {{ on "completed" click="filterBy" }}>Show Only Completed</button>
+          <button {{ disabledIf "incomplete" }} {{ on "incomplete"  click="filterBy" }}>Show Only Incompleted</button>
+          <button {{ disabledIf null }} {{ on null click="filterBy"  }}>Show All</button>
         {{/watch}}
       </div>
 
       <div>
-        <select {{ on "change" "sortBy" }}>
+        <select {{ on change="sortBy" }}>
           <option {{ selectedSort "name" }} value="name">Sort by Name</option>
           <option {{ selectedSort "updated" }} value="updated">Sort by Updated at</option>
           <option {{ selectedSort "completed" }} value="completed">Sort by Completed</option>
         </select>
 
-        <select {{ on "change" "sortDir" }}>
+        <select {{ on change="sortDir" }}>
           <option {{ selectedDir "asc" }} value="asc">Ascending</option>
           <option {{ selectedDir "desc" }} value="desc">Descending</option>
         </select>

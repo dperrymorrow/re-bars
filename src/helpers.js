@@ -14,28 +14,31 @@ export default {
     });
 
     instance.registerHelper("on", function(...args) {
-      const { loc } = args.pop();
+      const { hash, loc } = args.pop();
       const id = Utils.randomId();
-      const [eventType, methodName, ...rest] = args;
       const tplScope = this;
-      // check for method existance
-      if (!(args[1] in scope.methods)) instance.log(3, `ReBars: "${args[1]}" is not a method. line: ${loc.start.line}`);
 
-      Utils.nextTick().then(function() {
-        const $el = Utils.dom.findMethod(id);
-        if (!$el) return;
+      Object.entries(hash).forEach(([eventType, methodName]) => {
+        // check for method existance
 
-        $el.addEventListener(eventType, event => {
-          const context = {
-            event,
-            $app: scope.$app,
-            $refs: Utils.dom.findRefs.bind(null, scope.$app),
-            $nextTick: Utils.nextTick,
-            rootData: scope.data,
-          };
+        Utils.nextTick().then(function() {
+          const $el = Utils.dom.findMethod(id);
+          if (!$el) return;
 
-          context.methods = Utils.bind(scope.methods, tplScope, context);
-          context.methods[methodName](...rest);
+          if (!(methodName in scope.methods)) instance.log(3, `ReBars: "${methodName}" is not a method.`, hash, $el);
+
+          $el.addEventListener(eventType, event => {
+            const context = {
+              event,
+              $app: scope.$app,
+              $refs: Utils.dom.findRefs.bind(null, scope.$app),
+              $nextTick: Utils.nextTick,
+              rootData: scope.data,
+            };
+
+            context.methods = Utils.bind(scope.methods, tplScope, context);
+            context.methods[methodName](...args);
+          });
         });
       });
 

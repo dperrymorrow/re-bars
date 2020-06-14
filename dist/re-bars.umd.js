@@ -10,6 +10,11 @@
     logLevel: () => (isTracing ? 1 : 0),
     setTrace: val => (isTracing = val),
 
+    regex: {
+      attrs: /rbs-(.*?)="(.*?)"/g,
+      whitespace: /\s/g,
+    },
+
     attrs: {
       watch: "rbs-watch",
       method: "rbs-method",
@@ -27,16 +32,12 @@
       if (!$target.contains($active) || !ref) return null;
       return {
         ref,
+        style: $active.getAttribute("style"),
         scrollTop: $active.scrollTop,
         scrollLeft: $active.scrollLeft,
         selectionStart: $active.selectionStart,
       };
     },
-
-    // getMethodArr($el) {
-    //   const attr = $el.getAttribute(attrs.method);
-    //   return attr ? JSON.parse(attr) : null;
-    // },
 
     restoreState($target, activeRef) {
       if (!activeRef) return;
@@ -52,6 +53,7 @@
 
       $input.scrollTop = activeRef.scrollTop;
       $input.scrollLeft = activeRef.scrollLeft;
+      if (activeRef.style) $input.setAttribute("style", activeRef.style);
     },
 
     findRef: ($target, ref) => {
@@ -83,7 +85,7 @@
         .join(" "),
 
     wrapWatcher(id, html, hash) {
-      const { tag, ...props } = { ...{ tag: "span" }, ...hash };
+      const { tag, ...props } = { tag: "span", ...hash };
       const propStr = this.propStr(props);
       const style = !html.length ? "style='display:none;'" : "";
       return `<${tag} ${propStr} ${style} ${attrs.watch}="${id}">${html}</${tag}>`;
@@ -97,15 +99,9 @@
   };
 
   let counter = 1;
-  // import Msg from "../msg.js";
 
   var Utils = {
     dom: Dom,
-
-    // stringify(obj, indent = 2) {
-    //   const parser = (key, val) => (typeof val === "function" ? val + "" : val);
-    //   return JSON.stringify(obj, parser, indent);
-    // },
 
     debounce(callback, wait = 0, immediate = false) {
       let timeout = null;
@@ -121,6 +117,12 @@
           next();
         }
       };
+    },
+
+    nextTick() {
+      return new Promise(resolve => {
+        setTimeout(resolve, 0);
+      });
     },
 
     intersects: (obj1, obj2) => Object.keys(obj2).filter(key => key in obj1),
@@ -139,27 +141,22 @@
           if (collide.length) instance.log(2, `ReBars: partial ${name} has conflicting ${key} keys`, collide);
         });
 
-        if (partial.data) Object.assign(partial.data, scope.data);
+        if (partial.data) Object.assign(scope.data, partial.data);
         if (partial.methods) Object.assign(scope.methods, partial.methods);
         if (partial.helpers) this.registerHelpers(instance, partial.helpers);
       });
     },
 
     bind(obj, scope, ...args) {
-      return Object.keys(obj).reduce(
-        (bound, key) => {
-          bound[key] = bound[key].bind(scope, ...args);
-          return bound;
-        },
-        { ...obj }
-      );
+      return Object.keys(obj).reduce((bound, key) => {
+        bound[key] = obj[key].bind(scope, ...args);
+        return bound;
+      }, {});
     },
 
-    shouldRender(path, watch) {
-      const watchPaths = Array.isArray(watch) ? watch : [watch];
+    shouldRender(path, watchPaths) {
       return watchPaths.some(watchPath => {
         if (path === watchPath || watchPath === ".*") return true;
-
         const pathSegs = path.split(".");
         const watchSegs = watchPath.split(".");
 
@@ -171,33 +168,6 @@
     },
 
     randomId: () => `rbs${counter++}`,
-
-    // getKey(obj, path) {
-    //   return path.split(".").reduce((pointer, key) => {
-    //     if (!(key in pointer)) Msg.fail(`${path} was not found in object`, obj);
-    //     return pointer[key];
-    //   }, obj);
-    // },
-    //
-    // hasKey(obj, path) {
-    //   // cannot traverse it if wildcards are used
-    //   if (path.includes("*")) return true;
-    //   try {
-    //     this.getKey(obj, path);
-    //     return true;
-    //   } catch (err) {
-    //     return false;
-    //   }
-    // },
-    //
-    // setKey(obj, path, val) {
-    //   const arr = path.split(".");
-    //   arr.reduce((pointer, key, index) => {
-    //     if (!(key in pointer)) Msg.fail(`${path} was not found in object!`, obj);
-    //     if (index + 1 === arr.length) pointer[key] = val;
-    //     return pointer[key];
-    //   }, obj);
-    // },
   };
 
   var ProxyTrap = {
@@ -217,7 +187,6 @@
       function _buildProxy(raw, tree = []) {
         return new Proxy(raw, {
           get: function(target, prop) {
-            if (prop === "ReBarsPath") return tree.join(".");
             const value = Reflect.get(...arguments);
 
             if (value && typeof value === "object" && ["Array", "Object"].includes(value.constructor.name)) {
@@ -228,7 +197,7 @@
             }
           },
 
-          set: function(target, prop) {
+          set: function(target, prop, value) {
             const ret = Reflect.set(...arguments);
             const path = tree.concat(prop).join(".");
             _addToQue(path);
@@ -262,49 +231,44 @@
       });
 
       instance.registerHelper("on", function(...args) {
-        const { loc } = args.pop();
+        const { hash, loc } = args.pop();
         const id = Utils.randomId();
-        const [eventType, methodName, ...rest] = args;
         const tplScope = this;
-        // check for method existance
-        if (!(args[1] in scope.methods)) instance.log(3, `ReBars: "${args[1]}" is not a method. line: ${loc.start.line}`);
 
-        Utils.debounce(() => {
-          const $el = Utils.dom.findMethod(id);
-          if (!$el) return;
+        Object.entries(hash).forEach(([eventType, methodName]) => {
+          // check for method existance
 
-          $el.addEventListener(eventType, event => {
-            const context = {
-              event,
-              $app: scope.$app,
-              $refs: Utils.dom.findRefs.bind(null, scope.$app),
-              rootData: scope.data,
-            };
+          Utils.nextTick().then(function() {
+            const $el = Utils.dom.findMethod(id);
+            if (!$el) return;
 
-            context.methods = Utils.bind(scope.methods, tplScope, context);
-            context.methods[methodName](...rest);
+            if (!(methodName in scope.methods)) instance.log(3, `ReBars: "${methodName}" is not a method.`, hash, $el);
+
+            $el.addEventListener(eventType, event => {
+              const context = {
+                event,
+                $app: scope.$app,
+                $refs: Utils.dom.findRefs.bind(null, scope.$app),
+                $nextTick: Utils.nextTick,
+                rootData: scope.data,
+              };
+
+              context.methods = Utils.bind(scope.methods, tplScope, context);
+              context.methods[methodName](...args);
+            });
           });
-        })();
+        });
 
         return new instance.SafeString(`${attrs$1.method}="${id}"`);
       });
 
       instance.registerHelper("watch", function(...args) {
-        const last = args.pop();
-        const { fn, hash, data, loc } = last;
-
+        const { fn, hash } = args.pop();
         const eId = Utils.randomId();
 
-        const _getPath = target => {
-          if (target === undefined) instance.log(3, "undefined cannot be watched", { template, loc });
-          return typeof target === "object" ? `${target.ReBarsPath}.*` : target;
-        };
-
-        const path = args.map(_getPath);
-
-        if (!path.length) {
+        if (!args.length) {
           const trap = ProxyTrap.create(
-            data.root,
+            this,
             paths => {
               store.renders[eId].path = paths;
             },
@@ -314,63 +278,72 @@
           fn(trap);
         }
 
-        // path.forEach(item => {
-        //   if (!Utils.hasKey(data.root, item)) {
-        //     debugger;
-        //     Msg.fail(`cannot find path "${item}" to watch`, { template, loc });
-        //   }
-        // });
-
         store.renders[eId] = {
-          path,
+          path: args.filter(arg => typeof arg === "string"),
           render: () => fn(this),
         };
+
+        Utils.nextTick().then(() => {
+          const $el = Utils.dom.findWatcher(eId);
+          if (!$el) return;
+
+          args.forEach(path => {
+            if (typeof path !== "string") instance.log(3, "ReBars: can only watch Strings", args, $el);
+          });
+          instance.log(Config.logLevel(), "ReBars: watching", store.renders[eId].path, $el);
+        });
 
         return Utils.dom.wrapWatcher(eId, fn(this), hash);
       });
     },
   };
 
-  const refAttr = Config.attrs.ref;
+  const { attrs: attrs$2, regex } = Config;
 
   function _isEqHtml(html1, html2) {
-    const reg = new RegExp(/rbs-(.*?)="(.*?)"/g);
-    return html1.replace(reg, "") === html2.replace(reg, "");
-  }
-
-  function _insertAt($target, $child, index = 0) {
-    if (index >= $target.children.length) $target.appendChild($child);
-    else $target.insertBefore($child, $target.children[index]);
+    const parsed1 = html1.replace(regex.attrs, "");
+    const parsed2 = html2.replace(regex.attrs, "");
+    return Utils.dom.getShadow(parsed1).isEqualNode(Utils.dom.getShadow(parsed2));
   }
 
   var Patch = {
     canPatch: $target =>
       $target.children.length &&
       $target.children.length > 1 &&
-      Array.from($target.children).every($el => $el.getAttribute(refAttr)),
+      Array.from($target.children).every($el => $el.getAttribute(attrs$2.ref)),
+
     hasChanged: ($target, html) => !_isEqHtml($target.innerHTML, html),
 
-    compare({ app, $target, html }) {
+    compare({ $target, html, instance }) {
       const $shadow = Utils.dom.getShadow(html);
       const $vChilds = Array.from($shadow.children);
+      const level = Config.logLevel();
 
       // deletes and updates
       Array.from($target.children).forEach($r => {
-        const $v = Utils.dom.findRef($shadow, $r.getAttribute(refAttr));
-        if (!$v) $r.remove();
-        else if (!_isEqHtml($v.innerHTML, $r.innerHTML)) $r.replaceWith($v.cloneNode(true));
+        const $v = Utils.dom.findRef($shadow, $r.getAttribute(attrs$2.ref));
+        if (!$v) {
+          instance.log(level, "ReBars: removing", $r);
+          $r.remove();
+        } else if (!_isEqHtml($v.innerHTML, $r.innerHTML)) {
+          instance.log(level, "ReBars: updating", $r, $v);
+          $r.replaceWith($v.cloneNode(true));
+        }
       });
 
       // additions
       $vChilds.forEach(($v, index) => {
-        const $r = Utils.dom.findRef($target, $v.getAttribute(refAttr));
-        if (!$r) _insertAt($target, $v.cloneNode(true), index);
+        const $r = Utils.dom.findRef($target, $v.getAttribute(attrs$2.ref));
+        if (!$r) {
+          instance.log(level, "ReBars: adding", $v);
+          $target.append($v.cloneNode(true));
+        }
       });
 
       // sorting
       $vChilds.forEach(($v, index) => {
         const $r = $target.children[index];
-        if ($r.getAttribute("ref") !== $v.getAttribute(refAttr)) $r.replaceWith($v.cloneNode(true));
+        if ($r.getAttribute(attrs$2.ref) !== $v.getAttribute(attrs$2.ref)) $r.replaceWith($v.cloneNode(true));
       });
     },
   };
@@ -394,19 +367,20 @@
 
           if (!Patch.hasChanged($target, html)) return;
 
-          // if (Patch.canPatch($target)) {
-          //   Patch.compare({ app, $target, html });
-          //   Msg.log(`${name}: patching ${handler.path}`, $target);
-          //   Utils.dom.restoreState($target, stash);
-          //   return;
-          // }
+          if (Patch.canPatch($target)) {
+            instance.log(Config.logLevel(), "ReBars: patching", handler.path, $target);
+            Patch.compare({ $target, html, instance });
+            Utils.dom.restoreState($target, stash);
+            return;
+          }
 
           // warn for not having a ref on array update
           const lenPath = handler.path.find(path => path.endsWith(".length"));
           if (lenPath)
             instance.log(
               2,
-              `patching "${handler.path}" add a ref="someUniqueKey" to each to avoid re-rendering the entire Array of elements`,
+              "ReBars: add a {{ ref someUniqueKey }} to each to avoid re-rendering the entire Array",
+              handler.path,
               $target
             );
 
@@ -429,6 +403,7 @@
       refs = {},
       methods = {},
       partials = {},
+      watch = {},
       Handlebars = window.Handlebars,
       trace = false,
     }) {
@@ -442,14 +417,13 @@
       return {
         store,
         instance,
-        render($app) {
+        render(selector) {
+          const $app = document.querySelector(selector);
           const scope = {
             $app,
             methods,
             data,
           };
-
-          // TODO: should be able to await nextRender()
 
           Helpers.register({ instance, template, store, scope });
           Utils.registerPartials(instance, scope, partials);
@@ -463,6 +437,9 @@
           scope.data = ProxyTrap.create(data, paths => {
             instance.log(Config.logLevel(), "ReBars: change", paths);
             ReRender.paths({ paths, renders: store.renders, instance });
+            Object.entries(watch).forEach(([path, fn]) => {
+              if (paths.some(path => Utils.shouldRender(path, paths))) fn.call(scope);
+            });
           });
 
           const observer = new MutationObserver(mutationList => {

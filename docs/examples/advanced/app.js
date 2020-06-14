@@ -2,11 +2,10 @@ import Add from "./add.js";
 import Todo from "./todo.js";
 import Filters from "./filters.js";
 
+const { localStorage } = window;
 const storageKey = "rebars-todo";
-const store = window.localStorage.getItem(storageKey) || "{}";
+const store = localStorage.getItem(storageKey) || "{}";
 const { todos, header } = JSON.parse(store);
-
-console.log(JSON.parse(store));
 
 export default {
   template: /*html*/ `
@@ -18,12 +17,12 @@ export default {
 
       <label>
         Title:
-        <input type="text" value="{{ header.title }}" {{ on "input" "updateTitle" }} />
+        <input type="text" value="{{ header.title }}" {{ on input="updateTitle" }} />
       </label>
 
       <label>
         Description:
-        <input type="text" value="{{ header.description }}" {{ on "input" "updateDescription" }} />
+        <input type="text" value="{{ header.description }}" {{ on input="updateDescription" }} />
       </label>
     </div>
 
@@ -40,9 +39,9 @@ export default {
 
   trace: true,
 
-  helpers: {
-    asJSON(val) {
-      return JSON.stringify(val, null, 2);
+  watch: {
+    ".*"() {
+      localStorage.setItem(storageKey, JSON.stringify(this.data));
     },
   },
 
@@ -89,18 +88,12 @@ export default {
   },
 
   methods: {
-    saveLocal({ rootData }) {
-      window.localStorage.setItem(storageKey, JSON.stringify(rootData));
-    },
-
     updateTitle({ event, methods }) {
       this.header.title = event.target.value;
-      methods.saveLocal();
     },
 
     updateDescription({ event, methods }) {
       this.header.description = event.target.value;
-      methods.saveLocal();
     },
   },
 };

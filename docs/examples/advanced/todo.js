@@ -3,11 +3,11 @@ export default {
     <li {{ ref todo.id }}>
       <div class="todo">
         {{#if todo.isEditing }}
-          <input type="text" {{ ref "editInput" }} value="{{ todo.name }}">
-          <button {{ on "click" "save" }}>done</button>
+          <input type="text" {{ ref "editInput" }} value="{{ todo.name }}" {{ on keydown="saveOnEnter" }}>
+          <button {{ on click="save" }}>done</button>
         {{ else }}
           <label>
-            <input type="checkbox" {{ isChecked }} {{ on "click" "toggleDone" }} />
+            <input type="checkbox" {{ isChecked }} {{ on click="toggleDone" }} />
             {{#if todo.done }}
               <s>{{ todo.name }}</s>
             {{else}}
@@ -17,8 +17,8 @@ export default {
 
           <div class="actions">
             <span class="date">{{ timeAgo }}</span>
-            <button {{ on "click" "remove" }}>delete</button>
-            <button {{ on "click" "edit" }}>edit</button>
+            <button {{ on click="remove" }}>delete</button>
+            <button {{ on click="edit" }}>edit</button>
           </div>
         {{/if}}
       </div>
@@ -39,7 +39,10 @@ export default {
     remove({ methods, rootData }) {
       const index = rootData.todos.findIndex(todo => todo.id === this.id);
       rootData.todos.splice(index, 1);
-      methods.saveLocal();
+    },
+
+    saveOnEnter({ event, methods }) {
+      if (event.code == "Enter") methods.save();
     },
 
     save({ event, $refs }) {
@@ -54,7 +57,6 @@ export default {
 
     toggleDone({ methods }) {
       this.todo.done = !this.todo.done;
-      methods.saveLocal();
     },
   },
 };

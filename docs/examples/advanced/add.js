@@ -1,15 +1,15 @@
 export default {
   template: /*html*/ `
   <div>
-    {{#watch }}
+    {{#watch}}
       {{#if isAdding }}
         <form>
           <input type="text" {{ ref "newName" }} placeholder="the new todo" >
-          <button {{ on "click" "addItem" }}>Add todo</button>
-          <button {{ on "click" "toggleAdd" }}>Cancel</button>
+          <button {{ on click="addItem" }}>Add todo</button>
+          <button {{ on click="toggleAdd" }}>Cancel</button>
         </form>
       {{ else }}
-        <button {{ on "click" "toggleAdd" }}>Add another</button>
+        <button {{ on click="toggleAdd" }}>Add another</button>
       {{/if}}
     {{/watch}}
   </div>`,
@@ -38,9 +38,6 @@ export default {
       this.filters.filterBy = null;
       $input.value = "";
       $input.focus();
-
-      methods.sort();
-      methods.saveLocal();
     },
   },
 };

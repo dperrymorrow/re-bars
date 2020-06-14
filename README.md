@@ -27,7 +27,7 @@ ReBars is really just Handlebars with some built in helpers and the notion of [c
         {{ clicked }}
       {{/watch}}
 
-      &lt;button rbs-method=&quot;click:incriment&quot;&gt;
+      &lt;button {{ on click=&quot;incriment&quot; }}&gt;
         Click Me
       &lt;/button&gt;
     &lt;/h3&gt;
@@ -39,7 +39,7 @@ ReBars is really just Handlebars with some built in helpers and the notion of [c
 
   methods: {
     incriment() {
-      this.data.clicked++;
+      this.clicked++;
     },
   },
 };
