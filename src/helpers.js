@@ -70,6 +70,8 @@ export default {
         const $el = Utils.dom.findWatcher(eId);
         if (!$el) return;
 
+        store.renders[eId].$el = $el;
+
         args.forEach(path => {
           if (typeof path !== "string") instance.log(3, "ReBars: can only watch Strings", args, $el);
         });
