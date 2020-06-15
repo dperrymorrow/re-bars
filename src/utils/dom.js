@@ -16,6 +16,8 @@ export default {
     };
   },
 
+  isTextNode: $el => $el.nodeType === Node.TEXT_NODE,
+
   restoreState($target, activeRef) {
     if (!activeRef) return;
 
