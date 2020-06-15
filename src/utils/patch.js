@@ -17,7 +17,7 @@ export default {
 
   hasChanged: ($target, html) => !_isEqHtml($target.innerHTML, html),
 
-  compare({ $target, html, instance }) {
+  compare({ $target, html, instance, store }) {
     const $shadow = Utils.dom.getShadow(html);
     const $vChilds = Array.from($shadow.children);
     const level = Config.logLevel();

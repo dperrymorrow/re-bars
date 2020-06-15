@@ -19,9 +19,11 @@ export default {
   },
 
   methods: {
-    toggleAdd({ event, methods }) {
+    async toggleAdd({ $nextTick, event, methods, $refs }) {
       event.preventDefault();
       this.isAdding = !this.isAdding;
+      await $nextTick();
+      $refs().newName.focus();
     },
 
     addItem({ event, methods, $refs }) {

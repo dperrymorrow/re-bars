@@ -2,7 +2,6 @@
 import Helpers from "./helpers.js";
 import ReRender from "./re-render.js";
 import ProxyTrap from "./proxy-trap.js";
-import Garbage from "./utils/garbage.js";
 import Utils from "./utils/index.js";
 import Config from "./config.js";
 
@@ -47,7 +46,7 @@ export default {
 
         scope.data = ProxyTrap.create(data, changed => {
           instance.log(Config.logLevel(), "ReBars: change", changed);
-          ReRender.paths({ changed, renders: store.renders, instance });
+          ReRender.paths({ changed, store, instance });
           Object.entries(watch).forEach(([path, fn]) => {
             if (Utils.shouldRender(changed, [path])) fn.call(scope);
           });

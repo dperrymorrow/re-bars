@@ -3,8 +3,8 @@ import Patch from "./utils/patch.js";
 import Config from "./config.js";
 
 export default {
-  paths({ changed, renders, instance }) {
-    Object.entries(renders)
+  paths({ changed, store, instance }) {
+    Object.entries(store.renders)
       .filter(([renderId, handler]) => {
         return Utils.shouldRender(changed, handler.path) && Utils.dom.findWatcher(renderId);
       })
@@ -15,6 +15,8 @@ export default {
 
         if (!$target) return;
 
+        Utils.garbage(store);
+
         const html = handler.render();
         const stash = Utils.dom.recordState($target);
 
@@ -22,7 +24,7 @@ export default {
 
         if (Patch.canPatch($target)) {
           instance.log(Config.logLevel(), "ReBars: patching", handler.path, $target);
-          Patch.compare({ $target, html, instance });
+          Patch.compare({ $target, html, instance, store });
           Utils.dom.restoreState($target, stash);
           return;
         }

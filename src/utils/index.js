@@ -27,6 +27,20 @@ export default {
     });
   },
 
+  garbage({ renders }) {
+    this.nextTick()
+      .then(this.nextTick)
+      .then(() => {
+        Object.entries(renders).forEach(([id, render]) => {
+          if (!render.$el || !document.body.contains(render.$el)) {
+            console.log("deleted 1");
+            delete renders[id];
+          }
+        });
+        console.log(Object.keys(renders).length);
+      });
+  },
+
   intersects: (obj1, obj2) => Object.keys(obj2).filter(key => key in obj1),
 
   registerHelpers(instance, helpers) {

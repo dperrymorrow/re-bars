@@ -14,7 +14,7 @@ export default {
     });
 
     instance.registerHelper("on", function(...args) {
-      const { hash, loc } = args.pop();
+      const { hash } = args.pop();
       const id = Utils.randomId();
       const tplScope = this;
 
