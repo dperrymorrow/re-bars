@@ -56,18 +56,6 @@ export default {
     }, {});
   },
 
-  shouldRender(path, watchPaths) {
-    return watchPaths.some(watchPath => {
-      if (path === watchPath || watchPath === ".*") return true;
-      const pathSegs = path.split(".");
-      const watchSegs = watchPath.split(".");
-
-      return watchSegs.every((seg, index) => {
-        if (seg === pathSegs[index] || seg === "*") return true;
-        return false;
-      });
-    });
-  },
-
-  randomId: () => `rbs${counter++}`,
+  shouldRender: (changed, watching) => changed.some(change => watching.some(watch => change.match(watch))),
+  randomId: () => counter++,
 };

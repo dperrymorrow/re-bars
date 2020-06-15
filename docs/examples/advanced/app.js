@@ -28,7 +28,7 @@ export default {
 
     {{> Filters }}
 
-    {{#watch "filters.*" "todos.*" tag="ul"}}
+    {{#watch "filters(.*)" "todos(.*)" tag="ul"}}
       {{#each filteredTodos as | todo | }}
         {{> Todo todo=todo }}
       {{/each}}
@@ -40,7 +40,7 @@ export default {
   trace: true,
 
   watch: {
-    ".*"() {
+    "(.*)"() {
       localStorage.setItem(storageKey, JSON.stringify(this.data));
     },
   },

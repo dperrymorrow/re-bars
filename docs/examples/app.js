@@ -29,7 +29,7 @@ export default {
     </div>
 
     <ul class="simple">
-      {{#watch "todos.*" }}
+      {{#watch "todos(.*)" }}
         {{#each todos }}
           <li {{ ref id }}>
             <div class="todo">

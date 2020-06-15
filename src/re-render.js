@@ -3,11 +3,10 @@ import Patch from "./utils/patch.js";
 import Config from "./config.js";
 
 export default {
-  paths({ paths, renders, instance }) {
+  paths({ changed, renders, instance }) {
     Object.entries(renders)
       .filter(([renderId, handler]) => {
-        const matches = paths.some(path => Utils.shouldRender(path, handler.path));
-        return matches && Utils.dom.findWatcher(renderId);
+        return Utils.shouldRender(changed, handler.path) && Utils.dom.findWatcher(renderId);
       })
       .forEach(([renderId, handler]) => {
         const $target = Utils.dom.findWatcher(renderId);

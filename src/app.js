@@ -44,11 +44,11 @@ export default {
           return scoped;
         }, data);
 
-        scope.data = ProxyTrap.create(data, paths => {
-          instance.log(Config.logLevel(), "ReBars: change", paths);
-          ReRender.paths({ paths, renders: store.renders, instance });
+        scope.data = ProxyTrap.create(data, changed => {
+          instance.log(Config.logLevel(), "ReBars: change", changed);
+          ReRender.paths({ changed, renders: store.renders, instance });
           Object.entries(watch).forEach(([path, fn]) => {
-            if (paths.some(path => Utils.shouldRender(path, paths))) fn.call(scope);
+            if (Utils.shouldRender(changed, [path])) fn.call(scope);
           });
         });
 
