@@ -49,6 +49,11 @@ export default {
       const { fn, hash } = args.pop();
       const eId = Utils.randomId();
 
+      store.renders[eId] = {
+        path: args.filter(arg => typeof arg === "string"),
+        render: () => fn(this),
+      };
+
       if (!args.length) {
         const trap = ProxyTrap.create(
           this,
@@ -60,11 +65,6 @@ export default {
 
         fn(trap);
       }
-
-      store.renders[eId] = {
-        path: args.filter(arg => typeof arg === "string"),
-        render: () => fn(this),
-      };
 
       Utils.nextTick().then(() => {
         const $el = Utils.dom.findWatcher(eId);

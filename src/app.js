@@ -2,6 +2,7 @@
 import Helpers from "./helpers.js";
 import ReRender from "./re-render.js";
 import ProxyTrap from "./proxy-trap.js";
+import Garbage from "./utils/garbage.js";
 import Utils from "./utils/index.js";
 import Config from "./config.js";
 
@@ -50,22 +51,6 @@ export default {
           Object.entries(watch).forEach(([path, fn]) => {
             if (Utils.shouldRender(changed, [path])) fn.call(scope);
           });
-        });
-
-        const observer = new MutationObserver(mutationList => {
-          mutationList.forEach(({ addedNodes, removedNodes }) => {
-            removedNodes.forEach($el => {
-              if ($el.nodeType === Node.TEXT_NODE) return;
-              const watch = $el.getAttribute(Config.attrs.watch);
-              if (watch) delete store.renders[watch];
-            });
-          });
-        });
-
-        observer.observe($app, {
-          childList: true,
-          attributes: true,
-          subtree: true,
         });
 
         $app.innerHTML = templateFn(scope.data);
