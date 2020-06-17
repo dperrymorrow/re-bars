@@ -1,7 +1,7 @@
 
 # A ReBars Application
 
-A ReBars application is a collection of components rendered to a DOM element. You can have more than one app on a page if you desire.
+A ReBars application is a Handlebars template rendered to a specified DOM element. You can event have more than one app on a page if you desire.
 
 ## Getting Started
 
@@ -25,26 +25,33 @@ import Handlebars from "handlebars";
 import ReBars from "re-bars";
 ```
 
-To start an app, there is minimal code on the page. You create a new ReBars app with an Object containing two keys.
+## Creating an Application
 
-- `$el` the Element that your app will be rendered into
-- `root` the top level [component](component.html) in your app.
-- `trace` default false, if true will console.log all data changes and re-renders
+To create an app, invoke the `Rebars.app` function with an Object describing your application.
 
-``` html
-<div id="demo-app"></div>
-
-<script type="module">
-  import ReBars from "re-bars";
-  import RootComponent from "./app.js";
-
-  ReBars.app({
-    $el: document.getElementById("demo-app"),
-    root: RootComponent,
-    trace: true // default false
-  });
-</script>
+```javascript
+{
+  template: ``, // The Handlebars template string
+  data: {}, // data passed to your template
+  helpers: {}, // Hanlebars helpers to add
+  partials: {}, // Hanlebars partials to register
+  trace: true, // If true logs changes and re-renders to the console
+}
 ```
+
+This will return an Object containing
+
+- `instance` | `Object` the Handlebars instance the app is using
+- `render` | `Function` the function
+
+You then call `render` passing in the selector of the target element for your application to render to.
+
+```javascript
+const app = ReBars.app(...your app definition);
+app.render("#my-app");
+```
+
+>> example counter
 
 ## Global Helpers
 

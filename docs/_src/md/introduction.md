@@ -1,19 +1,33 @@
 
 
-# ReBars
+# The Problem
 
-A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a running Virtial DOM.
+Writing Javascript for the browser used to be simple. You wrote your code, and that same code ran in the browser. _Your_ code is what was running in your application. You spent your time writing Javascript, not configuring tools.
 
-> ReBars is under 5k gzipped!
+Things have changed. _Modern_ Javascript development requires rediculous amounts of tooling and setup. Webpack, JSX, Virtual DOM, Babel, CLI bolierplates, component loaders, Style extractors, concatenators and on an on. Have you ever looked in your `node_modules` directory? Have you ever seen the filesize of your _built_ app and wondered WTF is all that?
 
-ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling.
+The thing is, **WE DON'T NEED THIS ANYMORE**. Evergreen browsers support the features we want that we have been Babeling and polyfilling in order to use. [ES6](https://caniuse.com/#feat=es6) brought us Promises, Modules, Classes, Template Literals, Arrow Functions, Let and Const, Default Parameters, Generators, Destructuring Assignment, Rest & Spread, Map/Set & WeakMap/WeakSet and many more. All the things we have been waiting for It's all there!
 
-ReBars handles keeping your DOM in sync with your data, and gets out of your way. You can get back to just writing Javascript.
+> So why are we still using build steps and mangling _our_ beautiful code back to the stone age?
 
-ReBars is really just Handlebars with some built in helpers and the notion of [components](#rebars-components). The main concept of ReBars is a [{{#watch}}](#the-watch-helper) block helper that lets you tell ReBars what and when to re-render.
+## ReBars
+
+ReBars started with the idea of so what do I _actually_ need from a Javascript framework?
+
+- provide a templating language _(Handlebars)_
+- watch your data and re-render DOM elements on change
+- manage your elements event handling
+
+> ReBars is around 2.5k gzipped!
+
+ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling. _Your_ code runs on your _app_.
+
+ReBars keeps your DOM in sync with your data using [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy), and gets out of your way. You can get back to just writing Javascript.
+
+ReBars is just a Handlebars instance with helpers added. The main one being a [watch](#the-watch-helper) block helper that lets you tell ReBars what and when to re-render.
 
 > If you have used Handlebars, you already know ReBars
 
 >> example counter
 
-Each time the value passed to watch is changed, *just* that Handlebars block will re-render. No Virtial DOM patching, no re-render of entire template. The block function from the helper is stored at first render, and simply invoked again each time a value changes.
+Each time the value passed to watch is changed, that block will re-render. No JSX diffing, no re-render of entire template. The block function from the helper is stored at first render, and simply invoked again each time a value changes.
