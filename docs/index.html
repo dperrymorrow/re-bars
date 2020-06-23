@@ -28,42 +28,10 @@
                         <a href="#getting-started">Getting Started</a>
                       </li>
                       <li>
-                        <a href="#global-helpers">Global Helpers</a>
-                      </li>
-                      <li>
-                        <a href="#global-components">Global Components</a>
+                        <a href="#helpers">Helpers</a>
                       </li>
                       <li>
                         <a href="#handlebars">Handlebars</a>
-                      </li>
-                  </ul>
-            </li>
-            <li>
-              <a href="#rebars-components">A ReBars Component</a>
-                  <ul>
-                      <li>
-                        <a href="#template">Template</a>
-                      </li>
-                      <li>
-                        <a href="#name">Name</a>
-                      </li>
-                      <li>
-                        <a href="#data">Data</a>
-                      </li>
-                      <li>
-                        <a href="#methods">Methods</a>
-                      </li>
-                      <li>
-                        <a href="#refs">Refs</a>
-                      </li>
-                      <li>
-                        <a href="#watchers">Watchers</a>
-                      </li>
-                      <li>
-                        <a href="#hooks">Hooks</a>
-                      </li>
-                      <li>
-                        <a href="#helpers">Helpers</a>
                       </li>
                   </ul>
             </li>
@@ -74,16 +42,7 @@
                         <a href="#the-watch-helper">watch</a>
                       </li>
                       <li>
-                        <a href="#the-bound-helper">bound</a>
-                      </li>
-                      <li>
-                        <a href="#the-method-helper">method</a>
-                      </li>
-                      <li>
-                        <a href="#the-component-helper">component</a>
-                      </li>
-                      <li>
-                        <a href="#the-debug-helper">debug</a>
+                        <a href="#the-on-helper">on</a>
                       </li>
                   </ul>
             </li>
@@ -105,17 +64,65 @@
         <div class="content">
 
           <div class="page" data-anchor="rebars">
-            <div class="markdown-content"><h1 id="rebars">ReBars</h1>
-<p>A simple alternative to modern Javascript frameworks that need pre-compiled, Babeled, and a running Virtial DOM.</p>
+            <div class="markdown-content"><h1 id="the-problem">The Problem</h1>
+<p>Writing Javascript for the browser used to be simple. You wrote your code, and that same code ran in the browser. <em>Your</em> code is what was running in your application. You spent your time writing Javascript, not configuring tools.</p>
+<p>Things have changed. <em>Modern</em> Javascript development requires rediculous amounts of tooling and setup. Webpack, JSX, Virtual DOM, Babel, CLI bolierplates, component loaders, Style extractors, concatenators and on an on. Have you ever looked in your <code>node_modules</code> directory? Have you ever seen the filesize of your <em>built</em> app and wondered WTF is all that?</p>
+<p>The thing is, <strong>WE DON&#39;T NEED THIS ANYMORE</strong>. Evergreen browsers support the features we want that we have been Babeling and polyfilling in order to use. <a href="https://caniuse.com/#feat=es6">ES6</a> brought us Promises, Modules, Classes, Template Literals, Arrow Functions, Let and Const, Default Parameters, Generators, Destructuring Assignment, Rest &amp; Spread, Map/Set &amp; WeakMap/WeakSet and many more. All the things we have been waiting for It&#39;s all there!</p>
 <blockquote>
-<p>ReBars is under 5k gzipped!</p>
+<p>So why are we still using build steps and mangling <em>our</em> beautiful code back to the stone age?</p>
 </blockquote>
-<p>ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling.</p>
-<p>ReBars handles keeping your DOM in sync with your data, and gets out of your way. You can get back to just writing Javascript.</p>
-<p>ReBars is really just Handlebars with some built in helpers and the notion of <a href="#rebars-components">components</a>. The main concept of ReBars is a <a href="#the-watch-helper">{{#watch}}</a> block helper that lets you tell ReBars what and when to re-render.</p>
+<h2 id="rebars">ReBars</h2>
+<p>ReBars started with the idea of so what do I <em>actually</em> need from a Javascript framework?</p>
+<ul>
+<li>a templating language <em>(Handlebars)</em></li>
+<li>re-render DOM elements on data change</li>
+<li>manage your event handling and scope</li>
+</ul>
+<blockquote>
+<p>ReBars is around 2.8k gzipped and has no dependancies other than Handlebars!</p>
+</blockquote>
+<p>ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling. <em>Your</em> code runs on your <em>app</em>.</p>
+<p>ReBars keeps your DOM in sync with your data using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a>, and gets out of your way. You can get back to just writing Javascript.</p>
+<p>ReBars is just a Handlebars instance with helpers added. The main one being a <a href="#the-watch-helper">watch</a> block helper that lets you tell ReBars what and when to re-render.</p>
 <blockquote>
 <p>If you have used Handlebars, you already know ReBars</p>
 </blockquote>
+</div>
+            <div id="counter-demo" class="demo-app"></div>
+          </div>
+
+          <div class="page" data-anchor="a-rebars-application"><div class="markdown-content"><h1 id="a-rebars-application">A ReBars Application</h1>
+<p>A ReBars application is a Handlebars template rendered to a specified DOM element. You can event have more than one app on a page if you desire.</p>
+<h2 id="getting-started">Getting Started</h2>
+<blockquote>
+<p>You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.</p>
+</blockquote>
+<pre><code class="language-html">&lt;!-- Handlebars from CDN ---&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.min.js&quot;&gt;&lt;/script&gt;
+&lt;!-- ReBars from CDN ---&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/re-bars@latest/dist/index.umd.min.js&quot;&gt;&lt;/script&gt;</code></pre>
+<p>Or using NPM</p>
+<pre><code class="language-shell">npm i --save-dev handlebars re-bars</code></pre>
+<pre><code class="language-javascript">import Handlebars from &quot;handlebars&quot;;
+import ReBars from &quot;re-bars&quot;;</code></pre>
+<h2 id="creating-an-application">Creating an Application</h2>
+<p>To create an app, invoke the <code>Rebars.app</code> function with an Object describing your application.</p>
+<pre><code class="language-javascript">{
+  Handlebars // Optional, Handlebars source, defaults to window.Handlebars
+  template: ``, // The Handlebars template string
+  data: {}, // data passed to your template
+  helpers: {}, // Hanlebars helpers to add
+  partials: {}, // Hanlebars partials to register
+  trace: true, // If true logs changes and re-renders to the console
+}</code></pre>
+<p>This will return an Object containing</p>
+<ul>
+<li><code>instance</code> | <code>Object</code> the Handlebars instance the app is using</li>
+<li><code>render</code> | <code>Function</code> the function</li>
+</ul>
+<p>You then call <code>render</code> passing in the selector for a target element to render to.</p>
+<pre><code class="language-javascript">const app = ReBars.app(...your app definition);
+app.render(&quot;#my-app&quot;);</code></pre>
 <div id="counter-demo" class="demo-app"></div>
 <div class="markdown-content"><pre><code class="language-javascript">export default {
   template: /*html*/ `
@@ -140,219 +147,36 @@
 </code></pre></p>
 </div>
 
-<p>Each time the value passed to watch is changed, <em>just</em> that Handlebars block will re-render. No Virtial DOM patching, no re-render of entire template. The block function from the helper is stored at first render, and simply invoked again each time a value changes.</p>
-</div>
-            <div id="counter-demo" class="demo-app"></div>
-          </div>
-
-          <div class="page" data-anchor="a-rebars-application"><div class="markdown-content"><h1 id="a-rebars-application">A ReBars Application</h1>
-<p>A ReBars application is a collection of components rendered to a DOM element. You can have more than one app on a page if you desire.</p>
-<h2 id="getting-started">Getting Started</h2>
-<blockquote>
-<p>You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.</p>
-</blockquote>
-<pre><code class="language-html">&lt;!-- Handlebars from CDN ---&gt;
-&lt;script src=&quot;https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.min.js&quot;&gt;&lt;/script&gt;
-&lt;!-- ReBars from CDN ---&gt;
-&lt;script src=&quot;https://cdn.jsdelivr.net/npm/re-bars@latest/dist/index.umd.min.js&quot;&gt;&lt;/script&gt;</code></pre>
-<p>Or using NPM</p>
-<pre><code class="language-shell">npm i --save-dev handlebars re-bars</code></pre>
-<pre><code class="language-javascript">import Handlebars from &quot;handlebars&quot;;
-import ReBars from &quot;re-bars&quot;;</code></pre>
-<p>To start an app, there is minimal code on the page. You create a new ReBars app with an Object containing two keys.</p>
-<ul>
-<li><code>$el</code> the Element that your app will be rendered into</li>
-<li><code>root</code> the top level <a href="component.html">component</a> in your app.</li>
-<li><code>trace</code> default false, if true will console.log all data changes and re-renders</li>
-</ul>
-<pre><code class="language-html">&lt;div id=&quot;demo-app&quot;&gt;&lt;/div&gt;
-
-&lt;script type=&quot;module&quot;&gt;
-  import ReBars from &quot;re-bars&quot;;
-  import RootComponent from &quot;./app.js&quot;;
-
-  ReBars.app({
-    $el: document.getElementById(&quot;demo-app&quot;),
-    root: RootComponent,
-    trace: true // default false
-  });
-&lt;/script&gt;</code></pre>
-<h2 id="global-helpers">Global Helpers</h2>
-<p>If you would like to add helpers to all components within this application you can pass a helpers Object to the <code>ReBars.app</code> function, You would then be able to use your <code>isChecked</code> helper in any component in your application.</p>
+<h2 id="custom-helpers">Custom Helpers</h2>
+<p>If you would like to add helpers to all components within this application you can pass a helpers Object to the <code>ReBars.app</code> function, You would then be able to use your <code>isChecked</code> helper in any component in your application. The helpers operate just as any other Handlebars helper you would add. <code>this</code> is the scope of the render block. <a href="https://handlebarsjs.com/guide/#custom-helpers">more about Handlebars helpers here</a></p>
 <pre><code class="language-javascript">ReBars.app({
-  $el: document.getElementById(&quot;demo-app&quot;),
-  root: RootComponent,
   helpers: {
-    isChecked: val =&gt; (val ? &quot;checked&quot; : &quot;&quot;),
+    isChecked(val) {
+      console.log(this) // the scope of your template
+      return val ? &quot;checked&quot; : &quot;&quot;;
+    },
   }
 });</code></pre>
-<h2 id="global-components">Global Components</h2>
-<p>If you would like to register components for all components within this application you can pass a components Array to the <code>ReBars.app</code> function. This is the same as passing your components to a component definition.</p>
-<pre><code class="language-javascript">import MyComponent from &quot;my-component.js&quot;;
-
-ReBars.app({
-  $el: document.getElementById(&quot;demo-app&quot;),
-  root: RootComponent,
-  components: [ MyComponent ]
-});</code></pre>
+<p>ReBars simply registers these helpers for you to the Handlebars instance of your app. Should you want to register more helpers yourself instead of defining them in your app definitioin, you can do so using the instanct returned from creating your app.</p>
+<pre><code class="language-javascript">const { instance } = ReBars.app(...);
+instance.registerHelper(&quot;myCustomHelper&quot;, function () {
+  // helper code...
+})</code></pre>
 <h2 id="handlebars">Handlebars</h2>
-<p>If you would like use Handlebars from a source other than on <code>window</code> <em>such as loading from a CDN</em>, you can pass your instance of Handlebars to the <code>ReBars.app</code> function.</p>
+<p>If you would like use Handlebars from a source other than <code>window</code>, you can pass your instance of Handlebars to the <code>ReBars.app</code> function. This can be helpful for test setup.</p>
 <pre><code class="language-javascript">import Handlebars from &quot;somewhere&quot;;
 
 ReBars.app({
   Handlebars,
-  $el: document.getElementById(&quot;demo-app&quot;),
-  root: RootComponent,
+  ...
 });</code></pre>
-</div></div>
-          <div class="page" data-anchor="rebars-components"><div class="markdown-content"><h1 id="rebars-components">ReBars Components</h1>
-<p>Components are where everything happens. Each component has it&#39;s own <code>Handlebars.instance</code> so their helpers are isolated from other components/applications.</p>
-<pre><code class="language-javascript">export default {
-  template: /*html*/ `&lt;div&gt;&lt;/div&gt;`, // your Handlebars template
-  name: &quot;myComponent&quot;, // must have a name
-  data() { return {} }, // data for your template
-  methods: {}, // event handlers
-  hooks: {}, // lifecycle hooks
-  watchers: {}, // methods to fire on change of data
-  helpers: {} // Handlebars helpers just for this component
-}</code></pre>
-<h2 id="template">Template</h2>
-<p>The template is the Handlebars template that will be rendered. What is defined as the return from your <code>data()</code> function will be the root scope of the template when rendering.</p>
-<h2 id="name">Name</h2>
-<p>Each component must define a name. This is is the string you will use to render components using the <a href="#the-component-helper">component</a> helper within your template.</p>
-<h2 id="data">Data</h2>
-<p>The data for the component. Must be a function that returns an Object.</p>
-<pre><code class="language-javascript">data() {
-  return {
-    name: {
-      first: &quot;David&quot;,
-      last: &quot;Morrow&quot;
-    }
-  }
-}</code></pre>
-<blockquote>
-<p>It is also possible to return a function as a key in your data. This can be very useful.</p>
-</blockquote>
-<pre><code class="language-javascript">data() {
-  return {
-    fullName() {
-      return `${this.name.first}, ${this.name.last}`;
-    },
-    name: {
-      first: &quot;David&quot;,
-      last: &quot;Morrow&quot;
-    }
-  }
-}</code></pre>
-<pre><code class="language-html">&lt;p&gt;{{ fullName }}&lt;/p&gt;</code></pre>
-<h2 id="methods">Methods</h2>
-<p>Methods defined in a component are available for use with the <a href="#the-method-helper">method</a> helper, or can be called from within another method.</p>
-<pre><code class="language-html">&lt;button {{ method &quot;save:click&quot; &quot;fred&quot; }}&gt;save&lt;/button&gt;</code></pre>
-<pre><code class="language-javascript">methods: {
-  save(event, name) {
-    // this.$methods
-    // this.$refs()
-    // this.$props
-  }
-}</code></pre>
-<blockquote>
-<p>Methods can reference other methods.</p>
-</blockquote>
-<pre><code class="language-javascript">methods: {
-  findFriend(name) {
-    this.friends.find(friend =&gt; friend.name === name);
-  },
-  save(event, name) {
-    const friend = this.$methods.findFriend(name);
-    // save your friend
-  }
-}</code></pre>
-<h2 id="refs">Refs</h2>
-<p>ReBars keeps track of any element with a <code>ref=&quot;&quot;</code> tag on it. This gives you the ability to save a reference to an element. This also gives a key for Array loop items so that the Array can be patched instead of re-rendered entirely.</p>
-<blockquote>
-<p>The ref tag is also needed on any input or other elements that need focused restored after a re-render. It is also needed to prevent a full re-render of an Array if watching an Array. See <a href="#the-bound-helper">the bound helper</a> and <a href="#the-watch-helper">the watch helper</a></p>
-</blockquote>
-<pre><code class="language-html">&lt;div&gt;
-  &lt;h1 ref=&quot;header&quot;&gt;Header&lt;/h1&gt;
-&lt;/div&gt;</code></pre>
-<p>inside of a method, you can reference any ref by using the <code>$refs()</code> function from a method in your component.</p>
-<pre><code class="language-javascript">methods: {
-  save() {
-    this.$refs().header;
-    // returns the &lt;h1&gt; element
-  }
-}</code></pre>
-<p>If there are more than one element with the same ref, they will be returned as an Array.</p>
-<pre><code class="language-html">&lt;ul&gt;
-  &lt;li {{ ref &quot;listItem&quot; }}&gt;item one&lt;/li&gt;
-  &lt;li {{ ref &quot;listItem&quot; }}&gt;item one&lt;/li&gt;
-&lt;/ul&gt;</code></pre>
-<pre><code class="language-javascript">methods: {
-  save() {
-    this.$refs().listItem
-    // return [li, li]
-  }
-}</code></pre>
-<h2 id="watchers">Watchers</h2>
-<p>Watchers give you the ability to call a function when a property in your data has change. You can watch any items in  your data or <code>$props</code></p>
-<blockquote>
-<p>You cannot, however watch a method in your data. Methods defined in your data are only for convenience for your template rendering.</p>
-</blockquote>
-<pre><code class="language-javascript">data() {
-  return {
-    name: {
-      first: &quot;David&quot;
-    }
-  };
-},
-
-watchers: {
-  &quot;name.first&quot;() {
-    console.log(this.name.first); // David
-    // this.$refs()
-    // this.$methods
-    // this.$props
-  }
-}</code></pre>
-<p>Each time <code>name.first</code> is changed the method will be triggered with the same context you would have in a method.</p>
-<h2 id="hooks">Hooks</h2>
-<p>Hooks are triggered at different points in the component instance&#39;s life.</p>
-<ul>
-<li><code>created</code> triggered when the component is instantiated and prior to rendering</li>
-<li><code>attached</code> the component has been rendered and added to the DOM</li>
-<li><code>detached</code> the component is no longer on the DOM and is being garbage collected</li>
-</ul>
-<blockquote>
-<p><code>this.$refs()</code> cannot be used in the created hook. The component is not yet on the DOM. If you need to do something with the component&#39;s <code>$refs</code> or DOM. Use the attached hook instead.</p>
-</blockquote>
-<pre><code class="language-javascript">data() {
-  return {
-    name: {
-      first: &quot;David&quot;
-    }
-  }
-},
-
-hooks: {
-  created() {
-    // you can set items here pre-render
-    this.name.first = &quot;Mike&quot;;
-  }
-}</code></pre>
-<h2 id="helpers">Helpers</h2>
-<p>Any methods you define under Handlebars helpers methods you define in <code>helpers</code> will be automatically added to the instance rendering the component, and be available for use. ReBars includes several <a href="helpers.html">helpers</a> as well.</p>
-<pre><code class="language-html">&lt;input type=&quot;checkbox&quot; {{ isChecked someBoolean }} /&gt;</code></pre>
-<pre><code class="language-javascript">helpers: {
-  isChecked: val =&gt; (val ? &quot;checked&quot; : &quot;&quot;),
-}</code></pre>
-<p>These helpers are only available for the context of the component you are defining. If you would like to define helpers that are global. Add them to the <a href="#a-rebars-application">ReBars application</a>.</p>
 </div></div>
           <div class="page" data-anchor="rebars-built-in-helpers"><div class="markdown-content"><h1 id="rebars-built-in-helpers">ReBars built in helpers</h1>
 <p>ReBars comes with a few very powerful helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.</p>
 <h2 id="the-watch-helper">The {{#watch}} helper</h2>
 <p>The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.</p>
-<pre><code class="language-javascript">data() {
-  return {
+<pre><code class="language-javascript">{
+  data: {
     hobby: &quot;running&quot;,
     name: {
       first: &quot;David&quot;,
@@ -375,10 +199,10 @@ Watch takes an argument of what property to watch. The argument can be a string 
 </blockquote>
 <ul>
 <li><code>{{#watch name }}</code> this will watch all keys on Object <code>name</code></li>
-<li><code>{{#watch &quot;name.*&quot; }}</code> this is the string equivalent of the above</li>
+<li><code>{{#watch &quot;name(*.)&quot; }}</code> this is the string equivalent of the above</li>
 <li><code>{{#watch &quot;name.first&quot; }}</code> will only watch for changes to <code>name.first</code></li>
-<li><code>{{#watch &quot;name.*&quot; &quot;friends.*.hobby&quot; }}</code> will watch for any change to name or hobby</li>
-<li><code>{{#watch &quot;friends.*.hobby&quot; }}</code> will watch for any friend index hobby change</li>
+<li><code>{{#watch &quot;name(*.)&quot; &quot;friends.(*.).hobby&quot; }}</code> will watch for any change to name or hobby</li>
+<li><code>{{#watch &quot;friends(*.)hobby&quot; }}</code> will watch for any friend index hobby change</li>
 </ul>
 <h3 id="watch-element-wrappers">Watch Element wrappers</h3>
 <p>Each <code>{{watch}}</code> block gets wrapped in a span with an id which is stored to remember what outlet to re-render on change. Sometimes this can get in the way of styling your layouts.</p>
@@ -415,11 +239,11 @@ Watch takes an argument of what property to watch. The argument can be a string 
     &lt;/li&gt;
   {{/each}}
 &lt;/ul&gt;</code></pre>
-<h2 id="the-method-helper">The {{method}} helper</h2>
+<h2 id="the-on-helper">The {{on}} helper</h2>
 <p>This allows you to bind your component&#39;s methods to events in your template.</p>
-<pre><code class="language-html">&lt;button {{ method &quot;save:click&quot; &quot;param1&quot; &quot;param2&quot; }}&gt;Save&lt;/button&gt;</code></pre>
+<pre><code class="language-html">&lt;button {{ on click=&quot;save&quot; &quot;param1&quot; &quot;param2&quot; }}&gt;Save&lt;/button&gt;</code></pre>
 <pre><code class="language-javascript">methods: {
-  save(event, arg1, arg1) {
+  save({ event }, arg1, arg1) {
     console.log(arg1, arg1);
     // param1 param2
   }
@@ -443,41 +267,6 @@ Watch takes an argument of what property to watch. The argument can be a string 
     {{ component &quot;friend&quot; friend=friend }}
   {{/each}}
 &lt;/ul&gt;</code></pre>
-<h3 id="passing-methods-as-props">Passing Methods as props</h3>
-<p>You can pass methods to child components as well, they will be merged into the child&#39;s methods.</p>
-<p><strong>Parent component:</strong></p>
-<pre><code class="language-html">&lt;ul&gt;
-  {{#watch friends }}
-    {{#each friends as | friend | }}
-      {{
-        component &quot;friend&quot;
-        friend=friend
-        index=@index
-        deleteFriend=$methods.deleteFriend
-      }}
-    {{/each}}
-  {{/watch}}
-&lt;/ul&gt;</code></pre>
-<pre><code class="language-javascript">methods: {
-  deleteFriend(event, index) {
-    this.friends.splice(index, 1)
-  },
-}</code></pre>
-<p><strong>Child component:</strong></p>
-<pre><code class="language-html">&lt;button {{ method &quot;remove&quot; }}&gt;Delete Joe&lt;/button&gt;</code></pre>
-<pre><code class="language-javascript">methods: {
-  remove(event) {
-    this.$props.deleteFriend(this.$props.index)
-  }
-}</code></pre>
-<p>on clicking of the button, the friend would be deleted in the parent. Any watch blocks watching the <code>friends.*</code> or <code>friend[index]</code> would be re-rendered.</p>
-<h2 id="the-debug-helper">The {{debug}} helper</h2>
-<p>this helper allows you to view the state of your data in the template.</p>
-<p>To output all data for your template, use the Handlebars <code>.</code> reference.</p>
-<pre><code class="language-html">&lt;!-- full debug --&gt;
-{{ debug . }}
-&lt;!-- debug name object --&gt;
-{{ debug name }}</code></pre>
 </div></div>
 
           <div class="page" id="examples">
@@ -518,7 +307,7 @@ Watch takes an argument of what property to watch. The argument can be a string 
     &lt;/div&gt;
 
     &lt;ul class=&quot;simple&quot;&gt;
-      {{#watch &quot;todos.*&quot; }}
+      {{#watch &quot;todos(.*)&quot; }}
         {{#each todos }}
           &lt;li {{ ref id }}&gt;
             &lt;div class=&quot;todo&quot;&gt;
@@ -680,7 +469,7 @@ export default {
 
     {{&gt; Filters }}
 
-    {{#watch &quot;filters.*&quot; &quot;todos.*&quot; tag=&quot;ul&quot;}}
+    {{#watch &quot;filters(.*)&quot; &quot;todos(.*)&quot; tag=&quot;ul&quot;}}
       {{#each filteredTodos as | todo | }}
         {{&gt; Todo todo=todo }}
       {{/each}}
@@ -692,7 +481,7 @@ export default {
   trace: true,
 
   watch: {
-    &quot;.*&quot;() {
+    &quot;(.*)&quot;() {
       localStorage.setItem(storageKey, JSON.stringify(this.data));
     },
   },
@@ -772,9 +561,13 @@ export default {
   },
 
   methods: {
-    toggleAdd({ event, methods }) {
+    async toggleAdd({ $nextTick, event, methods, $refs }) {
       event.preventDefault();
       this.isAdding = !this.isAdding;
+
+      await $nextTick();
+      const $input = $refs().newName;
+      if ($input) $input.focus();
     },
 
     addItem({ event, methods, $refs }) {

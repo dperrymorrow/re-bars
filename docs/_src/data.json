@@ -13,54 +13,12 @@
           "path": "#getting-started"
         },
         {
-          "label": "Global Helpers",
-          "path": "#global-helpers"
-        },
-        {
-          "label": "Global Components",
-          "path": "#global-components"
+          "label": "Helpers",
+          "path": "#helpers"
         },
         {
           "label": "Handlebars",
           "path": "#handlebars"
-        }
-      ]
-    },
-    {
-      "label": "A ReBars Component",
-      "path": "#rebars-components",
-      "pages": [
-        {
-          "label": "Template",
-          "path": "#template"
-        },
-        {
-          "label": "Name",
-          "path": "#name"
-        },
-        {
-          "label": "Data",
-          "path": "#data"
-        },
-        {
-          "label": "Methods",
-          "path": "#methods"
-        },
-        {
-          "label": "Refs",
-          "path": "#refs"
-        },
-        {
-          "label": "Watchers",
-          "path": "#watchers"
-        },
-        {
-          "label": "Hooks",
-          "path": "#hooks"
-        },
-        {
-          "label": "Helpers",
-          "path": "#helpers"
         }
       ]
     },
@@ -73,20 +31,8 @@
           "path": "#the-watch-helper"
         },
         {
-          "label": "bound",
-          "path": "#the-bound-helper"
-        },
-        {
-          "label": "method",
-          "path": "#the-method-helper"
-        },
-        {
-          "label": "component",
-          "path": "#the-component-helper"
-        },
-        {
-          "label": "debug",
-          "path": "#the-debug-helper"
+          "label": "on",
+          "path": "#the-on-helper"
         }
       ]
     },

@@ -9,8 +9,8 @@ ReBars comes with a few very powerful helpers. Of course you can add your own to
 The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.
 
 ```javascript
-data() {
-  return {
+{
+  data: {
     hobby: "running",
     name: {
       first: "David",
@@ -38,10 +38,10 @@ Anytime `name` is changed the block would be re-rendered with the updated data.
 > If the item you are watching is a primitive such as a `String`, or `Number`. You will need to use a string as the argument.
 
 - `{{#watch name }}` this will watch all keys on Object `name`
-- `{{#watch "name.*" }}` this is the string equivalent of the above
+- `{{#watch "name(*.)" }}` this is the string equivalent of the above
 - `{{#watch "name.first" }}` will only watch for changes to `name.first`
-- `{{#watch "name.*" "friends.*.hobby" }}` will watch for any change to name or hobby
-- `{{#watch "friends.*.hobby" }}` will watch for any friend index hobby change
+- `{{#watch "name(*.)" "friends.(*.).hobby" }}` will watch for any change to name or hobby
+- `{{#watch "friends(*.)hobby" }}` will watch for any friend index hobby change
 
 ### Watch Element wrappers
 Each `{{watch}}` block gets wrapped in a span with an id which is stored to remember what outlet to re-render on change. Sometimes this can get in the way of styling your layouts.
@@ -90,16 +90,16 @@ If you are watching inside a loop, you can target the specific object and key by
 </ul>
 ```
 
-## The {{method}} helper
+## The {{on}} helper
 This allows you to bind your component's methods to events in your template.
 
 ```html
-<button {{ method "save:click" "param1" "param2" }}>Save</button>
+<button {{ on click="save" "param1" "param2" }}>Save</button>
 ```
 
 ```javascript
 methods: {
-  save(event, arg1, arg1) {
+  save({ event }, arg1, arg1) {
     console.log(arg1, arg1);
     // param1 param2
   }
@@ -128,59 +128,4 @@ You can pass props to the component. Any props sent in will be merged with the c
     {{ component "friend" friend=friend }}
   {{/each}}
 </ul>
-```
-
-### Passing Methods as props
-You can pass methods to child components as well, they will be merged into the child's methods.
-
-**Parent component:**
-
-```html
-<ul>
-  {{#watch friends }}
-    {{#each friends as | friend | }}
-      {{
-        component "friend"
-        friend=friend
-        index=@index
-        deleteFriend=$methods.deleteFriend
-      }}
-    {{/each}}
-  {{/watch}}
-</ul>
-```
-
-```javascript
-methods: {
-  deleteFriend(event, index) {
-    this.friends.splice(index, 1)
-  },
-}
-```
-
-**Child component:**
-
-```html
-<button {{ method "remove" }}>Delete Joe</button>
-```
-
-```javascript
-methods: {
-  remove(event) {
-    this.$props.deleteFriend(this.$props.index)
-  }
-}
-```
-on clicking of the button, the friend would be deleted in the parent. Any watch blocks watching the `friends.*` or `friend[index]` would be re-rendered.
-
-## The {{debug}} helper
-this helper allows you to view the state of your data in the template.
-
-To output all data for your template, use the Handlebars `.` reference.
-
-```html
-<!-- full debug -->
-{{ debug . }}
-<!-- debug name object -->
-{{ debug name }}
 ```

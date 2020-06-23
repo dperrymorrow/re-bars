@@ -7,20 +7,9 @@ window.Prism = window.Prism || {};
 window.Prism.manual = true;
 
 (function() {
-  ReBars.app({
-    $el: document.getElementById("demo-app-simple"),
-    root: Simple,
-  });
-
-  ReBars.app({
-    $el: document.getElementById("demo-app-advanced"),
-    root: Advanced,
-  });
-
-  ReBars.app({
-    $el: document.getElementById("counter-demo"),
-    root: Counter,
-  });
+  ReBars.app(Simple).render("#demo-app-simple");
+  ReBars.app(Advanced).render("#demo-app-advanced");
+  ReBars.app(Counter).render("#counter-demo");
 
   _highlight();
   _tabs();

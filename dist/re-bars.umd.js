@@ -39,6 +39,8 @@
       };
     },
 
+    isTextNode: $el => $el.nodeType === Node.TEXT_NODE,
+
     restoreState($target, activeRef) {
       if (!activeRef) return;
 
@@ -154,20 +156,8 @@
       }, {});
     },
 
-    shouldRender(path, watchPaths) {
-      return watchPaths.some(watchPath => {
-        if (path === watchPath || watchPath === ".*") return true;
-        const pathSegs = path.split(".");
-        const watchSegs = watchPath.split(".");
-
-        return watchSegs.every((seg, index) => {
-          if (seg === pathSegs[index] || seg === "*") return true;
-          return false;
-        });
-      });
-    },
-
-    randomId: () => `rbs${counter++}`,
+    shouldRender: (changed, watching) => changed.some(change => watching.some(watch => change.match(watch))),
+    randomId: () => counter++,
   };
 
   var ProxyTrap = {
@@ -231,9 +221,11 @@
       });
 
       instance.registerHelper("on", function(...args) {
-        const { hash, loc } = args.pop();
+        const { hash } = args.pop();
         const id = Utils.randomId();
         const tplScope = this;
+
+        store.handlers[id] = [];
 
         Object.entries(hash).forEach(([eventType, methodName]) => {
           // check for method existance
@@ -244,7 +236,7 @@
 
             if (!(methodName in scope.methods)) instance.log(3, `ReBars: "${methodName}" is not a method.`, hash, $el);
 
-            $el.addEventListener(eventType, event => {
+            const handler = event => {
               const context = {
                 event,
                 $app: scope.$app,
@@ -255,7 +247,10 @@
 
               context.methods = Utils.bind(scope.methods, tplScope, context);
               context.methods[methodName](...args);
-            });
+            };
+
+            store.handlers[id].push({ $el, handler, eventType });
+            $el.addEventListener(eventType, handler);
           });
         });
 
@@ -266,11 +261,16 @@
         const { fn, hash } = args.pop();
         const eId = Utils.randomId();
 
+        const ref = {
+          path: args.filter(arg => typeof arg === "string"),
+          render: () => fn(this),
+        };
+
         if (!args.length) {
           const trap = ProxyTrap.create(
             this,
             paths => {
-              store.renders[eId].path = paths;
+              ref.path = paths;
             },
             true
           );
@@ -278,19 +278,16 @@
           fn(trap);
         }
 
-        store.renders[eId] = {
-          path: args.filter(arg => typeof arg === "string"),
-          render: () => fn(this),
-        };
-
         Utils.nextTick().then(() => {
           const $el = Utils.dom.findWatcher(eId);
           if (!$el) return;
 
+          store.renders[eId] = { ...ref, $el };
+
           args.forEach(path => {
             if (typeof path !== "string") instance.log(3, "ReBars: can only watch Strings", args, $el);
           });
-          instance.log(Config.logLevel(), "ReBars: watching", store.renders[eId].path, $el);
+          instance.log(Config.logLevel(), "ReBars: watching", ref.path, $el);
         });
 
         return Utils.dom.wrapWatcher(eId, fn(this), hash);
@@ -314,7 +311,7 @@
 
     hasChanged: ($target, html) => !_isEqHtml($target.innerHTML, html),
 
-    compare({ $target, html, instance }) {
+    compare({ $target, html, instance, store }) {
       const $shadow = Utils.dom.getShadow(html);
       const $vChilds = Array.from($shadow.children);
       const level = Config.logLevel();
@@ -349,17 +346,16 @@
   };
 
   var ReRender = {
-    paths({ paths, renders, instance }) {
-      Object.entries(renders)
+    paths({ changed, store, instance }) {
+      Object.entries(store.renders)
         .filter(([renderId, handler]) => {
-          const matches = paths.some(path => Utils.shouldRender(path, handler.path));
-          return matches && Utils.dom.findWatcher(renderId);
+          return Utils.shouldRender(changed, handler.path) && Utils.dom.findWatcher(renderId);
         })
         .forEach(([renderId, handler]) => {
           const $target = Utils.dom.findWatcher(renderId);
           // if we cant find the target, we should not attempt to re-renders
           // this can probally be cleaned up with clearing orphans on the app
-
+          // TODO: this should not be needed if garbage is collected well
           if (!$target) return;
 
           const html = handler.render();
@@ -369,7 +365,7 @@
 
           if (Patch.canPatch($target)) {
             instance.log(Config.logLevel(), "ReBars: patching", handler.path, $target);
-            Patch.compare({ $target, html, instance });
+            Patch.compare({ $target, html, instance, store });
             Utils.dom.restoreState($target, stash);
             return;
           }
@@ -393,14 +389,36 @@
     },
   };
 
-  // import Msg from "./msg.js";
+  var Garbage = {
+    start($app, { renders, handlers }) {
+      const observer = new MutationObserver(([record]) => {
+        record.removedNodes.forEach($el => {
+          if ($el.nodeType !== Node.TEXT_NODE) {
+            const watchId = $el.getAttribute(Config.attrs.watch);
+            const handlerId = $el.getAttribute(Config.attrs.method);
+            if (watchId) delete renders[watchId];
+
+            if (handlerId) {
+              handlers[handlerId].forEach(item => {
+                item.$el.removeEventListener(item.eventType, item.handler);
+              });
+              delete handlers[handlerId];
+            }
+          }
+        });
+      });
+
+      observer.observe($app, { attributes: true, childList: true, subtree: true });
+
+      return observer;
+    },
+  };
 
   var app = {
     app({
       helpers = {},
       template,
       data = {},
-      refs = {},
       methods = {},
       partials = {},
       watch = {},
@@ -409,7 +427,7 @@
     }) {
       const instance = Handlebars.create();
       const templateFn = instance.compile(template);
-      const store = { renders: {} };
+      const store = { renders: {}, handlers: {} };
 
       Config.setTrace(trace);
       Utils.registerHelpers(instance, helpers);
@@ -434,30 +452,15 @@
             return scoped;
           }, data);
 
-          scope.data = ProxyTrap.create(data, paths => {
-            instance.log(Config.logLevel(), "ReBars: change", paths);
-            ReRender.paths({ paths, renders: store.renders, instance });
+          scope.data = ProxyTrap.create(data, changed => {
+            instance.log(Config.logLevel(), "ReBars: change", changed);
+            ReRender.paths({ changed, store, instance });
             Object.entries(watch).forEach(([path, fn]) => {
-              if (paths.some(path => Utils.shouldRender(path, paths))) fn.call(scope);
+              if (Utils.shouldRender(changed, [path])) fn.call(scope);
             });
           });
 
-          const observer = new MutationObserver(mutationList => {
-            mutationList.forEach(({ addedNodes, removedNodes }) => {
-              removedNodes.forEach($el => {
-                if ($el.nodeType === Node.TEXT_NODE) return;
-                const watch = $el.getAttribute(Config.attrs.watch);
-                if (watch) delete store.renders[watch];
-              });
-            });
-          });
-
-          observer.observe($app, {
-            childList: true,
-            attributes: true,
-            subtree: true,
-          });
-
+          Garbage.start($app, store);
           $app.innerHTML = templateFn(scope.data);
         },
       };
