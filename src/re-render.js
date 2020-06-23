@@ -12,10 +12,8 @@ export default {
         const $target = Utils.dom.findWatcher(renderId);
         // if we cant find the target, we should not attempt to re-renders
         // this can probally be cleaned up with clearing orphans on the app
-
+        // TODO: this should not be needed if garbage is collected well
         if (!$target) return;
-
-        Utils.garbage(store);
 
         const html = handler.render();
         const stash = Utils.dom.recordState($target);

@@ -22,8 +22,10 @@ export default {
     async toggleAdd({ $nextTick, event, methods, $refs }) {
       event.preventDefault();
       this.isAdding = !this.isAdding;
+
       await $nextTick();
-      $refs().newName.focus();
+      const $input = $refs().newName;
+      if ($input) $input.focus();
     },
 
     addItem({ event, methods, $refs }) {

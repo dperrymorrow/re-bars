@@ -1,16 +1,15 @@
-// import Msg from "./msg.js";
 import Helpers from "./helpers.js";
 import ReRender from "./re-render.js";
 import ProxyTrap from "./proxy-trap.js";
 import Utils from "./utils/index.js";
 import Config from "./config.js";
+import Garbage from "./garbage.js";
 
 export default {
   app({
     helpers = {},
     template,
     data = {},
-    refs = {},
     methods = {},
     partials = {},
     watch = {},
@@ -19,7 +18,7 @@ export default {
   }) {
     const instance = Handlebars.create();
     const templateFn = instance.compile(template);
-    const store = { renders: {} };
+    const store = { renders: {}, handlers: {} };
 
     Config.setTrace(trace);
     Utils.registerHelpers(instance, helpers);
@@ -52,6 +51,7 @@ export default {
           });
         });
 
+        Garbage.start($app, store);
         $app.innerHTML = templateFn(scope.data);
       },
     };

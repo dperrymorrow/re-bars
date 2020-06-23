@@ -18,6 +18,8 @@ export default {
       const id = Utils.randomId();
       const tplScope = this;
 
+      store.handlers[id] = [];
+
       Object.entries(hash).forEach(([eventType, methodName]) => {
         // check for method existance
 
@@ -27,7 +29,7 @@ export default {
 
           if (!(methodName in scope.methods)) instance.log(3, `ReBars: "${methodName}" is not a method.`, hash, $el);
 
-          $el.addEventListener(eventType, event => {
+          const handler = event => {
             const context = {
               event,
               $app: scope.$app,
@@ -38,7 +40,10 @@ export default {
 
             context.methods = Utils.bind(scope.methods, tplScope, context);
             context.methods[methodName](...args);
-          });
+          };
+
+          store.handlers[id].push({ $el, handler, eventType });
+          $el.addEventListener(eventType, handler);
         });
       });
 
@@ -49,7 +54,7 @@ export default {
       const { fn, hash } = args.pop();
       const eId = Utils.randomId();
 
-      store.renders[eId] = {
+      const ref = {
         path: args.filter(arg => typeof arg === "string"),
         render: () => fn(this),
       };
@@ -58,7 +63,7 @@ export default {
         const trap = ProxyTrap.create(
           this,
           paths => {
-            store.renders[eId].path = paths;
+            ref.path = paths;
           },
           true
         );
@@ -70,12 +75,12 @@ export default {
         const $el = Utils.dom.findWatcher(eId);
         if (!$el) return;
 
-        store.renders[eId].$el = $el;
+        store.renders[eId] = { ...ref, $el };
 
         args.forEach(path => {
           if (typeof path !== "string") instance.log(3, "ReBars: can only watch Strings", args, $el);
         });
-        instance.log(Config.logLevel(), "ReBars: watching", store.renders[eId].path, $el);
+        instance.log(Config.logLevel(), "ReBars: watching", ref.path, $el);
       });
 
       return Utils.dom.wrapWatcher(eId, fn(this), hash);
