@@ -52,8 +52,6 @@ const app = ReBars.app(...your app definition);
 app.render("#my-app");
 ```
 
->> example counter
-
 ## Custom Helpers
 
 If you would like to add helpers to all components within this application you can pass a helpers Object to the `ReBars.app` function, You would then be able to use your `isChecked` helper in any component in your application. The helpers operate just as any other Handlebars helper you would add. `this` is the scope of the render block. [more about Handlebars helpers here](https://handlebarsjs.com/guide/#custom-helpers)
@@ -66,10 +64,11 @@ ReBars.app({
       return val ? "checked" : "";
     },
   }
+  ...
 });
 ```
 
-ReBars simply registers these helpers for you to the Handlebars instance of your app. Should you want to register more helpers yourself instead of defining them in your app definitioin, you can do so using the instanct returned from creating your app.
+ReBars simply registers these helpers for you to the Handlebars instance of your app. Should you want to register more helpers yourself instead of defining them in your app definition, you can do so using the instanct returned from creating your app.
 
 ```javascript
 const { instance } = ReBars.app(...);

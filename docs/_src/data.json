@@ -13,8 +13,12 @@
           "path": "#getting-started"
         },
         {
-          "label": "Helpers",
-          "path": "#helpers"
+          "label": "Custom Helpers",
+          "path": "#custom-helpers"
+        },
+        {
+          "label": "Partials",
+          "path": "#partials"
         },
         {
           "label": "Handlebars",

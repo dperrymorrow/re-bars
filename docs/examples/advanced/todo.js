@@ -16,7 +16,7 @@ export default {
           </label>
 
           <div class="actions">
-            <span class="date">{{ timeAgo }}</span>
+            <span class="date">{{ todo.updatedAt }}</span>
             <button {{ on click="remove" }}>delete</button>
             <button {{ on click="edit" }}>edit</button>
           </div>
@@ -28,10 +28,6 @@ export default {
   helpers: {
     isChecked() {
       return this.todo.done ? "checked" : "";
-    },
-    timeAgo() {
-      return this.updated;
-      // window.moment(this.todo.updated).fromNow();
     },
   },
 

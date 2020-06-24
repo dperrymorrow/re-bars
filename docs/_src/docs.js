@@ -44,7 +44,10 @@ window.Prism.manual = true;
     Prism.highlightAll();
 
     Array.from(document.querySelectorAll("code.language-javascript .token.string"))
-      .filter($el => $el.innerText.trim().startsWith("<") && $el.innerText.trim().endsWith(">"))
+      .filter($el => {
+        const txt = $el.innerText.trim();
+        return (txt.startsWith("<") || txt.startsWith("{")) && (txt.endsWith(">") || txt.endsWith("}"));
+      })
       .forEach($el => {
         $el.innerHTML = Prism.highlight($el.innerText, Prism.languages.handlebars, "handlebars");
       });

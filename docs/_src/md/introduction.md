@@ -11,6 +11,7 @@ The thing is, **WE DON'T NEED THIS ANYMORE**. Evergreen browsers support the fea
 > So why are we still using build steps and mangling _our_ beautiful code back to the stone age?
 
 ## ReBars
+> ReBars is around 2.8k gzipped and has no dependancies other than Handlebars!
 
 ReBars started with the idea of so what do I _actually_ need from a Javascript framework?
 
@@ -18,7 +19,6 @@ ReBars started with the idea of so what do I _actually_ need from a Javascript f
 - re-render DOM elements on data change
 - manage your event handling and scope
 
-> ReBars is around 2.8k gzipped and has no dependancies other than Handlebars!
 
 ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling. _Your_ code runs on your _app_.
 

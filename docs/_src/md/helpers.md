@@ -62,31 +62,17 @@ As a solution you can add a tag, class id, any attribute you want to the watch b
 ### Watching Arrays
 `{{#watch}}` can be used on an `Array` as well.
 
-> Be sure to add a `ref="somethingUnique"` to each item enabling ReBars to only re-render changed items. _Each ref must be unique_
+> Be sure to use the ref helper `{{ ref "somethingUnique" }}` on each item enabling ReBars to only re-render changed items. _Each ref must be unique_
 
 ```html
 <ul>
-  {{#watch friends }}
+  {{#watch "friends(*.)" }}
     {{#each friends as | friend | }}
-      <li ref="{{ friend.name }}">
+      <li {{ ref friend.name }}>
         {{ friend.name }} likes to {{ friend.hobby }}
       </li>
     {{/each}}
   {{/watch}}
-</ul>
-```
-
-If you are watching inside a loop, you can target the specific object and key by passing further arguments. The example below will only trigger a re-render on that `friend.name` _(the item in the loop)_ change
-
-```html
-<ul>
-  {{#each friends as | friend | }}
-    <li>
-      {{#watch friend "name" }}
-        {{ friend.name }}
-      {{/watch}}
-    </li>
-  {{/each}}
 </ul>
 ```
 

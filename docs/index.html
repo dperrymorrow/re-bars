@@ -28,7 +28,10 @@
                         <a href="#getting-started">Getting Started</a>
                       </li>
                       <li>
-                        <a href="#helpers">Helpers</a>
+                        <a href="#custom-helpers">Custom Helpers</a>
+                      </li>
+                      <li>
+                        <a href="#partials">Partials</a>
                       </li>
                       <li>
                         <a href="#handlebars">Handlebars</a>
@@ -72,15 +75,15 @@
 <p>So why are we still using build steps and mangling <em>our</em> beautiful code back to the stone age?</p>
 </blockquote>
 <h2 id="rebars">ReBars</h2>
+<blockquote>
+<p>ReBars is around 2.8k gzipped and has no dependancies other than Handlebars!</p>
+</blockquote>
 <p>ReBars started with the idea of so what do I <em>actually</em> need from a Javascript framework?</p>
 <ul>
 <li>a templating language <em>(Handlebars)</em></li>
 <li>re-render DOM elements on data change</li>
 <li>manage your event handling and scope</li>
 </ul>
-<blockquote>
-<p>ReBars is around 2.8k gzipped and has no dependancies other than Handlebars!</p>
-</blockquote>
 <p>ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling. <em>Your</em> code runs on your <em>app</em>.</p>
 <p>ReBars keeps your DOM in sync with your data using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a>, and gets out of your way. You can get back to just writing Javascript.</p>
 <p>ReBars is just a Handlebars instance with helpers added. The main one being a <a href="#the-watch-helper">watch</a> block helper that lets you tell ReBars what and when to re-render.</p>
@@ -88,10 +91,37 @@
 <p>If you have used Handlebars, you already know ReBars</p>
 </blockquote>
 </div>
+            <div class="markdown-content"><pre><code class="language-javascript">export default {
+  template: /*html*/ `
+    &lt;h3&gt;
+      Button have been clicked
+      {{#watch}}
+        {{ clicked }}
+      {{/watch}}
+
+      &lt;button {{ on click=&quot;incriment&quot; }}&gt;
+        Click Me
+      &lt;/button&gt;
+    &lt;/h3&gt;
+  `,
+
+  data: { clicked: 0 },
+
+  trace: true,
+
+  methods: {
+    incriment() {
+      this.clicked++;
+    },
+  },
+};
+</code></pre>
+</div>
             <div id="counter-demo" class="demo-app"></div>
           </div>
 
-          <div class="page" data-anchor="a-rebars-application"><div class="markdown-content"><h1 id="a-rebars-application">A ReBars Application</h1>
+          <div class="page" data-anchor="a-rebars-application">
+            <div class="markdown-content"><h1 id="a-rebars-application">A ReBars Application</h1>
 <p>A ReBars application is a Handlebars template rendered to a specified DOM element. You can event have more than one app on a page if you desire.</p>
 <h2 id="getting-started">Getting Started</h2>
 <blockquote>
@@ -123,30 +153,6 @@ import ReBars from &quot;re-bars&quot;;</code></pre>
 <p>You then call <code>render</code> passing in the selector for a target element to render to.</p>
 <pre><code class="language-javascript">const app = ReBars.app(...your app definition);
 app.render(&quot;#my-app&quot;);</code></pre>
-<div id="counter-demo" class="demo-app"></div>
-<div class="markdown-content"><pre><code class="language-javascript">export default {
-  template: /*html*/ `
-    &lt;h3&gt;
-      Button have been clicked
-      {{#watch}}
-        {{ clicked }}
-      {{/watch}}
-
-<pre><code>  &amp;lt;button {{ on click=&amp;quot;incriment&amp;quot; }}&amp;gt;
-    Click Me
-  &amp;lt;/button&amp;gt;
-&amp;lt;/h3&amp;gt;</code></pre><p>  `,</p>
-<p>  data: { clicked: 0 },</p>
-<p>  trace: true,</p>
-<p>  methods: {
-    incriment() {
-      this.clicked++;
-    },
-  },
-};
-</code></pre></p>
-</div>
-
 <h2 id="custom-helpers">Custom Helpers</h2>
 <p>If you would like to add helpers to all components within this application you can pass a helpers Object to the <code>ReBars.app</code> function, You would then be able to use your <code>isChecked</code> helper in any component in your application. The helpers operate just as any other Handlebars helper you would add. <code>this</code> is the scope of the render block. <a href="https://handlebarsjs.com/guide/#custom-helpers">more about Handlebars helpers here</a></p>
 <pre><code class="language-javascript">ReBars.app({
@@ -156,8 +162,9 @@ app.render(&quot;#my-app&quot;);</code></pre>
       return val ? &quot;checked&quot; : &quot;&quot;;
     },
   }
+  ...
 });</code></pre>
-<p>ReBars simply registers these helpers for you to the Handlebars instance of your app. Should you want to register more helpers yourself instead of defining them in your app definitioin, you can do so using the instanct returned from creating your app.</p>
+<p>ReBars simply registers these helpers for you to the Handlebars instance of your app. Should you want to register more helpers yourself instead of defining them in your app definition, you can do so using the instanct returned from creating your app.</p>
 <pre><code class="language-javascript">const { instance } = ReBars.app(...);
 instance.registerHelper(&quot;myCustomHelper&quot;, function () {
   // helper code...
@@ -170,8 +177,10 @@ ReBars.app({
   Handlebars,
   ...
 });</code></pre>
-</div></div>
-          <div class="page" data-anchor="rebars-built-in-helpers"><div class="markdown-content"><h1 id="rebars-built-in-helpers">ReBars built in helpers</h1>
+</div>
+          </div>
+          <div class="page" data-anchor="rebars-built-in-helpers">
+            <div class="markdown-content"><h1 id="rebars-built-in-helpers">ReBars built in helpers</h1>
 <p>ReBars comes with a few very powerful helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.</p>
 <h2 id="the-watch-helper">The {{#watch}} helper</h2>
 <p>The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.</p>
@@ -267,7 +276,8 @@ Watch takes an argument of what property to watch. The argument can be a string 
     {{ component &quot;friend&quot; friend=friend }}
   {{/each}}
 &lt;/ul&gt;</code></pre>
-</div></div>
+</div>
+          </div>
 
           <div class="page" id="examples">
             <div id="example-simple">
@@ -691,7 +701,7 @@ export default {
           &lt;/label&gt;
 
           &lt;div class=&quot;actions&quot;&gt;
-            &lt;span class=&quot;date&quot;&gt;{{ timeAgo }}&lt;/span&gt;
+            &lt;span class=&quot;date&quot;&gt;{{ todo.updatedAt }}&lt;/span&gt;
             &lt;button {{ on click=&quot;remove&quot; }}&gt;delete&lt;/button&gt;
             &lt;button {{ on click=&quot;edit&quot; }}&gt;edit&lt;/button&gt;
           &lt;/div&gt;
@@ -703,10 +713,6 @@ export default {
   helpers: {
     isChecked() {
       return this.todo.done ? &quot;checked&quot; : &quot;&quot;;
-    },
-    timeAgo() {
-      return this.updated;
-      // window.moment(this.todo.updated).fromNow();
     },
   },
 

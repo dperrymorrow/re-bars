@@ -16,6 +16,7 @@ The thing is, **WE DON'T NEED THIS ANYMORE**. Evergreen browsers support the fea
 > So why are we still using build steps and mangling _our_ beautiful code back to the stone age?
 
 ## ReBars
+> ReBars is around 2.8k gzipped and has no dependancies other than Handlebars!
 
 ReBars started with the idea of so what do I _actually_ need from a Javascript framework?
 
@@ -23,7 +24,6 @@ ReBars started with the idea of so what do I _actually_ need from a Javascript f
 - re-render DOM elements on data change
 - manage your event handling and scope
 
-> ReBars is around 2.8k gzipped and has no dependancies other than Handlebars!
 
 ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling. _Your_ code runs on your _app_.
 
@@ -37,7 +37,8 @@ ReBars is just a Handlebars instance with helpers added. The main one being a [w
 - [ReBars Introduction](#rebars)
 - [A ReBars Application](#a-rebars-application)
   - [Getting Started](#getting-started)
-  - [Helpers](#helpers)
+  - [Custom Helpers](#custom-helpers)
+  - [Partials](#partials)
   - [Handlebars](#handlebars)
 - [ReBars Helpers](#rebars-built-in-helpers)
   - [watch](#the-watch-helper)
@@ -97,33 +98,6 @@ const app = ReBars.app(...your app definition);
 app.render("#my-app");
 ```
 
-<div class="markdown-content"><pre><code class="language-javascript">export default {
-  template: /*html*/ `
-    &lt;h3&gt;
-      Button have been clicked
-      {{#watch}}
-        {{ clicked }}
-      {{/watch}}
-
-      &lt;button {{ on click=&quot;incriment&quot; }}&gt;
-        Click Me
-      &lt;/button&gt;
-    &lt;/h3&gt;
-  `,
-
-  data: { clicked: 0 },
-
-  trace: true,
-
-  methods: {
-    incriment() {
-      this.clicked++;
-    },
-  },
-};
-</code></pre>
-</div>
-
 ## Custom Helpers
 
 If you would like to add helpers to all components within this application you can pass a helpers Object to the `ReBars.app` function, You would then be able to use your `isChecked` helper in any component in your application. The helpers operate just as any other Handlebars helper you would add. `this` is the scope of the render block. [more about Handlebars helpers here](https://handlebarsjs.com/guide/#custom-helpers)
@@ -136,10 +110,11 @@ ReBars.app({
       return val ? "checked" : "";
     },
   }
+  ...
 });
 ```
 
-ReBars simply registers these helpers for you to the Handlebars instance of your app. Should you want to register more helpers yourself instead of defining them in your app definitioin, you can do so using the instanct returned from creating your app.
+ReBars simply registers these helpers for you to the Handlebars instance of your app. Should you want to register more helpers yourself instead of defining them in your app definition, you can do so using the instanct returned from creating your app.
 
 ```javascript
 const { instance } = ReBars.app(...);
