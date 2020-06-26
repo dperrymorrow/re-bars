@@ -18,7 +18,7 @@
         <div class="logo">ReBars</div>
 
         <ul class="side-bar-nav">
-          {{#each pages as |page| }}
+          {{#each nav.pages as |page| }}
             <li>
               <a href="{{ page.path }}">{{ page.label }}</a>
                 {{#if page.pages }}
@@ -37,53 +37,55 @@
 
       <section>
         <div class="content">
-
-          <div class="page" data-anchor="rebars">
-            {{ render syntax="markdown" file="_src/md/introduction.md" }}
-            {{ render syntax="javascript" file="examples/counter.js" }}
-            <div id="counter-demo" class="demo-app"></div>
-          </div>
-
-          <div class="page" data-anchor="a-rebars-application">
-            {{ render syntax="markdown" file="_src/md/application.md" }}
-          </div>
-          <div class="page" data-anchor="rebars-built-in-helpers">
-            {{ render syntax="markdown" file="_src/md/helpers.md" }}
-          </div>
+          {{{ content }}}
 
           <div class="page" id="examples">
-            <div id="example-simple">
-              <h2>Todo List Simple</h2>
-              <p>
-                A simple, one component application that tracks todos.
-              </p>
-              <div id="demo-app-simple" class="demo-app"></div>
-              {{ render syntax="javascript" file="examples/app.js" }}
+
+            <h2 id="example-simple">Todo List Simple</h2>
+            <p>A simple, one component application that tracks todos.</p>
+
+            <div id="demo-app-simple" class="demo-app">
+              <!-- the render target -->
             </div>
 
-            <div id="example-advanced">
-              <h2>Todo List Advanced</h2>
-              <p>
-                Same concept, a little more advanced with sub components, sorting and filtering.
-              </p>
-              <div id="demo-app-advanced" class="demo-app"></div>
+            {{{ js "app.js" }}}
 
-              <div class="tab-container">
-                <nav class="tabs">
-                  <button class="active" data-target="app">app.js</button>
-                  <button data-target="add">add.js</button>
-                  <button data-target="filters">filters.js</button>
-                  <button data-target="todo">todo.js</button>
-                </nav>
+            <h2 id="example-advanced">Todo List Advanced</h2>
+            <p>Same concept, a little more advanced with sub components, sorting and filtering.</p>
 
-                <div class="tab-content">
-                  <div id="app" class="active">{{ render syntax="javascript" file="examples/advanced/app.js" }}</div>
-                  <div id="add">{{ render syntax="javascript" file="examples/advanced/add.js" }}</div>
-                  <div id="filters">{{ render syntax="javascript" file="examples/advanced/filters.js" }}</div>
-                  <div id="todo">{{ render syntax="javascript" file="examples/advanced/todo.js" }}</div>
+            <div id="demo-app-advanced" class="demo-app">
+              <!-- the render target -->
+            </div>
+
+            <!-- tab container -->
+            <div class="tab-container">
+              <nav class="tabs">
+                <button class="active" data-target="app">app.js</button>
+                <button data-target="add">add.js</button>
+                <button data-target="filters">filters.js</button>
+                <button data-target="todo">todo.js</button>
+              </nav>
+
+              <div class="tab-content">
+                <div id="app" class="active">
+                  {{{ js "advanced/app.js" }}}
+                </div>
+
+                <div id="add">
+                  {{{ js "advanced/add.js" }}}
+                </div>
+
+                <div id="filters">
+                  {{{ js "advanced/filters.js" }}}
+                </div>
+
+                <div id="todo">
+                  {{{ js "advanced/todo.js" }}}
                 </div>
               </div>
             </div>
+            <!-- end tab container -->
+
           </div>
 
         </div>

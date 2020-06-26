@@ -1,23 +1,4 @@
 
-> A simple, modern approach to Obvervables and DOM re-rendering and patching.
-
-## [Documentation](https://dperrymorrow.github.io/re-bars) | [Examples](https://dperrymorrow.github.io/re-bars#example-simple)
-
-- [ReBars Introduction](#rebars)
-- [A ReBars Application](#a-rebars-application)
-  - [Getting Started](#getting-started)
-  - [Helpers](#helpers)
-  - [Methods](#methods)
-  - [Partials](#partials)
-  - [Handlebars](#handlebars)
-- [ReBars Helpers](#rebars-built-in-helpers)
-  - [watch](#the-watch-helper)
-  - [on](#the-on-helper)
-- [Examples](#examples)
-  - [Simple](#example-simple)
-  - [Advanced](#example-advanced)
-
-
 
 # The Problem
 
@@ -47,36 +28,7 @@ ReBars is just a Handlebars instance with helpers added. The main one being a [w
 
 > If you have used Handlebars, you already know ReBars
 
-
-
-```javascript
-export default {
-  template: /*html*/ `
-    <h3>
-      Button have been clicked
-      {{#watch}}
-        {{ clicked }}
-      {{/watch}}
-
-      <button {{ on click="incriment" }}>
-        Click Me
-      </button>
-    </h3>
-  `,
-
-  data: { clicked: 0 },
-
-  trace: true,
-
-  methods: {
-    incriment() {
-      this.clicked++;
-    },
-  },
-};
-
-```
-
+{{ example counter.js }}
 
 # A ReBars Application
 
@@ -285,4 +237,3 @@ You can pass props to the component. Any props sent in will be merged with the c
   {{/each}}
 </ul>
 ```
-

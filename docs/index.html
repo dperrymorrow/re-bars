@@ -28,7 +28,10 @@
                         <a href="#getting-started">Getting Started</a>
                       </li>
                       <li>
-                        <a href="#custom-helpers">Custom Helpers</a>
+                        <a href="#helpers">Helpers</a>
+                      </li>
+                      <li>
+                        <a href="#methods">Methods</a>
                       </li>
                       <li>
                         <a href="#partials">Partials</a>
@@ -65,9 +68,7 @@
 
       <section>
         <div class="content">
-
-          <div class="page" data-anchor="rebars">
-            <div class="markdown-content"><h1 id="the-problem">The Problem</h1>
+          <h1 id="the-problem">The Problem</h1>
 <p>Writing Javascript for the browser used to be simple. You wrote your code, and that same code ran in the browser. <em>Your</em> code is what was running in your application. You spent your time writing Javascript, not configuring tools.</p>
 <p>Things have changed. <em>Modern</em> Javascript development requires rediculous amounts of tooling and setup. Webpack, JSX, Virtual DOM, Babel, CLI bolierplates, component loaders, Style extractors, concatenators and on an on. Have you ever looked in your <code>node_modules</code> directory? Have you ever seen the filesize of your <em>built</em> app and wondered WTF is all that?</p>
 <p>The thing is, <strong>WE DON&#39;T NEED THIS ANYMORE</strong>. Evergreen browsers support the features we want that we have been Babeling and polyfilling in order to use. <a href="https://caniuse.com/#feat=es6">ES6</a> brought us Promises, Modules, Classes, Template Literals, Arrow Functions, Let and Const, Default Parameters, Generators, Destructuring Assignment, Rest &amp; Spread, Map/Set &amp; WeakMap/WeakSet and many more. All the things we have been waiting for It&#39;s all there!</p>
@@ -90,8 +91,11 @@
 <blockquote>
 <p>If you have used Handlebars, you already know ReBars</p>
 </blockquote>
+<div class="example demo-app" example-target="counter.js">
+  <!-- example counter.js gets actually rendered here... -->
 </div>
-            <div class="markdown-content"><pre><code class="language-javascript">export default {
+
+<pre><code class="language-javascript">export default {
   template: /*html*/ `
     &lt;h3&gt;
       Button have been clicked
@@ -116,12 +120,7 @@
   },
 };
 </code></pre>
-</div>
-            <div id="counter-demo" class="demo-app"></div>
-          </div>
-
-          <div class="page" data-anchor="a-rebars-application">
-            <div class="markdown-content"><h1 id="a-rebars-application">A ReBars Application</h1>
+<h1 id="a-rebars-application">A ReBars Application</h1>
 <p>A ReBars application is a Handlebars template rendered to a specified DOM element. You can event have more than one app on a page if you desire.</p>
 <h2 id="getting-started">Getting Started</h2>
 <blockquote>
@@ -173,14 +172,11 @@ instance.registerHelper(&quot;myCustomHelper&quot;, function () {
 <p>If you would like use Handlebars from a source other than <code>window</code>, you can pass your instance of Handlebars to the <code>ReBars.app</code> function. This can be helpful for test setup.</p>
 <pre><code class="language-javascript">import Handlebars from &quot;somewhere&quot;;
 
-ReBars.app({
+<p>ReBars.app({
   Handlebars,
   ...
-});</code></pre>
-</div>
-          </div>
-          <div class="page" data-anchor="rebars-built-in-helpers">
-            <div class="markdown-content"><h1 id="rebars-built-in-helpers">ReBars built in helpers</h1>
+});</code></pre></p>
+<h1 id="rebars-built-in-helpers">ReBars built in helpers</h1>
 <p>ReBars comes with a few very powerful helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.</p>
 <h2 id="the-watch-helper">The {{#watch}} helper</h2>
 <p>The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.</p>
@@ -220,33 +216,23 @@ Watch takes an argument of what property to watch. The argument can be a string 
   {{ name.first }} {{ name.last }}
 {{/watch}}
 
-&lt;!-- outputs --&gt;
+<p>&lt;!-- outputs --&gt;
 &lt;p class=&quot;intro&quot; id=&quot;intro-p&quot; data-rbs-watch=&quot;rbs4&quot;&gt;
   David Morrow
-&lt;/p&gt;</code></pre>
+&lt;/p&gt;</code></pre></p>
 <h3 id="watching-arrays">Watching Arrays</h3>
 <p><code>{{#watch}}</code> can be used on an <code>Array</code> as well.</p>
 <blockquote>
-<p>Be sure to add a <code>ref=&quot;somethingUnique&quot;</code> to each item enabling ReBars to only re-render changed items. <em>Each ref must be unique</em></p>
+<p>Be sure to use the ref helper <code>{{ ref &quot;somethingUnique&quot; }}</code> on each item enabling ReBars to only re-render changed items. <em>Each ref must be unique</em></p>
 </blockquote>
 <pre><code class="language-html">&lt;ul&gt;
-  {{#watch friends }}
+  {{#watch &quot;friends(*.)&quot; }}
     {{#each friends as | friend | }}
-      &lt;li ref=&quot;{{ friend.name }}&quot;&gt;
+      &lt;li {{ ref friend.name }}&gt;
         {{ friend.name }} likes to {{ friend.hobby }}
       &lt;/li&gt;
     {{/each}}
   {{/watch}}
-&lt;/ul&gt;</code></pre>
-<p>If you are watching inside a loop, you can target the specific object and key by passing further arguments. The example below will only trigger a re-render on that <code>friend.name</code> <em>(the item in the loop)</em> change</p>
-<pre><code class="language-html">&lt;ul&gt;
-  {{#each friends as | friend | }}
-    &lt;li&gt;
-      {{#watch friend &quot;name&quot; }}
-        {{ friend.name }}
-      {{/watch}}
-    &lt;/li&gt;
-  {{/each}}
 &lt;/ul&gt;</code></pre>
 <h2 id="the-on-helper">The {{on}} helper</h2>
 <p>This allows you to bind your component&#39;s methods to events in your template.</p>
@@ -276,17 +262,18 @@ Watch takes an argument of what property to watch. The argument can be a string 
     {{ component &quot;friend&quot; friend=friend }}
   {{/each}}
 &lt;/ul&gt;</code></pre>
-</div>
-          </div>
+
 
           <div class="page" id="examples">
-            <div id="example-simple">
-              <h2>Todo List Simple</h2>
-              <p>
-                A simple, one component application that tracks todos.
-              </p>
-              <div id="demo-app-simple" class="demo-app"></div>
-              <div class="markdown-content"><pre><code class="language-javascript">export default {
+
+            <h2 id="example-simple">Todo List Simple</h2>
+            <p>A simple, one component application that tracks todos.</p>
+
+            <div id="demo-app-simple" class="demo-app">
+              <!-- the render target -->
+            </div>
+
+            <pre><code class="language-javascript">export default {
   template: /*html*/ `
   &lt;div&gt;
     &lt;div class=&quot;header-container&quot;&gt;
@@ -430,26 +417,27 @@ Watch takes an argument of what property to watch. The argument can be a string 
   },
 };
 </code></pre>
-</div>
+
+
+            <h2 id="example-advanced">Todo List Advanced</h2>
+            <p>Same concept, a little more advanced with sub components, sorting and filtering.</p>
+
+            <div id="demo-app-advanced" class="demo-app">
+              <!-- the render target -->
             </div>
 
-            <div id="example-advanced">
-              <h2>Todo List Advanced</h2>
-              <p>
-                Same concept, a little more advanced with sub components, sorting and filtering.
-              </p>
-              <div id="demo-app-advanced" class="demo-app"></div>
+            <!-- tab container -->
+            <div class="tab-container">
+              <nav class="tabs">
+                <button class="active" data-target="app">app.js</button>
+                <button data-target="add">add.js</button>
+                <button data-target="filters">filters.js</button>
+                <button data-target="todo">todo.js</button>
+              </nav>
 
-              <div class="tab-container">
-                <nav class="tabs">
-                  <button class="active" data-target="app">app.js</button>
-                  <button data-target="add">add.js</button>
-                  <button data-target="filters">filters.js</button>
-                  <button data-target="todo">todo.js</button>
-                </nav>
-
-                <div class="tab-content">
-                  <div id="app" class="active"><div class="markdown-content"><pre><code class="language-javascript">import Add from &quot;./add.js&quot;;
+              <div class="tab-content">
+                <div id="app" class="active">
+                  <pre><code class="language-javascript">import Add from &quot;./add.js&quot;;
 import Todo from &quot;./todo.js&quot;;
 import Filters from &quot;./filters.js&quot;;
 
@@ -549,8 +537,11 @@ export default {
   },
 };
 </code></pre>
-</div></div>
-                  <div id="add"><div class="markdown-content"><pre><code class="language-javascript">export default {
+
+                </div>
+
+                <div id="add">
+                  <pre><code class="language-javascript">export default {
   template: /*html*/ `
   &lt;div&gt;
     {{#watch}}
@@ -598,8 +589,11 @@ export default {
   },
 };
 </code></pre>
-</div></div>
-                  <div id="filters"><div class="markdown-content"><pre><code class="language-javascript">export default {
+
+                </div>
+
+                <div id="filters">
+                  <pre><code class="language-javascript">export default {
   template: /*html*/ `
     &lt;div class=&quot;filters&quot;&gt;
       &lt;div&gt;
@@ -682,8 +676,11 @@ export default {
   },
 };
 </code></pre>
-</div></div>
-                  <div id="todo"><div class="markdown-content"><pre><code class="language-javascript">export default {
+
+                </div>
+
+                <div id="todo">
+                  <pre><code class="language-javascript">export default {
   template: /*html*/ `
     &lt;li {{ ref todo.id }}&gt;
       &lt;div class=&quot;todo&quot;&gt;
@@ -742,10 +739,12 @@ export default {
   },
 };
 </code></pre>
-</div></div>
+
                 </div>
               </div>
             </div>
+            <!-- end tab container -->
+
           </div>
 
         </div>

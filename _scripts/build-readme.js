@@ -1,11 +1,14 @@
 const fs = require("fs");
 const Handlebars = require("handlebars");
-const { register, root } = require("./helpers.js");
+const { root, replaceExamples } = require("./helpers.js");
+const nav = require(`${root}/_src/data.json`);
 
-register();
+const tpl = fs.readFileSync(`${root}/_src/README.hbs`, "utf-8");
+const docs = fs.readFileSync(`${root}/_src/docs.md`, "utf-8");
 
-const data = require(root + "_src/data.json");
-data.pages.pop();
-const tpl = Handlebars.compile(fs.readFileSync(root + "_src/README.hbs", "utf-8"));
+const data = {
+  nav,
+  content: replaceExamples(docs),
+};
 
-fs.writeFileSync(process.cwd() + "/README.md", tpl(data));
+fs.writeFileSync(process.cwd() + "/README.md", Handlebars.compile(tpl)(data));

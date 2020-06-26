@@ -9,7 +9,7 @@ window.Prism.manual = true;
 (function() {
   ReBars.app(Simple).render("#demo-app-simple");
   ReBars.app(Advanced).render("#demo-app-advanced");
-  ReBars.app(Counter).render("#counter-demo");
+  ReBars.app(Counter).render("[example-target='counter.js']");
 
   _highlight();
   _tabs();

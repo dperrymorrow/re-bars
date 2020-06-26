@@ -28,6 +28,10 @@ export default {
       instance,
       render(selector) {
         const $app = document.querySelector(selector);
+
+        if (!$app)
+          return instance.log(3, `ReBars: document.querySelector("${selector}") could not be found on the document`);
+
         const scope = {
           $app,
           methods,

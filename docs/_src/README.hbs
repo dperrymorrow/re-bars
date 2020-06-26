@@ -3,9 +3,7 @@
 
 ## [Documentation](https://dperrymorrow.github.io/re-bars) | [Examples](https://dperrymorrow.github.io/re-bars#example-simple)
 
-{{ render syntax="raw" file="_src/md/introduction.md" }}
-
-{{#each pages as |page| }}
+{{#each nav.pages as |page| }}
 - [{{ page.label }}]({{ page.path }})
 {{#if page.pages }}
   {{#each page.pages as |subPage| }}
@@ -14,5 +12,4 @@
 {{/if}}
 {{/each}}
 
-{{ render syntax="raw" file="_src/md/application.md" }}
-{{ render syntax="raw" file="_src/md/helpers.md" }}
+{{{ content }}}

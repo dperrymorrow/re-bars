@@ -4,7 +4,7 @@ export default {
   start($app, { renders, handlers }) {
     const observer = new MutationObserver(([record]) => {
       record.removedNodes.forEach($el => {
-        if ($el.nodeType !== Node.TEXT_NODE) {
+        if ($el.nodeType === Node.ELEMENT_NODE) {
           const watchId = $el.getAttribute(Config.attrs.watch);
           const handlerId = $el.getAttribute(Config.attrs.method);
           if (watchId) delete renders[watchId];
@@ -20,7 +20,6 @@ export default {
     });
 
     observer.observe($app, { attributes: true, childList: true, subtree: true });
-
     return observer;
   },
 };
