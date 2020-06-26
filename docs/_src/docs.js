@@ -14,6 +14,7 @@ window.Prism.manual = true;
   _highlight();
   _tabs();
   _scrollSpy();
+  _addIntros();
 
   function _scrollSpy() {
     const observer = new IntersectionObserver(entries => {
@@ -51,6 +52,12 @@ window.Prism.manual = true;
       .forEach($el => {
         $el.innerHTML = Prism.highlight($el.innerText, Prism.languages.handlebars, "handlebars");
       });
+  }
+
+  function _addIntros() {
+    Array.from(document.querySelectorAll(".content > h1"))
+      .map($el => $el.nextSibling.nextSibling)
+      .forEach($p => $p.classList.add("intro"));
   }
 
   function _tabs() {

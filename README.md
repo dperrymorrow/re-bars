@@ -162,7 +162,6 @@ If you would like use Handlebars from a source other than `window`, you can pass
 
 ```javascript
 import Handlebars from "somewhere";
-
 ReBars.app({
   Handlebars,
   ...
@@ -222,7 +221,6 @@ As a solution you can add a tag, class id, any attribute you want to the watch b
 {{#watch name tag="p" class="intro" id="intro-p" }}
   {{ name.first }} {{ name.last }}
 {{/watch}}
-
 <!-- outputs -->
 <p class="intro" id="intro-p" data-rbs-watch="rbs4">
   David Morrow
@@ -266,23 +264,4 @@ methods: {
 
 - the first parameter is the methodName separated by `:eventType`, if none is specified `click` will be the event
 - you can add as many other parameters as you would like to your method call
-
-## The {{component}} helper
-This allows you to render child components from withing the component you are in. It takes one parameter, the name of the component to render. This will render a registered component to the DOM of the parent component.
-
-> The "name" of the component is the name property in the component's definition. Not the name you imported it as.
-
-```html
-{{ component "myComponentName" }}
-```
-
-You can pass props to the component. Any props sent in will be merged with the component's data. If a prop is a method, it will be merged into the child component's methods. The "friend" component will have friend defined in it's data.
-
-```html
-<ul>
-  {{#each friends as | friend | }}
-    {{ component "friend" friend=friend }}
-  {{/each}}
-</ul>
-```
 

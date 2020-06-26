@@ -29,20 +29,6 @@ h2
   margin-bottom: $padding-sm
   border-bottom: 1px solid $border
 
-.markdown-content > p:first-of-type, h1 small
-  display: block
-  font-weight: normal
-  font-family: $font-body
-  color: $txt-light
-  font-size: 1.7rem
-  letter-spacing: 0.001em
-  line-height: 1.6em
-  background-color: rgba(white, 0.7)
-  box-shadow: 0px 0px 20px 10px rgba(white, 0.7)
-  margin-bottom: $padding-lg
-  padding: $padding-sm $padding-md
-  margin-top: 0
-
 main
   display: flex
   height: 100%
@@ -54,23 +40,6 @@ section
   height: 100%
   scroll-behavior: smooth
 
-.page
-  padding-bottom: $padding-lg
-  padding-top: $padding-lg
-
-  &:before
-    content: ''
-    display: block
-    height: 10px
-    background-color: rgba($border, 0.5)
-    border-radius: 5px
-    box-shadow: 0px 0px 20px 10px rgba(white, 0.8)
-
-  &:first-child
-    padding-top: $padding-sm
-
-    &:before
-      display: none
 
 /* content styling */
 .content
@@ -92,12 +61,12 @@ section
     font-size: 1.15em
     background-color: $highlight-bg
 
-    p
+    > p
       line-height: 1.7em
       margin: 0
       padding: 0
 
-.markdown-content
+.content
   li
     margin-bottom: $padding-xs
 
@@ -115,17 +84,28 @@ section
     margin: 0
     border-top: 2px solid $bg
 
-  p
+  > p
     line-height: 1.8em
     font-size: 1.1rem
     margin-top: $padding-sm
+
+    &.intro
+      font-family: $font-body
+      color: $txt-light
+      font-size: 1.7rem
+      letter-spacing: 0.001em
+      line-height: 1.6em
+      background-color: rgba(white, 0.7)
+      box-shadow: 0px 0px 20px 10px rgba(white, 0.7)
+      padding: $padding-sm
+      margin-top: 0
 
 p code, .content li code, .content h1 code
   line-height: 1em
   background-color: white
   padding: 0.1em 0.25em
   color: $txt-dark
-  border: 1px solid $border
+  // border: 1px solid $border
   border-radius: $border-radius
   color: $highlight-txt
 

@@ -171,11 +171,10 @@ instance.registerHelper(&quot;myCustomHelper&quot;, function () {
 <h2 id="handlebars">Handlebars</h2>
 <p>If you would like use Handlebars from a source other than <code>window</code>, you can pass your instance of Handlebars to the <code>ReBars.app</code> function. This can be helpful for test setup.</p>
 <pre><code class="language-javascript">import Handlebars from &quot;somewhere&quot;;
-
-<p>ReBars.app({
+ReBars.app({
   Handlebars,
   ...
-});</code></pre></p>
+});</code></pre>
 <h1 id="rebars-built-in-helpers">ReBars built in helpers</h1>
 <p>ReBars comes with a few very powerful helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.</p>
 <h2 id="the-watch-helper">The {{#watch}} helper</h2>
@@ -215,11 +214,10 @@ Watch takes an argument of what property to watch. The argument can be a string 
 <pre><code class="language-html">{{#watch name tag=&quot;p&quot; class=&quot;intro&quot; id=&quot;intro-p&quot; }}
   {{ name.first }} {{ name.last }}
 {{/watch}}
-
-<p>&lt;!-- outputs --&gt;
+&lt;!-- outputs --&gt;
 &lt;p class=&quot;intro&quot; id=&quot;intro-p&quot; data-rbs-watch=&quot;rbs4&quot;&gt;
   David Morrow
-&lt;/p&gt;</code></pre></p>
+&lt;/p&gt;</code></pre>
 <h3 id="watching-arrays">Watching Arrays</h3>
 <p><code>{{#watch}}</code> can be used on an <code>Array</code> as well.</p>
 <blockquote>
@@ -250,18 +248,6 @@ Watch takes an argument of what property to watch. The argument can be a string 
 <li>the first parameter is the methodName separated by <code>:eventType</code>, if none is specified <code>click</code> will be the event</li>
 <li>you can add as many other parameters as you would like to your method call</li>
 </ul>
-<h2 id="the-component-helper">The {{component}} helper</h2>
-<p>This allows you to render child components from withing the component you are in. It takes one parameter, the name of the component to render. This will render a registered component to the DOM of the parent component.</p>
-<blockquote>
-<p>The &quot;name&quot; of the component is the name property in the component&#39;s definition. Not the name you imported it as.</p>
-</blockquote>
-<pre><code class="language-html">{{ component &quot;myComponentName&quot; }}</code></pre>
-<p>You can pass props to the component. Any props sent in will be merged with the component&#39;s data. If a prop is a method, it will be merged into the child component&#39;s methods. The &quot;friend&quot; component will have friend defined in it&#39;s data.</p>
-<pre><code class="language-html">&lt;ul&gt;
-  {{#each friends as | friend | }}
-    {{ component &quot;friend&quot; friend=friend }}
-  {{/each}}
-&lt;/ul&gt;</code></pre>
 
 
           <div class="page" id="examples">
