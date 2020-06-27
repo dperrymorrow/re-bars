@@ -33,6 +33,7 @@
     "http-server": "0.12.3",
     "httpserver": "0.3.0",
     "marked": "0.8.2",
+    "nodemon": "2.0.4",
     "prettier": "^1.19.1",
     "rollup": "^1.31.0",
     "rollup-plugin-filesize": "^6.2.1",

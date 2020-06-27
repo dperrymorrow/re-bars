@@ -8,7 +8,6 @@ body, html
   padding: 0
   margin: 0
   font-family: $font-body
-  scroll-behavior: smooth
   background-color: $bg
   height: 100%
   color: $txt
@@ -19,6 +18,36 @@ h1, h2, h3, h4, h5
   color: $txt-dark
   font-family: $font-header
 
+table
+  margin: $padding-md 0
+  border: 1px solid $border
+  cellspacing: 0
+  cellpadding: 0
+  border-radius: $border-radius
+  width: 100%
+
+  th
+    font-family: $font-header
+    text-align: left
+    background-color: $bg-2
+    border-bottom: 1px solid $border
+
+  td, th
+    padding: $padding-xs
+
+  td
+    border-bottom: 1px solid $border
+    border-left: 1px solid $border
+
+    &:first-child
+      border-left: none
+
+  tr:nth-child(odd)
+    background-color: white
+
+  tr:last-child td
+    border-bottom: none
+
 h1
   letter-spacing: -0.036em
   font-size: 5em
@@ -26,7 +55,9 @@ h1
 
 h2
   font-size: 1.8em
+  margin-top: $padding-lg
   margin-bottom: $padding-sm
+  padding-bottom: $padding-xs
   border-bottom: 1px solid $border
 
 main
@@ -84,10 +115,16 @@ section
     margin: 0
     border-top: 2px solid $bg
 
+  hr
+    margin-top: $padding-lg
+    border-top: 3px solid $border
+    border-bottom: none
+
   > p
     line-height: 1.8em
     font-size: 1.1rem
     margin-top: $padding-sm
+    transition: font-size .3s ease-out
 
     &.intro
       font-family: $font-body

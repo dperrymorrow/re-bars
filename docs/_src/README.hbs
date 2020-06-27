@@ -4,12 +4,14 @@
 ## [Documentation](https://dperrymorrow.github.io/re-bars) | [Examples](https://dperrymorrow.github.io/re-bars#example-simple)
 
 {{#each nav.pages as |page| }}
+  {{#if page.markdown }}
 - [{{ page.label }}]({{ page.path }})
-{{#if page.pages }}
-  {{#each page.pages as |subPage| }}
+    {{#if page.pages }}
+      {{#each page.pages as |subPage| }}
   - [{{ subPage.label }}]({{ subPage.path }})
-  {{/each}}
-{{/if}}
+      {{/each}}
+    {{/if}}
+  {{/if}}
 {{/each}}
 
 {{{ content }}}

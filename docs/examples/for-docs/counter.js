@@ -1,23 +1,20 @@
 export default {
   template: /*html*/ `
-    <h3>
+    <strong>
       Button have been clicked
       {{#watch}}
         {{ clicked }}
       {{/watch}}
+      times
+    </strong>
 
-      <button {{ on click="incriment" }}>
-        Click Me
-      </button>
-    </h3>
+    <button {{ on click="step" }}>Click Me</button>
   `,
 
   data: { clicked: 0 },
 
-  trace: true,
-
   methods: {
-    incriment() {
+    step() {
       this.clicked++;
     },
   },

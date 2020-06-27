@@ -2,45 +2,60 @@
   "pages": [
     {
       "label": "ReBars Introduction",
-      "path": "#rebars"
+      "path": "#rebars",
+      "markdown": "intro.md"
     },
     {
       "label": "A ReBars Application",
       "path": "#a-rebars-application",
+      "markdown": "app.md",
       "pages": [
         {
           "label": "Getting Started",
-          "path": "#getting-started"
+          "path": "#getting-started",
+          "markdown": "getting-started.md"
+        },
+        {
+          "label": "Handlebars",
+          "path": "#handlebars",
+          "markdown": "handlebars.md"
+        },
+        {
+          "label": "Data",
+          "path": "#data"
         },
         {
           "label": "Helpers",
-          "path": "#helpers"
+          "path": "#helpers",
+          "markdown": "custom-helpers.md"
         },
         {
           "label": "Methods",
-          "path": "#methods"
+          "path": "#methods",
+          "markdown": "methods.md"
         },
         {
           "label": "Partials",
           "path": "#partials"
-        },
-        {
-          "label": "Handlebars",
-          "path": "#handlebars"
         }
       ]
     },
     {
       "label": "ReBars Helpers",
       "path": "#rebars-built-in-helpers",
+      "markdown": "helpers.md",
       "pages": [
         {
-          "label": "watch",
+          "label": "watch (re-rendering)",
           "path": "#the-watch-helper"
         },
         {
-          "label": "on",
+          "label": "on (event handling)",
           "path": "#the-on-helper"
+        },
+        {
+          "label": "ref (element reference)",
+          "path": "#the-ref-helper"
         }
       ]
     },

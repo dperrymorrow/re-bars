@@ -1,7 +1,9 @@
 import ReBars from "../../src/app.js";
 import Simple from "../examples/app.js";
 import Advanced from "../examples/advanced/app.js";
-import Counter from "../examples/counter.js";
+import Counter from "../examples/for-docs/counter.js";
+import CustomHelper from "../examples/for-docs/custom-helper.js";
+import Methods from "../examples/for-docs/methods.js";
 
 window.Prism = window.Prism || {};
 window.Prism.manual = true;
@@ -9,7 +11,9 @@ window.Prism.manual = true;
 (function() {
   ReBars.app(Simple).render("#demo-app-simple");
   ReBars.app(Advanced).render("#demo-app-advanced");
-  ReBars.app(Counter).render("[example-target='counter.js']");
+  ReBars.app(Counter).render("[example-target='for-docs/counter.js']");
+  ReBars.app(CustomHelper).render("[example-target='for-docs/custom-helper.js']");
+  ReBars.app(Methods).render("[example-target='for-docs/methods.js']");
 
   _highlight();
   _tabs();
@@ -32,6 +36,9 @@ window.Prism.manual = true;
     document.querySelectorAll(" h1[id],h2[id],div[id],div[data-anchor]").forEach(section => {
       observer.observe(section);
     });
+
+    const $curEl = document.querySelector(window.location.hash);
+    if ($curEl) $curEl.scrollTo();
   }
 
   function _highlight() {
