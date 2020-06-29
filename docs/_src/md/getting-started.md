@@ -1,4 +1,4 @@
-## Getting Started
+## [Getting Started](getting-started)
 
 > You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.
 
@@ -20,7 +20,7 @@ import Handlebars from "handlebars";
 import ReBars from "re-bars";
 ```
 
-## Creating an Application
+### [Creating an Application](#creating-an-application)
 
 To create an app, invoke the `Rebars.app` function with an Object describing your application. _(We will talk more about thes items in a sec)_.
 
@@ -42,6 +42,7 @@ This will return an Object containing
 | instance | Object | the Handlebars instance the app is using |
 | render | Function | the function to render the app  |
 
+### [The Render Function](#the-render-function)
 You then call `render` passing in the selector for a target element to render to.
 
 ```javascript

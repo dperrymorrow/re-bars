@@ -1,8 +1,13 @@
 
 {{#if render }}
-<div class="example demo-app" example-target="{{ file }}">
-  <!-- example {{ file }} gets actually rendered here... -->
+<div class="example demo-app" example-target="{{ name }}">
+  <!-- example {{ name }} gets rendered here... -->
 </div>
+
+<script type="module">
+  import {{ name }} from "./examples/{{ file }}";
+  ReBars.app({{ name }}).render("[example-target='{{ name }}']")
+</script>
 {{/if}}
 
 ```{{ syntax }}

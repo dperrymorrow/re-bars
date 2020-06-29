@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8">
     <title>ReBars Docs</title>
-    <link rel="stylesheet" href="dist/docs.min.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/prism.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-markup-templating.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-handlebars.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+    <link rel="stylesheet" href="dist/docs.min.css">
   </head>
 
   <body>
@@ -79,7 +79,7 @@
 <p>Things have changed. <em>Modern</em> Javascript development requires rediculous amounts of tooling and setup. Webpack, JSX, Virtual DOM, Babel, CLI bolierplates, component loaders, Style extractors, concatenators and on and on. Have you looked in your <code>node_modules</code> directory recently? Have you ever seen the filesize of your <em>built</em> app and wondered WTF is all that?</p>
 <p>The thing is, <strong>WE DON&#39;T NEED THIS ANYMORE</strong>. Evergreen browsers support the features we want that we have been Babeling and polyfilling in order to use. <a href="https://caniuse.com/#feat=es6">ES6</a> brought us Promises, Modules, Classes, Template Literals, Arrow Functions, Let and Const, Default Parameters, Generators, Destructuring Assignment, Rest &amp; Spread, Map/Set &amp; WeakMap/WeakSet and many more. All the things we have been waiting for It&#39;s all there!</p>
 <p>So why are we still using build steps and mangling <strong>our</strong> beautiful code back to the stone age?</p>
-<h2 id="rebars">ReBars</h2>
+<h2 id="rebars"><a href="#rebars">ReBars</a></h2>
 <blockquote>
 <p>ReBars is around 2.8k gzipped and has no dependancies other than Handlebars!</p>
 </blockquote>
@@ -89,15 +89,20 @@
 <li>re-render DOM elements on data change</li>
 <li>manage your event handling and scope</li>
 </ul>
-<p>ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling. <strong>Your</strong> code runs on <strong>your</strong> app.</p>
+<p>ReBars re-renders tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling. <strong>Your</strong> code runs on <strong>your</strong> app.</p>
 <p>ReBars keeps your DOM in sync with your data using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a>, and gets out of your way. You can get back to just writing Javascript.</p>
 <p>ReBars is just a Handlebars instance with helpers added. The main one being a <a href="#the-watch-helper">watch</a> block helper that lets you tell ReBars what and when to re-render.</p>
 <blockquote>
 <p>If you have used Handlebars, you already know ReBars</p>
 </blockquote>
-<div class="example demo-app" example-target="for-docs/counter.js">
-  <!-- example for-docs/counter.js gets actually rendered here... -->
+<div class="example demo-app" example-target="counter">
+  <!-- example counter gets rendered here... -->
 </div>
+
+<script type="module">
+  import counter from "./examples/for-docs/counter.js";
+  ReBars.app(counter).render("[example-target='counter']")
+</script>
 
 <pre><code class="language-javascript">export default {
   template: /*html*/ `
@@ -121,10 +126,9 @@
   },
 };
 </code></pre>
-<hr>
 <h1 id="a-rebars-application">A ReBars Application</h1>
 <p>A ReBars application is a Handlebars template rendered to a specified DOM element. You can event have more than one app on a page if you desire.</p>
-<h2 id="getting-started">Getting Started</h2>
+<h2 id="getting-started"><a href="getting-started">Getting Started</a></h2>
 <blockquote>
 <p>You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.</p>
 </blockquote>
@@ -136,7 +140,7 @@
 <pre><code class="language-shell">npm i --save-dev handlebars re-bars</code></pre>
 <pre><code class="language-javascript">import Handlebars from &quot;handlebars&quot;;
 import ReBars from &quot;re-bars&quot;;</code></pre>
-<h2 id="creating-an-application">Creating an Application</h2>
+<h3 id="creating-an-application"><a href="#creating-an-application">Creating an Application</a></h3>
 <p>To create an app, invoke the <code>Rebars.app</code> function with an Object describing your application. <em>(We will talk more about thes items in a sec)</em>.</p>
 <pre><code class="language-javascript">{
   Handlebars // Optional, Handlebars source, defaults to window.Handlebars
@@ -166,17 +170,18 @@ import ReBars from &quot;re-bars&quot;;</code></pre>
 <td>the function to render the app</td>
 </tr>
 </tbody></table>
+<h3 id="the-render-function"><a href="#the-render-function">The Render Function</a></h3>
 <p>You then call <code>render</code> passing in the selector for a target element to render to.</p>
 <pre><code class="language-javascript">const app = ReBars.app(...your app definition);
 app.render(&quot;#my-app&quot;);</code></pre>
-<h2 id="handlebars">Handlebars</h2>
+<h2 id="handlebars"><a href="#handlebars">Handlebars</a></h2>
 <p>If you would like use Handlebars from a source other than <code>window</code>, you can pass your instance of Handlebars to the <code>ReBars.app</code> function. This can be helpful for test setup.</p>
 <pre><code class="language-javascript">import Handlebars from &quot;somewhere&quot;;
 ReBars.app({
   Handlebars,
   ...
 });</code></pre>
-<h2 id="helpers">Helpers</h2>
+<h2 id="helpers"><a href="#helpers">Helpers</a></h2>
 <p>If you would like to add helpers to your app you can pass a helpers Object to the <code>ReBars.app</code> function.</p>
 <pre><code class="language-javascript">ReBars.app({
   helpers: {} // your custom helpers
@@ -184,9 +189,14 @@ ReBars.app({
 });</code></pre>
 <p>The helpers operate just as any other Handlebars helper you would add. <code>this</code> is the scope of the render block. <a href="https://handlebarsjs.com/guide/#custom-helpers">more about Handlebars helpers here</a></p>
 <p>In the example below, you would then be able to use your <code>isChecked</code> helper anywhere in your application.</p>
-<div class="example demo-app" example-target="for-docs/custom-helper.js">
-  <!-- example for-docs/custom-helper.js gets actually rendered here... -->
+<div class="example demo-app" example-target="customhelper">
+  <!-- example customhelper gets rendered here... -->
 </div>
+
+<script type="module">
+  import customhelper from "./examples/for-docs/custom-helper.js";
+  ReBars.app(customhelper).render("[example-target='customhelper']")
+</script>
 
 <pre><code class="language-javascript">export default {
   template: /*html*/ `
@@ -221,10 +231,10 @@ ReBars.app({
 instance.registerHelper(&quot;myCustomHelper&quot;, function () {
   // helper code...
 })</code></pre>
-<h2 id="methods">Methods</h2>
+<h2 id="methods"><a href="#methods">Methods</a></h2>
 <p>Methods define functions that can be called from event handlers, <a href="#the-on-helper">see on helper</a> or can be called from another method in your application. This allows you to share code, and prevent redundant declarations.</p>
 <p>When a method is triggerd, it is called with the current scope of the template from where it was called <code>this</code>, similar to how Handlebars helpers are called with <code>this</code> as the scope of which the helper was triggered.</p>
-<p>Methods are also called with the first paraeter an object containing the following.</p>
+<p>The first param when invoked is an object containing the following.</p>
 <pre><code class="language-javascript">methods: {
   myMethod({ event, $app, rootData, $refs, $nextTick, methods}) {
     ...
@@ -273,9 +283,14 @@ instance.registerHelper(&quot;myCustomHelper&quot;, function () {
 <p>If you call a method from another method. The scope remains the same. <em>(the context in the template where the call originated)</em></p>
 </blockquote>
 <p>Here is an example of chaining methods from within a ReBars appliction.</p>
-<div class="example demo-app" example-target="for-docs/methods.js">
-  <!-- example for-docs/methods.js gets actually rendered here... -->
+<div class="example demo-app" example-target="methods">
+  <!-- example methods gets rendered here... -->
 </div>
+
+<script type="module">
+  import methods from "./examples/for-docs/methods.js";
+  ReBars.app(methods).render("[example-target='methods']")
+</script>
 
 <pre><code class="language-javascript">export default {
   template: /*html*/ `
@@ -304,10 +319,13 @@ instance.registerHelper(&quot;myCustomHelper&quot;, function () {
   },
 };
 </code></pre>
-<h1 id="rebars-built-in-helpers">ReBars built in helpers</h1>
-<p>ReBars comes with a few very powerful helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.</p>
-<h2 id="the-watch-helper">The {{#watch}} helper</h2>
+<h1 id="rebars-built-in-helpers"><a href="#rebars-built-in-helpers">ReBars built in helpers</a></h1>
+<p>ReBars consists of a few very powerful Handlebars helpers. Of course you can add your own to extend even futher, but the following is what you get on install.</p>
+<h2 id="the-watch-helper">The watch helper</h2>
 <p>The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.</p>
+<p>Watch allows you to re-render a block of your template on change.
+Watch takes an <em>optional</em> arguments of what properties to watch. The arguments can be string or a regular expression. You may aslo as many as you like. When any change, the block will re-render.</p>
+<p>In our explanation below, we will be referring to this data set.</p>
 <pre><code class="language-javascript">{
   data: {
     hobby: &quot;running&quot;,
@@ -321,36 +339,82 @@ instance.registerHelper(&quot;myCustomHelper&quot;, function () {
     ]
   }
 }</code></pre>
-<p>Watch allows you to re-render a block of your template on change.
-Watch takes an argument of what property to watch. The argument can be a string or an object.</p>
-<pre><code class="language-html">{{#watch name }}
+<pre><code class="language-html">{{#watch}}
   My name is {{ name.first }} {{ name.last }}.
 {{/watch}}</code></pre>
-<p>Anytime <code>name</code> is changed the block would be re-rendered with the updated data.</p>
+<p>The above omits the what to watch. In this situation, ReBars will pre-render the block, and captures any references used. It would evaluate to the same as.</p>
+<pre><code class="language-html">{{#watch &quot;name.first&quot; &quot;name.last&quot; }}</code></pre>
 <blockquote>
-<p>If the item you are watching is a primitive such as a <code>String</code>, or <code>Number</code>. You will need to use a string as the argument.</p>
+<p>If you are unsure what to watch, ReBars traces out changes to the console when you pass <code>trace: true</code> to your application.</p>
 </blockquote>
-<ul>
-<li><code>{{#watch name }}</code> this will watch all keys on Object <code>name</code></li>
-<li><code>{{#watch &quot;name(*.)&quot; }}</code> this is the string equivalent of the above</li>
-<li><code>{{#watch &quot;name.first&quot; }}</code> will only watch for changes to <code>name.first</code></li>
-<li><code>{{#watch &quot;name(*.)&quot; &quot;friends.(*.).hobby&quot; }}</code> will watch for any change to name or hobby</li>
-<li><code>{{#watch &quot;friends(*.)hobby&quot; }}</code> will watch for any friend index hobby change</li>
-</ul>
-<h3 id="watch-element-wrappers">Watch Element wrappers</h3>
-<p>Each <code>{{watch}}</code> block gets wrapped in a span with an id which is stored to remember what outlet to re-render on change. Sometimes this can get in the way of styling your layouts.</p>
-<p>As a solution you can add a tag, class id, any attribute you want to the watch block.</p>
-<pre><code class="language-html">{{#watch name tag=&quot;p&quot; class=&quot;intro&quot; id=&quot;intro-p&quot; }}
-  {{ name.first }} {{ name.last }}
-{{/watch}}
-&lt;!-- outputs --&gt;
-&lt;p class=&quot;intro&quot; id=&quot;intro-p&quot; data-rbs-watch=&quot;rbs4&quot;&gt;
-  David Morrow
-&lt;/p&gt;</code></pre>
-<h3 id="watching-arrays">Watching Arrays</h3>
-<p><code>{{#watch}}</code> can be used on an <code>Array</code> as well.</p>
+<table>
+<thead>
+<tr>
+<th>Argument Example</th>
+<th>re-renders when</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>{{#watch &quot;name(*.)&quot; }}</code></td>
+<td>on any change to name Object</td>
+</tr>
+<tr>
+<td><code>{{#watch &quot;name.first&quot; }}</code></td>
+<td>on changes to the string <code>name.first</code></td>
+</tr>
+<tr>
+<td><code>{{#watch &quot;name(*.)&quot; &quot;friends(*.)&quot; }}</code></td>
+<td>any change to name or friends</td>
+</tr>
+<tr>
+<td><code>{{#watch &quot;friends[1].hobby&quot; }}</code></td>
+<td>on changes to friends index 1 hobby change</td>
+</tr>
+<tr>
+<td><code>{{#watch &quot;friends(*.)hobby&quot; }}</code></td>
+<td>on change to any friend&#39;s hobby change</td>
+</tr>
+</tbody></table>
 <blockquote>
-<p>Be sure to use the ref helper <code>{{ ref &quot;somethingUnique&quot; }}</code> on each item enabling ReBars to only re-render changed items. <em>Each ref must be unique</em></p>
+<p>You can use any regular expression you would like. The examples above use <code>(*.)</code> which equates to any character.</p>
+</blockquote>
+<h3 id="watch-element-wrappers"><a href="#watch-element-wrappers">Watch Element wrappers</a></h3>
+<p>Each <code>{{#watch}}</code> block gets wrapped by default in a <code>&lt;span&gt;</code> tag with attributes marking what outlet this represents. Sometimes this can get in the way of styling your layouts.</p>
+<p>As a solution you can add a tag, class id, any attribute you want to the watch block.</p>
+<blockquote>
+<p>Remember, Handlebars helper arguments must have the params before <code>key=&quot;value&quot;</code> arguments <code>{{#watch &quot;name.first&quot; tag=&quot;h1&quot; }}</code></p>
+</blockquote>
+<div class="example demo-app" example-target="watchertag">
+  <!-- example watchertag gets rendered here... -->
+</div>
+
+<script type="module">
+  import watchertag from "./examples/for-docs/watcher-tag.js";
+  ReBars.app(watchertag).render("[example-target='watchertag']")
+</script>
+
+<pre><code class="language-javascript">export default {
+  template: /*html*/ `
+    {{#watch &quot;name&quot; tag=&quot;h3&quot;}}
+      {{ name }}
+    {{/watch}}
+
+    &lt;input type=&quot;text&quot; value=&quot;{{ name }}&quot; {{ on input=&quot;saveName&quot; }}&gt;
+  `,
+  data: {
+    name: &quot;David&quot;,
+  },
+  methods: {
+    saveName({ event }) {
+      this.name = event.target.value;
+    },
+  },
+};
+</code></pre>
+<h3 id="watching-arrays"><a href="#watching-arrays">Watching Arrays</a></h3>
+<p><code>{{#watch}}</code> can be used on an <code>Array</code> as well. But if one item in the Array changes, you don&#39;t want to re-render the entire block. That could have performance implications. Instead, ReBars will only update changed items in the block if every element has a <a href="#the-ref-helper">reference</a></p>
+<blockquote>
+<p>By using the ref helper <code>{{ ref &quot;somethingUnique&quot; }}</code> on each item, it enables ReBars to only re-render the changed items. <em>Each ref must be unique</em> such as a pKey from the database or such.</p>
 </blockquote>
 <pre><code class="language-html">&lt;ul&gt;
   {{#watch &quot;friends(*.)&quot; }}
@@ -361,9 +425,9 @@ Watch takes an argument of what property to watch. The argument can be a string 
     {{/each}}
   {{/watch}}
 &lt;/ul&gt;</code></pre>
-<h2 id="the-on-helper">The {{on}} helper</h2>
+<h2 id="the-on-helper"><a href="#the-on-helper">The on helper</a></h2>
 <p>This allows you to bind your component&#39;s methods to events in your template.</p>
-<pre><code class="language-html">&lt;button {{ on click=&quot;save&quot; &quot;param1&quot; &quot;param2&quot; }}&gt;Save&lt;/button&gt;</code></pre>
+<pre><code class="language-html">&lt;button {{ on click=&quot;save&quot; }}&gt;Save&lt;/button&gt;</code></pre>
 <pre><code class="language-javascript">methods: {
   save({ event }, arg1, arg1) {
     console.log(arg1, arg1);
@@ -377,19 +441,22 @@ Watch takes an argument of what property to watch. The argument can be a string 
 <li>the first parameter is the methodName separated by <code>:eventType</code>, if none is specified <code>click</code> will be the event</li>
 <li>you can add as many other parameters as you would like to your method call</li>
 </ul>
-<hr>
 
 
-          <div class="page" id="examples">
+          <h1 id="examples">
+            In Depth Examples
+          </h1>
+          
+          <p>Here you can get a better idea of how one would build a small application with ReBars. The entire source code for the examples is shown below the functioning ReBars app.</p>
 
-            <h2 id="example-simple">Todo List Simple</h2>
-            <p>A simple, one component application that tracks todos.</p>
+          <h2 id="example-simple">Todo List Simple</h2>
+          <p>A simple, one component application that tracks todos.</p>
 
-            <div id="demo-app-simple" class="demo-app">
-              <!-- the render target -->
-            </div>
+          <div id="demo-app-simple" class="demo-app">
+            <!-- the render target -->
+          </div>
 
-            <pre><code class="language-javascript">export default {
+          <pre><code class="language-javascript">export default {
   template: /*html*/ `
   &lt;div&gt;
     &lt;div class=&quot;header-container&quot;&gt;
@@ -535,25 +602,25 @@ Watch takes an argument of what property to watch. The argument can be a string 
 </code></pre>
 
 
-            <h2 id="example-advanced">Todo List Advanced</h2>
-            <p>Same concept, a little more advanced with sub components, sorting and filtering.</p>
+          <h2 id="example-advanced">Todo List Advanced</h2>
+          <p>Same concept, a little more advanced with sub components, sorting and filtering.</p>
 
-            <div id="demo-app-advanced" class="demo-app">
-              <!-- the render target -->
-            </div>
+          <div id="demo-app-advanced" class="demo-app">
+            <!-- the render target -->
+          </div>
 
-            <!-- tab container -->
-            <div class="tab-container">
-              <nav class="tabs">
-                <button class="active" data-target="app">app.js</button>
-                <button data-target="add">add.js</button>
-                <button data-target="filters">filters.js</button>
-                <button data-target="todo">todo.js</button>
-              </nav>
+          <!-- tab container -->
+          <div class="tab-container">
+            <nav class="tabs">
+              <button class="active" data-target="app">app.js</button>
+              <button data-target="add">add.js</button>
+              <button data-target="filters">filters.js</button>
+              <button data-target="todo">todo.js</button>
+            </nav>
 
-              <div class="tab-content">
-                <div id="app" class="active">
-                  <pre><code class="language-javascript">import Add from &quot;./add.js&quot;;
+            <div class="tab-content">
+              <div id="app" class="active">
+                <pre><code class="language-javascript">import Add from &quot;./add.js&quot;;
 import Todo from &quot;./todo.js&quot;;
 import Filters from &quot;./filters.js&quot;;
 
@@ -654,10 +721,10 @@ export default {
 };
 </code></pre>
 
-                </div>
+              </div>
 
-                <div id="add">
-                  <pre><code class="language-javascript">export default {
+              <div id="add">
+                <pre><code class="language-javascript">export default {
   template: /*html*/ `
   &lt;div&gt;
     {{#watch}}
@@ -706,10 +773,10 @@ export default {
 };
 </code></pre>
 
-                </div>
+              </div>
 
-                <div id="filters">
-                  <pre><code class="language-javascript">export default {
+              <div id="filters">
+                <pre><code class="language-javascript">export default {
   template: /*html*/ `
     &lt;div class=&quot;filters&quot;&gt;
       &lt;div&gt;
@@ -793,10 +860,10 @@ export default {
 };
 </code></pre>
 
-                </div>
+              </div>
 
-                <div id="todo">
-                  <pre><code class="language-javascript">export default {
+              <div id="todo">
+                <pre><code class="language-javascript">export default {
   template: /*html*/ `
     &lt;li {{ ref todo.id }}&gt;
       &lt;div class=&quot;todo&quot;&gt;
@@ -856,17 +923,14 @@ export default {
 };
 </code></pre>
 
-                </div>
               </div>
             </div>
-            <!-- end tab container -->
-
           </div>
+          <!-- end tab container -->
 
         </div>
       </section>
     </main>
-
 
     <script src="dist/docs.min.js"></script>
 

@@ -1,16 +1,18 @@
 
+# [ReBars built in helpers](#rebars-built-in-helpers)
+
+ReBars consists of a few very powerful Handlebars helpers. Of course you can add your own to extend even futher, but the following is what you get on install.
 
 
-
-
-# ReBars built in helpers
-
-ReBars comes with a few very powerful helpers. Of course you can add your own to any component, or at the application level just as you would with any Handlebars application.
-
-
-## The {{#watch}} helper
+## The watch helper
 
 The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.
+
+
+Watch allows you to re-render a block of your template on change.
+Watch takes an _optional_ arguments of what properties to watch. The arguments can be string or a regular expression. You may aslo as many as you like. When any change, the block will re-render.
+
+In our explanation below, we will be referring to this data set.
 
 ```javascript
 {
@@ -27,45 +29,45 @@ The watch helper tells ReBars to re-render this block on change of the item you 
   }
 }
 ```
-
-Watch allows you to re-render a block of your template on change.
-Watch takes an argument of what property to watch. The argument can be a string or an object.
-
 ```html
-{{#watch name }}
+{{#watch}}
   My name is {{ name.first }} {{ name.last }}.
 {{/watch}}
 ```
 
-Anytime `name` is changed the block would be re-rendered with the updated data.
+The above omits the what to watch. In this situation, ReBars will pre-render the block, and captures any references used. It would evaluate to the same as.
 
-> If the item you are watching is a primitive such as a `String`, or `Number`. You will need to use a string as the argument.
 
-- `{{#watch name }}` this will watch all keys on Object `name`
-- `{{#watch "name(*.)" }}` this is the string equivalent of the above
-- `{{#watch "name.first" }}` will only watch for changes to `name.first`
-- `{{#watch "name(*.)" "friends.(*.).hobby" }}` will watch for any change to name or hobby
-- `{{#watch "friends(*.)hobby" }}` will watch for any friend index hobby change
 
-### Watch Element wrappers
-Each `{{watch}}` block gets wrapped in a span with an id which is stored to remember what outlet to re-render on change. Sometimes this can get in the way of styling your layouts.
+```html
+{{#watch "name.first" "name.last" }}
+```
+
+> If you are unsure what to watch, ReBars traces out changes to the console when you pass `trace: true` to your application.
+
+| Argument Example | re-renders when |
+| - | - |
+| `{{#watch "name(*.)" }}` | on any change to name Object |
+| `{{#watch "name.first" }}` | on changes to the string `name.first` |
+| `{{#watch "name(*.)" "friends(*.)" }}` | any change to name or friends |
+| `{{#watch "friends[1].hobby" }}` | on changes to friends index 1 hobby change
+| `{{#watch "friends(*.)hobby" }}` | on change to any friend's hobby change
+
+> You can use any regular expression you would like. The examples above use `(*.)` which equates to any character.
+
+### [Watch Element wrappers](#watch-element-wrappers)
+Each `{{#watch}}` block gets wrapped by default in a `<span>` tag with attributes marking what outlet this represents. Sometimes this can get in the way of styling your layouts.
 
 As a solution you can add a tag, class id, any attribute you want to the watch block.
 
-```html
-{{#watch name tag="p" class="intro" id="intro-p" }}
-  {{ name.first }} {{ name.last }}
-{{/watch}}
-<!-- outputs -->
-<p class="intro" id="intro-p" data-rbs-watch="rbs4">
-  David Morrow
-</p>
-```
+> Remember, Handlebars helper arguments must have the params before `key="value"` arguments `{{#watch "name.first" tag="h1" }}`
 
-### Watching Arrays
-`{{#watch}}` can be used on an `Array` as well.
+{{ example for-docs/watcher-tag.js }}
 
-> Be sure to use the ref helper `{{ ref "somethingUnique" }}` on each item enabling ReBars to only re-render changed items. _Each ref must be unique_
+### [Watching Arrays](#watching-arrays)
+`{{#watch}}` can be used on an `Array` as well. But if one item in the Array changes, you don't want to re-render the entire block. That could have performance implications. Instead, ReBars will only update changed items in the block if every element has a [reference](#the-ref-helper)
+
+> By using the ref helper `{{ ref "somethingUnique" }}` on each item, it enables ReBars to only re-render the changed items. _Each ref must be unique_ such as a pKey from the database or such.
 
 ```html
 <ul>
@@ -79,11 +81,11 @@ As a solution you can add a tag, class id, any attribute you want to the watch b
 </ul>
 ```
 
-## The {{on}} helper
+## [The on helper](#the-on-helper)
 This allows you to bind your component's methods to events in your template.
 
 ```html
-<button {{ on click="save" "param1" "param2" }}>Save</button>
+<button {{ on click="save" }}>Save</button>
 ```
 
 ```javascript
@@ -99,5 +101,3 @@ methods: {
 
 - the first parameter is the methodName separated by `:eventType`, if none is specified `click` will be the event
 - you can add as many other parameters as you would like to your method call
-
-----

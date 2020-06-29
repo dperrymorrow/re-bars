@@ -8,7 +8,7 @@ The thing is, **WE DON'T NEED THIS ANYMORE**. Evergreen browsers support the fea
 
 So why are we still using build steps and mangling **our** beautiful code back to the stone age?
 
-## ReBars
+## [ReBars](#rebars)
 > ReBars is around 2.8k gzipped and has no dependancies other than Handlebars!
 
 ReBars started with the idea of so what do I _actually_ need from a Javascript framework?
@@ -17,7 +17,7 @@ ReBars started with the idea of so what do I _actually_ need from a Javascript f
 - re-render DOM elements on data change
 - manage your event handling and scope
 
-ReBars lets you re-render tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling. **Your** code runs on **your** app.
+ReBars re-renders tiny pieces of your application on change. You are in control of what re-renders and when. There is no Virtual DOM, no JSX, no pre-compiling. **Your** code runs on **your** app.
 
 ReBars keeps your DOM in sync with your data using [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy), and gets out of your way. You can get back to just writing Javascript.
 
@@ -26,5 +26,3 @@ ReBars is just a Handlebars instance with helpers added. The main one being a [w
 > If you have used Handlebars, you already know ReBars
 
 {{ example for-docs/counter.js }}
-
-----

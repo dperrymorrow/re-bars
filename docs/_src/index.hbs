@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8">
     <title>ReBars Docs</title>
-    <link rel="stylesheet" href="dist/docs.min.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.5.3/handlebars.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/prism.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-markup-templating.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-handlebars.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+    <link rel="stylesheet" href="dist/docs.min.css">
   </head>
 
   <body>
@@ -39,59 +39,60 @@
         <div class="content">
           {{{ content }}}
 
-          <div class="page" id="examples">
+          <h1 id="examples">
+            In Depth Examples
+          </h1>
+          
+          <p>Here you can get a better idea of how one would build a small application with ReBars. The entire source code for the examples is shown below the functioning ReBars app.</p>
 
-            <h2 id="example-simple">Todo List Simple</h2>
-            <p>A simple, one component application that tracks todos.</p>
+          <h2 id="example-simple">Todo List Simple</h2>
+          <p>A simple, one component application that tracks todos.</p>
 
-            <div id="demo-app-simple" class="demo-app">
-              <!-- the render target -->
-            </div>
+          <div id="demo-app-simple" class="demo-app">
+            <!-- the render target -->
+          </div>
 
-            {{{ js "app.js" }}}
+          {{{ js "app.js" }}}
 
-            <h2 id="example-advanced">Todo List Advanced</h2>
-            <p>Same concept, a little more advanced with sub components, sorting and filtering.</p>
+          <h2 id="example-advanced">Todo List Advanced</h2>
+          <p>Same concept, a little more advanced with sub components, sorting and filtering.</p>
 
-            <div id="demo-app-advanced" class="demo-app">
-              <!-- the render target -->
-            </div>
+          <div id="demo-app-advanced" class="demo-app">
+            <!-- the render target -->
+          </div>
 
-            <!-- tab container -->
-            <div class="tab-container">
-              <nav class="tabs">
-                <button class="active" data-target="app">app.js</button>
-                <button data-target="add">add.js</button>
-                <button data-target="filters">filters.js</button>
-                <button data-target="todo">todo.js</button>
-              </nav>
+          <!-- tab container -->
+          <div class="tab-container">
+            <nav class="tabs">
+              <button class="active" data-target="app">app.js</button>
+              <button data-target="add">add.js</button>
+              <button data-target="filters">filters.js</button>
+              <button data-target="todo">todo.js</button>
+            </nav>
 
-              <div class="tab-content">
-                <div id="app" class="active">
-                  {{{ js "advanced/app.js" }}}
-                </div>
+            <div class="tab-content">
+              <div id="app" class="active">
+                {{{ js "advanced/app.js" }}}
+              </div>
 
-                <div id="add">
-                  {{{ js "advanced/add.js" }}}
-                </div>
+              <div id="add">
+                {{{ js "advanced/add.js" }}}
+              </div>
 
-                <div id="filters">
-                  {{{ js "advanced/filters.js" }}}
-                </div>
+              <div id="filters">
+                {{{ js "advanced/filters.js" }}}
+              </div>
 
-                <div id="todo">
-                  {{{ js "advanced/todo.js" }}}
-                </div>
+              <div id="todo">
+                {{{ js "advanced/todo.js" }}}
               </div>
             </div>
-            <!-- end tab container -->
-
           </div>
+          <!-- end tab container -->
 
         </div>
       </section>
     </main>
-
 
     <script src="dist/docs.min.js"></script>
 

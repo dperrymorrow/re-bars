@@ -1,10 +1,10 @@
-## Methods
+## [Methods](#methods)
 
 Methods define functions that can be called from event handlers, [see on helper](#the-on-helper) or can be called from another method in your application. This allows you to share code, and prevent redundant declarations.
 
 When a method is triggerd, it is called with the current scope of the template from where it was called `this`, similar to how Handlebars helpers are called with `this` as the scope of which the helper was triggered.
 
-Methods are also called with the first paraeter an object containing the following.
+The first param when invoked is an object containing the following.
 
 ```javascript
 methods: {

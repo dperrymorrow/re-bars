@@ -10,10 +10,9 @@
   "jsdelivr": "dist/re-bars.umd.min.js",
   "scripts": {
     "prepublishOnly": "npm run build-all",
-    "examples": "http-server . -c=-1 -p=8003",
+    "serve": "http-server . -c=-1 -p=8003",
     "docs:build": "npm run docs:stylus && node _scripts/build-docs.js",
     "docs:stylus": "stylus --inline --hoist-atrules --compress --include-css ./docs/_src/styl/docs.styl -o ./docs/dist/docs.min.css",
-    "docs:stylus:watch": "npm run docs:stylus -- --watch",
     "readme:build": "node _scripts/build-readme.js",
     "test": "c8 ava --verbose",
     "build-all": "rollup -c && npm run docs:build && npm run readme:build"
@@ -33,7 +32,6 @@
     "http-server": "0.12.3",
     "httpserver": "0.3.0",
     "marked": "0.8.2",
-    "nodemon": "2.0.4",
     "prettier": "^1.19.1",
     "rollup": "^1.31.0",
     "rollup-plugin-filesize": "^6.2.1",

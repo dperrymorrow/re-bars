@@ -1,7 +1,7 @@
 const fs = require("fs");
 const Marked = require("marked");
 const Handlebars = require("handlebars");
-const { root, replaceExamples, concatPages } = require("./helpers.js");
+const { root, replaceExamples, concatPages, fileName } = require("./helpers.js");
 const nav = require(`${root}/_src/data.json`);
 
 const exampleTpl = Handlebars.compile(fs.readFileSync(`${root}/_src/example.hbs`, "utf-8"));
@@ -14,7 +14,9 @@ const data = {
 
 Handlebars.registerHelper("js", file => {
   const example = fs.readFileSync(`${root}/examples/${file}`, "utf-8");
-  return Marked(exampleTpl({ syntax: "javascript", example, render: false, file }));
+  const name = fileName(file);
+
+  return Marked(exampleTpl({ syntax: "javascript", example, render: false, file, name }));
 });
 
 fs.writeFileSync(`${root}/index.html`, tpl(data));

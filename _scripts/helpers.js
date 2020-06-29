@@ -13,8 +13,17 @@ function _concat(pages) {
   }, "");
 }
 
+function fileName(file) {
+  return file
+    .split("/")
+    .pop()
+    .replace(".js", "")
+    .replace("-", "");
+}
+
 module.exports = {
   root,
+  fileName,
   concatPages: () => _concat(nav.pages),
   replaceExamples(content, render = false, markdown = false) {
     const parsed = content.replace(/\{\{ example (.*) \}\}/g, function(match, file) {
@@ -24,6 +33,7 @@ module.exports = {
         example,
         render,
         file,
+        name: fileName(file),
       });
     });
 
