@@ -1,6 +1,7 @@
 {
   "watch": [
-    "docs/_src"
+    "docs/_src",
+    "_scripts"
   ],
   "ext": "*",
   "ignore": [
@@ -8,7 +9,7 @@
   ],
   "delay": ".2",
   "execMap": {
-    "js": "npm run docs:build",
+    "js": "npm run build-all",
     "json": "npm run docs:build",
     "md": "npm run docs:build",
     "hbs": "npm run docs:build",

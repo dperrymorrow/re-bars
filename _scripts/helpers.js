@@ -6,26 +6,29 @@ const nav = require(`${root}/_src/data.json`);
 const exampleTpl = Handlebars.compile(fs.readFileSync(`${root}/_src/example.hbs`, "utf-8"));
 
 function _concat(pages) {
-  return pages.reduce((content, { markdown, pages }) => {
-    if (markdown) content += fs.readFileSync(`${root}/_src/md/${markdown}`, "utf-8");
-    if (pages) content += _concat(pages);
+  return pages.reduce((content, { markdown, pages, path }) => {
+    const page = { path };
+    if (markdown) page.markdown = fs.readFileSync(`${root}/_src/md/${markdown}`, "utf-8");
+    if (pages) page.pages = _concat(pages);
+    content.push(page);
     return content;
-  }, "");
+  }, []);
 }
 
 function fileName(file) {
   return file
-    .split("/")
-    .pop()
+    .replace(/-/g, "/")
     .replace(".js", "")
-    .replace("-", "");
+    .split("/")
+    .map(seg => seg.charAt(0).toUpperCase() + seg.slice(1))
+    .join("");
 }
 
 module.exports = {
   root,
   fileName,
   concatPages: () => _concat(nav.pages),
-  replaceExamples(content, render = false, markdown = false) {
+  replaceExamples(content, render = false) {
     const parsed = content.replace(/\{\{ example (.*) \}\}/g, function(match, file) {
       const example = fs.readFileSync(`${root}/examples/${file}`, "utf-8");
       return exampleTpl({
@@ -37,6 +40,6 @@ module.exports = {
       });
     });
 
-    return markdown ? Marked(parsed) : parsed;
+    return parsed;
   },
 };

@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/prism.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-markup-templating.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-handlebars.min.js"></script>
-
     <link rel="stylesheet" href="dist/docs.min.css">
   </head>
 
@@ -65,10 +64,10 @@
               <a href="#examples">Examples</a>
                   <ul>
                       <li>
-                        <a href="#example-simple">Simple</a>
+                        <a href="#todo-list-simple">Simple</a>
                       </li>
                       <li>
-                        <a href="#example-advanced">Advanced</a>
+                        <a href="#todo-list-advanced">Advanced</a>
                       </li>
                   </ul>
             </li>
@@ -77,7 +76,8 @@
 
       <section>
         <div class="content">
-          <h1 id="the-problem">The Problem...</h1>
+            <div class="page" data-anchor="#rebars">
+              <h1 id="the-problem">The Problem...</h1>
 <p>Writing Javascript for the browser used to be simple. You wrote your code, and that same code ran in the browser. <strong>Your</strong> code is what was running in your application. You spent your time writing Javascript, not configuring tools.</p>
 <p>Things have changed. <em>Modern</em> Javascript development requires rediculous amounts of tooling and setup. Webpack, JSX, Virtual DOM, Babel, CLI bolierplates, component loaders, Style extractors, concatenators and on and on. Have you looked in your <code>node_modules</code> directory recently? Have you ever seen the filesize of your <em>built</em> app and wondered WTF is all that?</p>
 <p>The thing is, <strong>WE DON&#39;T NEED THIS ANYMORE</strong>. Evergreen browsers support the features we want that we have been Babeling and polyfilling in order to use. <a href="https://caniuse.com/#feat=es6">ES6</a> brought us Promises, Modules, Classes, Template Literals, Arrow Functions, Let and Const, Default Parameters, Generators, Destructuring Assignment, Rest &amp; Spread, Map/Set &amp; WeakMap/WeakSet and many more. All the things we have been waiting for It&#39;s all there!</p>
@@ -98,13 +98,13 @@
 <blockquote>
 <p>If you have used Handlebars, you already know ReBars</p>
 </blockquote>
-<div class="example demo-app" example-target="counter">
-  <!-- example counter gets rendered here... -->
+<div class="example demo-app" example-target="ForDocsCounter">
+  <!-- example ForDocsCounter gets rendered here... -->
 </div>
 
 <script type="module">
-  import counter from "./examples/for-docs/counter.js";
-  ReBars.app(counter).render("[example-target='counter']")
+  import ForDocsCounter from "./examples/for-docs/counter.js";
+  ReBars.app(ForDocsCounter).render("[example-target='ForDocsCounter']")
 </script>
 
 <pre><code class="language-javascript">export default {
@@ -129,9 +129,14 @@
   },
 };
 </code></pre>
-<h1 id="a-rebars-application">A ReBars Application</h1>
+
+            </div>
+            <div class="page" data-anchor="#a-rebars-application">
+              <h1 id="a-rebars-application"><a href="#a-rebars-application">A ReBars Application</a></h1>
 <p>A ReBars application is a Handlebars template rendered to a specified DOM element. You can event have more than one app on a page if you desire.</p>
-<h2 id="getting-started"><a href="getting-started">Getting Started</a></h2>
+
+                <div class="page" data-anchor="#getting-started">
+                  <h2 id="getting-started"><a href="getting-started">Getting Started</a></h2>
 <blockquote>
 <p>You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.</p>
 </blockquote>
@@ -177,14 +182,26 @@ import ReBars from &quot;re-bars&quot;;</code></pre>
 <p>You then call <code>render</code> passing in the selector for a target element to render to.</p>
 <pre><code class="language-javascript">const app = ReBars.app(...your app definition);
 app.render(&quot;#my-app&quot;);</code></pre>
-<h2 id="handlebars"><a href="#handlebars">Handlebars</a></h2>
+
+                </div>
+                <div class="page" data-anchor="#handlebars">
+                  <h2 id="handlebars"><a href="#handlebars">Handlebars</a></h2>
 <p>If you would like use Handlebars from a source other than <code>window</code>, you can pass your instance of Handlebars to the <code>ReBars.app</code> function. This can be helpful for test setup.</p>
 <pre><code class="language-javascript">import Handlebars from &quot;somewhere&quot;;
 ReBars.app({
   Handlebars,
   ...
 });</code></pre>
-<h2 id="helpers"><a href="#helpers">Helpers</a></h2>
+
+                </div>
+                <div class="page" data-anchor="#data">
+                  
+                </div>
+                <div class="page" data-anchor="#watch">
+                  
+                </div>
+                <div class="page" data-anchor="#helpers">
+                  <h2 id="helpers"><a href="#helpers">Helpers</a></h2>
 <p>If you would like to add helpers to your app you can pass a helpers Object to the <code>ReBars.app</code> function.</p>
 <pre><code class="language-javascript">ReBars.app({
   helpers: {} // your custom helpers
@@ -192,13 +209,13 @@ ReBars.app({
 });</code></pre>
 <p>The helpers operate just as any other Handlebars helper you would add. <code>this</code> is the scope of the render block. <a href="https://handlebarsjs.com/guide/#custom-helpers">more about Handlebars helpers here</a></p>
 <p>In the example below, you would then be able to use your <code>isChecked</code> helper anywhere in your application.</p>
-<div class="example demo-app" example-target="customhelper">
-  <!-- example customhelper gets rendered here... -->
+<div class="example demo-app" example-target="ForDocsCustomHelper">
+  <!-- example ForDocsCustomHelper gets rendered here... -->
 </div>
 
 <script type="module">
-  import customhelper from "./examples/for-docs/custom-helper.js";
-  ReBars.app(customhelper).render("[example-target='customhelper']")
+  import ForDocsCustomHelper from "./examples/for-docs/custom-helper.js";
+  ReBars.app(ForDocsCustomHelper).render("[example-target='ForDocsCustomHelper']")
 </script>
 
 <pre><code class="language-javascript">export default {
@@ -234,7 +251,10 @@ ReBars.app({
 instance.registerHelper(&quot;myCustomHelper&quot;, function () {
   // helper code...
 })</code></pre>
-<h2 id="methods"><a href="#methods">Methods</a></h2>
+
+                </div>
+                <div class="page" data-anchor="#methods">
+                  <h2 id="methods"><a href="#methods">Methods</a></h2>
 <p>Methods define functions that can be called from event handlers, <a href="#the-on-helper">see on helper</a> or can be called from another method in your application. This allows you to share code, and prevent redundant declarations.</p>
 <p>When a method is triggerd, it is called with the current scope of the template from where it was called <code>this</code>, similar to how Handlebars helpers are called with <code>this</code> as the scope of which the helper was triggered.</p>
 <p>The first param when invoked is an object containing the following.</p>
@@ -286,13 +306,13 @@ instance.registerHelper(&quot;myCustomHelper&quot;, function () {
 <p>If you call a method from another method. The scope remains the same. <em>(the context in the template where the call originated)</em></p>
 </blockquote>
 <p>Here is an example of chaining methods from within a ReBars appliction.</p>
-<div class="example demo-app" example-target="methods">
-  <!-- example methods gets rendered here... -->
+<div class="example demo-app" example-target="ForDocsMethods">
+  <!-- example ForDocsMethods gets rendered here... -->
 </div>
 
 <script type="module">
-  import methods from "./examples/for-docs/methods.js";
-  ReBars.app(methods).render("[example-target='methods']")
+  import ForDocsMethods from "./examples/for-docs/methods.js";
+  ReBars.app(ForDocsMethods).render("[example-target='ForDocsMethods']")
 </script>
 
 <pre><code class="language-javascript">export default {
@@ -322,9 +342,18 @@ instance.registerHelper(&quot;myCustomHelper&quot;, function () {
   },
 };
 </code></pre>
-<h1 id="rebars-built-in-helpers"><a href="#rebars-built-in-helpers">ReBars built in helpers</a></h1>
+
+                </div>
+                <div class="page" data-anchor="#partials">
+                  
+                </div>
+            </div>
+            <div class="page" data-anchor="#rebars-built-in-helpers">
+              <h1 id="rebars-built-in-helpers"><a href="#rebars-built-in-helpers">ReBars built in helpers</a></h1>
 <p>ReBars consists of a few very powerful Handlebars helpers. Of course you can add your own to extend even futher, but the following is what you get on install.</p>
-<h2 id="the-watch-helper"><a href="#the-watch-helper">The watch helper</a></h2>
+
+                <div class="page" data-anchor="#the-watch-helper">
+                  <h2 id="the-watch-helper"><a href="#the-watch-helper">The watch helper</a></h2>
 <p>The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.</p>
 <p>Watch allows you to re-render a block of your template on change.
 Watch takes an <em>optional</em> arguments of what properties to watch. The arguments can be string or a regular expression. You may aslo as many as you like. When any change, the block will re-render.</p>
@@ -387,13 +416,13 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
 <blockquote>
 <p>Remember, Handlebars helper arguments must have the params before <code>key=&quot;value&quot;</code> arguments <code>{{#watch &quot;name.first&quot; tag=&quot;h1&quot; }}</code></p>
 </blockquote>
-<div class="example demo-app" example-target="watchertag">
-  <!-- example watchertag gets rendered here... -->
+<div class="example demo-app" example-target="ForDocsWatcherTag">
+  <!-- example ForDocsWatcherTag gets rendered here... -->
 </div>
 
 <script type="module">
-  import watchertag from "./examples/for-docs/watcher-tag.js";
-  ReBars.app(watchertag).render("[example-target='watchertag']")
+  import ForDocsWatcherTag from "./examples/for-docs/watcher-tag.js";
+  ReBars.app(ForDocsWatcherTag).render("[example-target='ForDocsWatcherTag']")
 </script>
 
 <pre><code class="language-javascript">export default {
@@ -426,7 +455,10 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
     &lt;/li&gt;
   {{/each}}
 {{/watch}}</code></pre>
-<h2 id="the-on-helper"><a href="#the-on-helper">The on helper</a></h2>
+
+                </div>
+                <div class="page" data-anchor="#the-on-helper">
+                  <h2 id="the-on-helper"><a href="#the-on-helper">The on helper</a></h2>
 <p>This allows you to bind your component&#39;s methods to events in your template. The method will be called with the first param an Object as described <a href="#methods">above</a> and any additional params that are passed to the helper.</p>
 <p>The method will be called with <code>this</code> <em>(scope)</em> as the context in the template from where the on helper was called</p>
 <pre><code class="language-html">&lt;button {{ on &quot;yes&quot; click=&quot;save&quot; }}&gt;Save&lt;/button&gt;</code></pre>
@@ -442,21 +474,28 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
 <p>You can also call multiple events on one invocation of the on helpers. For example.</p>
 <pre><code class="language-html">&lt;input {{ on focus=&quot;focused&quot; blur=&quot;blurred&quot; input=&quot;inputChange&quot; &gt;</code></pre>
 
+                </div>
+                <div class="page" data-anchor="#the-ref-helper">
+                  
+                </div>
+            </div>
+            <div class="page" data-anchor="#examples">
+              <h1 id="examples">Examples</h1>
+<p>Here you can get a better idea of how one would build a small application with ReBars. The entire source code for the examples is shown below the functioning ReBars app.</p>
 
-          <h1 id="examples">
-            In Depth Examples
-          </h1>
-          
-          <p>Here you can get a better idea of how one would build a small application with ReBars. The entire source code for the examples is shown below the functioning ReBars app.</p>
+                <div class="page" data-anchor="#todo-list-simple">
+                  <h2 id="todo-list-simple">Todo List Simple</h2>
+<p>A simple, one component application that tracks todos. You can view source code on <a href="https://github.com/dperrymorrow/re-bars/blob/master/docs/examples/app.js">Github</a></p>
+<div class="example demo-app" example-target="App">
+  <!-- example App gets rendered here... -->
+</div>
 
-          <h2 id="example-simple">Todo List Simple</h2>
-          <p>A simple, one component application that tracks todos.</p>
+<script type="module">
+  import App from "./examples/app.js";
+  ReBars.app(App).render("[example-target='App']")
+</script>
 
-          <div id="demo-app-simple" class="demo-app">
-            <!-- the render target -->
-          </div>
-
-          <pre><code class="language-javascript">export default {
+<pre><code class="language-javascript">export default {
   template: /*html*/ `
   &lt;div&gt;
     &lt;div class=&quot;header-container&quot;&gt;
@@ -601,26 +640,20 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
 };
 </code></pre>
 
+                </div>
+                <div class="page" data-anchor="#todo-list-advanced">
+                  <h2 id="todo-list-advanced">Todo List Advanced</h2>
+<p>Same concept, a little more advanced using partials, some sorting and filtering. You can view the full app source code on <a href="https://github.com/dperrymorrow/re-bars/tree/master/docs/examples/advanced">Github</a></p>
+<div class="example demo-app" example-target="AdvancedApp">
+  <!-- example AdvancedApp gets rendered here... -->
+</div>
 
-          <h2 id="example-advanced">Todo List Advanced</h2>
-          <p>Same concept, a little more advanced with sub components, sorting and filtering.</p>
+<script type="module">
+  import AdvancedApp from "./examples/advanced/app.js";
+  ReBars.app(AdvancedApp).render("[example-target='AdvancedApp']")
+</script>
 
-          <div id="demo-app-advanced" class="demo-app">
-            <!-- the render target -->
-          </div>
-
-          <!-- tab container -->
-          <div class="tab-container">
-            <nav class="tabs">
-              <button class="active" data-target="app">app.js</button>
-              <button data-target="add">add.js</button>
-              <button data-target="filters">filters.js</button>
-              <button data-target="todo">todo.js</button>
-            </nav>
-
-            <div class="tab-content">
-              <div id="app" class="active">
-                <pre><code class="language-javascript">import Add from &quot;./add.js&quot;;
+<pre><code class="language-javascript">import Add from &quot;./add.js&quot;;
 import Todo from &quot;./todo.js&quot;;
 import Filters from &quot;./filters.js&quot;;
 
@@ -721,213 +754,8 @@ export default {
 };
 </code></pre>
 
-              </div>
-
-              <div id="add">
-                <pre><code class="language-javascript">export default {
-  template: /*html*/ `
-  &lt;div&gt;
-    {{#watch}}
-      {{#if isAdding }}
-        &lt;form&gt;
-          &lt;input type=&quot;text&quot; {{ ref &quot;newName&quot; }} placeholder=&quot;the new todo&quot; &gt;
-          &lt;button {{ on click=&quot;addItem&quot; }}&gt;Add todo&lt;/button&gt;
-          &lt;button {{ on click=&quot;toggleAdd&quot; }}&gt;Cancel&lt;/button&gt;
-        &lt;/form&gt;
-      {{ else }}
-        &lt;button {{ on click=&quot;toggleAdd&quot; }}&gt;Add another&lt;/button&gt;
-      {{/if}}
-    {{/watch}}
-  &lt;/div&gt;`,
-
-  data: {
-    isAdding: false,
-  },
-
-  methods: {
-    async toggleAdd({ $nextTick, event, methods, $refs }) {
-      event.preventDefault();
-      this.isAdding = !this.isAdding;
-
-      await $nextTick();
-      const $input = $refs().newName;
-      if ($input) $input.focus();
-    },
-
-    addItem({ event, methods, $refs }) {
-      event.preventDefault();
-      const $input = $refs().newName;
-
-      this.todos.push({
-        name: $input.value,
-        id: new Date().getTime(),
-        done: false,
-        updated: new Date().toLocaleString(),
-      });
-
-      this.filters.filterBy = null;
-      $input.value = &quot;&quot;;
-      $input.focus();
-    },
-  },
-};
-</code></pre>
-
-              </div>
-
-              <div id="filters">
-                <pre><code class="language-javascript">export default {
-  template: /*html*/ `
-    &lt;div class=&quot;filters&quot;&gt;
-      &lt;div&gt;
-        {{#watch &quot;filters.filterBy&quot; }}
-          &lt;button {{ disabledIf &quot;completed&quot; }} {{ on &quot;completed&quot; click=&quot;filterBy&quot; }}&gt;Show Only Completed&lt;/button&gt;
-          &lt;button {{ disabledIf &quot;incomplete&quot; }} {{ on &quot;incomplete&quot;  click=&quot;filterBy&quot; }}&gt;Show Only Incompleted&lt;/button&gt;
-          &lt;button {{ disabledIf null }} {{ on null click=&quot;filterBy&quot;  }}&gt;Show All&lt;/button&gt;
-        {{/watch}}
-      &lt;/div&gt;
-
-      &lt;div&gt;
-        &lt;select {{ on change=&quot;sortBy&quot; }}&gt;
-          &lt;option {{ selectedSort &quot;name&quot; }} value=&quot;name&quot;&gt;Sort by Name&lt;/option&gt;
-          &lt;option {{ selectedSort &quot;updated&quot; }} value=&quot;updated&quot;&gt;Sort by Updated at&lt;/option&gt;
-          &lt;option {{ selectedSort &quot;completed&quot; }} value=&quot;completed&quot;&gt;Sort by Completed&lt;/option&gt;
-        &lt;/select&gt;
-
-        &lt;select {{ on change=&quot;sortDir&quot; }}&gt;
-          &lt;option {{ selectedDir &quot;asc&quot; }} value=&quot;asc&quot;&gt;Ascending&lt;/option&gt;
-          &lt;option {{ selectedDir &quot;desc&quot; }} value=&quot;desc&quot;&gt;Descending&lt;/option&gt;
-        &lt;/select&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-  `,
-
-  helpers: {
-    selectedSort(val) {
-      return this.filters.sortBy === val ? &quot;selected&quot; : &quot;&quot;;
-    },
-
-    selectedDir(val) {
-      return this.filters.sortDir === val ? &quot;selected&quot; : &quot;&quot;;
-    },
-
-    disabledIf(val) {
-      return this.filters.filterBy === val ? &quot;disabled&quot; : &quot;&quot;;
-    },
-  },
-
-  data: {
-    filteredTodos() {
-      const { filterBy, sortBy, sortDir } = this.data.filters;
-
-      const filtered = this.data.todos.filter(todo =&gt; {
-        if (filterBy === &quot;incomplete&quot;) return !todo.done;
-        if (filterBy === &quot;completed&quot;) return todo.done;
-        return true;
-      });
-
-      filtered.sort((a, b) =&gt; {
-        if (sortBy === &quot;name&quot;) return a.name.localeCompare(b.name);
-        else if (sortBy === &quot;completed&quot;) return a.done - b.done;
-        else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
-      });
-
-      if (sortDir === &quot;desc&quot;) filtered.reverse();
-
-      return filtered;
-    },
-
-    filters: {
-      filterBy: null,
-      sortBy: &quot;completed&quot;,
-      sortDir: &quot;asc&quot;,
-    },
-  },
-
-  methods: {
-    sortBy({ methods, event }) {
-      this.filters.sortBy = event.target.value;
-    },
-
-    sortDir({ event, methods }) {
-      this.filters.sortDir = event.currentTarget.value;
-    },
-
-    filterBy({ methods }, filterBy) {
-      this.filters.filterBy = filterBy;
-    },
-  },
-};
-</code></pre>
-
-              </div>
-
-              <div id="todo">
-                <pre><code class="language-javascript">export default {
-  template: /*html*/ `
-    &lt;li {{ ref todo.id }}&gt;
-      &lt;div class=&quot;todo&quot;&gt;
-        {{#if todo.isEditing }}
-          &lt;input type=&quot;text&quot; {{ ref &quot;editInput&quot; }} value=&quot;{{ todo.name }}&quot; {{ on keydown=&quot;saveOnEnter&quot; }}&gt;
-          &lt;button {{ on click=&quot;save&quot; }}&gt;done&lt;/button&gt;
-        {{ else }}
-          &lt;label&gt;
-            &lt;input type=&quot;checkbox&quot; {{ isChecked }} {{ on click=&quot;toggleDone&quot; }} /&gt;
-            {{#if todo.done }}
-              &lt;s&gt;{{ todo.name }}&lt;/s&gt;
-            {{else}}
-              &lt;strong&gt;{{ todo.name }}&lt;/strong&gt;
-            {{/if}}
-          &lt;/label&gt;
-
-          &lt;div class=&quot;actions&quot;&gt;
-            &lt;span class=&quot;date&quot;&gt;{{ todo.updatedAt }}&lt;/span&gt;
-            &lt;button {{ on click=&quot;remove&quot; }}&gt;delete&lt;/button&gt;
-            &lt;button {{ on click=&quot;edit&quot; }}&gt;edit&lt;/button&gt;
-          &lt;/div&gt;
-        {{/if}}
-      &lt;/div&gt;
-    &lt;/li&gt;
-  `,
-
-  helpers: {
-    isChecked() {
-      return this.todo.done ? &quot;checked&quot; : &quot;&quot;;
-    },
-  },
-
-  methods: {
-    remove({ methods, rootData }) {
-      const index = rootData.todos.findIndex(todo =&gt; todo.id === this.id);
-      rootData.todos.splice(index, 1);
-    },
-
-    saveOnEnter({ event, methods }) {
-      if (event.code == &quot;Enter&quot;) methods.save();
-    },
-
-    save({ event, $refs }) {
-      event.preventDefault();
-      this.todo.name = $refs().editInput.value;
-      this.todo.isEditing = false;
-    },
-
-    edit() {
-      this.todo.isEditing = true;
-    },
-
-    toggleDone({ methods }) {
-      this.todo.done = !this.todo.done;
-    },
-  },
-};
-</code></pre>
-
-              </div>
+                </div>
             </div>
-          </div>
-          <!-- end tab container -->
-
         </div>
       </section>
     </main>

@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/prism.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-markup-templating.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-handlebars.min.js"></script>
-
     <link rel="stylesheet" href="dist/docs.min.css">
   </head>
 
@@ -37,59 +36,16 @@
 
       <section>
         <div class="content">
-          {{{ content }}}
-
-          <h1 id="examples">
-            In Depth Examples
-          </h1>
-          
-          <p>Here you can get a better idea of how one would build a small application with ReBars. The entire source code for the examples is shown below the functioning ReBars app.</p>
-
-          <h2 id="example-simple">Todo List Simple</h2>
-          <p>A simple, one component application that tracks todos.</p>
-
-          <div id="demo-app-simple" class="demo-app">
-            <!-- the render target -->
-          </div>
-
-          {{{ js "app.js" }}}
-
-          <h2 id="example-advanced">Todo List Advanced</h2>
-          <p>Same concept, a little more advanced with sub components, sorting and filtering.</p>
-
-          <div id="demo-app-advanced" class="demo-app">
-            <!-- the render target -->
-          </div>
-
-          <!-- tab container -->
-          <div class="tab-container">
-            <nav class="tabs">
-              <button class="active" data-target="app">app.js</button>
-              <button data-target="add">add.js</button>
-              <button data-target="filters">filters.js</button>
-              <button data-target="todo">todo.js</button>
-            </nav>
-
-            <div class="tab-content">
-              <div id="app" class="active">
-                {{{ js "advanced/app.js" }}}
-              </div>
-
-              <div id="add">
-                {{{ js "advanced/add.js" }}}
-              </div>
-
-              <div id="filters">
-                {{{ js "advanced/filters.js" }}}
-              </div>
-
-              <div id="todo">
-                {{{ js "advanced/todo.js" }}}
-              </div>
+          {{#each content as | page | }}
+            <div class="page" data-anchor="{{ page.path }}">
+              {{{ markdown page.markdown }}}
+              {{#each page.pages as | subPage | }}
+                <div class="page" data-anchor="{{ subPage.path }}">
+                  {{{ markdown subPage.markdown }}}
+                </div>
+              {{/each}}
             </div>
-          </div>
-          <!-- end tab container -->
-
+          {{/each}}
         </div>
       </section>
     </main>

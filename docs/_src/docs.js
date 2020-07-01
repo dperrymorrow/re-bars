@@ -1,34 +1,35 @@
 import ReBars from "../../src/app.js";
-import Simple from "../examples/app.js";
-import Advanced from "../examples/advanced/app.js";
 
 window.Prism = window.Prism || {};
 window.Prism.manual = true;
 window.ReBars = ReBars;
 
 (function() {
-  ReBars.app(Simple).render("#demo-app-simple");
-  ReBars.app(Advanced).render("#demo-app-advanced");
-
   _highlight();
-  _tabs();
+  // _tabs();
   _scrollSpy();
   _addIntros();
 
   function _scrollSpy() {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
-        const id = entry.target.getAttribute("id") || entry.target.dataset.anchor;
-        const $link = document.querySelector(`.side-bar-nav a[href="#${id}"]`);
+        const id = entry.target.dataset && entry.target.dataset.anchor;
+        const $link = document.querySelector(`.side-bar-nav a[href="${id}"]`);
+
+        console.log($link, id);
+
         if ($link) {
-          if (entry.intersectionRatio > 0) $link.classList.add("active");
-          else $link.classList.remove("active");
+          if (entry.intersectionRatio > 0) {
+            $link.classList.add("active");
+          } else {
+            $link.classList.remove("active");
+          }
         }
       });
     });
 
     // Track all sections that have an `id` applied
-    document.querySelectorAll("h1[id],h2[id],div[id]").forEach(section => {
+    document.querySelectorAll("div[data-anchor]").forEach(section => {
       observer.observe(section);
     });
 
@@ -62,18 +63,18 @@ window.ReBars = ReBars;
       .forEach($p => $p.classList.add("intro"));
   }
 
-  function _tabs() {
-    document.querySelectorAll("nav.tabs button").forEach($el => {
-      const $tabs = $el.parentElement.querySelectorAll("*");
-      const $containers = $el.parentElement.parentElement.querySelectorAll(".tab-content *");
-
-      $el.addEventListener("click", event => {
-        event.preventDefault();
-        $tabs.forEach($tab => $tab.classList.remove("active"));
-        $containers.forEach($content => $content.classList.remove("active"));
-        $el.classList.add("active");
-        document.getElementById($el.dataset.target).classList.add("active");
-      });
-    });
-  }
+  // function _tabs() {
+  //   document.querySelectorAll("nav.tabs button").forEach($el => {
+  //     const $tabs = $el.parentElement.querySelectorAll("*");
+  //     const $containers = $el.parentElement.parentElement.querySelectorAll(".tab-content *");
+  //
+  //     $el.addEventListener("click", event => {
+  //       event.preventDefault();
+  //       $tabs.forEach($tab => $tab.classList.remove("active"));
+  //       $containers.forEach($content => $content.classList.remove("active"));
+  //       $el.classList.add("active");
+  //       document.getElementById($el.dataset.target).classList.add("active");
+  //     });
+  //   });
+  // }
 })();
