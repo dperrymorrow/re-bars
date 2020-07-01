@@ -34,6 +34,9 @@
                         <a href="#data">Data</a>
                       </li>
                       <li>
+                        <a href="#watch">Watch Methods</a>
+                      </li>
+                      <li>
                         <a href="#helpers">Helpers</a>
                       </li>
                       <li>
@@ -321,7 +324,7 @@ instance.registerHelper(&quot;myCustomHelper&quot;, function () {
 </code></pre>
 <h1 id="rebars-built-in-helpers"><a href="#rebars-built-in-helpers">ReBars built in helpers</a></h1>
 <p>ReBars consists of a few very powerful Handlebars helpers. Of course you can add your own to extend even futher, but the following is what you get on install.</p>
-<h2 id="the-watch-helper">The watch helper</h2>
+<h2 id="the-watch-helper"><a href="#the-watch-helper">The watch helper</a></h2>
 <p>The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.</p>
 <p>Watch allows you to re-render a block of your template on change.
 Watch takes an <em>optional</em> arguments of what properties to watch. The arguments can be string or a regular expression. You may aslo as many as you like. When any change, the block will re-render.</p>
@@ -416,31 +419,28 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
 <blockquote>
 <p>By using the ref helper <code>{{ ref &quot;somethingUnique&quot; }}</code> on each item, it enables ReBars to only re-render the changed items. <em>Each ref must be unique</em> such as a pKey from the database or such.</p>
 </blockquote>
-<pre><code class="language-html">&lt;ul&gt;
-  {{#watch &quot;friends(*.)&quot; }}
-    {{#each friends as | friend | }}
-      &lt;li {{ ref friend.name }}&gt;
-        {{ friend.name }} likes to {{ friend.hobby }}
-      &lt;/li&gt;
-    {{/each}}
-  {{/watch}}
-&lt;/ul&gt;</code></pre>
+<pre><code class="language-html">{{#watch &quot;friends(*.)&quot; tag=&quot;ul&quot; }}
+  {{#each friends as | friend | }}
+    &lt;li {{ ref friend.name }}&gt;
+      {{ friend.name }} likes to {{ friend.hobby }}
+    &lt;/li&gt;
+  {{/each}}
+{{/watch}}</code></pre>
 <h2 id="the-on-helper"><a href="#the-on-helper">The on helper</a></h2>
-<p>This allows you to bind your component&#39;s methods to events in your template.</p>
-<pre><code class="language-html">&lt;button {{ on click=&quot;save&quot; }}&gt;Save&lt;/button&gt;</code></pre>
+<p>This allows you to bind your component&#39;s methods to events in your template. The method will be called with the first param an Object as described <a href="#methods">above</a> and any additional params that are passed to the helper.</p>
+<p>The method will be called with <code>this</code> <em>(scope)</em> as the context in the template from where the on helper was called</p>
+<pre><code class="language-html">&lt;button {{ on &quot;yes&quot; click=&quot;save&quot; }}&gt;Save&lt;/button&gt;</code></pre>
 <pre><code class="language-javascript">methods: {
-  save({ event }, arg1, arg1) {
-    console.log(arg1, arg1);
-    // param1 param2
+  save(context, arg) {
+    console.log(arg);
+    // yes
   }
 }</code></pre>
 <blockquote>
-<p>You method, when invoked, the first argument will always be the event, followed by any additional parameters. Parameters must be primitive and not full Objects or Arrays.</p>
+<p>Remember Handlebars requires params to be first, and then <code>key=&quot;val&quot;</code> arguments second</p>
 </blockquote>
-<ul>
-<li>the first parameter is the methodName separated by <code>:eventType</code>, if none is specified <code>click</code> will be the event</li>
-<li>you can add as many other parameters as you would like to your method call</li>
-</ul>
+<p>You can also call multiple events on one invocation of the on helpers. For example.</p>
+<pre><code class="language-html">&lt;input {{ on focus=&quot;focused&quot; blur=&quot;blurred&quot; input=&quot;inputChange&quot; &gt;</code></pre>
 
 
           <h1 id="examples">

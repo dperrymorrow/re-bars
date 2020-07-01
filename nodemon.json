@@ -1,0 +1,17 @@
+{
+  "watch": [
+    "docs/_src"
+  ],
+  "ext": "*",
+  "ignore": [
+    "docs/_src/dist"
+  ],
+  "delay": ".2",
+  "execMap": {
+    "js": "npm run docs:build",
+    "json": "npm run docs:build",
+    "md": "npm run docs:build",
+    "hbs": "npm run docs:build",
+    "styl": "npm run docs:stylus"
+  }
+}
