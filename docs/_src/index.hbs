@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-markup-templating.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-handlebars.min.js"></script>
     <link rel="stylesheet" href="dist/docs.min.css">
+    <script src="dist/re-bars.umd.min.js"></script>
   </head>
 
   <body>
@@ -50,7 +51,12 @@
       </section>
     </main>
 
-    <script src="dist/docs.min.js"></script>
+    <script>
+      const src = (window.location.host.includes("localhost")) ? "_src/docs.js" : "dist/docs.min.js";
+      const $script = document.createElement("script");
+      $script.src = src
+      document.body.append($script);
+    </script>
 
   </body>
 </html>

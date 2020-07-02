@@ -20,6 +20,8 @@
   - [Simple](#todo-list-simple)
   - [Advanced](#todo-list-advanced)
 
+---
+
 # The Problem...
 
 Writing Javascript for the browser used to be simple. You wrote your code, and that same code ran in the browser. **Your** code is what was running in your application. You spent your time writing Javascript, not configuring tools.
@@ -74,10 +76,12 @@ export default {
 
 ```
 
-# [A ReBars Application](#a-rebars-application)
+
+# A ReBars Application
 
 A ReBars application is a Handlebars template rendered to a specified DOM element. You can event have more than one app on a page if you desire.
-## [Getting Started](getting-started)
+
+## Getting Started
 
 > You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.
 
@@ -128,7 +132,8 @@ You then call `render` passing in the selector for a target element to render to
 const app = ReBars.app(...your app definition);
 app.render("#my-app");
 ```
-## [Handlebars](#handlebars)
+
+## Handlebars
 
 If you would like use Handlebars from a source other than `window`, you can pass your instance of Handlebars to the `ReBars.app` function. This can be helpful for test setup.
 
@@ -139,7 +144,10 @@ ReBars.app({
   ...
 });
 ```
-## [Helpers](#helpers)
+
+## Data
+## Watch Methods
+## Helpers
 
 If you would like to add helpers to your app you can pass a helpers Object to the `ReBars.app` function.
 
@@ -196,7 +204,8 @@ instance.registerHelper("myCustomHelper", function () {
   // helper code...
 })
 ```
-## [Methods](#methods)
+
+## Methods
 
 Methods define functions that can be called from event handlers, [see on helper](#the-on-helper) or can be called from another method in your application. This allows you to share code, and prevent redundant declarations.
 
@@ -258,10 +267,13 @@ export default {
 ```
 
 
-# [ReBars built in helpers](#rebars-built-in-helpers)
+## Partials
+
+# ReBars built in helpers
 
 ReBars consists of a few very powerful Handlebars helpers. Of course you can add your own to extend even futher, but the following is what you get on install.
-## [The watch helper](#the-watch-helper)
+
+## The watch helper
 
 The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.
 
@@ -357,7 +369,9 @@ export default {
   {{/each}}
 {{/watch}}
 ```
-## [The on helper](#the-on-helper)
+
+## The on helper
+
 This allows you to bind your component's methods to events in your template. The method will be called with the first param an Object as described [above](#methods) and any additional params that are passed to the helper.
 
 The method will be called with `this` _(scope)_ as the context in the template from where the on helper was called
@@ -382,9 +396,12 @@ You can also call multiple events on one invocation of the on helpers. For examp
 ```html
 <input {{ on focus="focused" blur="blurred" input="inputChange" >
 ```
+
+## ref (element reference)
 # Examples
 
 Here you can get a better idea of how one would build a small application with ReBars. The entire source code for the examples is shown below the functioning ReBars app.
+
 
 
 
@@ -540,6 +557,7 @@ export default {
 };
 
 ```
+
 
 ## Todo List Advanced
 

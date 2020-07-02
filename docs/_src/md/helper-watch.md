@@ -1,4 +1,4 @@
-## [The watch helper](#the-watch-helper)
+## The watch helper
 
 The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.
 

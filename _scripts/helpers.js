@@ -1,5 +1,4 @@
 const Handlebars = require("handlebars");
-const Marked = require("marked");
 const fs = require("fs");
 const root = process.cwd() + "/docs";
 const nav = require(`${root}/_src/data.json`);

@@ -1,4 +1,4 @@
-## [Helpers](#helpers)
+## Helpers
 
 If you would like to add helpers to your app you can pass a helpers Object to the `ReBars.app` function.
 

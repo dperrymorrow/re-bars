@@ -1,4 +1,4 @@
-## [Methods](#methods)
+## Methods
 
 Methods define functions that can be called from event handlers, [see on helper](#the-on-helper) or can be called from another method in your application. This allows you to share code, and prevent redundant declarations.
 

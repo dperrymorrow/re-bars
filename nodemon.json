@@ -3,16 +3,10 @@
     "docs/_src",
     "_scripts"
   ],
-  "ext": "*",
+  "ext": "md,js,json,md,hbs,styl",
   "ignore": [
     "docs/_src/dist"
   ],
   "delay": ".2",
-  "execMap": {
-    "js": "npm run docs:build",
-    "json": "npm run docs:build",
-    "md": "npm run docs:build",
-    "hbs": "npm run docs:build",
-    "styl": "npm run docs:stylus"
-  }
+  "exec": "npm run docs:build"
 }

@@ -1,8 +1,5 @@
-import ReBars from "../../src/app.js";
-
 window.Prism = window.Prism || {};
 window.Prism.manual = true;
-window.ReBars = ReBars;
 
 (function() {
   _highlight();

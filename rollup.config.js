@@ -2,6 +2,7 @@ import { terser } from "rollup-plugin-terser";
 // import strip from "rollup-plugin-strip";
 import filesize from "rollup-plugin-filesize";
 import gzipPlugin from "rollup-plugin-gzip";
+import copy from "rollup-plugin-copy";
 
 export default [
   {
@@ -13,7 +14,18 @@ export default [
         format: "umd",
         name: "ReBars",
         sourcemap: true,
-        plugins: [terser(), gzipPlugin(), filesize()],
+        plugins: [
+          terser(),
+          gzipPlugin(),
+          filesize(),
+          copy({
+            hook: "writeBundle",
+            targets: [
+              { src: "dist/re-bars.umd.min.js", dest: "docs/dist" },
+              { src: "dist/re-bars.umd.min.js.map", dest: "docs/dist" },
+            ],
+          }),
+        ],
       },
     ],
 
@@ -33,17 +45,5 @@ export default [
     ],
 
     // plugins: [strip()],
-  },
-
-  // doc site rollups...
-  {
-    input: "docs/_src/docs.js",
-    output: [
-      {
-        file: "docs/dist/docs.min.js",
-        format: "cjs",
-        plugins: [terser()],
-      },
-    ],
   },
 ];

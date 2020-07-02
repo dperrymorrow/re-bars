@@ -15,6 +15,9 @@ body, html
   color: $txt
   font-size: $font-size
 
+*
+  box-sizing: border-box
+
 main
   display: flex
   height: 100%
@@ -33,6 +36,7 @@ h1
   letter-spacing: -0.036em
   font-size: 5em
   margin-bottom: 0
+  line-height: 1.2em
 
 h2
   font-size: 1.8em
@@ -90,6 +94,7 @@ article.page
   min-width: $min-width
   max-width: $max-width
   margin: 0 auto
+  box-sizing: border-box
 
   > h1
     margin-top: 0
@@ -106,6 +111,9 @@ article.page
     margin-top: $padding-md
     border-top-left-radius: $border-radius
     border-top-right-radius: $border-radius
+
+  > h2
+    margin-top: $padding-lg
 
   > h3
     padding-top: $padding-xs
@@ -165,15 +173,11 @@ article.page
         text-decoration: underline
 
 article.page.main
-  padding: $padding-md
-  background-image:
-    linear-gradient(
-      to bottom,
-      white,
-      rgba(255, 255, 255, 0) 15%
-    )
+  background-color: white
+  padding: $padding-lg
+  border-radius: $border-radius
   margin-bottom: $padding-lg
-  border-top: 5px dashed $border
+  box-shadow: 0px 0px 20px rgba($bg-top, .1)
 
   > p:first-of-type
     font-family: $font-body
@@ -211,5 +215,25 @@ nav.tabs button
   &.active
     background-color: white
 
-@media (max-width: 767px)
-  /* do stuff with .content here... */
+@media (max-width: 1020px)
+  code
+    white-space: pre-wrap !important
+
+  #nav-container
+    display: none
+
+  main
+    flex-direction: column
+    flex-wrap: wrap
+
+  article.page
+    min-width: auto
+    max-width: auto
+    width: 100%
+    margin: 0
+    padding: $padding-md
+
+    &.main
+      padding: 0
+      box-shadow: none
+      background: transparent

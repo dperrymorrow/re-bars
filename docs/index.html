@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-markup-templating.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1.19.0/components/prism-handlebars.min.js"></script>
     <link rel="stylesheet" href="dist/docs.min.css">
+    <script src="dist/re-bars.umd.min.js"></script>
   </head>
 
   <body>
@@ -132,11 +133,11 @@
 
             </article>
             <article class="page main" data-anchor="#a-rebars-application">
-              <h1 id="a-rebars-application"><a href="#a-rebars-application">A ReBars Application</a></h1>
+              <h1 id="a-rebars-application">A ReBars Application</h1>
 <p>A ReBars application is a Handlebars template rendered to a specified DOM element. You can event have more than one app on a page if you desire.</p>
 
                 <article class="page sub" data-anchor="#getting-started">
-                  <h2 id="getting-started"><a href="getting-started">Getting Started</a></h2>
+                  <h2 id="getting-started">Getting Started</h2>
 <blockquote>
 <p>You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.</p>
 </blockquote>
@@ -185,7 +186,7 @@ app.render(&quot;#my-app&quot;);</code></pre>
 
                 </article>
                 <article class="page sub" data-anchor="#handlebars">
-                  <h2 id="handlebars"><a href="#handlebars">Handlebars</a></h2>
+                  <h2 id="handlebars">Handlebars</h2>
 <p>If you would like use Handlebars from a source other than <code>window</code>, you can pass your instance of Handlebars to the <code>ReBars.app</code> function. This can be helpful for test setup.</p>
 <pre><code class="language-javascript">import Handlebars from &quot;somewhere&quot;;
 ReBars.app({
@@ -203,7 +204,7 @@ ReBars.app({
 
                 </article>
                 <article class="page sub" data-anchor="#helpers">
-                  <h2 id="helpers"><a href="#helpers">Helpers</a></h2>
+                  <h2 id="helpers">Helpers</h2>
 <p>If you would like to add helpers to your app you can pass a helpers Object to the <code>ReBars.app</code> function.</p>
 <pre><code class="language-javascript">ReBars.app({
   helpers: {} // your custom helpers
@@ -256,7 +257,7 @@ instance.registerHelper(&quot;myCustomHelper&quot;, function () {
 
                 </article>
                 <article class="page sub" data-anchor="#methods">
-                  <h2 id="methods"><a href="#methods">Methods</a></h2>
+                  <h2 id="methods">Methods</h2>
 <p>Methods define functions that can be called from event handlers, <a href="#the-on-helper">see on helper</a> or can be called from another method in your application. This allows you to share code, and prevent redundant declarations.</p>
 <p>When a method is triggerd, it is called with the current scope of the template from where it was called <code>this</code>, similar to how Handlebars helpers are called with <code>this</code> as the scope of which the helper was triggered.</p>
 <p>The first param when invoked is an object containing the following.</p>
@@ -352,11 +353,11 @@ instance.registerHelper(&quot;myCustomHelper&quot;, function () {
                 </article>
             </article>
             <article class="page main" data-anchor="#rebars-built-in-helpers">
-              <h1 id="rebars-built-in-helpers"><a href="#rebars-built-in-helpers">ReBars built in helpers</a></h1>
+              <h1 id="rebars-built-in-helpers">ReBars built in helpers</h1>
 <p>ReBars consists of a few very powerful Handlebars helpers. Of course you can add your own to extend even futher, but the following is what you get on install.</p>
 
                 <article class="page sub" data-anchor="#the-watch-helper">
-                  <h2 id="the-watch-helper"><a href="#the-watch-helper">The watch helper</a></h2>
+                  <h2 id="the-watch-helper">The watch helper</h2>
 <p>The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.</p>
 <p>Watch allows you to re-render a block of your template on change.
 Watch takes an <em>optional</em> arguments of what properties to watch. The arguments can be string or a regular expression. You may aslo as many as you like. When any change, the block will re-render.</p>
@@ -461,7 +462,7 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
 
                 </article>
                 <article class="page sub" data-anchor="#the-on-helper">
-                  <h2 id="the-on-helper"><a href="#the-on-helper">The on helper</a></h2>
+                  <h2 id="the-on-helper">The on helper</h2>
 <p>This allows you to bind your component&#39;s methods to events in your template. The method will be called with the first param an Object as described <a href="#methods">above</a> and any additional params that are passed to the helper.</p>
 <p>The method will be called with <code>this</code> <em>(scope)</em> as the context in the template from where the on helper was called</p>
 <pre><code class="language-html">&lt;button {{ on &quot;yes&quot; click=&quot;save&quot; }}&gt;Save&lt;/button&gt;</code></pre>
@@ -764,7 +765,12 @@ export default {
       </section>
     </main>
 
-    <script src="dist/docs.min.js"></script>
+    <script>
+      const src = (window.location.host.includes("localhost")) ? "_src/docs.js" : "dist/docs.min.js";
+      const $script = document.createElement("script");
+      $script.src = src
+      document.body.append($script);
+    </script>
 
   </body>
 </html>

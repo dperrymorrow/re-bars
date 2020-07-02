@@ -1,4 +1,4 @@
-## [Getting Started](getting-started)
+## Getting Started
 
 > You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.
 
