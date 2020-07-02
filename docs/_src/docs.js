@@ -8,16 +8,12 @@ window.ReBars = ReBars;
   _highlight();
   // _tabs();
   _scrollSpy();
-  _addIntros();
 
   function _scrollSpy() {
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         const id = entry.target.dataset && entry.target.dataset.anchor;
         const $link = document.querySelector(`.side-bar-nav a[href="${id}"]`);
-
-        console.log($link, id);
-
         if ($link) {
           if (entry.intersectionRatio > 0) {
             $link.classList.add("active");
@@ -29,7 +25,7 @@ window.ReBars = ReBars;
     });
 
     // Track all sections that have an `id` applied
-    document.querySelectorAll("div[data-anchor]").forEach(section => {
+    document.querySelectorAll("article[data-anchor]").forEach(section => {
       observer.observe(section);
     });
 
@@ -57,11 +53,11 @@ window.ReBars = ReBars;
       });
   }
 
-  function _addIntros() {
-    Array.from(document.querySelectorAll(".content > h1"))
-      .map($el => $el.nextSibling.nextSibling)
-      .forEach($p => $p.classList.add("intro"));
-  }
+  // function _addIntros() {
+  //   Array.from(document.querySelectorAll(".content > h1"))
+  //     .map($el => $el.nextSibling.nextSibling)
+  //     .forEach($p => $p.classList.add("intro"));
+  // }
 
   // function _tabs() {
   //   document.querySelectorAll("nav.tabs button").forEach($el => {

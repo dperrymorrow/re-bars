@@ -35,18 +35,18 @@
       </nav>
 
       <section>
-        <div class="content">
+        <article class="content">
           {{#each content as | page | }}
-            <div class="page" data-anchor="{{ page.path }}">
+            <article class="page main" data-anchor="{{ page.path }}">
               {{{ markdown page.markdown }}}
               {{#each page.pages as | subPage | }}
-                <div class="page" data-anchor="{{ subPage.path }}">
+                <article class="page sub" data-anchor="{{ subPage.path }}">
                   {{{ markdown subPage.markdown }}}
-                </div>
+                </article>
               {{/each}}
-            </div>
+            </article>
           {{/each}}
-        </div>
+        </article>
       </section>
     </main>
 

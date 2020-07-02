@@ -9,7 +9,7 @@
   ],
   "delay": ".2",
   "execMap": {
-    "js": "npm run build-all",
+    "js": "npm run docs:build",
     "json": "npm run docs:build",
     "md": "npm run docs:build",
     "hbs": "npm run docs:build",

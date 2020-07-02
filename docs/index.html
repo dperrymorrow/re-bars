@@ -75,8 +75,8 @@
       </nav>
 
       <section>
-        <div class="content">
-            <div class="page" data-anchor="#rebars">
+        <article class="content">
+            <article class="page main" data-anchor="#rebars">
               <h1 id="the-problem">The Problem...</h1>
 <p>Writing Javascript for the browser used to be simple. You wrote your code, and that same code ran in the browser. <strong>Your</strong> code is what was running in your application. You spent your time writing Javascript, not configuring tools.</p>
 <p>Things have changed. <em>Modern</em> Javascript development requires rediculous amounts of tooling and setup. Webpack, JSX, Virtual DOM, Babel, CLI bolierplates, component loaders, Style extractors, concatenators and on and on. Have you looked in your <code>node_modules</code> directory recently? Have you ever seen the filesize of your <em>built</em> app and wondered WTF is all that?</p>
@@ -130,12 +130,12 @@
 };
 </code></pre>
 
-            </div>
-            <div class="page" data-anchor="#a-rebars-application">
+            </article>
+            <article class="page main" data-anchor="#a-rebars-application">
               <h1 id="a-rebars-application"><a href="#a-rebars-application">A ReBars Application</a></h1>
 <p>A ReBars application is a Handlebars template rendered to a specified DOM element. You can event have more than one app on a page if you desire.</p>
 
-                <div class="page" data-anchor="#getting-started">
+                <article class="page sub" data-anchor="#getting-started">
                   <h2 id="getting-started"><a href="getting-started">Getting Started</a></h2>
 <blockquote>
 <p>You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.</p>
@@ -183,8 +183,8 @@ import ReBars from &quot;re-bars&quot;;</code></pre>
 <pre><code class="language-javascript">const app = ReBars.app(...your app definition);
 app.render(&quot;#my-app&quot;);</code></pre>
 
-                </div>
-                <div class="page" data-anchor="#handlebars">
+                </article>
+                <article class="page sub" data-anchor="#handlebars">
                   <h2 id="handlebars"><a href="#handlebars">Handlebars</a></h2>
 <p>If you would like use Handlebars from a source other than <code>window</code>, you can pass your instance of Handlebars to the <code>ReBars.app</code> function. This can be helpful for test setup.</p>
 <pre><code class="language-javascript">import Handlebars from &quot;somewhere&quot;;
@@ -193,14 +193,16 @@ ReBars.app({
   ...
 });</code></pre>
 
-                </div>
-                <div class="page" data-anchor="#data">
-                  
-                </div>
-                <div class="page" data-anchor="#watch">
-                  
-                </div>
-                <div class="page" data-anchor="#helpers">
+                </article>
+                <article class="page sub" data-anchor="#data">
+                  <h2 id="data">Data</h2>
+
+                </article>
+                <article class="page sub" data-anchor="#watch">
+                  <h2 id="watch-methods">Watch Methods</h2>
+
+                </article>
+                <article class="page sub" data-anchor="#helpers">
                   <h2 id="helpers"><a href="#helpers">Helpers</a></h2>
 <p>If you would like to add helpers to your app you can pass a helpers Object to the <code>ReBars.app</code> function.</p>
 <pre><code class="language-javascript">ReBars.app({
@@ -252,8 +254,8 @@ instance.registerHelper(&quot;myCustomHelper&quot;, function () {
   // helper code...
 })</code></pre>
 
-                </div>
-                <div class="page" data-anchor="#methods">
+                </article>
+                <article class="page sub" data-anchor="#methods">
                   <h2 id="methods"><a href="#methods">Methods</a></h2>
 <p>Methods define functions that can be called from event handlers, <a href="#the-on-helper">see on helper</a> or can be called from another method in your application. This allows you to share code, and prevent redundant declarations.</p>
 <p>When a method is triggerd, it is called with the current scope of the template from where it was called <code>this</code>, similar to how Handlebars helpers are called with <code>this</code> as the scope of which the helper was triggered.</p>
@@ -343,16 +345,17 @@ instance.registerHelper(&quot;myCustomHelper&quot;, function () {
 };
 </code></pre>
 
-                </div>
-                <div class="page" data-anchor="#partials">
-                  
-                </div>
-            </div>
-            <div class="page" data-anchor="#rebars-built-in-helpers">
+                </article>
+                <article class="page sub" data-anchor="#partials">
+                  <h2 id="partials">Partials</h2>
+
+                </article>
+            </article>
+            <article class="page main" data-anchor="#rebars-built-in-helpers">
               <h1 id="rebars-built-in-helpers"><a href="#rebars-built-in-helpers">ReBars built in helpers</a></h1>
 <p>ReBars consists of a few very powerful Handlebars helpers. Of course you can add your own to extend even futher, but the following is what you get on install.</p>
 
-                <div class="page" data-anchor="#the-watch-helper">
+                <article class="page sub" data-anchor="#the-watch-helper">
                   <h2 id="the-watch-helper"><a href="#the-watch-helper">The watch helper</a></h2>
 <p>The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.</p>
 <p>Watch allows you to re-render a block of your template on change.
@@ -456,8 +459,8 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
   {{/each}}
 {{/watch}}</code></pre>
 
-                </div>
-                <div class="page" data-anchor="#the-on-helper">
+                </article>
+                <article class="page sub" data-anchor="#the-on-helper">
                   <h2 id="the-on-helper"><a href="#the-on-helper">The on helper</a></h2>
 <p>This allows you to bind your component&#39;s methods to events in your template. The method will be called with the first param an Object as described <a href="#methods">above</a> and any additional params that are passed to the helper.</p>
 <p>The method will be called with <code>this</code> <em>(scope)</em> as the context in the template from where the on helper was called</p>
@@ -474,16 +477,17 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
 <p>You can also call multiple events on one invocation of the on helpers. For example.</p>
 <pre><code class="language-html">&lt;input {{ on focus=&quot;focused&quot; blur=&quot;blurred&quot; input=&quot;inputChange&quot; &gt;</code></pre>
 
-                </div>
-                <div class="page" data-anchor="#the-ref-helper">
-                  
-                </div>
-            </div>
-            <div class="page" data-anchor="#examples">
+                </article>
+                <article class="page sub" data-anchor="#the-ref-helper">
+                  <h2 id="ref-element-reference">ref (element reference)</h2>
+
+                </article>
+            </article>
+            <article class="page main" data-anchor="#examples">
               <h1 id="examples">Examples</h1>
 <p>Here you can get a better idea of how one would build a small application with ReBars. The entire source code for the examples is shown below the functioning ReBars app.</p>
 
-                <div class="page" data-anchor="#todo-list-simple">
+                <article class="page sub" data-anchor="#todo-list-simple">
                   <h2 id="todo-list-simple">Todo List Simple</h2>
 <p>A simple, one component application that tracks todos. You can view source code on <a href="https://github.com/dperrymorrow/re-bars/blob/master/docs/examples/app.js">Github</a></p>
 <div class="example demo-app" example-target="App">
@@ -640,8 +644,8 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
 };
 </code></pre>
 
-                </div>
-                <div class="page" data-anchor="#todo-list-advanced">
+                </article>
+                <article class="page sub" data-anchor="#todo-list-advanced">
                   <h2 id="todo-list-advanced">Todo List Advanced</h2>
 <p>Same concept, a little more advanced using partials, some sorting and filtering. You can view the full app source code on <a href="https://github.com/dperrymorrow/re-bars/tree/master/docs/examples/advanced">Github</a></p>
 <div class="example demo-app" example-target="AdvancedApp">
@@ -754,9 +758,9 @@ export default {
 };
 </code></pre>
 
-                </div>
-            </div>
-        </div>
+                </article>
+            </article>
+        </article>
       </section>
     </main>
 

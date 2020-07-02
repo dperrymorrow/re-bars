@@ -6,11 +6,13 @@ const nav = require(`${root}/_src/data.json`);
 const exampleTpl = Handlebars.compile(fs.readFileSync(`${root}/_src/example.hbs`, "utf-8"));
 
 function _concat(pages) {
-  return pages.reduce((content, { markdown, pages, path }) => {
-    const page = { path };
-    if (markdown) page.markdown = fs.readFileSync(`${root}/_src/md/${markdown}`, "utf-8");
-    if (pages) page.pages = _concat(pages);
-    content.push(page);
+  return pages.reduce((content, { markdown, pages, path, label }) => {
+    content.push({
+      path,
+      markdown: markdown ? fs.readFileSync(`${root}/_src/md/${markdown}`, "utf-8") : `## ${label}`,
+      pages: pages ? _concat(pages) : [],
+    });
+
     return content;
   }, []);
 }
