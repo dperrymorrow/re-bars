@@ -41,11 +41,11 @@ export default {
         Helpers.register({ instance, template, store, scope });
         Utils.registerPartials(instance, scope, partials);
 
-        // for the methods
-        scope.data = Object.entries(scope.data).reduce((scoped, [key, value]) => {
-          if (typeof value === "function" && scoped.hasOwnProperty(key)) scoped[key] = value.bind(scope);
-          return scoped;
-        }, data);
+        // // for the methods
+        // scope.data = Object.entries(scope.data).reduce((scoped, [key, value]) => {
+        //   if (typeof value === "function" && scoped.hasOwnProperty(key)) scoped[key] = value.bind(scope.data);
+        //   return scoped;
+        // }, data);
 
         scope.data = ProxyTrap.create(data, changed => {
           instance.log(Config.logLevel(), "ReBars: change", changed);

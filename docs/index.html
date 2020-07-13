@@ -34,7 +34,7 @@
                         <a href="#data">Data</a>
                       </li>
                       <li>
-                        <a href="#watch">Watch Methods</a>
+                        <a href="#watch-methods">Watch Methods</a>
                       </li>
                       <li>
                         <a href="#helpers">Helpers</a>
@@ -197,9 +197,64 @@ ReBars.app({
                 </article>
                 <article class="page sub" data-anchor="#data">
                   <h2 id="data">Data</h2>
+<p>The data object you provide to your ReBars application is the core of what makes ReBars great.</p>
+<p>Your data object is what is passed to your Handlebars template on render, and what is watched for changes with the <a href="#the-watch-helper">watch</a>, and triggers re-renders.</p>
+<pre><code class="language-javascript">{
+  data: {
+    name: {
+      first: &quot;David&quot;,
+      last: &quot;Morrow&quot;
+    }
+  }
+}</code></pre>
+<blockquote>
+<p>You don&#39;t have to do anything special for ReBars to observe all changes to your data Object. In fact ReBar&#39;s observer is native <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a></p>
+</blockquote>
+<h3 id="methods-in-your-data">Methods in your data</h3>
+<p>You can also return a method as a value from your data. This is a simple yet powerful feture that lets you return calculations based off your data&#39;s state at that point in time. You can even define methods at runtime, or nest them deeply within your data Object.</p>
+<div class="example demo-app" example-target="ForDocsDataMethod">
+  <!-- example ForDocsDataMethod gets rendered here... -->
+</div>
+
+<script type="module">
+  import ForDocsDataMethod from "./examples/for-docs/data-method.js";
+  ReBars.app(ForDocsDataMethod).render("[example-target='ForDocsDataMethod']")
+</script>
+
+<pre><code class="language-javascript">export default {
+  template: /*html*/ `
+    {{#watch &quot;friends.length&quot; tag=&quot;h3&quot; }}
+      my friends: {{ allMyFriends }}
+    {{/watch}}
+
+    &lt;input type=&quot;text&quot; {{ ref &quot;input&quot; }}&gt;
+    &lt;button {{ on click=&quot;add&quot; }}&gt;Add&lt;/button&gt;
+  `,
+
+  data: {
+    allMyFriends() {
+      return this.friends.join(&quot;, &quot;);
+    },
+
+    friends: [&quot;Mike&quot;, &quot;David&quot;, &quot;Todd&quot;, &quot;Keith&quot;],
+  },
+
+  methods: {
+    add({ rootData, $refs }) {
+      const $input = $refs().input;
+      rootData.friends.push($input.value);
+      $input.value = &quot;&quot;;
+    },
+  },
+};
+</code></pre>
+<p>Any method defined in your data Object will be scoped to your data object <code>this</code></p>
+<blockquote>
+<p>You <strong>cannot</strong> however <code>watch</code> a method from your data. You would need to watch the item or items in your data that the method relies on its computation for.</p>
+</blockquote>
 
                 </article>
-                <article class="page sub" data-anchor="#watch">
+                <article class="page sub" data-anchor="#watch-methods">
                   <h2 id="watch-methods">Watch Methods</h2>
 
                 </article>

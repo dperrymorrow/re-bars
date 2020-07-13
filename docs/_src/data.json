@@ -22,11 +22,12 @@
         },
         {
           "label": "Data",
-          "path": "#data"
+          "path": "#data",
+          "markdown": "data.md"
         },
         {
           "label": "Watch Methods",
-          "path": "#watch"
+          "path": "#watch-methods"
         },
         {
           "label": "Helpers",

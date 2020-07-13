@@ -28,7 +28,7 @@ export default {
         }
 
         // warn for not having a ref on array update
-        const lenPath = handler.path.find(path => path.endsWith(".length"));
+        const lenPath = handler.path.find(path => path.endsWith(".length") && $target.children.length > 1);
         if (lenPath)
           instance.log(
             2,

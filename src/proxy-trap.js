@@ -19,6 +19,10 @@ export default {
         get: function(target, prop) {
           const value = Reflect.get(...arguments);
 
+          if (typeof value === "function" && target.hasOwnProperty(prop)) {
+            return value.bind(proxyData);
+          }
+
           if (value && typeof value === "object" && ["Array", "Object"].includes(value.constructor.name)) {
             return _buildProxy(value, tree.concat(prop));
           } else {

@@ -146,6 +146,61 @@ ReBars.app({
 ```
 
 ## Data
+
+The data object you provide to your ReBars application is the core of what makes ReBars great.
+
+Your data object is what is passed to your Handlebars template on render, and what is watched for changes with the [watch](#the-watch-helper), and triggers re-renders.
+
+```javascript
+{
+  data: {
+    name: {
+      first: "David",
+      last: "Morrow"
+    }
+  }
+}
+```
+
+> You don't have to do anything special for ReBars to observe all changes to your data Object. In fact ReBar's observer is native [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy)
+
+### Methods in your data
+
+You can also return a method as a value from your data. This is a simple yet powerful feture that lets you return calculations based off your data's state at that point in time.
+
+
+
+```javascript
+export default {
+  template: /*html*/ `
+    {{#watch "friends.length" tag="h3" }}
+      my friends: {{ allMyFriends }}
+    {{/watch}}
+
+    <input type="text" {{ ref "input" }}>
+    <button {{ on click="add" }}>Add</button>
+  `,
+
+  data: {
+    allMyFriends() {
+      return this.data.friends.join(", ");
+    },
+
+    friends: ["Mike", "David", "Todd", "Keith"],
+  },
+
+  methods: {
+    add({ rootData, $refs }) {
+      const $input = $refs().input;
+      rootData.friends.push($input.value);
+      $input.value = "";
+    },
+  },
+};
+
+```
+
+
 ## Watch Methods
 ## Helpers
 

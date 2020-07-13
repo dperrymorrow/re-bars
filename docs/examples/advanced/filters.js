@@ -40,9 +40,9 @@ export default {
 
   data: {
     filteredTodos() {
-      const { filterBy, sortBy, sortDir } = this.data.filters;
+      const { filterBy, sortBy, sortDir } = this.filters;
 
-      const filtered = this.data.todos.filter(todo => {
+      const filtered = this.todos.filter(todo => {
         if (filterBy === "incomplete") return !todo.done;
         if (filterBy === "completed") return todo.done;
         return true;
@@ -55,7 +55,7 @@ export default {
       });
 
       if (sortDir === "desc") filtered.reverse();
-
+      console.log("filterd", filtered);
       return filtered;
     },
 

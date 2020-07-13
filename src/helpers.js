@@ -8,10 +8,6 @@ const { attrs } = Config;
 export default {
   register({ instance, template, store, scope }) {
     instance.registerHelper("ref", name => new instance.SafeString(`${attrs.ref}="${name}"`));
-    instance.registerHelper("buildPath", function(...args) {
-      args.pop();
-      return Array.from(args).join(".");
-    });
 
     instance.registerHelper("on", function(...args) {
       const { hash } = args.pop();

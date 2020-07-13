@@ -179,6 +179,10 @@
           get: function(target, prop) {
             const value = Reflect.get(...arguments);
 
+            if (typeof value === "function" && target.hasOwnProperty(prop)) {
+              return value.bind(proxyData);
+            }
+
             if (value && typeof value === "object" && ["Array", "Object"].includes(value.constructor.name)) {
               return _buildProxy(value, tree.concat(prop));
             } else {
@@ -371,7 +375,7 @@
           }
 
           // warn for not having a ref on array update
-          const lenPath = handler.path.find(path => path.endsWith(".length"));
+          const lenPath = handler.path.find(path => path.endsWith(".length") && $target.children.length > 1);
           if (lenPath)
             instance.log(
               2,
@@ -449,11 +453,11 @@
           Helpers.register({ instance, template, store, scope });
           Utils.registerPartials(instance, scope, partials);
 
-          // for the methods
-          scope.data = Object.entries(scope.data).reduce((scoped, [key, value]) => {
-            if (typeof value === "function" && scoped.hasOwnProperty(key)) scoped[key] = value.bind(scope);
-            return scoped;
-          }, data);
+          // // for the methods
+          // scope.data = Object.entries(scope.data).reduce((scoped, [key, value]) => {
+          //   if (typeof value === "function" && scoped.hasOwnProperty(key)) scoped[key] = value.bind(scope.data);
+          //   return scoped;
+          // }, data);
 
           scope.data = ProxyTrap.create(data, changed => {
             instance.log(Config.logLevel(), "ReBars: change", changed);
