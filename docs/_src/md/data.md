@@ -6,6 +6,7 @@ Your data object is what is passed to your Handlebars template on render, and wh
 
 ```javascript
 {
+  ...
   data: {
     name: {
       first: "David",

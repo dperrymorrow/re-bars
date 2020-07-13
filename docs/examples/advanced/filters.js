@@ -67,15 +67,15 @@ export default {
   },
 
   methods: {
-    sortBy({ methods, event }) {
+    sortBy({ event }) {
       this.filters.sortBy = event.target.value;
     },
 
-    sortDir({ event, methods }) {
+    sortDir({ event }) {
       this.filters.sortDir = event.currentTarget.value;
     },
 
-    filterBy({ methods }, filterBy) {
+    filterBy(context, filterBy) {
       this.filters.filterBy = filterBy;
     },
   },
