@@ -200,6 +200,7 @@ ReBars.app({
 <p>The data object you provide to your ReBars application is the core of what makes ReBars great.</p>
 <p>Your data object is what is passed to your Handlebars template on render, and what is watched for changes with the <a href="#the-watch-helper">watch</a>, and triggers re-renders.</p>
 <pre><code class="language-javascript">{
+  ...
   data: {
     name: {
       first: &quot;David&quot;,
@@ -292,13 +293,13 @@ ReBars.app({
   },
 
   methods: {
-    toggle() {
+    toggle(context) {
       this.isOn = !this.isOn;
     },
   },
 
   helpers: {
-    isChecked() {
+    isChecked(context) {
       if (this.isOn) return &quot;checked&quot;;
     },
   },

@@ -121,13 +121,30 @@ var Utils = {
     });
   },
 
-  intersects: (obj1, obj2) => Object.keys(obj2).filter(key => key in obj1),
-
-  registerHelpers(instance, helpers) {
-    Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
+  buildContext(scope, { $app, data, methods }) {
+    const context = {
+      $app,
+      $nextTick: this.nextTick,
+      $refs: this.dom.findRefs.bind(null, $app),
+      rootData: data,
+    };
+    context.methods = this.bind(methods, scope, context);
+    return context;
   },
 
-  registerPartials(instance, scope, partials) {
+  intersects: (obj1, obj2) => Object.keys(obj2).filter(key => key in obj1),
+
+  registerHelpers({ instance, helpers, scope }) {
+    const utils = this;
+    Object.entries(helpers).forEach(([name, fn]) =>
+      instance.registerHelper(name, function(...args) {
+        const context = utils.buildContext(this, scope);
+        return fn.call(this, context, ...args);
+      })
+    );
+  },
+
+  registerPartials({ instance, scope, partials }) {
     Object.entries(partials).forEach(([name, partial]) => {
       instance.registerPartial(name, partial.template);
 
@@ -139,7 +156,7 @@ var Utils = {
 
       if (partial.data) Object.assign(scope.data, partial.data);
       if (partial.methods) Object.assign(scope.methods, partial.methods);
-      if (partial.helpers) this.registerHelpers(instance, partial.helpers);
+      if (partial.helpers) this.registerHelpers({ instance, helpers: partial.helpers, scope });
     });
   },
 
@@ -155,7 +172,7 @@ var Utils = {
 };
 
 var ProxyTrap = {
-  create(data, callback, trackGet = false) {
+  create(scope, callback, trackGet = false) {
     let que = [];
 
     const _debounced = Utils.debounce(() => {
@@ -173,9 +190,8 @@ var ProxyTrap = {
         get: function(target, prop) {
           const value = Reflect.get(...arguments);
 
-          if (typeof value === "function" && target.hasOwnProperty(prop)) {
-            return value.bind(proxyData);
-          }
+          if (typeof value === "function" && target.hasOwnProperty(prop))
+            return value.bind(proxyData, Utils.buildContext(target, scope));
 
           if (value && typeof value === "object" && ["Array", "Object"].includes(value.constructor.name)) {
             return _buildProxy(value, tree.concat(prop));
@@ -201,7 +217,7 @@ var ProxyTrap = {
       });
     }
 
-    const proxyData = _buildProxy(data);
+    const proxyData = _buildProxy(scope.data);
     return proxyData;
   },
 };
@@ -213,10 +229,6 @@ const { attrs: attrs$1 } = Config;
 var Helpers = {
   register({ instance, template, store, scope }) {
     instance.registerHelper("ref", name => new instance.SafeString(`${attrs$1.ref}="${name}"`));
-    instance.registerHelper("buildPath", function(...args) {
-      args.pop();
-      return Array.from(args).join(".");
-    });
 
     instance.registerHelper("on", function(...args) {
       const { hash } = args.pop();
@@ -235,15 +247,8 @@ var Helpers = {
           if (!(methodName in scope.methods)) instance.log(3, `ReBars: "${methodName}" is not a method.`, hash, $el);
 
           const handler = event => {
-            const context = {
-              event,
-              $app: scope.$app,
-              $refs: Utils.dom.findRefs.bind(null, scope.$app),
-              $nextTick: Utils.nextTick,
-              rootData: scope.data,
-            };
-
-            context.methods = Utils.bind(scope.methods, tplScope, context);
+            const context = Utils.buildContext(tplScope, scope);
+            context.event = event;
             context.methods[methodName](...args);
           };
 
@@ -266,7 +271,7 @@ var Helpers = {
 
       if (!args.length) {
         const trap = ProxyTrap.create(
-          this,
+          { ...scope, data: this },
           paths => {
             ref.path = paths;
           },
@@ -427,7 +432,6 @@ var app = {
     const store = { renders: {}, handlers: {} };
 
     Config.setTrace(trace);
-    Utils.registerHelpers(instance, helpers);
 
     return {
       store,
@@ -444,16 +448,11 @@ var app = {
           data,
         };
 
+        Utils.registerPartials({ instance, scope, partials });
+        Utils.registerHelpers({ instance, helpers, scope });
         Helpers.register({ instance, template, store, scope });
-        Utils.registerPartials(instance, scope, partials);
 
-        // // for the methods
-        // scope.data = Object.entries(scope.data).reduce((scoped, [key, value]) => {
-        //   if (typeof value === "function" && scoped.hasOwnProperty(key)) scoped[key] = value.bind(scope.data);
-        //   return scoped;
-        // }, data);
-
-        scope.data = ProxyTrap.create(data, changed => {
+        scope.data = ProxyTrap.create(scope, changed => {
           instance.log(Config.logLevel(), "ReBars: change", changed);
           ReRender.paths({ changed, store, instance });
           Object.entries(watch).forEach(([path, fn]) => {

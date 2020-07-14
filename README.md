@@ -8,7 +8,7 @@
   - [Getting Started](#getting-started)
   - [Handlebars](#handlebars)
   - [Data](#data)
-  - [Watch Methods](#watch)
+  - [Watch Methods](#watch-methods)
   - [Helpers](#helpers)
   - [Methods](#methods)
   - [Partials](#partials)
@@ -153,6 +153,7 @@ Your data object is what is passed to your Handlebars template on render, and wh
 
 ```javascript
 {
+  ...
   data: {
     name: {
       first: "David",
@@ -166,7 +167,7 @@ Your data object is what is passed to your Handlebars template on render, and wh
 
 ### Methods in your data
 
-You can also return a method as a value from your data. This is a simple yet powerful feture that lets you return calculations based off your data's state at that point in time.
+You can also return a method as a value from your data. This is a simple yet powerful feture that lets you return calculations based off your data's state at that point in time. You can even define methods at runtime, or nest them deeply within your data Object.
 
 
 
@@ -183,7 +184,7 @@ export default {
 
   data: {
     allMyFriends() {
-      return this.data.friends.join(", ");
+      return this.friends.join(", ");
     },
 
     friends: ["Mike", "David", "Todd", "Keith"],
@@ -200,6 +201,10 @@ export default {
 
 ```
 
+
+Any method defined in your data Object will be scoped to your data object `this`
+
+> You **cannot** however `watch` a method from your data. You would need to watch the item or items in your data that the method relies on its computation for.
 
 ## Watch Methods
 ## Helpers
@@ -236,13 +241,13 @@ export default {
   },
 
   methods: {
-    toggle() {
+    toggle(context) {
       this.isOn = !this.isOn;
     },
   },
 
   helpers: {
-    isChecked() {
+    isChecked(context) {
       if (this.isOn) return "checked";
     },
   },
