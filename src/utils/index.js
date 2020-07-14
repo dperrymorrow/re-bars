@@ -27,6 +27,17 @@ export default {
     });
   },
 
+  buildContext(scope, { $app, data: rootData, methods }) {
+    const context = {
+      $app,
+      $nextTick: this.nextTick,
+      $refs: this.dom.findRefs.bind(null, $app),
+      rootData,
+    };
+    context.methods = this.bind(methods, scope, context);
+    return context;
+  },
+
   intersects: (obj1, obj2) => Object.keys(obj2).filter(key => key in obj1),
 
   registerHelpers(instance, helpers) {

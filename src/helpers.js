@@ -26,15 +26,8 @@ export default {
           if (!(methodName in scope.methods)) instance.log(3, `ReBars: "${methodName}" is not a method.`, hash, $el);
 
           const handler = event => {
-            const context = {
-              event,
-              $app: scope.$app,
-              $refs: Utils.dom.findRefs.bind(null, scope.$app),
-              $nextTick: Utils.nextTick,
-              rootData: scope.data,
-            };
-
-            context.methods = Utils.bind(scope.methods, tplScope, context);
+            const context = Utils.buildContext(tplScope, scope);
+            context.event = event;
             context.methods[methodName](...args);
           };
 
