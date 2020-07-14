@@ -25,15 +25,15 @@ export default {
   `,
 
   helpers: {
-    selectedSort(val) {
+    selectedSort(context, val) {
       return this.filters.sortBy === val ? "selected" : "";
     },
 
-    selectedDir(val) {
+    selectedDir(context, val) {
       return this.filters.sortDir === val ? "selected" : "";
     },
 
-    disabledIf(val) {
+    disabledIf(context, val) {
       return this.filters.filterBy === val ? "disabled" : "";
     },
   },
@@ -55,7 +55,6 @@ export default {
       });
 
       if (sortDir === "desc") filtered.reverse();
-      console.log("filterd", filtered);
       return filtered;
     },
 

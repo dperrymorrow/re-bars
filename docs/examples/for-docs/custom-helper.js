@@ -14,13 +14,13 @@ export default {
   },
 
   methods: {
-    toggle() {
+    toggle(context) {
       this.isOn = !this.isOn;
     },
   },
 
   helpers: {
-    isChecked() {
+    isChecked(context) {
       if (this.isOn) return "checked";
     },
   },

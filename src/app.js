@@ -21,7 +21,6 @@ export default {
     const store = { renders: {}, handlers: {} };
 
     Config.setTrace(trace);
-    Utils.registerHelpers(instance, helpers);
 
     return {
       store,
@@ -38,10 +37,11 @@ export default {
           data,
         };
 
+        Utils.registerPartials({ instance, scope, partials });
+        Utils.registerHelpers({ instance, helpers, scope });
         Helpers.register({ instance, template, store, scope });
-        Utils.registerPartials(instance, scope, partials);
 
-        scope.data = ProxyTrap.create(data, changed => {
+        scope.data = ProxyTrap.create(scope, changed => {
           instance.log(Config.logLevel(), "ReBars: change", changed);
           ReRender.paths({ changed, store, instance });
           Object.entries(watch).forEach(([path, fn]) => {

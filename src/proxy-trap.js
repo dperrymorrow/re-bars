@@ -1,7 +1,7 @@
 import Utils from "./utils/index.js";
 
 export default {
-  create(data, callback, trackGet = false) {
+  create(scope, callback, trackGet = false) {
     let que = [];
 
     const _debounced = Utils.debounce(() => {
@@ -19,9 +19,8 @@ export default {
         get: function(target, prop) {
           const value = Reflect.get(...arguments);
 
-          if (typeof value === "function" && target.hasOwnProperty(prop)) {
-            return value.bind(proxyData);
-          }
+          if (typeof value === "function" && target.hasOwnProperty(prop))
+            return value.bind(proxyData, Utils.buildContext(target, scope));
 
           if (value && typeof value === "object" && ["Array", "Object"].includes(value.constructor.name)) {
             return _buildProxy(value, tree.concat(prop));
@@ -47,7 +46,7 @@ export default {
       });
     }
 
-    const proxyData = _buildProxy(data);
+    const proxyData = _buildProxy(scope.data);
     return proxyData;
   },
 };

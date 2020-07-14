@@ -50,7 +50,7 @@ export default {
 
       if (!args.length) {
         const trap = ProxyTrap.create(
-          this,
+          { ...scope, data: this },
           paths => {
             ref.path = paths;
           },

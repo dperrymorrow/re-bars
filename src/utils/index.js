@@ -27,12 +27,12 @@ export default {
     });
   },
 
-  buildContext(scope, { $app, data: rootData, methods }) {
+  buildContext(scope, { $app, data, methods }) {
     const context = {
       $app,
       $nextTick: this.nextTick,
       $refs: this.dom.findRefs.bind(null, $app),
-      rootData,
+      rootData: data,
     };
     context.methods = this.bind(methods, scope, context);
     return context;
@@ -40,11 +40,17 @@ export default {
 
   intersects: (obj1, obj2) => Object.keys(obj2).filter(key => key in obj1),
 
-  registerHelpers(instance, helpers) {
-    Object.entries(helpers).forEach(([name, fn]) => instance.registerHelper(name, fn));
+  registerHelpers({ instance, helpers, scope }) {
+    const utils = this;
+    Object.entries(helpers).forEach(([name, fn]) =>
+      instance.registerHelper(name, function(...args) {
+        const context = utils.buildContext(this, scope);
+        return fn.call(this, context, ...args);
+      })
+    );
   },
 
-  registerPartials(instance, scope, partials) {
+  registerPartials({ instance, scope, partials }) {
     Object.entries(partials).forEach(([name, partial]) => {
       instance.registerPartial(name, partial.template);
 
@@ -56,7 +62,7 @@ export default {
 
       if (partial.data) Object.assign(scope.data, partial.data);
       if (partial.methods) Object.assign(scope.methods, partial.methods);
-      if (partial.helpers) this.registerHelpers(instance, partial.helpers);
+      if (partial.helpers) this.registerHelpers({ instance, helpers: partial.helpers, scope });
     });
   },
 

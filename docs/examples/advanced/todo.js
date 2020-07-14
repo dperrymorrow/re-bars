@@ -51,7 +51,7 @@ export default {
       this.todo.isEditing = true;
     },
 
-    toggleDone({ methods }) {
+    toggleDone() {
       this.todo.done = !this.todo.done;
     },
   },

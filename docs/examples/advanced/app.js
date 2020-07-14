@@ -28,7 +28,6 @@ export default {
 
     {{> Filters }}
 
-
     {{#watch "filters(.*)" "todos(.*)" tag="ul"}}
       {{#each filteredTodos as | todo | }}
         {{> Todo todo=todo }}
