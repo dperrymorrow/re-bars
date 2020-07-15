@@ -1,6 +1,6 @@
 {
   "name": "re-bars",
-  "version": "0.0.1-beta.3.0.1",
+  "version": "0.0.1-beta.3.1.0",
   "description": "Handlebars templates with re-render / watch blocks",
   "repository": "https://github.com/dperrymorrow/re-bars",
   "main": "dist/re-bars.umd.min.js",
