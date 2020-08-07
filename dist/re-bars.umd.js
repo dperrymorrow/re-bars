@@ -430,6 +430,7 @@
       methods = {},
       partials = {},
       watch = {},
+      hooks = {},
       Handlebars = window.Handlebars,
       trace = false,
     }) {
@@ -437,12 +438,14 @@
       const templateFn = instance.compile(template);
       const store = { renders: {}, handlers: {} };
 
+      if (!Handlebars) return instance.log(3, "ReBars: needs Handlebars in order to run");
+
       Config.setTrace(trace);
 
       return {
         store,
         instance,
-        render(selector) {
+        async render(selector) {
           const $app = document.querySelector(selector);
 
           if (!$app)
@@ -462,11 +465,12 @@
             instance.log(Config.logLevel(), "ReBars: change", changed);
             ReRender.paths({ changed, store, instance });
             Object.entries(watch).forEach(([path, fn]) => {
-              if (Utils.shouldRender(changed, [path])) fn.call(scope);
+              if (Utils.shouldRender(changed, [path])) fn.call(Utils.buildContext(scope.data, scope));
             });
           });
 
           Garbage.start($app, store);
+          if (hooks.beforeRender) await hooks.beforeRender(Utils.buildContext(scope.data, scope));
           $app.innerHTML = templateFn(scope.data);
         },
       };
