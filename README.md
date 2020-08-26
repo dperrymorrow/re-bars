@@ -8,7 +8,6 @@
   - [Getting Started](#getting-started)
   - [Handlebars](#handlebars)
   - [Data](#data)
-  - [Watch Methods](#watch-methods)
   - [Helpers](#helpers)
   - [Methods](#methods)
   - [Partials](#partials)
@@ -206,7 +205,6 @@ Any method defined in your data Object will be scoped to your data object `this`
 
 > You **cannot** however `watch` a method from your data. You would need to watch the item or items in your data that the method relies on its computation for.
 
-## Watch Methods
 ## Helpers
 
 If you would like to add helpers to your app you can pass a helpers Object to the `ReBars.app` function.
@@ -328,6 +326,58 @@ export default {
 
 
 ## Partials
+
+The partials object in a ReBars app _(or partial)_ is simply a way to use Handlebars built in [partials](https://handlebarsjs.com/guide/partials.html) functionality in a ReBars application.
+
+This lets you break up your application into pieces. They are not isolated components however.
+
+> Any helpers, methods, and data will be merged into your application and available everywhere. For this reason ReBars will warn you if there are any naming collisions between partials / main application.
+
+Using native import works great for splitting up your application into seperate files.
+
+```javascript
+// person.js
+export default {
+  template: /*html*/ `
+    <ul>
+      </li>{{ fullName }}</li>
+      </li>{{ person.profession }}</li>
+    </ul>
+  `,
+
+  helpers: {
+    fullName() {
+      return `${this.person.firstName} ${this.person.lastName}`;
+    }
+  }
+}
+```
+
+```javascript
+// app.js
+import Person from "./person.js";
+
+export default {
+  template: /*html*/ `
+    <h1>All the people</h1>
+    {{#each people as | person | }}
+      {{> Person person=person }}
+    {{/each}}
+  `,
+
+  data: {
+    people: [
+      { firstName: "Mike", lastName: "Jones", profession: "Doctor" },
+      { firstName: "David", lastName: "Smith", profession: "Programmer" },
+    ]
+  },
+
+  partials: {
+    Person
+  }
+}
+```
+
 
 # ReBars built in helpers
 
@@ -457,7 +507,25 @@ You can also call multiple events on one invocation of the on helpers. For examp
 <input {{ on focus="focused" blur="blurred" input="inputChange" >
 ```
 
-## ref (element reference)
+## The ref helper
+
+The ref helper gives you an alias to a DOM element in your template. The `$refs` method can be accessed in the context passed like other items in the context.
+
+
+```html
+<button {{ ref "myButton" }}>Save</button>
+<a {{ on click="doSomething" }}>Click</a>
+```
+
+```javascript
+methods: {
+  doSomething(context) {
+    console.log(context.$refs().myButton);
+    // <button>Save</button>
+  }
+}
+```
+
 # Examples
 
 Here you can get a better idea of how one would build a small application with ReBars. The entire source code for the examples is shown below the functioning ReBars app.

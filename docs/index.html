@@ -34,9 +34,6 @@
                         <a href="#data">Data</a>
                       </li>
                       <li>
-                        <a href="#watch-methods">Watch Methods</a>
-                      </li>
-                      <li>
                         <a href="#helpers">Helpers</a>
                       </li>
                       <li>
@@ -255,10 +252,6 @@ ReBars.app({
 </blockquote>
 
                 </article>
-                <article class="page sub" data-anchor="#watch-methods">
-                  <h2 id="watch-methods">Watch Methods</h2>
-
-                </article>
                 <article class="page sub" data-anchor="#helpers">
                   <h2 id="helpers">Helpers</h2>
 <p>If you would like to add helpers to your app you can pass a helpers Object to the <code>ReBars.app</code> function.</p>
@@ -405,6 +398,49 @@ instance.registerHelper(&quot;myCustomHelper&quot;, function () {
                 </article>
                 <article class="page sub" data-anchor="#partials">
                   <h2 id="partials">Partials</h2>
+<p>The partials object in a ReBars app <em>(or partial)</em> is simply a way to use Handlebars built in <a href="https://handlebarsjs.com/guide/partials.html">partials</a> functionality in a ReBars application.</p>
+<p>This lets you break up your application into pieces. They are not isolated components however.</p>
+<blockquote>
+<p>Any helpers, methods, and data will be merged into your application and available everywhere. For this reason ReBars will warn you if there are any naming collisions between partials / main application.</p>
+</blockquote>
+<p>Using native import works great for splitting up your application into seperate files.</p>
+<pre><code class="language-javascript">// person.js
+export default {
+  template: /*html*/ `
+    &lt;ul&gt;
+      &lt;/li&gt;{{ fullName }}&lt;/li&gt;
+      &lt;/li&gt;{{ person.profession }}&lt;/li&gt;
+    &lt;/ul&gt;
+  `,
+
+  helpers: {
+    fullName() {
+      return `${this.person.firstName} ${this.person.lastName}`;
+    }
+  }
+}</code></pre>
+<pre><code class="language-javascript">// app.js
+import Person from &quot;./person.js&quot;;
+
+export default {
+  template: /*html*/ `
+    &lt;h1&gt;All the people&lt;/h1&gt;
+    {{#each people as | person | }}
+      {{&gt; Person person=person }}
+    {{/each}}
+  `,
+
+  data: {
+    people: [
+      { firstName: &quot;Mike&quot;, lastName: &quot;Jones&quot;, profession: &quot;Doctor&quot; },
+      { firstName: &quot;David&quot;, lastName: &quot;Smith&quot;, profession: &quot;Programmer&quot; },
+    ]
+  },
+
+  partials: {
+    Person
+  }
+}</code></pre>
 
                 </article>
             </article>
@@ -536,7 +572,16 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
 
                 </article>
                 <article class="page sub" data-anchor="#the-ref-helper">
-                  <h2 id="ref-element-reference">ref (element reference)</h2>
+                  <h2 id="the-ref-helper">The ref helper</h2>
+<p>The ref helper gives you an alias to a DOM element in your template. The <code>$refs</code> method can be accessed in the context passed like other items in the context.</p>
+<pre><code class="language-html">&lt;button {{ ref &quot;myButton&quot; }}&gt;Save&lt;/button&gt;
+&lt;a {{ on click=&quot;doSomething&quot; }}&gt;Click&lt;/a&gt;</code></pre>
+<pre><code class="language-javascript">methods: {
+  doSomething(context) {
+    console.log(context.$refs().myButton);
+    // &lt;button&gt;Save&lt;/button&gt;
+  }
+}</code></pre>
 
                 </article>
             </article>

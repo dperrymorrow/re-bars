@@ -26,10 +26,6 @@
           "markdown": "data.md"
         },
         {
-          "label": "Watch Methods",
-          "path": "#watch-methods"
-        },
-        {
           "label": "Helpers",
           "path": "#helpers",
           "markdown": "custom-helpers.md"
@@ -41,7 +37,8 @@
         },
         {
           "label": "Partials",
-          "path": "#partials"
+          "path": "#partials",
+          "markdown": "partials.md"
         }
       ]
     },
@@ -62,7 +59,8 @@
         },
         {
           "label": "ref (element reference)",
-          "path": "#the-ref-helper"
+          "path": "#the-ref-helper",
+          "markdown": "helper-ref.md"
         }
       ]
     },
