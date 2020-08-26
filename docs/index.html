@@ -866,12 +866,7 @@ export default {
       </section>
     </main>
 
-    <script>
-      const src = (window.location.host.includes("localhost")) ? "_src/docs.js" : "dist/docs.js";
-      const $script = document.createElement("script");
-      $script.src = src
-      document.body.append($script);
-    </script>
+    <script src="_src/docs.js"></script>
 
   </body>
 </html>
