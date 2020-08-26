@@ -21,6 +21,7 @@ export default [
           copy({
             hook: "writeBundle",
             targets: [
+              { src: "docs/_src/docs.js", dest: "docs/dist" },
               { src: "dist/re-bars.umd.min.js", dest: "docs/dist" },
               { src: "dist/re-bars.umd.min.js.map", dest: "docs/dist" },
             ],
