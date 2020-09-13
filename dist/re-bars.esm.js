@@ -459,12 +459,12 @@ var app = {
           instance.log(Config.logLevel(), "ReBars: change", changed);
           ReRender.paths({ changed, store, instance });
           Object.entries(watch).forEach(([path, fn]) => {
-            if (Utils.shouldRender(changed, [path])) fn.call(Utils.buildContext(scope.data, scope));
+            if (Utils.shouldRender(changed, [path])) fn.call(scope.data, Utils.buildContext(scope.data, scope));
           });
         });
 
         Garbage.start($app, store);
-        if (hooks.beforeRender) await hooks.beforeRender(Utils.buildContext(scope.data, scope));
+        if (hooks.beforeRender) await hooks.beforeRender(scope.data, Utils.buildContext(scope.data, scope));
         $app.innerHTML = templateFn(scope.data);
       },
     };

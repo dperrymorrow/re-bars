@@ -53,8 +53,11 @@ export default {
         });
 
         Garbage.start($app, store);
-        if (hooks.beforeRender) await hooks.beforeRender(scope.data, Utils.buildContext(scope.data, scope));
+        const context = Utils.buildContext(scope.data, scope);
+
+        if (hooks.beforeRender) await hooks.beforeRender(scope.data, context);
         $app.innerHTML = templateFn(scope.data);
+        if (hooks.afterRender) await hooks.afterRender(scope.data, context);
       },
     };
   },
