@@ -466,9 +466,9 @@ var app = {
         Garbage.start($app, store);
         const context = Utils.buildContext(scope.data, scope);
 
-        if (hooks.beforeRender) await hooks.beforeRender(scope.data, context);
+        if (hooks.beforeRender) await hooks.beforeRender.call(scope.data, context);
         $app.innerHTML = templateFn(scope.data);
-        if (hooks.afterRender) await hooks.afterRender(scope.data, context);
+        if (hooks.afterRender) await hooks.afterRender.call(scope.data, context);
       },
     };
   },
