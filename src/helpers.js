@@ -39,6 +39,11 @@ export default {
       return new instance.SafeString(`${attrs.method}="${id}"`);
     });
 
+    instance.registerHelper("concat", function(...args) {
+      args.pop();
+      return args.join("");
+    });
+
     instance.registerHelper("watch", function(...args) {
       const { fn, hash } = args.pop();
       const eId = Utils.randomId();
@@ -67,9 +72,9 @@ export default {
         store.renders[eId] = { ...ref, $el };
 
         args.forEach(path => {
-          if (typeof path !== "string") instance.log(3, "ReBars: can only watch Strings", args, $el);
+          if (typeof path !== "string")
+            instance.log(3, `ReBars: can only watch Strings, ${typeof path} - ${path} given`, args, $el);
         });
-        instance.log(Config.logLevel(), "ReBars: watching", ref.path, $el);
       });
 
       return Utils.dom.wrapWatcher(eId, fn(this), hash);

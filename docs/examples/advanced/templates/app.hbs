@@ -1,0 +1,30 @@
+<div class="header-container">
+  {{#watch tag="h1" }}
+    <span>{{ header.title }}</span>
+    <small>{{ header.description }}</small>
+  {{/watch}}
+
+  <label>
+    Title:
+    <input type="text" value="{{ header.title }}" {{ on input="updateTitle" }} />
+  </label>
+
+  <label>
+    Description:
+    <input type="text" value="{{ header.description }}" {{ on input="updateDescription" }} />
+  </label>
+</div>
+
+{{> Filters }}
+
+{{#watch "todos.length" "filters.sortBy" tag="ul"}}
+  {{#each todos as | todo | }}
+    {{#watch (concat "todos." @index "(.*)") tag="li" }}
+      {{#if todo.display }}
+        {{> Todo todo=todo }}
+      {{/if}}
+    {{/watch}}
+  {{/each}}
+{{/watch}}
+
+{{> Add }}

@@ -16,8 +16,6 @@ export default {
     };
   },
 
-  isTextNode: $el => $el.nodeType === Node.TEXT_NODE,
-
   restoreState($target, activeRef) {
     if (!activeRef) return;
 
@@ -68,11 +66,5 @@ export default {
     const propStr = this.propStr(props);
     const style = !html.length ? "style='display:none;'" : "";
     return `<${tag} ${propStr} ${style} ${attrs.watch}="${id}">${html}</${tag}>`;
-  },
-
-  getShadow(html) {
-    const $tmp = document.createElement("div");
-    $tmp.innerHTML = html;
-    return $tmp;
   },
 };

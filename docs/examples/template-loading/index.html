@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>ReBars Docs: Application</title>
-    <link rel="stylesheet" href="../../dist/docs.min.css">
+    <link rel="stylesheet" href="../dist/docs.min.css">
   </head>
 
   <body>
@@ -18,10 +18,11 @@
 
     <script type="module">
       import Handlebars from "//unpkg.com/handlebars-esm"
-      import ReBars from "../../../src/app.js";
+      import ReBars from "/src/app.js";
       import DemoApp from "./app.js";
 
       ReBars.app(DemoApp).render("#demo-app");
+
     </script>
   </body>
 </html>

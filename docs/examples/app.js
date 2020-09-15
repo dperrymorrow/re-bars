@@ -29,14 +29,14 @@ export default {
     </div>
 
     <ul class="simple">
-      {{#watch "todos(.*)" }}
+      {{#watch "todos.length" }}
         {{#each todos }}
-          <li {{ ref id }}>
+          {{#watch (concat "todos." @index ".done") tag="li" }}
             <div class="todo">
               <label>
                 <input
                   type="checkbox"
-                  {{ on click="toggleDone" }}
+                  {{ on @index click="toggleDone" }}
                   {{ isChecked }}
                 />
                 {{#if done }}
@@ -47,12 +47,12 @@ export default {
               </label>
 
               <div class="actions">
-                <button {{ on click="deleteTodo" }}>
+                <button {{ on @index click="deleteTodo" }}>
                   delete
                 </button>
               </div>
             </div>
-          </li>
+          {{/watch}}
         {{/each}}
       {{/watch}}
     </ul>
@@ -83,12 +83,10 @@ export default {
       {
         done: false,
         name: "Grocery Shopping",
-        id: 22,
       },
       {
         done: true,
         name: "Paint the House",
-        id: 44,
       },
     ],
   },
@@ -113,7 +111,6 @@ export default {
       const $input = $refs().newName;
 
       this.todos.push({
-        id: new Date().getTime(),
         done: false,
         name: $input.value,
       });
@@ -121,18 +118,12 @@ export default {
       $input.value = "";
     },
 
-    findTodo({ rootData }, id) {
-      return rootData.todos.find(item => item.id === parseInt(id));
-    },
-
-    deleteTodo({ rootData }) {
-      const index = rootData.todos.findIndex(t => t.id === this.id);
+    deleteTodo({ rootData }, index) {
       rootData.todos.splice(index, 1);
     },
 
-    toggleDone({ event, methods }) {
-      const todo = methods.findTodo(this.id);
-      todo.done = !this.done;
+    toggleDone({ rootData }, index) {
+      rootData.todos[index].done = !this.done;
     },
 
     toggleCreate({ event }) {

@@ -10,11 +10,6 @@
     logLevel: () => (isTracing ? 1 : 0),
     setTrace: val => (isTracing = val),
 
-    regex: {
-      attrs: /rbs-(.*?)="(.*?)"/g,
-      whitespace: /\s/g,
-    },
-
     attrs: {
       watch: "rbs-watch",
       method: "rbs-method",
@@ -38,8 +33,6 @@
         selectionStart: $active.selectionStart,
       };
     },
-
-    isTextNode: $el => $el.nodeType === Node.TEXT_NODE,
 
     restoreState($target, activeRef) {
       if (!activeRef) return;
@@ -92,15 +85,10 @@
       const style = !html.length ? "style='display:none;'" : "";
       return `<${tag} ${propStr} ${style} ${attrs.watch}="${id}">${html}</${tag}>`;
     },
-
-    getShadow(html) {
-      const $tmp = document.createElement("div");
-      $tmp.innerHTML = html;
-      return $tmp;
-    },
   };
 
   let counter = 1;
+  const { fetch } = window;
 
   var Utils = {
     dom: Dom,
@@ -121,11 +109,17 @@
       };
     },
 
-    nextTick() {
-      return new Promise(resolve => {
+    loadTemplate: file =>
+      fetch(file)
+        .then(res => res.text())
+        .catch(err => {
+          throw new Error(err);
+        }),
+
+    nextTick: () =>
+      new Promise(resolve => {
         setTimeout(resolve, 0);
-      });
-    },
+      }),
 
     buildContext(scope, { $app, data, methods }) {
       const context = {
@@ -138,8 +132,6 @@
       return context;
     },
 
-    intersects: (obj1, obj2) => Object.keys(obj2).filter(key => key in obj1),
-
     registerHelpers({ instance, helpers, scope }) {
       const utils = this;
       Object.entries(helpers).forEach(([name, fn]) =>
@@ -148,22 +140,6 @@
           return fn.call(this, context, ...args);
         })
       );
-    },
-
-    registerPartials({ instance, scope, partials }) {
-      Object.entries(partials).forEach(([name, partial]) => {
-        instance.registerPartial(name, partial.template);
-
-        ["methods", "partials", "data"].forEach(key => {
-          if (!(key in partial)) return;
-          const collide = this.intersects(scope[key], partial[key]);
-          if (collide.length) instance.log(2, `ReBars: partial ${name} has conflicting ${key} keys`, collide);
-        });
-
-        if (partial.data) Object.assign(scope.data, partial.data);
-        if (partial.methods) Object.assign(scope.methods, partial.methods);
-        if (partial.helpers) this.registerHelpers({ instance, helpers: partial.helpers, scope });
-      });
     },
 
     bind(obj, scope, ...args) {
@@ -266,6 +242,11 @@
         return new instance.SafeString(`${attrs$1.method}="${id}"`);
       });
 
+      instance.registerHelper("concat", function(...args) {
+        args.pop();
+        return args.join("");
+      });
+
       instance.registerHelper("watch", function(...args) {
         const { fn, hash } = args.pop();
         const eId = Utils.randomId();
@@ -294,62 +275,12 @@
           store.renders[eId] = { ...ref, $el };
 
           args.forEach(path => {
-            if (typeof path !== "string") instance.log(3, "ReBars: can only watch Strings", args, $el);
+            if (typeof path !== "string")
+              instance.log(3, `ReBars: can only watch Strings, ${typeof path} - ${path} given`, args, $el);
           });
-          instance.log(Config.logLevel(), "ReBars: watching", ref.path, $el);
         });
 
         return Utils.dom.wrapWatcher(eId, fn(this), hash);
-      });
-    },
-  };
-
-  const { attrs: attrs$2, regex } = Config;
-
-  function _isEqHtml(html1, html2) {
-    const parsed1 = html1.replace(regex.attrs, "");
-    const parsed2 = html2.replace(regex.attrs, "");
-    return Utils.dom.getShadow(parsed1).isEqualNode(Utils.dom.getShadow(parsed2));
-  }
-
-  var Patch = {
-    canPatch: $target =>
-      $target.children.length &&
-      $target.children.length > 1 &&
-      Array.from($target.children).every($el => $el.getAttribute(attrs$2.ref)),
-
-    hasChanged: ($target, html) => !_isEqHtml($target.innerHTML, html),
-
-    compare({ $target, html, instance, store }) {
-      const $shadow = Utils.dom.getShadow(html);
-      const $vChilds = Array.from($shadow.children);
-      const level = Config.logLevel();
-
-      // deletes and updates
-      Array.from($target.children).forEach($r => {
-        const $v = Utils.dom.findRef($shadow, $r.getAttribute(attrs$2.ref));
-        if (!$v) {
-          instance.log(level, "ReBars: removing", $r);
-          $r.remove();
-        } else if (!_isEqHtml($v.innerHTML, $r.innerHTML)) {
-          instance.log(level, "ReBars: updating", $r, $v);
-          $r.replaceWith($v.cloneNode(true));
-        }
-      });
-
-      // additions
-      $vChilds.forEach(($v, index) => {
-        const $r = Utils.dom.findRef($target, $v.getAttribute(attrs$2.ref));
-        if (!$r) {
-          instance.log(level, "ReBars: adding", $v);
-          $target.append($v.cloneNode(true));
-        }
-      });
-
-      // sorting
-      $vChilds.forEach(($v, index) => {
-        const $r = $target.children[index];
-        if ($r.getAttribute(attrs$2.ref) !== $v.getAttribute(attrs$2.ref)) $r.replaceWith($v.cloneNode(true));
       });
     },
   };
@@ -368,30 +299,12 @@
           if (!$target) return;
 
           const html = handler.render();
+          // cursor position focused element ect...
           const stash = Utils.dom.recordState($target);
-
-          if (!Patch.hasChanged($target, html)) return;
-
-          if (Patch.canPatch($target)) {
-            instance.log(Config.logLevel(), "ReBars: patching", handler.path, $target);
-            Patch.compare({ $target, html, instance, store });
-            Utils.dom.restoreState($target, stash);
-            return;
-          }
-
-          // warn for not having a ref on array update
-          const lenPath = handler.path.find(path => path.endsWith(".length") && $target.children.length > 1);
-          if (lenPath)
-            instance.log(
-              2,
-              "ReBars: add a {{ ref someUniqueKey }} to each to avoid re-rendering the entire Array",
-              handler.path,
-              $target
-            );
-
+          // we dont want wrappers to show up with no content
           $target.style.display = html === "" ? "none" : "";
           $target.innerHTML = html;
-
+          // restore saved state of DOM
           Utils.dom.restoreState($target, stash);
           instance.log(Config.logLevel(), "ReBars: render", handler.path, $target);
         });
@@ -422,7 +335,8 @@
     },
   };
 
-  var app = {
+  const ReBars = {
+    load: Utils.loadTemplate,
     app({
       helpers = {},
       template,
@@ -431,14 +345,13 @@
       partials = {},
       watch = {},
       hooks = {},
-      Handlebars = window.Handlebars,
+      Handlebars = window ? window.Handlebars : null,
       trace = false,
     }) {
       const instance = Handlebars.create();
-      const templateFn = instance.compile(template);
-      const store = { renders: {}, handlers: {} };
 
-      if (!Handlebars) return instance.log(3, "ReBars: needs Handlebars in order to run");
+      const store = { renders: {}, handlers: {} };
+      if (!Handlebars) throw new Error("ReBars: needs Handlebars in order to run");
 
       Config.setTrace(trace);
 
@@ -447,6 +360,15 @@
         instance,
         async render(selector) {
           const $app = document.querySelector(selector);
+
+          // have to make sure they are resolved first
+          await Promise.all(Object.values(partials));
+          Object.entries(partials).forEach(async ([name, tpl]) =>
+            instance.registerPartial(name, tpl instanceof Promise ? await tpl : tpl)
+          );
+
+          // must be compiled after the partials
+          const templateFn = instance.compile(template instanceof Promise ? await template : template);
 
           if (!$app)
             return instance.log(3, `ReBars: document.querySelector("${selector}") could not be found on the document`);
@@ -457,13 +379,14 @@
             data,
           };
 
-          Utils.registerPartials({ instance, scope, partials });
           Utils.registerHelpers({ instance, helpers, scope });
           Helpers.register({ instance, template, store, scope });
 
-          scope.data = ProxyTrap.create(scope, changed => {
+          scope.data = ProxyTrap.create(scope, async changed => {
             instance.log(Config.logLevel(), "ReBars: change", changed);
             ReRender.paths({ changed, store, instance });
+            // have to wait a tick or anything set by a watch will not catch...
+            await Utils.nextTick();
             Object.entries(watch).forEach(([path, fn]) => {
               if (Utils.shouldRender(changed, [path])) fn.call(scope.data, Utils.buildContext(scope.data, scope));
             });
@@ -480,6 +403,9 @@
     },
   };
 
-  return app;
+  // add it to the window if we have one...
+  if (window) window.ReBars = window.ReBars || ReBars;
+
+  return ReBars;
 
 })));

@@ -240,7 +240,7 @@ ReBars.app({
   methods: {
     add({ rootData, $refs }) {
       const $input = $refs().input;
-      rootData.friends.push($input.value);
+      this.friends.push($input.value);
       $input.value = &quot;&quot;;
     },
   },
@@ -385,7 +385,7 @@ instance.registerHelper(&quot;myCustomHelper&quot;, function () {
 
   methods: {
     display({ rootData }) {
-      rootData.favorite = `${this.toUpperCase()}!! is my favorite food`;
+      this.favorite = `${this.toUpperCase()}!! is my favorite food`;
     },
 
     isFavorite({ event, $refs, $nextTick, rootData, methods }) {
@@ -632,14 +632,14 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
     &lt;/div&gt;
 
     &lt;ul class=&quot;simple&quot;&gt;
-      {{#watch &quot;todos(.*)&quot; }}
+      {{#watch &quot;todos.length&quot; }}
         {{#each todos }}
-          &lt;li {{ ref id }}&gt;
+          {{#watch (concat &quot;todos.&quot; @index &quot;.done&quot;) tag=&quot;li&quot; }}
             &lt;div class=&quot;todo&quot;&gt;
               &lt;label&gt;
                 &lt;input
                   type=&quot;checkbox&quot;
-                  {{ on click=&quot;toggleDone&quot; }}
+                  {{ on @index click=&quot;toggleDone&quot; }}
                   {{ isChecked }}
                 /&gt;
                 {{#if done }}
@@ -650,12 +650,12 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
               &lt;/label&gt;
 
               &lt;div class=&quot;actions&quot;&gt;
-                &lt;button {{ on click=&quot;deleteTodo&quot; }}&gt;
+                &lt;button {{ on @index click=&quot;deleteTodo&quot; }}&gt;
                   delete
                 &lt;/button&gt;
               &lt;/div&gt;
             &lt;/div&gt;
-          &lt;/li&gt;
+          {{/watch}}
         {{/each}}
       {{/watch}}
     &lt;/ul&gt;
@@ -686,12 +686,10 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
       {
         done: false,
         name: &quot;Grocery Shopping&quot;,
-        id: 22,
       },
       {
         done: true,
         name: &quot;Paint the House&quot;,
-        id: 44,
       },
     ],
   },
@@ -716,7 +714,6 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
       const $input = $refs().newName;
 
       this.todos.push({
-        id: new Date().getTime(),
         done: false,
         name: $input.value,
       });
@@ -724,18 +721,12 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
       $input.value = &quot;&quot;;
     },
 
-    findTodo({ rootData }, id) {
-      return rootData.todos.find(item =&gt; item.id === parseInt(id));
-    },
-
-    deleteTodo({ rootData }) {
-      const index = rootData.todos.findIndex(t =&gt; t.id === this.id);
+    deleteTodo({ rootData }, index) {
       rootData.todos.splice(index, 1);
     },
 
-    toggleDone({ event, methods }) {
-      const todo = methods.findTodo(this.id);
-      todo.done = !this.done;
+    toggleDone({ rootData }, index) {
+      rootData.todos[index].done = !this.done;
     },
 
     toggleCreate({ event }) {
@@ -759,102 +750,173 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
   ReBars.app(AdvancedApp).render("[example-target='AdvancedApp']")
 </script>
 
-<pre><code class="language-javascript">import Add from &quot;./add.js&quot;;
-import Todo from &quot;./todo.js&quot;;
-import Filters from &quot;./filters.js&quot;;
-
-const { localStorage } = window;
-const storageKey = &quot;rebars-todo&quot;;
-const store = localStorage.getItem(storageKey) || &quot;{}&quot;;
-const { todos, header } = JSON.parse(store);
+<pre><code class="language-javascript">const { ReBars } = window;
 
 export default {
-  template: /*html*/ `
-    &lt;div class=&quot;header-container&quot;&gt;
-      {{#watch tag=&quot;h1&quot; }}
-        &lt;span&gt;{{ header.title }}&lt;/span&gt;
-        &lt;small&gt;{{ header.description }}&lt;/small&gt;
-      {{/watch}}
-
-      &lt;label&gt;
-        Title:
-        &lt;input type=&quot;text&quot; value=&quot;{{ header.title }}&quot; {{ on input=&quot;updateTitle&quot; }} /&gt;
-      &lt;/label&gt;
-
-      &lt;label&gt;
-        Description:
-        &lt;input type=&quot;text&quot; value=&quot;{{ header.description }}&quot; {{ on input=&quot;updateDescription&quot; }} /&gt;
-      &lt;/label&gt;
-    &lt;/div&gt;
-
-    {{&gt; Filters }}
-
-    {{#watch &quot;filters(.*)&quot; &quot;todos(.*)&quot; tag=&quot;ul&quot;}}
-      {{#each filteredTodos as | todo | }}
-        {{&gt; Todo todo=todo }}
-      {{/each}}
-    {{/watch}}
-
-    {{&gt; Add }}
-  `,
-
+  template: ReBars.load(&quot;./templates/app.hbs&quot;),
   trace: true,
 
-  watch: {
-    &quot;(.*)&quot;() {
-      localStorage.setItem(storageKey, JSON.stringify(this.data));
-    },
-  },
-
   data: {
-    header: header || {
+    header: {
       title: &quot;ReBars Todos&quot;,
       description: &quot;Some things that need done&quot;,
     },
-
-    todos: todos || [
+    isAdding: false,
+    filters: {
+      filterBy: null,
+      sortBy: &quot;completed&quot;,
+      sortDir: &quot;asc&quot;,
+    },
+    todos: [
       {
         done: false,
-        name: &quot;Wash the car&quot;,
-        updated: &quot;3/1/2020, 12:37:10 PM&quot;,
-        id: 21,
-      },
-      {
-        done: true,
-        name: &quot;Shopping for groceries&quot;,
-        updated: &quot;2/27/2020, 2:37:10 PM&quot;,
-        id: 22,
-      },
-
-      {
-        done: false,
+        display: true,
         name: &quot;Code some Javascript&quot;,
         updated: &quot;1/27/2020, 9:37:10 AM&quot;,
-        id: 23,
+      },
+      {
+        done: false,
+        display: true,
+        name: &quot;Wash the car&quot;,
+        updated: &quot;3/1/2020, 12:37:10 PM&quot;,
+      },
+      {
+        done: true,
+        display: true,
+        name: &quot;Shopping for groceries&quot;,
+        updated: &quot;2/27/2020, 2:37:10 PM&quot;,
       },
 
       {
         done: true,
+        display: true,
         name: &quot;Go for a run&quot;,
         updated: &quot;1/15/2020, 10:37:10 PM&quot;,
-        id: 24,
       },
     ],
   },
 
+  watch: {
+    // &quot;filters.sort(.*)&quot;() {
+    //   this.todos = this.todos.sort((a, b) =&gt; {
+    //     if (sortBy === &quot;name&quot;) return a.name.localeCompare(b.name);
+    //     else if (sortBy === &quot;completed&quot;) return a.done - b.done;
+    //     else return new Date(a.updated).getTime() - new Date(b.updated).getTime();
+    //   });
+    //
+    //   if (sortDir === &quot;desc&quot;) filtered.reverse();
+    //   this.todos = filtered;
+    // },
+
+    &quot;filters.filterBy&quot;({ methods }) {
+      methods.filter();
+    },
+
+    &quot;todos(.*).done&quot;({ methods }) {
+      methods.filter();
+    },
+  },
+
+  helpers: {
+    isChecked() {
+      return this.todo.done ? &quot;checked&quot; : &quot;&quot;;
+    },
+
+    selectedSort(context, val) {
+      return this.filters.sortBy === val ? &quot;selected&quot; : &quot;&quot;;
+    },
+
+    selectedDir(context, val) {
+      return this.filters.sortDir === val ? &quot;selected&quot; : &quot;&quot;;
+    },
+
+    disabledIf(context, val) {
+      return this.filters.filterBy === val ? &quot;disabled&quot; : &quot;&quot;;
+    },
+  },
+
   partials: {
-    Todo,
-    Filters,
-    Add,
+    Todo: ReBars.load(&quot;./templates/todo.hbs&quot;),
+    Filters: ReBars.load(&quot;./templates/filters.hbs&quot;),
+    Add: ReBars.load(&quot;./templates/add.hbs&quot;),
   },
 
   methods: {
+    filter() {
+      const filtering = this.filters.filterBy;
+      this.todos.forEach(todo =&gt; {
+        if (filtering === &quot;incomplete&quot;) todo.display = !todo.done;
+        if (filtering === &quot;completed&quot;) todo.display = todo.done;
+        else todo.display = true;
+      });
+    },
+
+    sortBy({ event }) {
+      this.filters.sortBy = event.target.value;
+    },
+
+    sortDir({ event }) {
+      this.filters.sortDir = event.currentTarget.value;
+    },
+
+    filterBy(context, filterBy) {
+      this.filters.filterBy = filterBy;
+    },
+
     updateTitle({ event, methods }) {
       this.header.title = event.target.value;
     },
 
     updateDescription({ event, methods }) {
       this.header.description = event.target.value;
+    },
+
+    async toggleAdd({ $nextTick, event, methods, $refs }) {
+      event.preventDefault();
+      this.isAdding = !this.isAdding;
+
+      await $nextTick();
+      const $input = $refs().newName;
+      if ($input) $input.focus();
+    },
+
+    addItem({ event, methods, $refs }) {
+      event.preventDefault();
+      const $input = $refs().newName;
+
+      this.todos.push({
+        name: $input.value,
+        display: true,
+        done: false,
+        updated: new Date().toLocaleString(),
+      });
+
+      this.filters.filterBy = null;
+      $input.value = &quot;&quot;;
+      $input.focus();
+    },
+
+    remove({ methods, rootData }) {
+      const index = rootData.todos.findIndex(todo =&gt; todo.id === this.id);
+      rootData.todos.splice(index, 1);
+    },
+
+    saveOnEnter({ event, methods }) {
+      if (event.code == &quot;Enter&quot;) methods.save();
+    },
+
+    save({ event, $refs }) {
+      event.preventDefault();
+      this.todo.name = $refs().editInput.value;
+      this.todo.isEditing = false;
+    },
+
+    edit() {
+      this.todo.isEditing = true;
+    },
+
+    toggleDone() {
+      this.todo.done = !this.todo.done;
     },
   },
 };

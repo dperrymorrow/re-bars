@@ -16,7 +16,7 @@ export default {
 
   methods: {
     display({ rootData }) {
-      rootData.favorite = `${this.toUpperCase()}!! is my favorite food`;
+      this.favorite = `${this.toUpperCase()}!! is my favorite food`;
     },
 
     isFavorite({ event, $refs, $nextTick, rootData, methods }) {

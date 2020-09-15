@@ -19,7 +19,7 @@ export default {
   methods: {
     add({ rootData, $refs }) {
       const $input = $refs().input;
-      rootData.friends.push($input.value);
+      this.friends.push($input.value);
       $input.value = "";
     },
   },

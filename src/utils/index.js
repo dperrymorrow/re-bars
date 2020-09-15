@@ -1,6 +1,7 @@
 let counter = 1;
 
 import Dom from "./dom.js";
+const { fetch } = window;
 
 export default {
   dom: Dom,
@@ -21,11 +22,17 @@ export default {
     };
   },
 
-  nextTick() {
-    return new Promise(resolve => {
+  loadTemplate: file =>
+    fetch(file)
+      .then(res => res.text())
+      .catch(err => {
+        throw new Error(err);
+      }),
+
+  nextTick: () =>
+    new Promise(resolve => {
       setTimeout(resolve, 0);
-    });
-  },
+    }),
 
   buildContext(scope, { $app, data, methods }) {
     const context = {
@@ -38,8 +45,6 @@ export default {
     return context;
   },
 
-  intersects: (obj1, obj2) => Object.keys(obj2).filter(key => key in obj1),
-
   registerHelpers({ instance, helpers, scope }) {
     const utils = this;
     Object.entries(helpers).forEach(([name, fn]) =>
@@ -48,22 +53,6 @@ export default {
         return fn.call(this, context, ...args);
       })
     );
-  },
-
-  registerPartials({ instance, scope, partials }) {
-    Object.entries(partials).forEach(([name, partial]) => {
-      instance.registerPartial(name, partial.template);
-
-      ["methods", "partials", "data"].forEach(key => {
-        if (!(key in partial)) return;
-        const collide = this.intersects(scope[key], partial[key]);
-        if (collide.length) instance.log(2, `ReBars: partial ${name} has conflicting ${key} keys`, collide);
-      });
-
-      if (partial.data) Object.assign(scope.data, partial.data);
-      if (partial.methods) Object.assign(scope.methods, partial.methods);
-      if (partial.helpers) this.registerHelpers({ instance, helpers: partial.helpers, scope });
-    });
   },
 
   bind(obj, scope, ...args) {
