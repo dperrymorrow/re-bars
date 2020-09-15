@@ -1,34 +1,23 @@
 ## Partials
 
-The partials object in a ReBars app _(or partial)_ is simply a way to use Handlebars built in [partials](https://handlebarsjs.com/guide/partials.html) functionality in a ReBars application.
+The partials object in a ReBars app is simply a way to use Handlebars built in [partials](https://handlebarsjs.com/guide/partials.html) functionality in a ReBars application.
 
-This lets you break up your application into pieces. They are not isolated components however.
+This lets you break up your templates into pieces.
 
-> Any helpers, methods, and data will be merged into your application and available everywhere. For this reason ReBars will warn you if there are any naming collisions between partials / main application.
 
-Using native import works great for splitting up your application into seperate files.
+> This is another great candidate for using `ReBars.load` to have separate files for your partials.
 
-```javascript
-// person.js
-export default {
-  template: /*html*/ `
-    <ul>
-      </li>{{ fullName }}</li>
-      </li>{{ person.profession }}</li>
-    </ul>
-  `,
-
-  helpers: {
-    fullName() {
-      return `${this.person.firstName} ${this.person.lastName}`;
-    }
-  }
-}
+```handlebars
+<!-- person.hbs -->
+<ul>
+  </li>{{ fullName }}</li>
+  </li>{{ person.profession }}</li>
+</ul>
 ```
 
 ```javascript
 // app.js
-import Person from "./person.js";
+const { ReBars } = window;
 
 export default {
   template: /*html*/ `
@@ -46,7 +35,14 @@ export default {
   },
 
   partials: {
-    Person
+    Person: ReBars.load("./person.hbs")
   }
 }
+```
+
+This is simply a convenience method giving you access to Handlebar's `registerPartial` method. Just like with helpers, if you would like to work directly with Handlebars, you simply reference the instance passed back after you create your application. See [Handlebars Partials](https://handlebarsjs.com/guide/partials.html) for more info.
+
+```javascript
+const app = ReBars.app(...);
+app.instance.registerPartial("myPartial", "<h1><{{ name }}</h1>");
 ```

@@ -17,7 +17,7 @@
 
 {{> Filters }}
 
-{{#watch "todos.length" "filters.sortBy" tag="ul"}}
+{{#watch "todos.length" "filters(.*)" tag="ul"}}
   {{#each todos as | todo | }}
     {{#watch (concat "todos." @index "(.*)") tag="li" }}
       {{#if todo.display }}

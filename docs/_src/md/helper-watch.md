@@ -4,7 +4,7 @@ The watch helper tells ReBars to re-render this block on change of the item you 
 
 
 Watch allows you to re-render a block of your template on change.
-Watch takes an _optional_ arguments of what properties to watch. The arguments can be string or a regular expression. You may aslo as many as you like. When any change, the block will re-render.
+Watch takes an _optional_ arguments of what properties to watch. The arguments can be string or a regular expression. You may also as many as you like. When any change, the block will re-render.
 
 In our explanation below, we will be referring to this data set.
 
@@ -50,25 +50,10 @@ The above omits the what to watch. In this situation, ReBars will pre-render the
 > You can use any regular expression you would like. The examples above use `(*.)` which equates to any character.
 
 ### [Watch Element wrappers](#watch-element-wrappers)
-Each `{{#watch}}` block gets wrapped by default in a `<span>` tag with attributes marking what outlet this represents. Sometimes this can get in the way of styling your layouts.
+Each `{{#watch}}` block gets wrapped by default in a `<span>` tag with attributes marking what outlet this represents. Sometimes this can get in the way of styling your layout.
 
 As a solution you can add a tag, class id, any attribute you want to the watch block.
 
 > Remember, Handlebars helper arguments must have the params before `key="value"` arguments `{{#watch "name.first" tag="h1" }}`
 
 {{ example for-docs/watcher-tag.js }}
-
-### [Watching Arrays](#watching-arrays)
-`{{#watch}}` can be used on an `Array` as well. But if one item in the Array changes, you don't want to re-render the entire block. That could have performance implications. Instead, ReBars will only update changed items in the block if every element has a [reference](#the-ref-helper)
-
-> By using the ref helper `{{ ref "somethingUnique" }}` on each item, it enables ReBars to only re-render the changed items. _Each ref must be unique_ such as a pKey from the database or such.
-
-```html
-{{#watch "friends(*.)" tag="ul" }}
-  {{#each friends as | friend | }}
-    <li {{ ref friend.name }}>
-      {{ friend.name }} likes to {{ friend.hobby }}
-    </li>
-  {{/each}}
-{{/watch}}
-```

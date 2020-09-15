@@ -377,7 +377,7 @@ const ReBars = {
         Helpers.register({ instance, template, store, scope });
 
         scope.data = ProxyTrap.create(scope, async changed => {
-          instance.log(Config.logLevel(), "ReBars: change", changed);
+          instance.log(Config.logLevel(), "ReBars: change".blue, changed);
           ReRender.paths({ changed, store, instance });
           // have to wait a tick or anything set by a watch will not catch...
           await Utils.nextTick();

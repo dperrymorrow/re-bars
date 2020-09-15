@@ -20,10 +20,10 @@ Your data object is what is passed to your Handlebars template on render, and wh
 
 ### Methods in your data
 
-You can also return a method as a value from your data. This is a simple yet powerful feture that lets you return calculations based off your data's state at that point in time. You can even define methods at runtime, or nest them deeply within your data Object.
+You can also return a method as a value from your data. This is a simple yet powerful feature that lets you return calculations based off your data's state at that point in time. You can even define methods at runtime, or nest them deeply within your data Object.
 
 {{ example for-docs/data-method.js }}
 
 Any method defined in your data Object will be scoped to your data object `this`
 
-> You **cannot** however `watch` a method from your data. You would need to watch the item or items in your data that the method relies on its computation for.
+> You **cannot** however [watch](#the-watch-helper) a method from your data. You would need to watch the item or items in your data that the method relies on its computation for.

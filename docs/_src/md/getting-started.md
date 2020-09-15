@@ -2,11 +2,12 @@
 
 > You will need Handlebars in order to use ReBars. You can install it from NPM or use a CDN.
 
+
+Using a CDN
+
 ```html
-<!-- Handlebars from CDN --->
-<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.min.js"></script>
-<!-- ReBars from CDN --->
-<script src="https://cdn.jsdelivr.net/npm/re-bars@latest/dist/index.umd.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/re-bars@latest/dist/index.umd.min.js"></script>
 ```
 
 Or using NPM
@@ -20,6 +21,15 @@ import Handlebars from "handlebars";
 import ReBars from "re-bars";
 ```
 
+Or using browser esm modules
+
+```html
+<script type="module">
+  import Handlebars from "//unpkg.com/handlebars-esm";
+  import ReBars from "//unpkg.com/re-bars";
+</script>
+```
+
 ### [Creating an Application](#creating-an-application)
 
 To create an app, invoke the `Rebars.app` function with an Object describing your application. _(We will talk more about thes items in a sec)_.
@@ -29,8 +39,8 @@ To create an app, invoke the `Rebars.app` function with an Object describing you
   Handlebars // Optional, Handlebars source, defaults to window.Handlebars
   template: ``, // The Handlebars template string
   data: {}, // data passed to your template
-  helpers: {}, // Hanlebars helpers to add
-  partials: {}, // Hanlebars partials to register
+  helpers: {}, // Handlebars helpers to add
+  partials: {}, // Handlebars partials to register
   trace: true, // If true logs changes and re-renders to the console
 }
 ```

@@ -21,9 +21,19 @@
           "markdown": "handlebars.md"
         },
         {
+          "label": "Template",
+          "path": "#template",
+          "markdown": "template.md"
+        },
+        {
           "label": "Data",
           "path": "#data",
           "markdown": "data.md"
+        },
+        {
+          "label": "Hooks",
+          "path": "#hooks",
+          "markdown": "hooks.md"
         },
         {
           "label": "Helpers",
@@ -53,6 +63,11 @@
           "markdown": "helper-watch.md"
         },
         {
+          "label": "concat (string building)",
+          "path": "#the-concat-helper",
+          "markdown": "helper-concat.md"
+        },
+        {
           "label": "on (event handling)",
           "path": "#the-on-helper",
           "markdown": "helper-on.md"
@@ -61,23 +76,6 @@
           "label": "ref (element reference)",
           "path": "#the-ref-helper",
           "markdown": "helper-ref.md"
-        }
-      ]
-    },
-    {
-      "label": "Examples",
-      "path": "#examples",
-      "markdown": "examples.md",
-      "pages": [
-        {
-          "label": "Simple",
-          "path": "#todo-list-simple",
-          "markdown": "example-simple.md"
-        },
-        {
-          "label": "Advanced",
-          "path": "#todo-list-advanced",
-          "markdown": "example-advanced.md"
         }
       ]
     }

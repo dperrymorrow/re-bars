@@ -16,10 +16,13 @@ export default {
 
   methods: {
     display({ rootData }) {
-      this.favorite = `${this.toUpperCase()}!! is my favorite food`;
+      // this is the scope of the template
+      // here it is a string inside of the each loop
+      rootData.favorite = `${this.toUpperCase()}!! is my favorite food`;
     },
 
     isFavorite({ event, $refs, $nextTick, rootData, methods }) {
+      // here we call another method, and the scope remains the same
       methods.display();
     },
   },
