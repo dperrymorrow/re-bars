@@ -6,12 +6,12 @@
 
   <label>
     Title:
-    <input type="text" value="{{ header.title }}" {{ on input="updateTitle" }} />
+    <input type="text" value="{{ header.title }}" {{ bind input="header.title" }} />
   </label>
 
   <label>
     Description:
-    <input type="text" value="{{ header.description }}" {{ on input="updateDescription" }} />
+    <input type="text" value="{{ header.description }}" {{ bind input="header.description" }} />
   </label>
 </div>
 

@@ -1,4 +1,5 @@
 const { ReBars } = window;
+let counter = 3;
 
 export default {
   template: ReBars.load("./app.hbs"),
@@ -25,28 +26,14 @@ export default {
     ],
   },
 
-  helpers: {
-    isChecked() {
-      return this.done ? "checked" : "";
-    },
-  },
-
   methods: {
-    updateTitle({ event }) {
-      this.header.title = event.target.value;
-    },
-
-    updateDescription({ event }) {
-      this.header.description = event.target.value;
-    },
-
     addItem({ $refs, event }) {
       event.preventDefault();
       const $input = $refs().newName;
 
       this.todos.push({
         done: false,
-        id: Math.floor(Math.random() * 1000),
+        id: counter++,
         name: $input.value,
       });
 

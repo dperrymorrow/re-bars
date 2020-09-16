@@ -1,4 +1,3 @@
-// import Msg from "./msg.js";
 import Utils from "./utils/index.js";
 import ProxyTrap from "./proxy-trap.js";
 import Config from "./config.js";
@@ -7,22 +6,18 @@ const { attrs } = Config;
 
 export default {
   register({ instance, template, store, scope }) {
-    instance.registerHelper("ref", name => new instance.SafeString(`${attrs.ref}="${name}"`));
-
-    instance.registerHelper("on", function(...args) {
+    function on(...args) {
       const { hash } = args.pop();
       const id = Utils.randomId();
       const tplScope = this;
 
       store.handlers[id] = [];
 
-      Object.entries(hash).forEach(([eventType, methodName]) => {
-        // check for method existance
+      Utils.nextTick().then(function() {
+        const $el = Utils.dom.findMethod(id);
+        if (!$el) return;
 
-        Utils.nextTick().then(function() {
-          const $el = Utils.dom.findMethod(id);
-          if (!$el) return;
-
+        Object.entries(hash).forEach(([eventType, methodName]) => {
           if (!(methodName in scope.methods)) instance.log(3, `ReBars: "${methodName}" is not a method.`, hash, $el);
 
           const handler = event => {
@@ -31,6 +26,37 @@ export default {
             context.methods[methodName](...args);
           };
 
+          store.handlers[id].push({ $el, handler, eventType });
+          $el.addEventListener(eventType, handler);
+        });
+      });
+
+      return new instance.SafeString(`${attrs.method}="${id}"`);
+    }
+
+    instance.registerHelper("key", name => new instance.SafeString(`${attrs.key}="${name}"`));
+    instance.registerHelper("ref", name => new instance.SafeString(`${attrs.ref}="${name}"`));
+    instance.registerHelper("on", on);
+
+    instance.registerHelper("bind", function(...args) {
+      const { hash } = args.pop();
+      const tplScope = this;
+      const id = Utils.randomId();
+
+      store.handlers[id] = [];
+
+      Utils.nextTick().then(() => {
+        const $el = Utils.dom.findMethod(id);
+        if (!$el) return;
+
+        Object.entries(hash).forEach(([eventType, path]) => {
+          function handler(event) {
+            try {
+              Utils.setPath(tplScope, path, event.target.value);
+            } catch (err) {
+              instance.log(3, `ReBars: could not set path ${path}`, $el);
+            }
+          }
           store.handlers[id].push({ $el, handler, eventType });
           $el.addEventListener(eventType, handler);
         });

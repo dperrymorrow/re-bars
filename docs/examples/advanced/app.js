@@ -99,22 +99,6 @@ export default {
       });
     },
 
-    sortBy({ event }) {
-      this.filters.sortBy = event.target.value;
-    },
-
-    filterBy(context, filterBy) {
-      this.filters.filterBy = filterBy;
-    },
-
-    updateTitle({ event, methods }) {
-      this.header.title = event.target.value;
-    },
-
-    updateDescription({ event, methods }) {
-      this.header.description = event.target.value;
-    },
-
     async toggleAdd({ $nextTick, event, methods, $refs }) {
       event.preventDefault();
       this.isAdding = !this.isAdding;

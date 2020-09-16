@@ -33,6 +33,13 @@ export default {
       setTimeout(resolve, 0);
     }),
 
+  setPath(target, path, val) {
+    const segs = path.split(".");
+    const last = segs.pop();
+    segs.reduce((point, seg) => point[seg], target)[last] = val;
+    return target;
+  },
+
   buildContext(scope, { $app, data, methods }) {
     const context = {
       $app,

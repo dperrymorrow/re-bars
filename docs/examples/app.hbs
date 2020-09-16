@@ -12,7 +12,7 @@
       <input
         type="text"
         value="{{ header.title }}"
-        {{ on input="updateTitle" }}
+        {{ bind input="header.title" }}
       />
     </label>
 
@@ -21,7 +21,7 @@
       <input
         type="text"
         value="{{ header.description }}"
-        {{ on input="updateDescription" }}
+        {{ bind input="header.description" }}
       />
     </label>
   </div>
