@@ -24,6 +24,9 @@ export default {
 
     // deletes and updates
     Array.from($target.children).forEach($r => {
+      // warn with the real element if we have an undefined key
+      if ($r.getAttribute(attrs.key) === "undefined") instance.log(3, "ReBars: key was undefined", $r);
+
       const $v = Utils.dom.findAttr(attrs.key, $r.getAttribute(attrs.key), $shadow);
       if (!$v) {
         instance.log(level, "ReBars: removing", $r);

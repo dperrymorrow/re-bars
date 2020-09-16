@@ -1,11 +1,12 @@
-<div>
-  {{#watch}}
+<div class="addBar">
+  {{#watch "isAdding" "newName" }}
     {{#if isAdding }}
-      <form>
-        <input type="text" {{ ref "newName" }} placeholder="the new todo" >
-        <button {{ on click="addItem" }}>Add todo</button>
-        <button {{ on click="toggleAdd" }}>Cancel</button>
-      </form>
+      <input type="text"
+        {{ ref "newName" }} value="{{ newName }}"
+        {{ bind input="newName" }} placeholder="the new todo" />
+
+      <button {{ on click="addItem" }}>Add todo</button>
+      <button {{ on click="toggleAdd" }}>Cancel</button>
     {{ else }}
       <button {{ on click="toggleAdd" }}>Add another</button>
     {{/if}}

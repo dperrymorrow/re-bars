@@ -3,24 +3,23 @@
 <li {{ key todo.id }}>
   <div class="todo">
     {{#if todo.isEditing }}
-    <input type="text" {{ ref "editInput" }} value="{{ todo.name }}" {{ on keydown="saveOnEnter" }}>
-    <button {{ on click="save" }}>done</button>
+      <input type="text" {{ ref "editInput" }} value="{{ todo.name }}" {{ bind input="todo.name" }}>
+      <button {{ on click="toggleEdit" }}>done</button>
     {{ else }}
+      <label>
+        <input type="checkbox" {{ onlyIf todo.done "checked='true'" }} {{ on click="toggleDone" }} />
+        {{#if todo.done }}
+          <s>{{ todo.name }}</s>
+        {{else}}
+          <strong>{{ todo.name }}</strong>
+        {{/if}}
+      </label>
 
-    <label>
-      <input type="checkbox" checked="{{ todo.done }}" {{ on click="toggleDone" }} />
-      {{#if todo.done }}
-        <s>{{ todo.name }}</s>
-      {{else}}
-        <strong>{{ todo.name }}</strong>
-      {{/if}}
-    </label>
-
-    <div class="actions">
-      <span class="date">{{ todo.updated }}</span>
-      <button {{ on click="remove" }}>delete</button>
-      <button {{ on click="edit" }}>edit</button>
-    </div>
+      <div class="actions">
+        <span class="date">{{ todo.updated }}</span>
+        <button {{ on click="remove" }}>delete</button>
+        <button {{ on click="toggleEdit" }}>edit</button>
+      </div>
     {{/if}}
   </div>
 </li>

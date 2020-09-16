@@ -6,7 +6,21 @@ const { attrs } = Config;
 
 export default {
   register({ instance, template, store, scope }) {
-    function on(...args) {
+    instance.registerHelper("key", name => new instance.SafeString(`${attrs.key}="${name}"`));
+    instance.registerHelper("ref", name => new instance.SafeString(`${attrs.ref}="${name}"`));
+
+    instance.registerHelper("concat", function(...args) {
+      args.pop();
+      return args.join("");
+    });
+
+    instance.registerHelper("onlyIf", function(...args) {
+      args.pop();
+      const [condition, string] = args;
+      return new instance.SafeString(condition ? string : "");
+    });
+
+    instance.registerHelper("on", function(...args) {
       const { hash } = args.pop();
       const id = Utils.randomId();
       const tplScope = this;
@@ -32,11 +46,7 @@ export default {
       });
 
       return new instance.SafeString(`${attrs.method}="${id}"`);
-    }
-
-    instance.registerHelper("key", name => new instance.SafeString(`${attrs.key}="${name}"`));
-    instance.registerHelper("ref", name => new instance.SafeString(`${attrs.ref}="${name}"`));
-    instance.registerHelper("on", on);
+    });
 
     instance.registerHelper("bind", function(...args) {
       const { hash } = args.pop();
@@ -52,7 +62,7 @@ export default {
         Object.entries(hash).forEach(([eventType, path]) => {
           function handler(event) {
             try {
-              Utils.setPath(tplScope, path, event.target.value);
+              Utils.setPath(tplScope, path, event.target.value || null);
             } catch (err) {
               instance.log(3, `ReBars: could not set path ${path}`, $el);
             }
@@ -63,11 +73,6 @@ export default {
       });
 
       return new instance.SafeString(`${attrs.method}="${id}"`);
-    });
-
-    instance.registerHelper("concat", function(...args) {
-      args.pop();
-      return args.join("");
     });
 
     instance.registerHelper("watch", function(...args) {

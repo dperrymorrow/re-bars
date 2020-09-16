@@ -3,14 +3,14 @@
     {{#watch "filters.filterBy" }}
       <button value="completed" {{ disabledIf "completed" }} {{ bind click="filters.filterBy" }}>Show Only Completed</button>
       <button value="incomplete" {{ disabledIf "incomplete" }} {{ bind click="filters.filterBy" }}>Show Only Incompleted</button>
-      <button value="" {{ disabledIf null }} {{ bind click="filters.filterBy"  }}>Show All</button>
+      <button {{ disabledIf null }} {{ bind click="filters.filterBy"  }}>Show All</button>
     {{/watch}}
   </div>
 
   <div>
     <select {{ bind change="filters.sortBy" }}>
-      <option {{ selectedSort "name" }} value="name">Sort by Name</option>
-      <option {{ selectedSort "updated" }} value="updated">Sort by Updated at</option>
+      <option value="name">Sort by Name</option>
+      <option value="updated">Sort by Updated at</option>
     </select>
   </div>
 </div>

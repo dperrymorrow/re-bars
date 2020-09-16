@@ -26,23 +26,12 @@ export default {
           return;
         }
 
-        // warn for not having a ref on array update
-        const lenPath = changed.find(path => path.endsWith(".length"));
-
-        if (lenPath && Config.logLevel)
-          instance.log(
-            2,
-            "ReBars: add a {{ key someUniqueKey }} on each item to avoid re-rendering the entire Array",
-            handler.path,
-            $target
-          );
-
         // we dont want wrappers to show up with no content
         $target.style.display = html === "" ? "none" : "";
         $target.innerHTML = html;
         // restore saved state of DOM
         Utils.dom.restoreState($target, stash);
-        instance.log(Config.logLevel(), "ReBars: render", handler.path, $target);
+        instance.log(Config.logLevel(), "ReBars: re-render", handler.path, $target);
       });
   },
 };

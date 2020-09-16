@@ -1,4 +1,5 @@
 const { ReBars } = window;
+let counter = 5;
 
 export default {
   template: ReBars.load("./templates/app.hbs"),
@@ -10,6 +11,7 @@ export default {
       description: "Some things that need done",
     },
     isAdding: false,
+    newName: "",
     filters: {
       filterBy: null,
       sortBy: "name",
@@ -66,18 +68,6 @@ export default {
   },
 
   helpers: {
-    isChecked() {
-      return this.todo.done ? "checked" : "";
-    },
-
-    selectedSort(context, val) {
-      return this.filters.sortBy === val ? "selected" : "";
-    },
-
-    selectedDir(context, val) {
-      return this.filters.sortDir === val ? "selected" : "";
-    },
-
     disabledIf(context, val) {
       return this.filters.filterBy === val ? "disabled" : "";
     },
@@ -99,29 +89,30 @@ export default {
       });
     },
 
-    async toggleAdd({ $nextTick, event, methods, $refs }) {
+    async toggleAdd({ $nextTick, event, $refs }) {
       event.preventDefault();
       this.isAdding = !this.isAdding;
-
+      // we have to wait for the render to take place
       await $nextTick();
       const $input = $refs().newName;
       if ($input) $input.focus();
     },
 
-    addItem({ event, methods, $refs }) {
+    async addItem({ event, $refs, $nextTick }) {
       event.preventDefault();
-      const $input = $refs().newName;
 
       this.todos.push({
-        name: $input.value,
+        name: this.newName,
         display: true,
         done: false,
+        id: counter++,
         updated: new Date().toLocaleString(),
       });
 
       this.filters.filterBy = null;
-      $input.value = "";
-      $input.focus();
+      this.newName = "";
+      await $nextTick();
+      $refs().newName.focus();
     },
 
     remove({ methods, rootData }) {
@@ -129,18 +120,8 @@ export default {
       rootData.todos.splice(index, 1);
     },
 
-    saveOnEnter({ event, methods }) {
-      if (event.code == "Enter") methods.save();
-    },
-
-    save({ event, $refs }) {
-      event.preventDefault();
-      this.todo.name = $refs().editInput.value;
-      this.todo.isEditing = false;
-    },
-
-    edit() {
-      this.todo.isEditing = true;
+    toggleEdit() {
+      this.todo.isEditing = !this.todo.isEditing;
     },
 
     toggleDone() {
