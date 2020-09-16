@@ -1,7 +1,6 @@
-let counter = 1;
-
 import Dom from "./dom.js";
 const { fetch } = window;
+let counter = 1;
 
 export default {
   dom: Dom,

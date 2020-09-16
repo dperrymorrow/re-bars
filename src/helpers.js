@@ -39,22 +39,13 @@ export default {
       return new instance.SafeString(`${attrs.method}="${id}"`);
     });
 
-    instance.registerHelper("concat", function(...args) {
-      args.pop();
-      return args.join("");
-    });
-
     instance.registerHelper("watch", function(...args) {
-      const { fn, hash, data } = args.pop();
+      const { fn, hash } = args.pop();
       const eId = Utils.randomId();
-      const scope = { ...this, ...data };
 
       const ref = {
         path: args.filter(arg => typeof arg === "string"),
-        render: () => {
-          console.log("re-render", scope);
-          return fn.call(scope, scope);
-        },
+        render: () => fn(this),
       };
 
       if (!args.length) {
@@ -76,14 +67,12 @@ export default {
         store.renders[eId] = { ...ref, $el };
 
         args.forEach(path => {
-          if (typeof path !== "string")
-            instance.log(3, `ReBars: can only watch Strings, ${typeof path} - ${path} given`, args, $el);
+          if (typeof path !== "string") instance.log(3, "ReBars: can only watch Strings", args, $el);
         });
+        instance.log(Config.logLevel(), "ReBars: watching", ref.path, $el);
       });
 
-      // console.log("first render", data.index);
-
-      return Utils.dom.wrapWatcher(eId, fn(scope), hash);
+      return Utils.dom.wrapWatcher(eId, fn(this), hash);
     });
   },
 };

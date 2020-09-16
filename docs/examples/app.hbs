@@ -26,36 +26,27 @@
     </label>
   </div>
 
-  <ul class="simple">
-    {{#watch "todos.length" }}
-      {{#each todos as |todo| }}
-        {{#watch (concat "todos." @index "(.*)") tag="li" }}
-          <div class="todo">
-            <label>
-              <input
-                type="checkbox"
-                {{ on @index click="toggleDone" }}
-                {{ isChecked }}
-              />
+  {{#watch "todos(.*)" tag="ul" class="simple" }}
+    {{#each todos as |todo| }}
+      <li {{ ref id }}>
+        <div class="todo">
+          <label>
+            {{#if done }}
+              <input type="checkbox" {{ on click="toggleDone" }} checked="checked" />
+              <s>{{ name }}</s>
+            {{else}}
+              <input type="checkbox" {{ on click="toggleDone" }} />
+              <strong>{{ name }}</strong>
+            {{/if}}
+          </label>
 
-              {{ @index }}
-              {{#if done }}
-                <s>{{ name }}</s>
-              {{else}}
-                <strong>{{ name }}</strong>
-              {{/if}}
-            </label>
-
-            <div class="actions">
-              <button {{ on @index click="deleteTodo" }}>
-                delete
-              </button>
-            </div>
+          <div class="actions">
+            <button {{ on click="deleteTodo" }}>delete</button>
           </div>
-        {{/watch}}
-      {{/each}}
-    {{/watch}}
-  </ul>
+        </div>
+      </li>
+    {{/each}}
+  {{/watch}}
 
   {{#watch}}
     {{#if adding }}

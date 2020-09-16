@@ -3,7 +3,7 @@ const { ReBars } = window;
 export default {
   template: ReBars.load("./app.hbs"),
 
-  trace: false,
+  trace: true,
 
   data: {
     adding: false,
@@ -13,10 +13,12 @@ export default {
     },
     todos: [
       {
+        id: 1,
         done: false,
         name: "Grocery Shopping",
       },
       {
+        id: 2,
         done: true,
         name: "Paint the House",
       },
@@ -44,6 +46,7 @@ export default {
 
       this.todos.push({
         done: false,
+        id: Math.floor(Math.random() * 1000),
         name: $input.value,
       });
 
@@ -54,9 +57,8 @@ export default {
       rootData.todos.splice(index, 1);
     },
 
-    toggleDone({ rootData }, index) {
-      console.log(index, rootData.todos, this.done);
-      rootData.todos[index].done = !this.done;
+    toggleDone() {
+      this.done = !this.done;
     },
 
     toggleCreate({ event }) {
