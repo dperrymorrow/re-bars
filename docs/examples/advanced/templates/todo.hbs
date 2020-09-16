@@ -1,6 +1,6 @@
 
 
-<li {{ ref todo.id }}>  
+<li {{ key todo.id }}>
   <div class="todo">
     {{#if todo.isEditing }}
     <input type="text" {{ ref "editInput" }} value="{{ todo.name }}" {{ on keydown="saveOnEnter" }}>
@@ -8,11 +8,11 @@
     {{ else }}
 
     <label>
-      <input type="checkbox" {{ isChecked }} {{ on click="toggleDone" }} />
+      <input type="checkbox" checked="{{ todo.done }}" {{ on click="toggleDone" }} />
       {{#if todo.done }}
-      <s>{{ todo.name }}</s>
+        <s>{{ todo.name }}</s>
       {{else}}
-      <strong>{{ todo.name }}</strong>
+        <strong>{{ todo.name }}</strong>
       {{/if}}
     </label>
 

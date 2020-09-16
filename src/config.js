@@ -10,6 +10,7 @@ export default {
   },
 
   attrs: {
+    key: "rbs-key",
     watch: "rbs-watch",
     method: "rbs-method",
     ref: "rbs-ref",

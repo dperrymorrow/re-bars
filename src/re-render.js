@@ -11,8 +11,6 @@ export default {
       .forEach(([renderId, handler]) => {
         const $target = Utils.dom.findWatcher(renderId);
         // if we cant find the target, we should not attempt to re-renders
-        // this can probally be cleaned up with clearing orphans on the app
-        // TODO: this should not be needed if garbage is collected well
         if (!$target) return;
 
         const html = handler.render();
@@ -20,8 +18,6 @@ export default {
         const stash = Utils.dom.recordState($target);
 
         if (!Patch.hasChanged($target, html)) return;
-
-        console.log("target", $target);
 
         if (Patch.canPatch($target)) {
           instance.log(Config.logLevel(), "ReBars: patching", handler.path, $target);
@@ -31,11 +27,12 @@ export default {
         }
 
         // warn for not having a ref on array update
-        const lenPath = handler.path.find(path => path.endsWith(".length") && $target.children.length > 1);
-        if (lenPath)
+        const lenPath = changed.find(path => path.endsWith(".length"));
+
+        if (lenPath && Config.logLevel)
           instance.log(
             2,
-            "ReBars: add a {{ ref someUniqueKey }} to each to avoid re-rendering the entire Array",
+            "ReBars: add a {{ key someUniqueKey }} on each item to avoid re-rendering the entire Array",
             handler.path,
             $target
           );

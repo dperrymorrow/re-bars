@@ -33,11 +33,6 @@ export default {
     if (activeRef.style) $input.setAttribute("style", activeRef.style);
   },
 
-  findRef: ($target, ref) => {
-    if ($target.getAttribute(attrs.ref) === ref) return $target;
-    return $target.querySelector(`[${attrs.ref}="${ref}"]`);
-  },
-
   findRefs($root) {
     const { ref } = attrs;
     const $refs = Array.from($root.querySelectorAll(`[${ref}]`));
@@ -48,6 +43,18 @@ export default {
       obj[key] = target ? [target].concat($el) : $el;
       return obj;
     }, {});
+  },
+
+  // use this in place of all the others that are repeated eventually...
+  findAttr(attr, val, $target = null) {
+    const $container = $target || document;
+    if ($container.getAttribute(attr) === val) return $container;
+    return $container.querySelector(`[${attr}="${val}"]`);
+  },
+
+  findRef: ($target, ref) => {
+    if ($target.getAttribute(attrs.ref) === ref) return $target;
+    return $target.querySelector(`[${attrs.ref}="${ref}"]`);
   },
 
   findMethod: id => document.querySelector(`[${attrs.method}="${id}"]`),

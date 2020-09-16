@@ -13,7 +13,7 @@ export default {
   canPatch: $target =>
     $target.children.length &&
     $target.children.length > 1 &&
-    Array.from($target.children).every($el => $el.getAttribute(attrs.ref)),
+    Array.from($target.children).every($el => $el.getAttribute(attrs.key)),
 
   hasChanged: ($target, html) => !_isEqHtml($target.innerHTML, html),
 
@@ -24,21 +24,21 @@ export default {
 
     // deletes and updates
     Array.from($target.children).forEach($r => {
-      const $v = Utils.dom.findRef($shadow, $r.getAttribute(attrs.ref));
+      const $v = Utils.dom.findAttr(attrs.key, $r.getAttribute(attrs.key), $shadow);
       if (!$v) {
-        // instance.log(level, "ReBars: removing", $r);
+        instance.log(level, "ReBars: removing", $r);
         $r.remove();
       } else if (!_isEqHtml($v.innerHTML, $r.innerHTML, true)) {
-        // instance.log(level, "ReBars: updating", $r, $v);
+        instance.log(level, "ReBars: updating", $r, $v);
         $r.replaceWith($v.cloneNode(true));
       }
     });
 
     // additions
     $vChilds.forEach(($v, index) => {
-      const $r = Utils.dom.findRef($target, $v.getAttribute(attrs.ref));
+      const $r = Utils.dom.findAttr(attrs.key, $v.getAttribute(attrs.key), $target);
       if (!$r) {
-        // instance.log(level, "ReBars: adding", $v);
+        instance.log(level, "ReBars: adding", $v);
         $target.append($v.cloneNode(true));
       }
     });
@@ -46,7 +46,7 @@ export default {
     // sorting
     $vChilds.forEach(($v, index) => {
       const $r = $target.children[index];
-      if ($r.getAttribute(attrs.ref) !== $v.getAttribute(attrs.ref)) $r.replaceWith($v.cloneNode(true));
+      if ($r.getAttribute(attrs.key) !== $v.getAttribute(attrs.key)) $r.replaceWith($v.cloneNode(true));
     });
   },
 };
