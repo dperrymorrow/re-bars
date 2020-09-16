@@ -45,12 +45,16 @@ export default {
     });
 
     instance.registerHelper("watch", function(...args) {
-      const { fn, hash } = args.pop();
+      const { fn, hash, data } = args.pop();
       const eId = Utils.randomId();
+      const scope = { ...this, ...data };
 
       const ref = {
         path: args.filter(arg => typeof arg === "string"),
-        render: () => fn(this),
+        render: () => {
+          console.log("re-render", scope);
+          return fn.call(scope, scope);
+        },
       };
 
       if (!args.length) {
@@ -77,7 +81,9 @@ export default {
         });
       });
 
-      return Utils.dom.wrapWatcher(eId, fn(this), hash);
+      // console.log("first render", data.index);
+
+      return Utils.dom.wrapWatcher(eId, fn(scope), hash);
     });
   },
 };

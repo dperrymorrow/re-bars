@@ -1,5 +1,6 @@
 
 <div class="todo">
+  {{ @index }}
   {{#if todo.isEditing }}
     <input type="text" {{ ref "editInput" }} value="{{ todo.name }}" {{ on keydown="saveOnEnter" }}>
     <button {{ on click="save" }}>done</button>

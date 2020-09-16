@@ -1,77 +1,9 @@
+const { ReBars } = window;
+
 export default {
-  template: /*html*/ `
-  <div>
-    <div class="header-container">
-      <h1>
-        {{#watch}}
-          <span>{{ header.title }}</span>
-          <small>{{ header.description }}</small>
-        {{/watch}}
-      </h1>
+  template: ReBars.load("./app.hbs"),
 
-      <label>
-        Title:
-        <input
-          type="text"
-          value="{{ header.title }}"
-          {{ on input="updateTitle" }}
-        />
-      </label>
-
-      <label>
-        Description:
-        <input
-          type="text"
-          value="{{ header.description }}"
-          {{ on input="updateDescription" }}
-        />
-      </label>
-    </div>
-
-    <ul class="simple">
-      {{#watch "todos.length" }}
-        {{#each todos }}
-          {{#watch (concat "todos." @index ".done") tag="li" }}
-            <div class="todo">
-              <label>
-                <input
-                  type="checkbox"
-                  {{ on @index click="toggleDone" }}
-                  {{ isChecked }}
-                />
-                {{#if done }}
-                  <s>{{ name }}</s>
-                {{else}}
-                  <strong>{{ name }}</strong>
-                {{/if}}
-              </label>
-
-              <div class="actions">
-                <button {{ on @index click="deleteTodo" }}>
-                  delete
-                </button>
-              </div>
-            </div>
-          {{/watch}}
-        {{/each}}
-      {{/watch}}
-    </ul>
-
-    {{#watch}}
-      {{#if adding }}
-        <form>
-          <input type="text" {{ ref "newName" }} placeholder="the new todo" />
-          <button {{ on click="addItem" }}>Add todo</button>
-          <button {{ on click="toggleCreate" }}>Cancel</button>
-        </form>
-      {{else}}
-        <button {{ on click="toggleCreate" }}>Add another</button>
-      {{/if}}
-    {{/watch}}
-  </div>
-  `,
-
-  trace: true,
+  trace: false,
 
   data: {
     adding: false,
@@ -123,6 +55,7 @@ export default {
     },
 
     toggleDone({ rootData }, index) {
+      console.log(index, rootData.todos, this.done);
       rootData.todos[index].done = !this.done;
     },
 
