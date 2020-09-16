@@ -21,6 +21,8 @@ export default {
 
         if (!Patch.hasChanged($target, html)) return;
 
+        console.log("target", $target);
+
         if (Patch.canPatch($target)) {
           instance.log(Config.logLevel(), "ReBars: patching", handler.path, $target);
           Patch.compare({ $target, html, instance, store });

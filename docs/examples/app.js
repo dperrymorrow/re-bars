@@ -53,7 +53,8 @@ export default {
       $input.value = "";
     },
 
-    deleteTodo({ rootData }, index) {
+    deleteTodo({ rootData }) {
+      const index = rootData.todos.findIndex(todo => todo.id === this.id);
       rootData.todos.splice(index, 1);
     },
 

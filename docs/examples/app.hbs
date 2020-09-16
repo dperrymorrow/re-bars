@@ -26,7 +26,7 @@
     </label>
   </div>
 
-  {{#watch "todos(.*)" tag="ul" class="simple" }}
+  {{#watch tag="ul" class="simple" }}
     {{#each todos as |todo| }}
       <li {{ ref id }}>
         <div class="todo">

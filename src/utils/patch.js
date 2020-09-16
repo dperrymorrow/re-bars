@@ -26,10 +26,10 @@ export default {
     Array.from($target.children).forEach($r => {
       const $v = Utils.dom.findRef($shadow, $r.getAttribute(attrs.ref));
       if (!$v) {
-        instance.log(level, "ReBars: removing", $r);
+        // instance.log(level, "ReBars: removing", $r);
         $r.remove();
       } else if (!_isEqHtml($v.innerHTML, $r.innerHTML, true)) {
-        instance.log(level, "ReBars: updating", $r, $v);
+        // instance.log(level, "ReBars: updating", $r, $v);
         $r.replaceWith($v.cloneNode(true));
       }
     });
@@ -38,7 +38,7 @@ export default {
     $vChilds.forEach(($v, index) => {
       const $r = Utils.dom.findRef($target, $v.getAttribute(attrs.ref));
       if (!$r) {
-        instance.log(level, "ReBars: adding", $v);
+        // instance.log(level, "ReBars: adding", $v);
         $target.append($v.cloneNode(true));
       }
     });
