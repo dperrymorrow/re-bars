@@ -17,13 +17,11 @@
 
 {{> Filters }}
 
-{{#watch "todos.length" "filters(.*)" tag="ul"}}
+{{#watch "todos" tag="ul"}}
   {{#each todos as | todo | }}
-    {{#watch (concat "todos." @index "(.*)") tag="li" }}
-      {{#if todo.display }}
-        {{> Todo todo=todo }}
-      {{/if}}
-    {{/watch}}
+    {{#if todo.display }}
+      {{> Todo todo=todo }}
+    {{/if}}
   {{/each}}
 {{/watch}}
 

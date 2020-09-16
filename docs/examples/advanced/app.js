@@ -16,18 +16,21 @@ export default {
     },
     todos: [
       {
+        id: 1,
         done: false,
         display: true,
         name: "Code some Javascript",
         updated: "1/27/2020, 9:37:10 AM",
       },
       {
+        id: 2,
         done: false,
         display: true,
         name: "Wash the car",
         updated: "3/1/2020, 12:37:10 PM",
       },
       {
+        id: 3,
         done: true,
         display: true,
         name: "Shopping for groceries",
@@ -35,6 +38,7 @@ export default {
       },
 
       {
+        id: 4,
         done: true,
         display: true,
         name: "Go for a run",

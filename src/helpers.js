@@ -39,6 +39,11 @@ export default {
       return new instance.SafeString(`${attrs.method}="${id}"`);
     });
 
+    instance.registerHelper("concat", function(...args) {
+      args.pop();
+      return args.join("");
+    });
+
     instance.registerHelper("watch", function(...args) {
       const { fn, hash } = args.pop();
       const eId = Utils.randomId();
