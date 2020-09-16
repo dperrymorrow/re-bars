@@ -3,15 +3,9 @@ export default {
     {{#watch "name" tag="h3"}}
       {{ name }}
     {{/watch}}
-
-    <input type="text" value="{{ name }}" {{ on input="saveName" }}>
+    <input type="text" value="{{ name }}" {{ bind input="name" }}>
   `,
   data: {
     name: "David",
-  },
-  methods: {
-    saveName({ event }) {
-      this.name = event.target.value;
-    },
   },
 };

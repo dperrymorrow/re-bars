@@ -57,13 +57,16 @@
                         <a href="#the-watch-helper">watch (re-rendering)</a>
                       </li>
                       <li>
-                        <a href="#the-concat-helper">concat (string building)</a>
-                      </li>
-                      <li>
                         <a href="#the-on-helper">on (event handling)</a>
                       </li>
                       <li>
-                        <a href="#the-ref-helper">ref (element reference)</a>
+                        <a href="#the-bind-helper">bind (data binding)</a>
+                      </li>
+                      <li>
+                        <a href="#the-ref-helper">ref ($el reference)</a>
+                      </li>
+                      <li>
+                        <a href="#the-key-helper">key (pointer reference)</a>
                       </li>
                   </ul>
             </li>
@@ -103,12 +106,14 @@
 <p>ReBars re-renders tiny pieces of your application on change. You are in control of what re-renders and when. There is no...</p>
 <ul>
 <li>❌ Virtual DOM</li>
-<li>❌ JSX or anything else to pre-compile</li>
+<li>❌ JSX or others that need pre-built to JS</li>
 <li>❌ DOM diffing and patching</li>
+<li>❌ Single File Components</li>
+<li>❌ CSS pre-processing and extracting</li>
 </ul>
 <p><strong>Your</strong> code simply runs on <strong>your</strong> app.</p>
 <blockquote>
-<p>In fact there is zero DOM diffing / checking of any kind in ReBars. Marked elements are simply re-rendered when correlating data changes.</p>
+<p>In fact the only time ReBars will compare any DOM is when an Array is being patched. All other times ReBars simply calls the Handlebars method again, and replaces the HTML.</p>
 </blockquote>
 <p>ReBars keeps your DOM in sync with your data using <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a>, and gets out of your way. You can get back to just writing Javascript.</p>
 <p>The reason ReBars is so simple, is that it is in fact just a Handlebars instance with helpers added. The main one being <a href="#the-watch-helper">watch</a>. This marks elements, and tells ReBars when to re-render them.</p>
@@ -535,6 +540,9 @@ app.instance.registerPartial(&quot;myPartial&quot;, &quot;&lt;h1&gt;&lt;{{ name 
 <p>Watch allows you to re-render a block of your template on change.
 Watch takes an <em>optional</em> arguments of what properties to watch. The arguments can be string or a regular expression. You may also as many as you like. When any change, the block will re-render.</p>
 <p>In our explanation below, we will be referring to this data set.</p>
+<pre><code class="language-handlebars">{{#watch}}
+  My name is {{ name.first }} {{ name.last }}.
+{{/watch}}</code></pre>
 <pre><code class="language-javascript">{
   data: {
     hobby: &quot;running&quot;,
@@ -548,11 +556,8 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
     ]
   }
 }</code></pre>
-<pre><code class="language-html">{{#watch}}
-  My name is {{ name.first }} {{ name.last }}.
-{{/watch}}</code></pre>
 <p>The above omits the what to watch. In this situation, ReBars will pre-render the block, and captures any references used. It would evaluate to the same as.</p>
-<pre><code class="language-html">{{#watch &quot;name.first&quot; &quot;name.last&quot; }}</code></pre>
+<pre><code class="language-handlebars">{{#watch &quot;name.first&quot; &quot;name.last&quot; }}</code></pre>
 <blockquote>
 <p>If you are unsure what to watch, ReBars traces out changes to the console when you pass <code>trace: true</code> to your application.</p>
 </blockquote>
@@ -607,37 +612,13 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
     {{#watch &quot;name&quot; tag=&quot;h3&quot;}}
       {{ name }}
     {{/watch}}
-
-    &lt;input type=&quot;text&quot; value=&quot;{{ name }}&quot; {{ on input=&quot;saveName&quot; }}&gt;
+    &lt;input type=&quot;text&quot; value=&quot;{{ name }}&quot; {{ bind input=&quot;name&quot; }}&gt;
   `,
   data: {
     name: &quot;David&quot;,
   },
-  methods: {
-    saveName({ event }) {
-      this.name = event.target.value;
-    },
-  },
 };
 </code></pre>
-
-                </article>
-                <article class="page sub" data-anchor="#the-concat-helper">
-                  <h2 id="the-concat-helper">The Concat Helper</h2>
-<p>Sometimes you need to piece together something that is a combination of a dynamic value, and a static. Thats where this simple little helper comes in handy.</p>
-<p>In this example we are looking to not re-render the entire Array on change of any of it&#39;s items. So we use the concat helper as a <a href="https://handlebarsjs.com/guide/expressions.html#subexpressions">sub expression</a></p>
-<blockquote>
-<p>Notice the <code>()</code> around the sub expression. You will get a syntax error without them!</p>
-</blockquote>
-<pre><code class="language-handlebars">{{#watch &quot;todos.length&quot; tag=&quot;ul&quot;}}
-  {{#each todos as | todo | }}
-    {{#watch (concat &quot;todos.&quot; @index &quot;(.*)&quot;) tag=&quot;li&quot; }}
-      {{ todo.name }}
-    {{/watch}}
-  {{/each}}
-{{/watch}}</code></pre>
-<p>The above results in the equivalent of</p>
-<pre><code class="language-handlebars">{{#watch &quot;todos.1(.*)&quot; }}</code></pre>
 
                 </article>
                 <article class="page sub" data-anchor="#the-on-helper">
@@ -654,8 +635,36 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
 <blockquote>
 <p>Remember Handlebars requires params to be first, and then <code>key=&quot;val&quot;</code> arguments second</p>
 </blockquote>
-<p>You can also call multiple events on one invocation of the on helpers. For example.</p>
+<p>You can also call multiple events on one use of the on helper. For example.</p>
 <pre><code class="language-html">&lt;input {{ on focus=&quot;focused&quot; blur=&quot;blurred&quot; input=&quot;inputChange&quot; &gt;</code></pre>
+
+                </article>
+                <article class="page sub" data-anchor="#the-bind-helper">
+                  <h2 id="the-bind-helper">The Bind Helper</h2>
+<p>The bind helper is very simimar to the <a href="#the-on-helper">on helper</a> with one exception. It saves you from having to write a method in your app when all you want to do is set a value.</p>
+<p>For example:</p>
+<pre><code class="language-handlebars">&lt;input type=&quot;text&quot; {{ bind input=&quot;name.last&quot; }} /&gt;</code></pre>
+<pre><code class="language-javascript">data: {
+  name: {
+    first: &quot;David&quot;,
+    last: &quot;Morrow&quot;
+  }
+}</code></pre>
+<p>As opposed to:</p>
+<pre><code class="language-handlebars">&lt;input type=&quot;text&quot; {{ on input=&quot;updateLastName&quot; }} /&gt;</code></pre>
+<pre><code class="language-javascript">data: {
+  name: {
+    first: &quot;David&quot;,
+    last: &quot;Morrow&quot;
+  }
+},
+
+methods: {
+  updateLastName({ event }) {
+    this.name.last = event.target.value;
+  }
+}</code></pre>
+<p>On each input event of the text input, the last name will be updated to the input&#39;s current value. This is merely a convienance, and could be accomplished by defining a method. But is useful in many common cases.</p>
 
                 </article>
                 <article class="page sub" data-anchor="#the-ref-helper">
@@ -669,6 +678,10 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
     // &lt;button&gt;Save&lt;/button&gt;
   }
 }</code></pre>
+
+                </article>
+                <article class="page sub" data-anchor="#the-key-helper">
+                  <h2 id="the-key-helper">The Key Helper</h2>
 
                 </article>
             </article>

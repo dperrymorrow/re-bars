@@ -63,19 +63,24 @@
           "markdown": "helper-watch.md"
         },
         {
-          "label": "concat (string building)",
-          "path": "#the-concat-helper",
-          "markdown": "helper-concat.md"
-        },
-        {
           "label": "on (event handling)",
           "path": "#the-on-helper",
           "markdown": "helper-on.md"
         },
         {
-          "label": "ref (element reference)",
+          "label": "bind (data binding)",
+          "path": "#the-bind-helper",
+          "markdown": "helper-bind.md"
+        },
+        {
+          "label": "ref ($el reference)",
           "path": "#the-ref-helper",
           "markdown": "helper-ref.md"
+        },
+        {
+          "label": "key (pointer reference)",
+          "path": "#the-key-helper",
+          "markdown": "helper-key.md"
         }
       ]
     }

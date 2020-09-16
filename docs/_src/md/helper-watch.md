@@ -8,6 +8,12 @@ Watch takes an _optional_ arguments of what properties to watch. The arguments c
 
 In our explanation below, we will be referring to this data set.
 
+```handlebars
+{{#watch}}
+  My name is {{ name.first }} {{ name.last }}.
+{{/watch}}
+```
+
 ```javascript
 {
   data: {
@@ -23,17 +29,12 @@ In our explanation below, we will be referring to this data set.
   }
 }
 ```
-```html
-{{#watch}}
-  My name is {{ name.first }} {{ name.last }}.
-{{/watch}}
-```
 
 The above omits the what to watch. In this situation, ReBars will pre-render the block, and captures any references used. It would evaluate to the same as.
 
 
 
-```html
+```handlebars
 {{#watch "name.first" "name.last" }}
 ```
 

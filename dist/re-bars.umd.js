@@ -10,7 +10,13 @@
     logLevel: () => (isTracing ? 1 : 0),
     setTrace: val => (isTracing = val),
 
+    regex: {
+      attrs: /rbs-(.*?)="(.*?)"/g,
+      whitespace: /\s/g,
+    },
+
     attrs: {
+      key: "rbs-key",
       watch: "rbs-watch",
       method: "rbs-method",
       ref: "rbs-ref",
@@ -51,11 +57,6 @@
       if (activeRef.style) $input.setAttribute("style", activeRef.style);
     },
 
-    findRef: ($target, ref) => {
-      if ($target.getAttribute(attrs.ref) === ref) return $target;
-      return $target.querySelector(`[${attrs.ref}="${ref}"]`);
-    },
-
     findRefs($root) {
       const { ref } = attrs;
       const $refs = Array.from($root.querySelectorAll(`[${ref}]`));
@@ -68,8 +69,21 @@
       }, {});
     },
 
+    // use this in place of all the others that are repeated eventually...
+    findAttr(attr, val, $target = null) {
+      const $container = $target || document;
+      if ($container.getAttribute(attr) === val) return $container;
+      return $container.querySelector(`[${attr}="${val}"]`);
+    },
+
+    findRef: ($target, ref) => {
+      if ($target.getAttribute(attrs.ref) === ref) return $target;
+      return $target.querySelector(`[${attrs.ref}="${ref}"]`);
+    },
+
     findMethod: id => document.querySelector(`[${attrs.method}="${id}"]`),
     findWatcher: id => document.querySelector(`[${attrs.watch}="${id}"]`),
+    isTextNode: $el => $el.nodeType === Node.TEXT_NODE,
 
     propStr: props =>
       Object.entries(props)
@@ -85,10 +99,16 @@
       const style = !html.length ? "style='display:none;'" : "";
       return `<${tag} ${propStr} ${style} ${attrs.watch}="${id}">${html}</${tag}>`;
     },
+
+    getShadow(html) {
+      const $tmp = document.createElement("div");
+      $tmp.innerHTML = html;
+      return $tmp;
+    },
   };
 
-  let counter = 1;
   const { fetch } = window;
+  let counter = 1;
 
   var Utils = {
     dom: Dom,
@@ -120,6 +140,13 @@
       new Promise(resolve => {
         setTimeout(resolve, 0);
       }),
+
+    setPath(target, path, val) {
+      const segs = path.split(".");
+      const last = segs.pop();
+      segs.reduce((point, seg) => point[seg], target)[last] = val;
+      return target;
+    },
 
     buildContext(scope, { $app, data, methods }) {
       const context = {
@@ -204,13 +231,23 @@
     },
   };
 
-  // import Msg from "./msg.js";
-
   const { attrs: attrs$1 } = Config;
 
   var Helpers = {
     register({ instance, template, store, scope }) {
+      instance.registerHelper("key", name => new instance.SafeString(`${attrs$1.key}="${name}"`));
       instance.registerHelper("ref", name => new instance.SafeString(`${attrs$1.ref}="${name}"`));
+
+      instance.registerHelper("concat", function(...args) {
+        args.pop();
+        return args.join("");
+      });
+
+      instance.registerHelper("onlyIf", function(...args) {
+        args.pop();
+        const [condition, string] = args;
+        return new instance.SafeString(condition ? string : "");
+      });
 
       instance.registerHelper("on", function(...args) {
         const { hash } = args.pop();
@@ -219,13 +256,11 @@
 
         store.handlers[id] = [];
 
-        Object.entries(hash).forEach(([eventType, methodName]) => {
-          // check for method existance
+        Utils.nextTick().then(function() {
+          const $el = Utils.dom.findMethod(id);
+          if (!$el) return;
 
-          Utils.nextTick().then(function() {
-            const $el = Utils.dom.findMethod(id);
-            if (!$el) return;
-
+          Object.entries(hash).forEach(([eventType, methodName]) => {
             if (!(methodName in scope.methods)) instance.log(3, `ReBars: "${methodName}" is not a method.`, hash, $el);
 
             const handler = event => {
@@ -242,9 +277,31 @@
         return new instance.SafeString(`${attrs$1.method}="${id}"`);
       });
 
-      instance.registerHelper("concat", function(...args) {
-        args.pop();
-        return args.join("");
+      instance.registerHelper("bind", function(...args) {
+        const { hash } = args.pop();
+        const tplScope = this;
+        const id = Utils.randomId();
+
+        store.handlers[id] = [];
+
+        Utils.nextTick().then(() => {
+          const $el = Utils.dom.findMethod(id);
+          if (!$el) return;
+
+          Object.entries(hash).forEach(([eventType, path]) => {
+            function handler(event) {
+              try {
+                Utils.setPath(tplScope, path, event.target.value || null);
+              } catch (err) {
+                instance.log(3, `ReBars: could not set path ${path}`, $el);
+              }
+            }
+            store.handlers[id].push({ $el, handler, eventType });
+            $el.addEventListener(eventType, handler);
+          });
+        });
+
+        return new instance.SafeString(`${attrs$1.method}="${id}"`);
       });
 
       instance.registerHelper("watch", function(...args) {
@@ -275,12 +332,65 @@
           store.renders[eId] = { ...ref, $el };
 
           args.forEach(path => {
-            if (typeof path !== "string")
-              instance.log(3, `ReBars: can only watch Strings, ${typeof path} - ${path} given`, args, $el);
+            if (typeof path !== "string") instance.log(3, "ReBars: can only watch Strings", args, $el);
           });
+          instance.log(Config.logLevel(), "ReBars: watching", ref.path, $el);
         });
 
         return Utils.dom.wrapWatcher(eId, fn(this), hash);
+      });
+    },
+  };
+
+  const { attrs: attrs$2, regex } = Config;
+
+  function _isEqHtml(html1, html2) {
+    const parsed1 = html1.replace(regex.attrs, "");
+    const parsed2 = html2.replace(regex.attrs, "");
+    return Utils.dom.getShadow(parsed1).isEqualNode(Utils.dom.getShadow(parsed2));
+  }
+
+  var Patch = {
+    canPatch: $target =>
+      $target.children.length &&
+      $target.children.length > 1 &&
+      Array.from($target.children).every($el => $el.getAttribute(attrs$2.key)),
+
+    hasChanged: ($target, html) => !_isEqHtml($target.innerHTML, html),
+
+    compare({ $target, html, instance, store }) {
+      const $shadow = Utils.dom.getShadow(html);
+      const $vChilds = Array.from($shadow.children);
+      const level = Config.logLevel();
+
+      // deletes and updates
+      Array.from($target.children).forEach($r => {
+        // warn with the real element if we have an undefined key
+        if ($r.getAttribute(attrs$2.key) === "undefined") instance.log(3, "ReBars: key was undefined", $r);
+
+        const $v = Utils.dom.findAttr(attrs$2.key, $r.getAttribute(attrs$2.key), $shadow);
+        if (!$v) {
+          instance.log(level, "ReBars: removing", $r);
+          $r.remove();
+        } else if (!_isEqHtml($v.innerHTML, $r.innerHTML)) {
+          instance.log(level, "ReBars: updating", $r, $v);
+          $r.replaceWith($v.cloneNode(true));
+        }
+      });
+
+      // additions
+      $vChilds.forEach(($v, index) => {
+        const $r = Utils.dom.findAttr(attrs$2.key, $v.getAttribute(attrs$2.key), $target);
+        if (!$r) {
+          instance.log(level, "ReBars: adding", $v);
+          $target.append($v.cloneNode(true));
+        }
+      });
+
+      // sorting
+      $vChilds.forEach(($v, index) => {
+        const $r = $target.children[index];
+        if ($r.getAttribute(attrs$2.key) !== $v.getAttribute(attrs$2.key)) $r.replaceWith($v.cloneNode(true));
       });
     },
   };
@@ -294,19 +404,27 @@
         .forEach(([renderId, handler]) => {
           const $target = Utils.dom.findWatcher(renderId);
           // if we cant find the target, we should not attempt to re-renders
-          // this can probally be cleaned up with clearing orphans on the app
-          // TODO: this should not be needed if garbage is collected well
           if (!$target) return;
 
           const html = handler.render();
           // cursor position focused element ect...
           const stash = Utils.dom.recordState($target);
+
+          if (!Patch.hasChanged($target, html)) return;
+
+          if (Patch.canPatch($target)) {
+            instance.log(Config.logLevel(), "ReBars: patching", handler.path, $target);
+            Patch.compare({ $target, html, instance, store });
+            Utils.dom.restoreState($target, stash);
+            return;
+          }
+
           // we dont want wrappers to show up with no content
           $target.style.display = html === "" ? "none" : "";
           $target.innerHTML = html;
           // restore saved state of DOM
           Utils.dom.restoreState($target, stash);
-          instance.log(Config.logLevel(), "ReBars: render", handler.path, $target);
+          instance.log(Config.logLevel(), "ReBars: re-render", handler.path, $target);
         });
     },
   };
@@ -383,7 +501,7 @@
           Helpers.register({ instance, template, store, scope });
 
           scope.data = ProxyTrap.create(scope, async changed => {
-            instance.log(Config.logLevel(), "ReBars: change".blue, changed);
+            instance.log(Config.logLevel(), "ReBars: change", changed);
             ReRender.paths({ changed, store, instance });
             // have to wait a tick or anything set by a watch will not catch...
             await Utils.nextTick();

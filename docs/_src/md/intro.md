@@ -20,12 +20,14 @@ ReBars started with the idea of so what do I _actually_ need from a Javascript f
 ReBars re-renders tiny pieces of your application on change. You are in control of what re-renders and when. There is no...
 
 - ❌ Virtual DOM
-- ❌ JSX or anything else to pre-compile
+- ❌ JSX or others that need pre-built to JS
 - ❌ DOM diffing and patching
+- ❌ Single File Components
+- ❌ CSS pre-processing and extracting
 
 **Your** code simply runs on **your** app.
 
-> In fact there is zero DOM diffing / checking of any kind in ReBars. Marked elements are simply re-rendered when correlating data changes.
+> In fact the only time ReBars will compare any DOM is when an Array is being patched. All other times ReBars simply calls the Handlebars method again, and replaces the HTML.
 
 ReBars keeps your DOM in sync with your data using [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy), and gets out of your way. You can get back to just writing Javascript.
 

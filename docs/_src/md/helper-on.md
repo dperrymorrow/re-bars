@@ -19,7 +19,7 @@ methods: {
 
 > Remember Handlebars requires params to be first, and then `key="val"` arguments second
 
-You can also call multiple events on one invocation of the on helpers. For example.
+You can also call multiple events on one use of the on helper. For example.
 
 ```html
 <input {{ on focus="focused" blur="blurred" input="inputChange" >

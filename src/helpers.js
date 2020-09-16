@@ -9,11 +9,6 @@ export default {
     instance.registerHelper("key", name => new instance.SafeString(`${attrs.key}="${name}"`));
     instance.registerHelper("ref", name => new instance.SafeString(`${attrs.ref}="${name}"`));
 
-    instance.registerHelper("concat", function(...args) {
-      args.pop();
-      return args.join("");
-    });
-
     instance.registerHelper("onlyIf", function(...args) {
       args.pop();
       const [condition, string] = args;
