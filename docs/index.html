@@ -539,12 +539,12 @@ app.instance.registerPartial(&quot;myPartial&quot;, &quot;&lt;h1&gt;&lt;{{ name 
 <p>The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.</p>
 <p>Watch allows you to re-render a block of your template on change.
 Watch takes an <em>optional</em> arguments of what properties to watch. The arguments can be string or a regular expression. You may also as many as you like. When any change, the block will re-render.</p>
-<p>In our explanation below, we will be referring to this data set.</p>
 <pre><code class="language-handlebars">{{#watch}}
   My name is {{ name.first }} {{ name.last }}.
 {{/watch}}</code></pre>
 <pre><code class="language-javascript">{
   data: {
+    open: false,
     hobby: &quot;running&quot;,
     name: {
       first: &quot;David&quot;,
@@ -558,8 +558,17 @@ Watch takes an <em>optional</em> arguments of what properties to watch. The argu
 }</code></pre>
 <p>The above omits the what to watch. In this situation, ReBars will pre-render the block, and captures any references used. It would evaluate to the same as.</p>
 <pre><code class="language-handlebars">{{#watch &quot;name.first&quot; &quot;name.last&quot; }}</code></pre>
+<h3 id="automatic-watch-pitfalls">Automatic Watch pitfalls</h3>
+<p>Sometimes automatically inferring what to watch will not have the desired effect.</p>
+<pre><code class="language-handlebars">{{#watch}}
+  My name is: {{ name.first }} {{ name.last }}
+  {{#if open }}
+    {{ hobby }}
+  {{/if}}
+{{/watch}}</code></pre>
+<p>In the example above, only <code>name.first</code> <code>name.last</code> will be watched. This is because open was false and hobby was not referenced. When in doubt, be specific.</p>
 <blockquote>
-<p>If you are unsure what to watch, ReBars traces out changes to the console when you pass <code>trace: true</code> to your application.</p>
+<p>If you are unsure what to watch, ReBars traces out changes to the console when you pass <code>trace: true</code> to your application. It&#39;s best to be explicit when telling ReBars what to watch.</p>
 </blockquote>
 <table>
 <thead>
@@ -682,6 +691,35 @@ methods: {
                 </article>
                 <article class="page sub" data-anchor="#the-key-helper">
                   <h2 id="the-key-helper">The Key Helper</h2>
+<p>This simple little helper marks individual items with a unique identifier you provide. The main use for this is when you have a <code>{{#watch}}</code> around an Array in your data.</p>
+<pre><code class="language-handlebars">{{#watch &quot;friends&quot; }}
+  &lt;ul&gt;
+    {{#each friends as |friend| }}
+      &lt;li&gt;{{ friend.name }}&lt;/li&gt;
+    {{/each}}
+  &lt;/ul&gt;
+{{/watch}}</code></pre>
+<pre><code class="language-javascript">{
+  data: {
+    friends: [
+      { id: 1, name: &quot;Fred&quot; },
+      { id: 2, name: &quot;Mike&quot; },
+    ]
+  }
+}</code></pre>
+<p>In the above example, on each change of any item in your todos, the entire UL block would re-render. This is not ideal, and ReBars is smart enough to determine which elements need changed.</p>
+<p>Alternativly:</p>
+<pre><code class="language-handlebars">{{#watch &quot;friends&quot; }}
+  &lt;ul&gt;
+    {{#each friends as |friend| }}
+      &lt;li {{ key friend.id }}&gt;{{ friend.name }}&lt;/li&gt;
+    {{/each}}
+  &lt;/ul&gt;
+{{/watch}}</code></pre>
+<p>Now when the Array friends is updated, ReBars will have a unique identifier to compare which items have changed and only update those items.</p>
+<blockquote>
+<p>Allthough it may work initially, using <a href="https://handlebarsjs.com/api-reference/data-variables.html#index">@index</a> as your key value is not encouraged. Should you sort or reasign your Array, those indexes will no longer be a valid identifier for that item in the Array.</p>
+</blockquote>
 
                 </article>
             </article>

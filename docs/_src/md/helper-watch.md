@@ -2,11 +2,8 @@
 
 The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.
 
-
 Watch allows you to re-render a block of your template on change.
 Watch takes an _optional_ arguments of what properties to watch. The arguments can be string or a regular expression. You may also as many as you like. When any change, the block will re-render.
-
-In our explanation below, we will be referring to this data set.
 
 ```handlebars
 {{#watch}}
@@ -17,6 +14,7 @@ In our explanation below, we will be referring to this data set.
 ```javascript
 {
   data: {
+    open: false,
     hobby: "running",
     name: {
       first: "David",
@@ -33,12 +31,26 @@ In our explanation below, we will be referring to this data set.
 The above omits the what to watch. In this situation, ReBars will pre-render the block, and captures any references used. It would evaluate to the same as.
 
 
-
 ```handlebars
 {{#watch "name.first" "name.last" }}
 ```
 
-> If you are unsure what to watch, ReBars traces out changes to the console when you pass `trace: true` to your application.
+### Automatic Watch pitfalls
+
+Sometimes automatically inferring what to watch will not have the desired effect.
+
+```handlebars
+{{#watch}}
+  My name is: {{ name.first }} {{ name.last }}
+  {{#if open }}
+    {{ hobby }}
+  {{/if}}
+{{/watch}}
+```
+
+In the example above, only `name.first` `name.last` will be watched. This is because open was false and hobby was not referenced. When in doubt, be specific.
+
+> If you are unsure what to watch, ReBars traces out changes to the console when you pass `trace: true` to your application. It's best to be explicit when telling ReBars what to watch.
 
 | Argument Example | re-renders when |
 | - | - |
