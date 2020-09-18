@@ -19,7 +19,7 @@ export default {
   restoreState($target, activeRef) {
     if (!activeRef) return;
 
-    const $input = this.findRef($target, activeRef.ref);
+    const $input = this.findAttr(attrs.ref, activeRef.ref, $target);
     if (!$input) return;
 
     $input.focus();
@@ -48,13 +48,9 @@ export default {
   // use this in place of all the others that are repeated eventually...
   findAttr(attr, val, $target = null) {
     const $container = $target || document;
-    if ($container.getAttribute(attr) === val) return $container;
+    // check top level
+    if ($target && $target.getAttribute(attr) === val) return $target;
     return $container.querySelector(`[${attr}="${val}"]`);
-  },
-
-  findRef: ($target, ref) => {
-    if ($target.getAttribute(attrs.ref) === ref) return $target;
-    return $target.querySelector(`[${attrs.ref}="${ref}"]`);
   },
 
   findMethod: id => document.querySelector(`[${attrs.method}="${id}"]`),

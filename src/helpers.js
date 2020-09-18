@@ -15,6 +15,11 @@ export default {
       return new instance.SafeString(condition ? string : "");
     });
 
+    instance.registerHelper("concat", function(...args) {
+      args.pop();
+      return new instance.SafeString(args.join(""));
+    });
+
     instance.registerHelper("on", function(...args) {
       const { hash } = args.pop();
       const id = Utils.randomId();
@@ -45,6 +50,7 @@ export default {
 
     instance.registerHelper("bind", function(...args) {
       const { hash } = args.pop();
+      const [forceValue] = args;
       const tplScope = this;
       const id = Utils.randomId();
 
@@ -56,8 +62,11 @@ export default {
 
         Object.entries(hash).forEach(([eventType, path]) => {
           function handler(event) {
+            let value = event.target.value;
+            value = value === "" ? null : value;
+
             try {
-              Utils.setPath(tplScope, path, event.target.value || null);
+              Utils.setPath(tplScope, path, forceValue || value);
             } catch (err) {
               instance.log(3, `ReBars: could not set path ${path}`, $el);
             }

@@ -18,18 +18,20 @@ const ReBars = {
     Handlebars = window ? window.Handlebars : null,
     trace = false,
   }) {
-    const instance = Handlebars.create();
-
-    const store = { renders: {}, handlers: {} };
     if (!Handlebars) throw new Error("ReBars: needs Handlebars in order to run");
 
+    const instance = Handlebars.create();
+    const store = { renders: {}, handlers: {} };
     Config.setTrace(trace);
 
     return {
       store,
       instance,
       async render(selector) {
-        const $app = document.querySelector(selector);
+        // takes an element or a selector
+        const $app = selector.nodeType === Node.ELEMENT_NODE ? selector : document.querySelector(selector);
+
+        if (!$app) throw new Error(`ReBars: document.querySelector("${selector}") could not be found on the document`);
 
         // have to make sure they are resolved first
         await Promise.all(Object.values(partials));
@@ -40,13 +42,10 @@ const ReBars = {
         // must be compiled after the partials
         const templateFn = instance.compile(template instanceof Promise ? await template : template);
 
-        if (!$app)
-          return instance.log(3, `ReBars: document.querySelector("${selector}") could not be found on the document`);
-
         const scope = {
           $app,
           methods,
-          data,
+          data: typeof data === "function" ? data() : data,
         };
 
         Utils.registerHelpers({ instance, helpers, scope });
@@ -68,6 +67,8 @@ const ReBars = {
         if (hooks.beforeRender) await hooks.beforeRender.call(scope.data, context);
         $app.innerHTML = templateFn(scope.data);
         if (hooks.afterRender) await hooks.afterRender.call(scope.data, context);
+
+        return context;
       },
     };
   },

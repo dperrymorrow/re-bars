@@ -1,7 +1,9 @@
 
+# ReBars
+
 > A simple, modern approach to Obvervables and DOM re-rendering and patching.
 
-## [Documentation](https://dperrymorrow.github.io/re-bars) | [Examples](https://dperrymorrow.github.io/re-bars#example-simple)
+## [Documentation](https://dperrymorrow.github.io/re-bars) | [Examples](https://dperrymorrow.github.io/re-bars/examples/advanced)
 
 - [ReBars Introduction](#rebars)
 - [A ReBars Application](#a-rebars-application)
@@ -15,9 +17,10 @@
   - [Partials](#partials)
 - [ReBars Helpers](#rebars-built-in-helpers)
   - [watch (re-rendering)](#the-watch-helper)
-  - [concat (string building)](#the-concat-helper)
   - [on (event handling)](#the-on-helper)
-  - [ref (element reference)](#the-ref-helper)
+  - [bind (data binding)](#the-bind-helper)
+  - [ref ($el reference)](#the-ref-helper)
+  - [key (pointer reference)](#the-key-helper)
 
 ---
 
@@ -43,12 +46,14 @@ ReBars started with the idea of so what do I _actually_ need from a Javascript f
 ReBars re-renders tiny pieces of your application on change. You are in control of what re-renders and when. There is no...
 
 - ❌ Virtual DOM
-- ❌ JSX or anything else to pre-compile
+- ❌ JSX or others that need pre-built to JS
 - ❌ DOM diffing and patching
+- ❌ Single File Components
+- ❌ CSS pre-processing and extracting
 
 **Your** code simply runs on **your** app.
 
-> In fact there is zero DOM diffing / checking of any kind in ReBars. Marked elements are simply re-rendered when correlating data changes.
+> In fact the only time ReBars will compare any DOM is when an Array is being patched. All other times ReBars simply calls the Handlebars method again, and replaces the HTML.
 
 ReBars keeps your DOM in sync with your data using [Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy), and gets out of your way. You can get back to just writing Javascript.
 
@@ -469,15 +474,19 @@ ReBars consists of a few very powerful Handlebars helpers. Of course you can add
 
 The watch helper tells ReBars to re-render this block on change of the item you pass in as the second parameter.
 
-
 Watch allows you to re-render a block of your template on change.
 Watch takes an _optional_ arguments of what properties to watch. The arguments can be string or a regular expression. You may also as many as you like. When any change, the block will re-render.
 
-In our explanation below, we will be referring to this data set.
+```handlebars
+{{#watch}}
+  My name is {{ name.first }} {{ name.last }}.
+{{/watch}}
+```
 
 ```javascript
 {
   data: {
+    open: false,
     hobby: "running",
     name: {
       first: "David",
@@ -490,21 +499,30 @@ In our explanation below, we will be referring to this data set.
   }
 }
 ```
-```html
-{{#watch}}
-  My name is {{ name.first }} {{ name.last }}.
-{{/watch}}
-```
 
 The above omits the what to watch. In this situation, ReBars will pre-render the block, and captures any references used. It would evaluate to the same as.
 
 
-
-```html
+```handlebars
 {{#watch "name.first" "name.last" }}
 ```
 
-> If you are unsure what to watch, ReBars traces out changes to the console when you pass `trace: true` to your application.
+### Automatic Watch pitfalls
+
+Sometimes automatically inferring what to watch will not have the desired effect.
+
+```handlebars
+{{#watch}}
+  My name is: {{ name.first }} {{ name.last }}
+  {{#if open }}
+    {{ hobby }}
+  {{/if}}
+{{/watch}}
+```
+
+In the example above, only `name.first` `name.last` will be watched. This is because open was false and hobby was not referenced. When in doubt, be specific.
+
+> If you are unsure what to watch, ReBars traces out changes to the console when you pass `trace: true` to your application. It's best to be explicit when telling ReBars what to watch.
 
 | Argument Example | re-renders when |
 | - | - |
@@ -531,45 +549,15 @@ export default {
     {{#watch "name" tag="h3"}}
       {{ name }}
     {{/watch}}
-
-    <input type="text" value="{{ name }}" {{ on input="saveName" }}>
+    <input type="text" value="{{ name }}" {{ bind input="name" }}>
   `,
   data: {
     name: "David",
-  },
-  methods: {
-    saveName({ event }) {
-      this.name = event.target.value;
-    },
   },
 };
 
 ```
 
-
-## The Concat Helper
-
-Sometimes you need to piece together something that is a combination of a dynamic value, and a static. Thats where this simple little helper comes in handy.
-
-In this example we are looking to not re-render the entire Array on change of any of it's items. So we use the concat helper as a [sub expression](https://handlebarsjs.com/guide/expressions.html#subexpressions)
-
-> Notice the `()` around the sub expression. You will get a syntax error without them!
-
-```handlebars
-{{#watch "todos.length" tag="ul"}}
-  {{#each todos as | todo | }}
-    {{#watch (concat "todos." @index "(.*)") tag="li" }}
-      {{ todo.name }}
-    {{/watch}}
-  {{/each}}
-{{/watch}}
-```
-
-The above results in the equivalent of
-
-```handlebars
-{{#watch "todos.1(.*)" }}
-```
 
 ## The on helper
 
@@ -592,11 +580,53 @@ methods: {
 
 > Remember Handlebars requires params to be first, and then `key="val"` arguments second
 
-You can also call multiple events on one invocation of the on helpers. For example.
+You can also call multiple events on one use of the on helper. For example.
 
 ```html
 <input {{ on focus="focused" blur="blurred" input="inputChange" >
 ```
+
+## The Bind Helper
+
+The bind helper is very simimar to the [on helper](#the-on-helper) with one exception. It saves you from having to write a method in your app when all you want to do is set a value.
+
+For example:
+
+```handlebars
+<input type="text" {{ bind input="name.last" }} />
+```
+
+```javascript
+data: {
+  name: {
+    first: "David",
+    last: "Morrow"
+  }
+}
+```
+
+As opposed to:
+
+```handlebars
+<input type="text" {{ on input="updateLastName" }} />
+```
+
+```javascript
+data: {
+  name: {
+    first: "David",
+    last: "Morrow"
+  }
+},
+
+methods: {
+  updateLastName({ event }) {
+    this.name.last = event.target.value;
+  }
+}
+```
+
+On each input event of the text input, the last name will be updated to the input's current value. This is merely a convienance, and could be accomplished by defining a method. But is useful in many common cases.
 
 ## The ref helper
 
@@ -616,4 +646,47 @@ methods: {
   }
 }
 ```
+
+## The Key Helper
+
+This simple little helper marks individual items with a unique identifier you provide. The main use for this is when you have a `{{#watch}}` around an Array in your data.
+
+```handlebars
+{{#watch "friends" }}
+  <ul>
+    {{#each friends as |friend| }}
+      <li>{{ friend.name }}</li>
+    {{/each}}
+  </ul>
+{{/watch}}
+```
+
+```javascript
+{
+  data: {
+    friends: [
+      { id: 1, name: "Fred" },
+      { id: 2, name: "Mike" },
+    ]
+  }
+}
+```
+
+In the above example, on each change of any item in your todos, the entire UL block would re-render. This is not ideal, and ReBars is smart enough to determine which elements need changed.
+
+Alternativly:
+
+```handlebars
+{{#watch "friends" }}
+  <ul>
+    {{#each friends as |friend| }}
+      <li {{ key friend.id }}>{{ friend.name }}</li>
+    {{/each}}
+  </ul>
+{{/watch}}
+```
+
+Now when the Array friends is updated, ReBars will have a unique identifier to compare which items have changed and only update those items.
+
+> Allthough it may work initially, using [@index](https://handlebarsjs.com/api-reference/data-variables.html#index) as your key value is not encouraged. Should you sort or reasign your Array, those indexes will no longer be a valid identifier for that item in the Array.
 

@@ -1,6 +1,10 @@
 import ReBars from "../src/index.js";
 import Handlebars from "handlebars";
 import Sinon from "sinon";
+import fs from "fs";
+import path from "path";
+
+const fixtureDir = path.join(__dirname, "fixtures");
 
 const _query = ($container, selector) => {
   const $matches = $container.querySelectorAll(selector);
@@ -25,9 +29,11 @@ export default {
     return _query(t.context.$el, selector);
   },
 
-  trigger(t, val, eventType = "click", search = "ref") {
+  async trigger(t, val, eventType = "click", search = "ref") {
     const $el = search === "query" ? this.find(t, val) : this.ref(t, val);
     $el.dispatchEvent(new MouseEvent(eventType, { bubbles: true }));
+    await t.context.scope.$nextTick();
+    return $el;
   },
 
   cleanup(t) {
@@ -35,24 +41,21 @@ export default {
     Sinon.restore();
   },
 
-  buildContext(t, app) {
+  buildFixture(t, name) {
+    const app = require(`${fixtureDir}/${name}.js`).default;
+    app.template = fs.readFileSync(`${fixtureDir}/${name}.hbs`, "utf-8");
+    return this.buildContext(t, app);
+  },
+
+  async buildContext(t, app) {
+    window.Handlebars = Handlebars;
     if (t.context.$el) t.context.$el.remove();
     const $el = document.createElement("div");
     document.body.append($el);
 
     t.context.$el = $el;
-    t.context.app = ReBars.app({ ...app, $el, Handlebars, trace: false });
-
-    const [id, inst] = Object.entries(t.context.app.components.instances)[0];
-    t.context.id = id;
-    t.context.inst = inst;
-    t.context.scope = inst.scope;
-    t.context.$refs = inst.scope.$refs();
-
-    return this.wait();
-  },
-
-  getCompByName(t, name) {
-    return Object.values(t.context.app.components.instances).find(inst => inst.scope.$name === name);
+    t.context.app = ReBars.app({ Handlebars, trace: false, ...app });
+    t.context.scope = await t.context.app.render($el);
+    await t.context.scope.$nextTick();
   },
 };

@@ -37,7 +37,7 @@ var Dom = {
   restoreState($target, activeRef) {
     if (!activeRef) return;
 
-    const $input = this.findRef($target, activeRef.ref);
+    const $input = this.findAttr(attrs.ref, activeRef.ref, $target);
     if (!$input) return;
 
     $input.focus();
@@ -66,13 +66,9 @@ var Dom = {
   // use this in place of all the others that are repeated eventually...
   findAttr(attr, val, $target = null) {
     const $container = $target || document;
-    if ($container.getAttribute(attr) === val) return $container;
+    // check top level
+    if ($target && $target.getAttribute(attr) === val) return $target;
     return $container.querySelector(`[${attr}="${val}"]`);
-  },
-
-  findRef: ($target, ref) => {
-    if ($target.getAttribute(attrs.ref) === ref) return $target;
-    return $target.querySelector(`[${attrs.ref}="${ref}"]`);
   },
 
   findMethod: id => document.querySelector(`[${attrs.method}="${id}"]`),
@@ -232,15 +228,15 @@ var Helpers = {
     instance.registerHelper("key", name => new instance.SafeString(`${attrs$1.key}="${name}"`));
     instance.registerHelper("ref", name => new instance.SafeString(`${attrs$1.ref}="${name}"`));
 
-    instance.registerHelper("concat", function(...args) {
-      args.pop();
-      return args.join("");
-    });
-
     instance.registerHelper("onlyIf", function(...args) {
       args.pop();
       const [condition, string] = args;
       return new instance.SafeString(condition ? string : "");
+    });
+
+    instance.registerHelper("concat", function(...args) {
+      args.pop();
+      return new instance.SafeString(args.join(""));
     });
 
     instance.registerHelper("on", function(...args) {
@@ -273,6 +269,7 @@ var Helpers = {
 
     instance.registerHelper("bind", function(...args) {
       const { hash } = args.pop();
+      const [forceValue] = args;
       const tplScope = this;
       const id = Utils.randomId();
 
@@ -284,8 +281,11 @@ var Helpers = {
 
         Object.entries(hash).forEach(([eventType, path]) => {
           function handler(event) {
+            let value = event.target.value;
+            value = value === "" ? null : value;
+
             try {
-              Utils.setPath(tplScope, path, event.target.value || null);
+              Utils.setPath(tplScope, path, forceValue || value);
             } catch (err) {
               instance.log(3, `ReBars: could not set path ${path}`, $el);
             }
@@ -460,18 +460,20 @@ const ReBars = {
     Handlebars = window ? window.Handlebars : null,
     trace = false,
   }) {
-    const instance = Handlebars.create();
-
-    const store = { renders: {}, handlers: {} };
     if (!Handlebars) throw new Error("ReBars: needs Handlebars in order to run");
 
+    const instance = Handlebars.create();
+    const store = { renders: {}, handlers: {} };
     Config.setTrace(trace);
 
     return {
       store,
       instance,
       async render(selector) {
-        const $app = document.querySelector(selector);
+        // takes an element or a selector
+        const $app = selector.nodeType === Node.ELEMENT_NODE ? selector : document.querySelector(selector);
+
+        if (!$app) throw new Error(`ReBars: document.querySelector("${selector}") could not be found on the document`);
 
         // have to make sure they are resolved first
         await Promise.all(Object.values(partials));
@@ -482,13 +484,10 @@ const ReBars = {
         // must be compiled after the partials
         const templateFn = instance.compile(template instanceof Promise ? await template : template);
 
-        if (!$app)
-          return instance.log(3, `ReBars: document.querySelector("${selector}") could not be found on the document`);
-
         const scope = {
           $app,
           methods,
-          data,
+          data: typeof data === "function" ? data() : data,
         };
 
         Utils.registerHelpers({ instance, helpers, scope });
@@ -510,6 +509,8 @@ const ReBars = {
         if (hooks.beforeRender) await hooks.beforeRender.call(scope.data, context);
         $app.innerHTML = templateFn(scope.data);
         if (hooks.afterRender) await hooks.afterRender.call(scope.data, context);
+
+        return context;
       },
     };
   },

@@ -1,0 +1,47 @@
+
+<!-- refs -->
+<h1 {{ ref name.first }}>Dynamic</h1>
+<h2 {{ ref "static" }}>Static</h2>
+
+<!-- key helper -->
+<h1 {{ ref "keyH1" }} {{ key name.first }}>Dynamic</h1>
+<h2 {{ ref "keyH2" }} {{ key "Static" }}>Static</h2>
+
+<!-- only if helper -->
+{{#watch}}
+  <button {{ ref "onlyIfName" }} {{ onlyIf name.first "disabled" }}></button>
+  <button {{ ref "onlyIfShow" }} {{ onlyIf show "disabled" }}></button>
+{{/watch}}
+
+<!-- on helper -->
+<button
+  {{ ref "onBtn1" }}
+  {{ on "Rick" "James" click="changeName" }}>
+</button>
+
+<button
+  {{ ref "onBtn2" }}
+  {{ on "Gary" "Clark" mouseover="changeName" mouseout="restoreName" }}>
+</button>
+
+<!-- bind section -->
+<button {{ ref "bindBtn1" }} value="Rick" {{ bind click="name.first" }}></button>
+<!-- test with passing value instead of inferring it -->
+<button {{ ref "bindBtn2" }} value="James" {{ bind "Clark" click="name.last" }}></button>
+<!-- if nothign null instead of "" -->
+<button {{ ref "bindBtn3" }} {{ bind click="name.last" }}></button>
+<!-- test with input -->
+<input type="text" {{ ref "bindInput" }} {{ bind input="name.first" }} />
+
+<!-- outlet -->
+{{#watch "name" }}
+  <div {{ ref "nameTarget" }}>{{ name.first }} {{ name.last }}</div>
+{{/watch}}
+
+{{#watch tag="ul"}}
+  {{#each friends as | friend | }}
+    <li {{ key friend.id }} {{ ref (concat "friend" friend.name) }}>
+      {{ friend.name }} - {{ friend.hobby }}
+    </li>
+  {{/each}}
+{{/watch}}

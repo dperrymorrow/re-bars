@@ -1,12 +1,12 @@
 import { terser } from "rollup-plugin-terser";
-// import strip from "rollup-plugin-strip";
+import strip from "rollup-plugin-strip";
 import filesize from "rollup-plugin-filesize";
 import gzipPlugin from "rollup-plugin-gzip";
 import copy from "rollup-plugin-copy";
 
 export default [
   {
-    input: "src/app.js",
+    input: "src/index.js",
     output: [
       { file: "dist/re-bars.umd.js", format: "umd", name: "ReBars" },
       {
@@ -30,10 +30,10 @@ export default [
       },
     ],
 
-    // plugins: [strip()],
+    plugins: [strip()],
   },
   {
-    input: "src/app.js",
+    input: "src/index.js",
     output: [
       { file: "dist/re-bars.esm.js", format: "module", name: "ReBars" },
       {
@@ -45,6 +45,6 @@ export default [
       },
     ],
 
-    // plugins: [strip()],
+    plugins: [strip()],
   },
 ];
