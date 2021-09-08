@@ -29,7 +29,7 @@
     "eslint-config-prettier": "^6.7.0",
     "eslint-plugin-prettier": "^3.1.1",
     "esm": "3.2.25",
-    "handlebars": "4.7.4",
+    "handlebars": "4.7.7",
     "http-server": "0.12.3",
     "marked": "0.8.2",
     "nodemon": "2.0.4",
